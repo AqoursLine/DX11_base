@@ -1,7 +1,7 @@
 #include "main.h"
-#include <chrono>
-#include <thread>
 #include "manager.h"
+#include "timer.h"
+
 
 //プロシージャ
 LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -50,16 +50,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//ウィンドウ更新
 	UpdateWindow(hWnd);
 
-	//FPS制御
-	using Clock = std::chrono::high_resolution_clock;
-	using TimePoint = std::chrono::time_point<Clock>;
-	//変数
-	TimePoint lastFrameTime = Clock::now();
-	double targetFPS = 60.0f;
-	double frameTime = (1.0 / 60.0);
-
 	//マネージャークラス
 	Manager* manager = new Manager();
+	manager->Initialize();
+
+	Timer timer;
+
+	timer.Reset();
+	timer.Start();
 
 	//メッセージクラス
 	MSG msg;
@@ -76,46 +74,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			}
 		}
 
-		//現在時間取得
-		TimePoint currentTime = Clock::now();
-		//deltaTime計算
-		double deltaTime = std::chrono::duration<double>(currentTime - lastFrameTime).count();
-
-		//フレームレート制限
-		if (deltaTime < frameTime) {
-			auto sleepTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::duration<double>(frameTime - deltaTime));
-			std::this_thread::sleep_for(sleepTime);
-
-			//正確なdeltaTimeを再計算
-			currentTime = Clock::now();
-			deltaTime = std::chrono::duration<double>(currentTime - lastFrameTime).count();
-		}
-
-		//秒数更新
-		lastFrameTime = currentTime;
-
-		//deltaTimeの上限設定
-		deltaTime = min(deltaTime, 0.1);
-
-		//ゲーム更新
-		bool isFinished = manager->Update(deltaTime);
-
-		if (isFinished) {
+		timer.Tick();
+		if (manager->Update(timer.GetDeltaTime())) {
 			break;
 		}
-
-		//ゲーム描画
 		manager->Draw();
-
-		//ゲーム後処理
 		manager->CleanUp();
-
 
 	}
 
 	//マネージャークラス終了
-
-	timeEndPeriod(1);
+	manager->Finalize();
+	delete manager;
 
 	//ウィンドウ登録解除
 	UnregisterClass(className.c_str(), wc.hInstance);

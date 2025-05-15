@@ -6,10 +6,22 @@ Manager::Manager() {
 Manager::~Manager() {
 }
 
-bool Manager::Update(double dt) {
+void Manager::Initialize() {
 }
 
-void Manager::Draw() {
+void Manager::Finalize() {
+}
+
+bool Manager::Update(double dt) {
+
+	if (m_isFinished) {
+		return true;
+	}
+
+	return false;
+}
+
+void Manager::Draw() const {
 }
 
 void Manager::CleanUp() {
