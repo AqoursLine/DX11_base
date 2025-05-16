@@ -1,4 +1,7 @@
 #include "manager.h"
+#include "DX11/renderer.h"
+
+bool Manager::m_isFinished = false;
 
 Manager::Manager() {
 }
@@ -6,11 +9,16 @@ Manager::Manager() {
 Manager::~Manager() {
 }
 
-void Manager::Initialize() {
+bool Manager::Initialize() {
+	m_isFinished = false;
+
+
+	return false;
 }
 
 void Manager::Finalize() {
 }
+
 
 bool Manager::Update(double dt) {
 

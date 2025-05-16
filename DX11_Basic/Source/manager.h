@@ -5,7 +5,7 @@ public:
 	Manager();
 	~Manager();
 
-	void Initialize();
+	bool Initialize();
 	void Finalize();
 
 	bool Update(double dt);

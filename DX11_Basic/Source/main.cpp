@@ -3,11 +3,28 @@
 #include "timer.h"
 
 
+HWND g_hWnd = nullptr;
+
+void ErrorMessage(std::wstring msg, HRESULT hr) {
+	std::wstring errorId = L"Error ID: " + std::to_wstring(hr) + L"\n";
+
+	hr = MessageBox(g_hWnd, errorId.c_str(), msg.c_str(), MB_OK | MB_ICONERROR);
+	if (SUCCEEDED(hr)) {
+		DestroyWindow(g_hWnd);
+	}
+
+}
+
 //プロシージャ
 LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
 		case WM_DESTROY:
 			PostQuitMessage(0);
+			break;
+		case WM_KEYDOWN:
+			if (wParam == VK_ESCAPE) {
+				DestroyWindow(hWnd);
+			}
 			break;
 	}
 
@@ -50,9 +67,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//ウィンドウ更新
 	UpdateWindow(hWnd);
 
+	g_hWnd = hWnd;
+
 	//マネージャークラス
 	Manager* manager = new Manager();
-	manager->Initialize();
+	bool isInitialized = manager->Initialize();
+
+	if (!isInitialized) {
+		ErrorMessage(L"マネージャークラスの初期化に失敗しました", E_FAIL);
+	}
 
 	Timer timer;
 
@@ -65,7 +88,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//メインループ
 	while (true) {
 		//メッセージ処理
-		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 			//終了メッセージ
@@ -95,3 +118,4 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	return static_cast<int>(msg.wParam);
 }
+

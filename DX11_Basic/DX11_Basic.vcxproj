@@ -104,6 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -118,6 +119,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -127,15 +129,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\DX11\renderer.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\manager.cpp" />
-    <ClCompile Include="Source\renderer.cpp" />
     <ClCompile Include="Source\timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\DX11\renderer.h" />
     <ClInclude Include="Source\main.h" />
     <ClInclude Include="Source\manager.h" />
-    <ClInclude Include="Source\renderer.h" />
     <ClInclude Include="Source\timer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
