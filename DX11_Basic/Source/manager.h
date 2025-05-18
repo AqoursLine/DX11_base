@@ -1,5 +1,7 @@
 #pragma once
 
+class Sprite;
+
 class Manager {
 public:
 	Manager();
@@ -16,4 +18,6 @@ public:
 	static void SetFinish(bool isFinish) { m_isFinished = isFinish; }
 private:
 	static bool m_isFinished;
+
+	Sprite* m_sprite = nullptr;
 };

@@ -1,14 +1,19 @@
 #include "main.h"
 #include "manager.h"
 #include "timer.h"
-
+#include "DX11/renderer.h"
 
 HWND g_hWnd = nullptr;
 
 void ErrorMessage(std::wstring msg, HRESULT hr) {
-	std::wstring errorId = L"Error ID: " + std::to_wstring(hr) + L"\n";
+	//エラーメッセージを表示
 
-	hr = MessageBox(g_hWnd, errorId.c_str(), msg.c_str(), MB_OK | MB_ICONERROR);
+	//HRESULTを文字列に変換
+	std::wstringstream ss;
+	ss << L"Error ID: 0x" << std::hex << std::uppercase << hr << L"\n";
+	std::wstring errorMsg = ss.str();
+
+	hr = MessageBox(g_hWnd, errorMsg.c_str(), msg.c_str(), MB_OK | MB_ICONERROR);
 	if (SUCCEEDED(hr)) {
 		DestroyWindow(g_hWnd);
 	}
@@ -69,6 +74,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	g_hWnd = hWnd;
 
+	//DirectX11初期化
+	Renderer::CreateInstance();
+	RENDERER.Initialize(hWnd);
+
 	//マネージャークラス
 	Manager* manager = new Manager();
 	bool isInitialized = manager->Initialize();
@@ -109,6 +118,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//マネージャークラス終了
 	manager->Finalize();
 	delete manager;
+
+	//DirectX11終了
+	RENDERER.Finalize();
+	Renderer::DestroyInstance();
 
 	//ウィンドウ登録解除
 	UnregisterClass(className.c_str(), wc.hInstance);

@@ -1,4 +1,10 @@
+#include "../main.h"
 #include "renderer.h"
+
+#include <d3dcompiler.h>
+#pragma comment(lib, "d3dcompiler.lib")
+
+Renderer* Renderer::s_instance = nullptr;
 
 bool Renderer::Initialize(HWND hWnd) {
 	HRESULT hr = S_OK;
@@ -23,14 +29,14 @@ bool Renderer::Initialize(HWND hWnd) {
 		nullptr,
 		D3D_DRIVER_TYPE_HARDWARE,
 		nullptr,
-		D3D11_CREATE_DEVICE_BGRA_SUPPORT,
-		&m_featureLevel,
-		1,
+		0,
+		NULL,
+		0,
 		D3D11_SDK_VERSION,
 		&swapChainDesc,
 		m_swapChain.GetAddressOf(),
 		m_device.GetAddressOf(),
-		nullptr,
+		&m_featureLevel,
 		m_deviceContext.GetAddressOf()
 	);
 
@@ -105,7 +111,7 @@ bool Renderer::Initialize(HWND hWnd) {
 		return false;
 	}
 	m_deviceContext->RSSetState(rasterizerState);
-	rasterizerState->Release();
+	//rasterizerState->Release();
 
 	//ブレンドステートの初期化
 	D3D11_BLEND_DESC blendDesc = {};
@@ -131,7 +137,7 @@ bool Renderer::Initialize(HWND hWnd) {
 		return false;
 	}
 
-
+	//ブレンドステートの設定
 	float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 	m_deviceContext->OMSetBlendState(m_blendState.Get(), blendFactor, 0xffffffff);
 
@@ -174,7 +180,8 @@ bool Renderer::Initialize(HWND hWnd) {
 		return false;
 	}
 	m_deviceContext->PSSetSamplers(0, 1, &samplerState);
-	samplerState->Release();
+//	samplerState->Release();
+	
 
 	//定数バッファの初期化
 	D3D11_BUFFER_DESC bufferDesc = {};
@@ -236,6 +243,8 @@ bool Renderer::Initialize(HWND hWnd) {
 	material.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	SetMaterial(material);
+
+	return true;
 }
 
 void Renderer::Finalize() {
@@ -305,26 +314,63 @@ void Renderer::SetLight(const LIGHT& light) {
 }
 
 void Renderer::CreateVertexShader(ID3D11VertexShader** vertexShader, ID3D11InputLayout** inputLayout, std::wstring fileName) {
-	//HRESULT hr = S_OK;
-	//ID3DBlob* blob = nullptr;
-	//ID3DBlob* errorBlob = nullptr;
-	//hr = D3DCompileFromFile(fileName.c_str(), nullptr, nullptr, "VSMain", "vs_5_0", 0, 0, &blob, &errorBlob);
-	//if (FAILED(hr)) {
-	//	if (errorBlob) {
-	//		OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-	//		errorBlob->Release();
-	//	}
-	//	return;
-	//}
-	//m_device->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, vertexShader);
-	//m_device->CreateInputLayout(Vertex::GetInputLayout(), Vertex::GetInputLayoutCount(), blob->GetBufferPointer(), blob->GetBufferSize(), inputLayout);
-	//blob->Release();
-	//if (errorBlob) {
-	//	errorBlob->Release();
-	//}
+	HRESULT hr = S_OK;
+	ID3DBlob* shaderBlob = nullptr;
+	ID3DBlob* errorBlob = nullptr;
+
+	//CSOファイルの読み込み
+	hr = D3DReadFileToBlob(fileName.c_str(), &shaderBlob);
+	if (FAILED(hr)) {
+		ErrorMessage(L"CSOファイルの読み込みに失敗しました。", hr);
+		return;
+	}
+
+	//シェーダーの作成
+	hr = m_device->CreateVertexShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, vertexShader);
+	if (FAILED(hr)) {
+		ErrorMessage(L"頂点シェーダーの作成に失敗しました。", hr);
+		shaderBlob->Release();
+		return;
+	}
+
+	//入力レイアウトの作成
+	D3D11_INPUT_ELEMENT_DESC layout[] = {
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+	};
+	UINT numElements = ARRAYSIZE(layout);
+
+	hr = m_device->CreateInputLayout(layout, numElements, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), inputLayout);
+	if (FAILED(hr)) {
+		ErrorMessage(L"入力レイアウトの作成に失敗しました。", hr);
+		shaderBlob->Release();
+		return;
+	}
+
+	shaderBlob->Release();
 }
 
 void Renderer::CreatePixelShader(ID3D11PixelShader** pixelShader, std::wstring fileName) {
+	HRESULT hr = S_OK;
+	ID3DBlob* shaderBlob = nullptr;
+	ID3DBlob* errorBlob = nullptr;
+
+	//CSOファイルの読み込み
+	hr = D3DReadFileToBlob(fileName.c_str(), &shaderBlob);
+	if (FAILED(hr)) {
+		ErrorMessage(L"CSOファイルの読み込みに失敗しました。", hr);
+		return;
+	}
+
+	//シェーダーの作成
+	hr = m_device->CreatePixelShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, pixelShader);
+	if (FAILED(hr)) {
+		ErrorMessage(L"ピクセルシェーダーの作成に失敗しました。", hr);
+		shaderBlob->Release();
+		return;
+	}
+
+	shaderBlob->Release();
 }
-
-

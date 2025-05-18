@@ -1,20 +1,18 @@
 #pragma once
-#include "../main.h"
-
 
 //頂点構造体
 struct VERTEX_3D {
 	XMFLOAT3 position;
 	XMFLOAT3 normal;
-	XMFLOAT2 texcoord;
 	XMFLOAT4 diffuse;
+	XMFLOAT2 texcoord;
 };
 
 //マテリアル構造体
 struct MATERIAL {
+	XMFLOAT4 ambient;
 	XMFLOAT4 diffuse;
 	XMFLOAT4 specular;
-	XMFLOAT4 ambient;
 	XMFLOAT4 emission;
 	float shininess;
 	BOOL textureEnable;
@@ -113,3 +111,6 @@ private:
 	ComPtr<ID3D11Buffer> m_materialBuffer;
 
 };
+
+//シングルトンインスタンス取得マクロ
+#define RENDERER Renderer::GetInstance()
