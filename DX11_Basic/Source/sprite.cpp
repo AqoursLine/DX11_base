@@ -1,12 +1,12 @@
-#include "main.h"
+ï»¿#include "main.h"
 #include "DX11/renderer.h"
 #include "sprite.h"
 
-bool Sprite::Initialize(std::wstring fileName) {
-	//’¸“_ƒf[ƒ^‚Ìì¬
+bool Sprite::Initialize() {
+	//é ‚ç‚¹ãƒ‡ãƒ¼ã‚¿ã®ä½œæˆ
 	VERTEX_3D vertices[4] = {};
 
-	//“ñŸŒ³ƒ|ƒŠƒSƒ“İ’è
+	//äºŒæ¬¡å…ƒãƒãƒªã‚´ãƒ³è¨­å®š
 	vertices[0].position = XMFLOAT3(-0.5f, -0.5f, 0.0f);
 	vertices[1].position = XMFLOAT3(0.5f, -0.5f, 0.0f);
 	vertices[2].position = XMFLOAT3(-0.5f, 0.5f, 0.0f);
@@ -27,7 +27,7 @@ bool Sprite::Initialize(std::wstring fileName) {
 	vertices[2].diffuse = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 	vertices[3].diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	//’¸“_ƒoƒbƒtƒ@‚Ìİ’è
+	//é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã®è¨­å®š
 	D3D11_BUFFER_DESC bufferDesc = {};
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	bufferDesc.ByteWidth = sizeof(vertices);
@@ -39,22 +39,78 @@ bool Sprite::Initialize(std::wstring fileName) {
 
 	HRESULT hr = RENDERER.GetDevice()->CreateBuffer(&bufferDesc, &initData, m_vertexBuffer.GetAddressOf());
 	if (FAILED(hr)) {
-		ErrorMessage(L"’¸“_ƒoƒbƒtƒ@‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return false;
 	}
 
-	//ƒeƒNƒXƒ`ƒƒ“Ç‚İ‚İ
+	//ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®ä½œæˆ
+	RENDERER.CreateVertexShader(&m_vertexShader, &m_inputLayout, L"Shader\\unlitColorVS.cso");
+	RENDERER.CreatePixelShader(&m_pixelShader, L"Shader\\unlitColorPS.cso");
+
+	return true;
+}
+
+bool Sprite::Initialize(std::wstring fileName) {
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£èª­ã¿è¾¼ã¿
 	TexMetadata metadata;
 	ScratchImage scratchImg;
 	HRESULT hrTex = LoadFromWICFile(fileName.c_str(), WIC_FLAGS_NONE, &metadata, scratchImg);
 	if (FAILED(hrTex)) {
-		ErrorMessage(L"ƒeƒNƒXƒ`ƒƒ‚Ì“Ç‚İ‚İ‚É¸”s‚µ‚Ü‚µ‚½B", hrTex);
+		ErrorMessage(L"ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®èª­ã¿è¾¼ã¿ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hrTex);
 		return false;
 	}
 	CreateShaderResourceView(RENDERER.GetDevice(), scratchImg.GetImages(), scratchImg.GetImageCount(), metadata, m_texture.GetAddressOf());
 	assert(m_texture);
 
-	//ƒVƒF[ƒ_[‚Ìì¬
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®å¹…ã¨é«˜ã•ã‚’å–å¾—
+	UINT width = metadata.width;
+	UINT height = metadata.height;
+
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®å¹…ã¨é«˜ã•ã‚’åŠåˆ†ã«ã™ã‚‹
+	float halfWidth = static_cast<float>(width) * 0.5f;
+	float halfHeight = static_cast<float>(height) * 0.5f;
+
+	//é ‚ç‚¹ãƒ‡ãƒ¼ã‚¿ã®ä½œæˆ
+	VERTEX_3D vertices[4] = {};
+
+	//äºŒæ¬¡å…ƒãƒãƒªã‚´ãƒ³è¨­å®š
+	vertices[0].position = XMFLOAT3(-halfWidth, -halfHeight, 0.0f);
+	vertices[1].position = XMFLOAT3(halfWidth, -halfHeight, 0.0f);
+	vertices[2].position = XMFLOAT3(-halfWidth, halfHeight, 0.0f);
+	vertices[3].position = XMFLOAT3(halfWidth, halfHeight, 0.0f);
+
+	vertices[0].normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	vertices[1].normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	vertices[2].normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	vertices[3].normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
+
+	vertices[0].texcoord = XMFLOAT2(0.0f, 0.0f);
+	vertices[1].texcoord = XMFLOAT2(1.0f, 0.0f);
+	vertices[2].texcoord = XMFLOAT2(0.0f, 1.0f);
+	vertices[3].texcoord = XMFLOAT2(1.0f, 1.0f);
+
+	vertices[0].diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	vertices[1].diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	vertices[2].diffuse = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	vertices[3].diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
+	//é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã®è¨­å®š
+	D3D11_BUFFER_DESC bufferDesc = {};
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.ByteWidth = sizeof(vertices);
+	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bufferDesc.CPUAccessFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA initData = {};
+	initData.pSysMem = vertices;
+
+	HRESULT hr = RENDERER.GetDevice()->CreateBuffer(&bufferDesc, &initData, m_vertexBuffer.GetAddressOf());
+	if (FAILED(hr)) {
+		ErrorMessage(L"é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
+		return false;
+	}
+
+	//ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®ä½œæˆ
 	RENDERER.CreateVertexShader(&m_vertexShader, &m_inputLayout, L"Shader\\unlitTextureVS.cso");
 	RENDERER.CreatePixelShader(&m_pixelShader, L"Shader\\unlitTexturePS.cso");
 
@@ -65,34 +121,34 @@ void Sprite::Finalize() {
 }
 
 void Sprite::Draw(const Vector3& pos, const Vector3& rot, const Vector3& scale) const {
-	// “ü—ÍƒŒƒCƒAƒEƒg‚ğƒZƒbƒg
+	// å…¥åŠ›ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã‚’ã‚»ãƒƒãƒˆ
 	RENDERER.GetDeviceContext()->IASetInputLayout(m_inputLayout.Get());
-	// ’¸“_ƒVƒF[ƒ_[‚ğƒZƒbƒg
+	// é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ã‚»ãƒƒãƒˆ
 	RENDERER.GetDeviceContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0);
-	// ƒsƒNƒZƒ‹ƒVƒF[ƒ_[‚ğƒZƒbƒg
+	// ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ã‚»ãƒƒãƒˆ
 	RENDERER.GetDeviceContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0);
 
-	//2Ds—ñİ’è
+	//2Dè¡Œåˆ—è¨­å®š
 	RENDERER.Set2DMatrix();
 
-	// 2D•`‰æ‚Ì‚½‚ß‚Ìs—ñ‚ğİ’è
+	// 2Dæç”»ã®ãŸã‚ã®è¡Œåˆ—ã‚’è¨­å®š
 	XMMATRIX worldMatrix = XMMatrixScaling(scale.x, scale.y, scale.z) *
 		XMMatrixRotationRollPitchYaw(rot.x, rot.y, rot.z) *
 		XMMatrixTranslation(pos.x, pos.y, pos.z);
-	// ƒ[ƒ‹ƒhs—ñ‚ğƒZƒbƒg
+	// ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’ã‚»ãƒƒãƒˆ
 	RENDERER.SetWorldMatrix(worldMatrix);
 
-	// ’¸“_ƒoƒbƒtƒ@‚ğƒZƒbƒg
+	// é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã‚’ã‚»ãƒƒãƒˆ
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
 	RENDERER.GetDeviceContext()->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
 
-	//ƒeƒNƒXƒ`ƒƒƒZƒbƒg
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚»ãƒƒãƒˆ
 	RENDERER.GetDeviceContext()->PSSetShaderResources(0, 1, m_texture.GetAddressOf());
 
-	// ƒvƒŠƒ~ƒeƒBƒuƒgƒ|ƒƒW‚ğƒZƒbƒg
+	// ãƒ—ãƒªãƒŸãƒ†ã‚£ãƒ–ãƒˆãƒãƒ­ã‚¸ã‚’ã‚»ãƒƒãƒˆ
 	RENDERER.GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
-	// •`‰æ
+	// æç”»
 	RENDERER.GetDeviceContext()->Draw(4, 0);
 }

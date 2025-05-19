@@ -1,24 +1,27 @@
-#pragma once
+ï»¿#pragma once
 
 class Sprite {
 public:
 	Sprite() = default;
 	~Sprite() = default;
 
+	bool Initialize();
 	bool Initialize(std::wstring fileName);
 	void Finalize();
 	void Draw(const Vector3& pos, const Vector3& rot, const Vector3& scale) const;
 
 private:
+	//é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡
 	ComPtr<ID3D11Buffer> m_vertexBuffer;
 
-	//’¸“_ƒVƒF[ƒ_[
+
+	//é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
 	ComPtr<ID3D11VertexShader> m_vertexShader;
-	//ƒsƒNƒZƒ‹ƒVƒF[ƒ_[
+	//ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
 	ComPtr<ID3D11PixelShader> m_pixelShader;
-	//“ü—ÍƒŒƒCƒAƒEƒg
+	//å…¥åŠ›ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆ
 	ComPtr<ID3D11InputLayout> m_inputLayout;
 
-	//ƒeƒNƒXƒ`ƒƒ
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£
 	ComPtr<ID3D11ShaderResourceView> m_texture;
 };

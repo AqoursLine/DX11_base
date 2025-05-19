@@ -1,4 +1,4 @@
-#include "main.h"
+ï»¿#include "main.h"
 #include "manager.h"
 #include "DX11/renderer.h"
 #include "sprite.h"
@@ -14,9 +14,10 @@ Manager::~Manager() {
 bool Manager::Initialize() {
 	m_isFinished = false;
 
+
 	m_sprite = new Sprite();
 	if (!m_sprite->Initialize(L"Asset\\Texture\\yukino.png")) {
-		ErrorMessage(L"ƒXƒvƒ‰ƒCƒg‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½", E_FAIL);
+		ErrorMessage(L"ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸ", E_FAIL);
 		return false;
 	}
 
@@ -42,13 +43,13 @@ bool Manager::Update(double dt) {
 }
 
 void Manager::Draw() const {
-	//•`‰æŠJn
+	//æç”»é–‹å§‹
 	RENDERER.BeginDraw();
 
-	//•`‰æˆ—
-	m_sprite->Draw(Vector3(500.0f, 500.0f, 0.0f), Vector3(0.0f, 0.0f, 0.0f), Vector3(200.0f, 200.0f, 1.0f));
+	//æç”»å‡¦ç†
+	m_sprite->Draw(Vector3(500.0f, 500.0f, 0.0f), Vector3(0.0f, 0.0f, 0.0f), Vector3(1.0f, 1.0f, 1.0f));
 
-	//•`‰æI—¹
+	//æç”»çµ‚äº†
 	RENDERER.EndDraw();
 
 }

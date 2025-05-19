@@ -1,14 +1,15 @@
-#include "main.h"
+ï»¿#include "main.h"
 #include "manager.h"
 #include "timer.h"
 #include "DX11/renderer.h"
 
+
 HWND g_hWnd = nullptr;
 
 void ErrorMessage(std::wstring msg, HRESULT hr) {
-	//ƒGƒ‰[ƒƒbƒZ[ƒW‚ğ•\¦
+	//ã‚¨ãƒ©ãƒ¼ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’è¡¨ç¤º
 
-	//HRESULT‚ğ•¶š—ñ‚É•ÏŠ·
+	//HRESULTã‚’æ–‡å­—åˆ—ã«å¤‰æ›
 	std::wstringstream ss;
 	ss << L"Error ID: 0x" << std::hex << std::uppercase << hr << L"\n";
 	std::wstring errorMsg = ss.str();
@@ -20,7 +21,7 @@ void ErrorMessage(std::wstring msg, HRESULT hr) {
 
 }
 
-//ƒvƒƒV[ƒWƒƒ
+//ãƒ—ãƒ­ã‚·ãƒ¼ã‚¸ãƒ£
 LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
 		case WM_DESTROY:
@@ -39,7 +40,7 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	std::wstring className = L"DirectX11";
 
-	//ƒEƒBƒ“ƒhƒEƒNƒ‰ƒXì¬
+	//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚¯ãƒ©ã‚¹ä½œæˆ
 	WNDCLASSEX wc = {};
 	wc.cbSize = sizeof(WNDCLASSEX);
 	wc.style = 0;
@@ -54,36 +55,36 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	wc.lpszClassName = className.c_str();
 	wc.hIconSm = nullptr;
 	
-	//ƒEƒBƒ“ƒhƒEƒNƒ‰ƒX“o˜^
+	//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚¯ãƒ©ã‚¹ç™»éŒ²
 	RegisterClassEx(&wc);
 
-	//ƒTƒCƒY’¥«
+	//ã‚µã‚¤ã‚ºå¾´æ€§
 	RECT rc = { 0,0,(LONG)SCREEN_WIDTH, (LONG)SCREEN_HEIGHT };
 	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
 
-	//ƒEƒBƒ“ƒhƒEì¬
-	HWND hWnd = CreateWindowEx(0, className.c_str(), L"‚Æ‚è‚ ‚¦‚¸", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance, nullptr);
+	//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ä½œæˆ
+	HWND hWnd = CreateWindowEx(0, className.c_str(), L"ã¨ã‚Šã‚ãˆãš", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance, nullptr);
 
-	//COMƒ‰ƒCƒuƒ‰ƒŠ‰Šú‰»
+	//COMãƒ©ã‚¤ãƒ–ãƒ©ãƒªåˆæœŸåŒ–
 	CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
 
-	//ƒEƒBƒ“ƒhƒE•\¦
+	//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦è¡¨ç¤º
 	ShowWindow(hWnd, nCmdShow);
-	//ƒEƒBƒ“ƒhƒEXV
+	//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦æ›´æ–°
 	UpdateWindow(hWnd);
 
 	g_hWnd = hWnd;
 
-	//DirectX11‰Šú‰»
+	//DirectX11åˆæœŸåŒ–
 	Renderer::CreateInstance();
 	RENDERER.Initialize(hWnd);
 
-	//ƒ}ƒl[ƒWƒƒ[ƒNƒ‰ƒX
+	//ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã‚¯ãƒ©ã‚¹
 	Manager* manager = new Manager();
 	bool isInitialized = manager->Initialize();
 
 	if (!isInitialized) {
-		ErrorMessage(L"ƒ}ƒl[ƒWƒƒ[ƒNƒ‰ƒX‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½", E_FAIL);
+		ErrorMessage(L"ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã‚¯ãƒ©ã‚¹ã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸ", E_FAIL);
 	}
 
 	Timer timer;
@@ -91,16 +92,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	timer.Reset();
 	timer.Start();
 
-	//ƒƒbƒZ[ƒWƒNƒ‰ƒX
+	//ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚¯ãƒ©ã‚¹
 	MSG msg;
 
-	//ƒƒCƒ“ƒ‹[ƒv
+	//ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒ—
 	while (true) {
-		//ƒƒbƒZ[ƒWˆ—
+		//ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸å‡¦ç†
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
-			//I—¹ƒƒbƒZ[ƒW
+			//çµ‚äº†ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸
 			if (msg.message == WM_QUIT) {
 				break;
 			}
@@ -115,18 +116,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	}
 
-	//ƒ}ƒl[ƒWƒƒ[ƒNƒ‰ƒXI—¹
+	//ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã‚¯ãƒ©ã‚¹çµ‚äº†
 	manager->Finalize();
 	delete manager;
 
-	//DirectX11I—¹
+	//DirectX11çµ‚äº†
 	RENDERER.Finalize();
 	Renderer::DestroyInstance();
 
-	//ƒEƒBƒ“ƒhƒE“o˜^‰ğœ
+	//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ç™»éŒ²è§£é™¤
 	UnregisterClass(className.c_str(), wc.hInstance);
 
-	//COMƒ‰ƒCƒuƒ‰ƒŠI—¹
+	//COMãƒ©ã‚¤ãƒ–ãƒ©ãƒªçµ‚äº†
 	CoUninitialize();
 
 	return static_cast<int>(msg.wParam);

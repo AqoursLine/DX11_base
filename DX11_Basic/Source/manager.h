@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 class Sprite;
 
@@ -17,7 +17,9 @@ public:
 
 	static void SetFinish(bool isFinish) { m_isFinished = isFinish; }
 private:
+	//終了したか
 	static bool m_isFinished;
 
 	Sprite* m_sprite = nullptr;
+
 };

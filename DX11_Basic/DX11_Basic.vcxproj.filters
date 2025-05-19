@@ -64,10 +64,10 @@
     <FxCompile Include="Shader\unlitColorVS.hlsl">
       <Filter>シェーダー</Filter>
     </FxCompile>
-    <FxCompile Include="Shader\unlitTexturePS.hlsl">
+    <FxCompile Include="Shader\unlitTextureVS.hlsl">
       <Filter>シェーダー</Filter>
     </FxCompile>
-    <FxCompile Include="Shader\unlitTextureVS.hlsl">
+    <FxCompile Include="Shader\unlitTexturePS.hlsl">
       <Filter>シェーダー</Filter>
     </FxCompile>
   </ItemGroup>

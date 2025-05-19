@@ -1,16 +1,14 @@
 #include "common.hlsl"
-
-void main(in VS_INPUT In, out PS_INPUT Out)
+void main( in VS_INPUT In, out PS_INPUT Out )
 {
-	//ワールドビュープロジェクション
-	matrix wvp;
-	wvp = mul(WorldMatrix, ViewMatrix);
+	//ワールドビュープロジェクション行列を計算
+	matrix wvp = mul(WorldMatrix, ViewMatrix);
 	wvp = mul(wvp, ProjectionMatrix);
 	
-	//頂点座標を行列で変換
+	//頂点座標をクリップ空間に変換
 	Out.Position = mul(In.Position, wvp);
 	
-	//頂点座標をワールド行列で変換
+	//ワールドポジションを計算
 	Out.WorldPosition = mul(In.Position, WorldMatrix);
 	
 	//法線をそのまま渡す
@@ -19,6 +17,6 @@ void main(in VS_INPUT In, out PS_INPUT Out)
 	//頂点カラーをそのまま渡す
 	Out.Diffuse = In.Diffuse;
 	
-	//テクスチャ座標をそのまま渡す
+	//UV座標をそのまま渡す
 	Out.TexCoord = In.TexCoord;
 }

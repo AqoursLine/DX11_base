@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 class Timer {
 public:
@@ -13,8 +13,10 @@ public:
 	double GetTotalTime() const;
 
 private:
+	//メンバ変数
 	double m_secondsPerCount;
 	double m_deltaTime;
+
 
 	__int64 m_baseTime;
 	__int64 m_pausedTime;
@@ -23,5 +25,4 @@ private:
 	__int64 m_currTime;
 
 	bool m_stoped;
-
 };

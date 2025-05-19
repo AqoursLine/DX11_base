@@ -1,6 +1,7 @@
-#pragma once
+ï»¿#pragma once
 
-//’¸“_\‘¢‘Ì
+
+//é ‚ç‚¹æ§‹é€ ä½“
 struct VERTEX_3D {
 	XMFLOAT3 position;
 	XMFLOAT3 normal;
@@ -8,7 +9,7 @@ struct VERTEX_3D {
 	XMFLOAT2 texcoord;
 };
 
-//ƒ}ƒeƒŠƒAƒ‹\‘¢‘Ì
+//ãƒãƒ†ãƒªã‚¢ãƒ«æ§‹é€ ä½“
 struct MATERIAL {
 	XMFLOAT4 ambient;
 	XMFLOAT4 diffuse;
@@ -19,7 +20,7 @@ struct MATERIAL {
 	float dummy[2];
 };
 
-//ƒ‰ƒCƒg\‘¢‘Ì
+//ãƒ©ã‚¤ãƒˆæ§‹é€ ä½“
 struct LIGHT {
 	XMFLOAT4 direction;
 	XMFLOAT4 diffuse;
@@ -35,7 +36,7 @@ private:
 	static Renderer* s_instance;
 
 public:
-	/// ƒVƒ“ƒOƒ‹ƒgƒ“ƒpƒ^[ƒ“
+	/// ã‚·ãƒ³ã‚°ãƒ«ãƒˆãƒ³ãƒ‘ã‚¿ãƒ¼ãƒ³
 	static void CreateInstance() {
 		DestroyInstance();
 
@@ -51,42 +52,42 @@ public:
 		return *s_instance;
 	}
 
-	//‰Šú‰»
+	//åˆæœŸåŒ–
 	bool Initialize(HWND hWnd);
-	//I—¹
+	//çµ‚äº†
 	void Finalize();
-	//•`‰æŠJn
+	//æç”»é–‹å§‹
 	void BeginDraw();
-	//•`‰æI—¹
+	//æç”»çµ‚äº†
 	void EndDraw();
 
-	//[“xƒoƒbƒtƒ@İ’è
+	//æ·±åº¦ãƒãƒƒãƒ•ã‚¡è¨­å®š
 	void SetDepthStencilState(bool enable);
-	//ƒuƒŒƒ“ƒhƒXƒe[ƒgİ’è
+	//ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚¹ãƒ†ãƒ¼ãƒˆè¨­å®š
 	void SetATCEnable(bool enable);
 
-	//2D—ps—ñİ’è
+	//2Dç”¨è¡Œåˆ—è¨­å®š
 	void Set2DMatrix();
-	//ƒ[ƒ‹ƒhs—ñİ’è
+	//ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—è¨­å®š
 	void SetWorldMatrix(const XMMATRIX& worldMatrix);
-	//ƒrƒ…[s—ñİ’è
+	//ãƒ“ãƒ¥ãƒ¼è¡Œåˆ—è¨­å®š
 	void SetViewMatrix(const XMMATRIX& viewMatrix);
-	//ƒvƒƒWƒFƒNƒVƒ‡ƒ“s—ñİ’è
+	//ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³è¡Œåˆ—è¨­å®š
 	void SetProjectionMatrix(const XMMATRIX& projectionMatrix);
 
-	//ƒ}ƒeƒŠƒAƒ‹İ’è
+	//ãƒãƒ†ãƒªã‚¢ãƒ«è¨­å®š
 	void SetMaterial(const MATERIAL& material);
-	//ƒ‰ƒCƒgİ’è
+	//ãƒ©ã‚¤ãƒˆè¨­å®š
 	void SetLight(const LIGHT& light);
 
-	//ƒfƒoƒCƒXæ“¾
+	//ãƒ‡ãƒã‚¤ã‚¹å–å¾—
 	ID3D11Device* GetDevice() { return m_device.Get(); }
-	//ƒfƒoƒCƒXƒRƒ“ƒeƒLƒXƒgæ“¾
+	//ãƒ‡ãƒã‚¤ã‚¹ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆå–å¾—
 	ID3D11DeviceContext* GetDeviceContext() { return m_deviceContext.Get(); }
 
-	//’¸“_ƒVƒF[ƒ_[ì¬
+	//é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ä½œæˆ
 	void CreateVertexShader(ID3D11VertexShader** vertexShader, ID3D11InputLayout** inputLayout, std::wstring fileName);
-	//ƒsƒNƒZƒ‹ƒVƒF[ƒ_[ì¬
+	//ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ä½œæˆ
 	void CreatePixelShader(ID3D11PixelShader** pixelShader, std::wstring fileName);
 
 private:
@@ -112,5 +113,5 @@ private:
 
 };
 
-//ƒVƒ“ƒOƒ‹ƒgƒ“ƒCƒ“ƒXƒ^ƒ“ƒXæ“¾ƒ}ƒNƒ
+//ã‚·ãƒ³ã‚°ãƒ«ãƒˆãƒ³ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹å–å¾—ãƒã‚¯ãƒ­
 #define RENDERER Renderer::GetInstance()

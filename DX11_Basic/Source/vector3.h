@@ -1,10 +1,12 @@
-#pragma once	
+﻿#pragma once	
 
 #include <math.h>
 
 class Vector3 {
 public:
+	//メンバ変数
 	float x, y, z;
+
 
 	Vector3() = default;
 	Vector3(const Vector3& a) : x(a.x), y(a.y), z(a.z) {}
