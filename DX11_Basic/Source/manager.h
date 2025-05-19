@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 class Sprite;
+class Camera;
+class Field;
 
 class Manager {
 public:
@@ -10,10 +12,10 @@ public:
 	bool Initialize();
 	void Finalize();
 
-	bool Update(double dt);
+	void Update(double dt);
 	void Draw() const;
 
-	void CleanUp();
+	bool CleanUp();
 
 	static void SetFinish(bool isFinish) { m_isFinished = isFinish; }
 private:
@@ -21,5 +23,7 @@ private:
 	static bool m_isFinished;
 
 	Sprite* m_sprite = nullptr;
+	Camera* m_camera = nullptr;
+	Field* m_field = nullptr;
 
 };

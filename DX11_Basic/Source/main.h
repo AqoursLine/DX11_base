@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <Windows.h>
+#include <windows.h>
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -24,7 +24,7 @@ using namespace DirectX;
 #endif // _DEBUG
 
 
-#include "vector3.h"
+#include "System/vector3.h"
 
 
 void ErrorMessage(std::wstring msg, HRESULT hr);

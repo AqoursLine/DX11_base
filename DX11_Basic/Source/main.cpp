@@ -1,7 +1,7 @@
 ﻿#include "main.h"
-#include "manager.h"
-#include "timer.h"
+#include "System/timer.h"
 #include "DX11/renderer.h"
+#include "System/system.h"
 
 
 HWND g_hWnd = nullptr;
@@ -79,12 +79,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	Renderer::CreateInstance();
 	RENDERER.Initialize(hWnd);
 
-	//マネージャークラス
-	Manager* manager = new Manager();
-	bool isInitialized = manager->Initialize();
-
-	if (!isInitialized) {
-		ErrorMessage(L"マネージャークラスの初期化に失敗しました", E_FAIL);
+	//システムクラス初期化
+	System* system = new System();
+	bool isSystemInitialized = system->Initialize();
+	if (!isSystemInitialized) {
+		ErrorMessage(L"システム初期化に失敗しました", E_FAIL);
+		return -1;
 	}
 
 	Timer timer;
@@ -95,8 +95,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//メッセージクラス
 	MSG msg;
 
+	//経過時間
+	double elapsedTime = 0.0f;
+
+	//フレームレート
+	int frameRate = 60;
+
+	//フレーム時間
+	double frameTime = 1.0 / frameRate;
+
+	//ループフラグ
+	bool isLoop = true;
+
 	//メインループ
-	while (true) {
+	while (isLoop) {
 		//メッセージ処理
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
@@ -108,17 +120,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 
 		timer.Tick();
-		if (manager->Update(timer.GetDeltaTime())) {
-			break;
-		}
-		manager->Draw();
-		manager->CleanUp();
+		//経過時間に加算
+		elapsedTime += timer.GetDeltaTime();
 
+		//経過時間がフレームレートを超えたら
+		while (elapsedTime >= frameTime) {
+			//フレーム時間を引く
+			elapsedTime -= frameTime;
+			if (system->Excute()) {
+				isLoop = false;
+				break;
+			}
+		}
 	}
 
-	//マネージャークラス終了
-	manager->Finalize();
-	delete manager;
+	//システムクラス終了
+	system->Finalize();
+	delete system;
 
 	//DirectX11終了
 	RENDERER.Finalize();

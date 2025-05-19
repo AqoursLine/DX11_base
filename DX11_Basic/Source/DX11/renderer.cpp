@@ -112,7 +112,7 @@ bool Renderer::Initialize(HWND hWnd) {
 		return false;
 	}
 	m_deviceContext->RSSetState(rasterizerState);
-	//rasterizerState->Release();
+	rasterizerState->Release();
 
 	//ブレンドステートの初期化
 	D3D11_BLEND_DESC blendDesc = {};
@@ -181,7 +181,7 @@ bool Renderer::Initialize(HWND hWnd) {
 		return false;
 	}
 	m_deviceContext->PSSetSamplers(0, 1, &samplerState);
-//	samplerState->Release();
+	samplerState->Release();
 	
 
 	//定数バッファの初期化
