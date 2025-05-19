@@ -1,4 +1,4 @@
-#include "../main.h"
+ï»¿#include "../main.h"
 #include "renderer.h"
 
 #include <d3dcompiler.h>
@@ -11,7 +11,7 @@ bool Renderer::Initialize(HWND hWnd) {
 
 	m_featureLevel = D3D_FEATURE_LEVEL_11_0;
 
-	//ƒfƒoƒCƒXƒXƒƒbƒvƒ`ƒFƒCƒ“‚Ì‰Šú‰»
+	//ãƒ‡ãƒã‚¤ã‚¹ã‚¹ãƒ¯ãƒƒãƒ—ãƒã‚§ã‚¤ãƒ³ã®åˆæœŸåŒ–
 	DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
 	swapChainDesc.BufferCount = 1;
 	swapChainDesc.BufferDesc.Width = SCREEN_WIDTH;
@@ -41,22 +41,22 @@ bool Renderer::Initialize(HWND hWnd) {
 	);
 
 	if (FAILED(hr)) {
-		ErrorMessage(L"ƒfƒoƒCƒXƒXƒƒbƒvƒ`ƒFƒCƒ“‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"ãƒ‡ãƒã‚¤ã‚¹ã‚¹ãƒ¯ãƒƒãƒ—ãƒã‚§ã‚¤ãƒ³ã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return false;
 	}
 
-	//ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒgƒrƒ…[‚Ì‰Šú‰»
+	//ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆãƒ“ãƒ¥ãƒ¼ã®åˆæœŸåŒ–
 	ID3D11Texture2D* backBuffer = nullptr;
 	hr = m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBuffer);
 	m_device->CreateRenderTargetView(backBuffer, nullptr, m_renderTargetView.GetAddressOf());
 	backBuffer->Release();
 
 	if (FAILED(hr)) {
-		ErrorMessage(L"ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒgƒrƒ…[‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆãƒ“ãƒ¥ãƒ¼ã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return false;
 	}
 
-	//ƒfƒvƒXƒXƒeƒ“ƒVƒ‹ƒrƒ…[‚Ì‰Šú‰»
+	//ãƒ‡ãƒ—ã‚¹ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ãƒ“ãƒ¥ãƒ¼ã®åˆæœŸåŒ–
 	D3D11_TEXTURE2D_DESC depthStencilDesc = {};
 	depthStencilDesc.Width = SCREEN_WIDTH;
 	depthStencilDesc.Height = SCREEN_HEIGHT;
@@ -71,7 +71,7 @@ bool Renderer::Initialize(HWND hWnd) {
 	ID3D11Texture2D* depthStencilBuffer = nullptr;
 	hr = m_device->CreateTexture2D(&depthStencilDesc, nullptr, &depthStencilBuffer);
 	if (FAILED(hr)) {
-		ErrorMessage(L"ƒfƒvƒXƒXƒeƒ“ƒVƒ‹ƒoƒbƒtƒ@‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"ãƒ‡ãƒ—ã‚¹ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ãƒãƒƒãƒ•ã‚¡ã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return false;
 	}
 
@@ -82,12 +82,12 @@ bool Renderer::Initialize(HWND hWnd) {
 	hr = m_device->CreateDepthStencilView(depthStencilBuffer, &depthStencilViewDesc, m_depthStencilView.GetAddressOf());
 	depthStencilBuffer->Release();
 	if (FAILED(hr)) {
-		ErrorMessage(L"ƒfƒvƒXƒXƒeƒ“ƒVƒ‹ƒrƒ…[‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"ãƒ‡ãƒ—ã‚¹ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ãƒ“ãƒ¥ãƒ¼ã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return false;
 	}
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
 
-	//ƒrƒ…[ƒ|[ƒg‚Ì‰Šú‰»
+	//ãƒ“ãƒ¥ãƒ¼ãƒãƒ¼ãƒˆã®åˆæœŸåŒ–
 	D3D11_VIEWPORT viewport = {};
 	viewport.Width = static_cast<float>(SCREEN_WIDTH);
 	viewport.Height = static_cast<float>(SCREEN_HEIGHT);
@@ -97,7 +97,7 @@ bool Renderer::Initialize(HWND hWnd) {
 	viewport.TopLeftY = 0.0f;
 	m_deviceContext->RSSetViewports(1, &viewport);
 
-	//ƒ‰ƒXƒ^ƒ‰ƒCƒU[ƒXƒe[ƒg‚Ì‰Šú‰»
+	//ãƒ©ã‚¹ã‚¿ãƒ©ã‚¤ã‚¶ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆã®åˆæœŸåŒ–
 	D3D11_RASTERIZER_DESC rasterizerDesc = {};
 	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
 	rasterizerDesc.CullMode = D3D11_CULL_BACK;
@@ -107,13 +107,13 @@ bool Renderer::Initialize(HWND hWnd) {
 	ID3D11RasterizerState* rasterizerState = nullptr;
 	hr = m_device->CreateRasterizerState(&rasterizerDesc, &rasterizerState);
 	if (FAILED(hr)) {
-		ErrorMessage(L"ƒ‰ƒXƒ^ƒ‰ƒCƒU[ƒXƒe[ƒg‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"ãƒ©ã‚¹ã‚¿ãƒ©ã‚¤ã‚¶ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return false;
 	}
 	m_deviceContext->RSSetState(rasterizerState);
 	//rasterizerState->Release();
 
-	//ƒuƒŒƒ“ƒhƒXƒe[ƒg‚Ì‰Šú‰»
+	//ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚¹ãƒ†ãƒ¼ãƒˆã®åˆæœŸåŒ–
 	D3D11_BLEND_DESC blendDesc = {};
 	blendDesc.AlphaToCoverageEnable = FALSE;
 	blendDesc.IndependentBlendEnable = FALSE;
@@ -127,21 +127,21 @@ bool Renderer::Initialize(HWND hWnd) {
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 	hr = m_device->CreateBlendState(&blendDesc, m_blendState.GetAddressOf());
 	if (FAILED(hr)) {
-		ErrorMessage(L"ƒuƒŒƒ“ƒhƒXƒe[ƒg‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚¹ãƒ†ãƒ¼ãƒˆã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return false;
 	}
 	blendDesc.AlphaToCoverageEnable = TRUE;
 	hr = m_device->CreateBlendState(&blendDesc, m_blendStateATC.GetAddressOf());
 	if (FAILED(hr)) {
-		ErrorMessage(L"ATCƒuƒŒƒ“ƒhƒXƒe[ƒg‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"ATCãƒ–ãƒ¬ãƒ³ãƒ‰ã‚¹ãƒ†ãƒ¼ãƒˆã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return false;
 	}
 
-	//ƒuƒŒƒ“ƒhƒXƒe[ƒg‚Ìİ’è
+	//ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚¹ãƒ†ãƒ¼ãƒˆã®è¨­å®š
 	float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 	m_deviceContext->OMSetBlendState(m_blendState.Get(), blendFactor, 0xffffffff);
 
-	//ƒfƒvƒXƒXƒeƒ“ƒVƒ‹ƒXƒe[ƒg‚Ì‰Šú‰»
+	//ãƒ‡ãƒ—ã‚¹ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ã‚¹ãƒ†ãƒ¼ãƒˆã®åˆæœŸåŒ–
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc2 = {};
 	depthStencilDesc2.DepthEnable = TRUE;
 	depthStencilDesc2.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
@@ -150,7 +150,7 @@ bool Renderer::Initialize(HWND hWnd) {
 
 	hr = m_device->CreateDepthStencilState(&depthStencilDesc2, m_depthStencilStateEnable.GetAddressOf());
 	if (FAILED(hr)) {
-		ErrorMessage(L"ƒfƒvƒXƒXƒeƒ“ƒVƒ‹ƒXƒe[ƒg‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"ãƒ‡ãƒ—ã‚¹ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ã‚¹ãƒ†ãƒ¼ãƒˆã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return false;
 	}
 
@@ -158,13 +158,13 @@ bool Renderer::Initialize(HWND hWnd) {
 	depthStencilDesc2.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 	hr = m_device->CreateDepthStencilState(&depthStencilDesc2, m_depthStencilStateDisable.GetAddressOf());
 	if (FAILED(hr)) {
-		ErrorMessage(L"ƒfƒvƒXƒXƒeƒ“ƒVƒ‹ƒXƒe[ƒg‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"ãƒ‡ãƒ—ã‚¹ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ã‚¹ãƒ†ãƒ¼ãƒˆã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return false;
 	}
 
 	m_deviceContext->OMSetDepthStencilState(m_depthStencilStateEnable.Get(), NULL);
 
-	//ƒTƒ“ƒvƒ‰[ƒXƒe[ƒg‚Ì‰Šú‰»
+	//ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆã®åˆæœŸåŒ–
 	D3D11_SAMPLER_DESC samplerDesc = {};
 	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -176,14 +176,14 @@ bool Renderer::Initialize(HWND hWnd) {
 	ID3D11SamplerState* samplerState = nullptr;
 	hr = m_device->CreateSamplerState(&samplerDesc, &samplerState);
 	if (FAILED(hr)) {
-		ErrorMessage(L"ƒTƒ“ƒvƒ‰[ƒXƒe[ƒg‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return false;
 	}
 	m_deviceContext->PSSetSamplers(0, 1, &samplerState);
 //	samplerState->Release();
 	
 
-	//’è”ƒoƒbƒtƒ@‚Ì‰Šú‰»
+	//å®šæ•°ãƒãƒƒãƒ•ã‚¡ã®åˆæœŸåŒ–
 	D3D11_BUFFER_DESC bufferDesc = {};
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	bufferDesc.ByteWidth = sizeof(XMFLOAT4X4);
@@ -194,17 +194,17 @@ bool Renderer::Initialize(HWND hWnd) {
 
 	hr = m_device->CreateBuffer(&bufferDesc, nullptr, m_worldBuffer.GetAddressOf());
 	if (FAILED(hr)) {
-		ErrorMessage(L"ƒ[ƒ‹ƒhƒoƒbƒtƒ@‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"ãƒ¯ãƒ¼ãƒ«ãƒ‰ãƒãƒƒãƒ•ã‚¡ã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return false;
 	}
 	hr = m_device->CreateBuffer(&bufferDesc, nullptr, m_viewBuffer.GetAddressOf());
 	if (FAILED(hr)) {
-		ErrorMessage(L"ƒrƒ…[s—ñƒoƒbƒtƒ@‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"ãƒ“ãƒ¥ãƒ¼è¡Œåˆ—ãƒãƒƒãƒ•ã‚¡ã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return false;
 	}
 	hr = m_device->CreateBuffer(&bufferDesc, nullptr, m_projectionBuffer.GetAddressOf());
 	if (FAILED(hr)) {
-		ErrorMessage(L"ƒvƒƒWƒFƒNƒVƒ‡ƒ“s—ñƒoƒbƒtƒ@‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³è¡Œåˆ—ãƒãƒƒãƒ•ã‚¡ã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return false;
 	}
 
@@ -215,7 +215,7 @@ bool Renderer::Initialize(HWND hWnd) {
 	bufferDesc.ByteWidth = sizeof(MATERIAL);
 	hr = m_device->CreateBuffer(&bufferDesc, nullptr, m_materialBuffer.GetAddressOf());
 	if (FAILED(hr)) {
-		ErrorMessage(L"ƒ}ƒeƒŠƒAƒ‹ƒoƒbƒtƒ@‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"ãƒãƒ†ãƒªã‚¢ãƒ«ãƒãƒƒãƒ•ã‚¡ã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return false;
 	}
 	m_deviceContext->PSSetConstantBuffers(3, 1, m_materialBuffer.GetAddressOf());
@@ -224,13 +224,13 @@ bool Renderer::Initialize(HWND hWnd) {
 	bufferDesc.ByteWidth = sizeof(LIGHT);
 	hr = m_device->CreateBuffer(&bufferDesc, nullptr, m_lightBuffer.GetAddressOf());
 	if (FAILED(hr)) {
-		ErrorMessage(L"ƒ‰ƒCƒgƒoƒbƒtƒ@‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"ãƒ©ã‚¤ãƒˆãƒãƒƒãƒ•ã‚¡ã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return false;
 	}
 	m_deviceContext->PSSetConstantBuffers(4, 1, m_lightBuffer.GetAddressOf());
 	m_deviceContext->VSSetConstantBuffers(4, 1, m_lightBuffer.GetAddressOf());
 
-	//ƒ‰ƒCƒg‰Šú‰»
+	//ãƒ©ã‚¤ãƒˆåˆæœŸåŒ–
 	LIGHT light = {};
 	light.enable = true;
 	light.direction = XMFLOAT4(0.0f, -1.0f, 0.0f, 0.0f);
@@ -238,7 +238,7 @@ bool Renderer::Initialize(HWND hWnd) {
 	light.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	SetLight(light);
 
-	//ƒ}ƒeƒŠƒAƒ‹‰Šú‰»
+	//ãƒãƒ†ãƒªã‚¢ãƒ«åˆæœŸåŒ–
 	MATERIAL material = {};
 	material.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -246,7 +246,6 @@ bool Renderer::Initialize(HWND hWnd) {
 
 	return true;
 }
-
 void Renderer::Finalize() {
 }
 
@@ -318,22 +317,22 @@ void Renderer::CreateVertexShader(ID3D11VertexShader** vertexShader, ID3D11Input
 	ID3DBlob* shaderBlob = nullptr;
 	ID3DBlob* errorBlob = nullptr;
 
-	//CSOƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‚İ
+	//CSOãƒ•ã‚¡ã‚¤ãƒ«ã®èª­ã¿è¾¼ã¿
 	hr = D3DReadFileToBlob(fileName.c_str(), &shaderBlob);
 	if (FAILED(hr)) {
-		ErrorMessage(L"CSOƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‚İ‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"CSOãƒ•ã‚¡ã‚¤ãƒ«ã®èª­ã¿è¾¼ã¿ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return;
 	}
 
-	//ƒVƒF[ƒ_[‚Ìì¬
+	//ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®ä½œæˆ
 	hr = m_device->CreateVertexShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, vertexShader);
 	if (FAILED(hr)) {
-		ErrorMessage(L"’¸“_ƒVƒF[ƒ_[‚Ìì¬‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		shaderBlob->Release();
 		return;
 	}
 
-	//“ü—ÍƒŒƒCƒAƒEƒg‚Ìì¬
+	//å…¥åŠ›ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã®ä½œæˆ
 	D3D11_INPUT_ELEMENT_DESC layout[] = {
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
 		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
@@ -344,7 +343,7 @@ void Renderer::CreateVertexShader(ID3D11VertexShader** vertexShader, ID3D11Input
 
 	hr = m_device->CreateInputLayout(layout, numElements, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), inputLayout);
 	if (FAILED(hr)) {
-		ErrorMessage(L"“ü—ÍƒŒƒCƒAƒEƒg‚Ìì¬‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"å…¥åŠ›ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã®ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		shaderBlob->Release();
 		return;
 	}
@@ -357,17 +356,17 @@ void Renderer::CreatePixelShader(ID3D11PixelShader** pixelShader, std::wstring f
 	ID3DBlob* shaderBlob = nullptr;
 	ID3DBlob* errorBlob = nullptr;
 
-	//CSOƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‚İ
+	//CSOãƒ•ã‚¡ã‚¤ãƒ«ã®èª­ã¿è¾¼ã¿
 	hr = D3DReadFileToBlob(fileName.c_str(), &shaderBlob);
 	if (FAILED(hr)) {
-		ErrorMessage(L"CSOƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‚İ‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"CSOãƒ•ã‚¡ã‚¤ãƒ«ã®èª­ã¿è¾¼ã¿ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return;
 	}
 
-	//ƒVƒF[ƒ_[‚Ìì¬
+	//ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®ä½œæˆ
 	hr = m_device->CreatePixelShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, pixelShader);
 	if (FAILED(hr)) {
-		ErrorMessage(L"ƒsƒNƒZƒ‹ƒVƒF[ƒ_[‚Ìì¬‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		shaderBlob->Release();
 		return;
 	}

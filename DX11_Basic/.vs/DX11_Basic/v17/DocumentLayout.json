@@ -1,0 +1,141 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{58374749-0EF8-4092-9C4A-2E67502D7194}|DX11_Basic.vcxproj|C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\Source\\DX11\\renderer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{58374749-0EF8-4092-9C4A-2E67502D7194}|DX11_Basic.vcxproj|solutionrelative:Source\\DX11\\renderer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{58374749-0EF8-4092-9C4A-2E67502D7194}|DX11_Basic.vcxproj|C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\Source\\manager.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{58374749-0EF8-4092-9C4A-2E67502D7194}|DX11_Basic.vcxproj|solutionrelative:Source\\manager.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{58374749-0EF8-4092-9C4A-2E67502D7194}|DX11_Basic.vcxproj|C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\Source\\sprite.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{58374749-0EF8-4092-9C4A-2E67502D7194}|DX11_Basic.vcxproj|solutionrelative:Source\\sprite.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{58374749-0EF8-4092-9C4A-2E67502D7194}|DX11_Basic.vcxproj|C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\Shader\\unlitTexturePS.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{58374749-0EF8-4092-9C4A-2E67502D7194}|DX11_Basic.vcxproj|solutionrelative:Shader\\unlitTexturePS.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{58374749-0EF8-4092-9C4A-2E67502D7194}|DX11_Basic.vcxproj|C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\Source\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{58374749-0EF8-4092-9C4A-2E67502D7194}|DX11_Basic.vcxproj|solutionrelative:Source\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{58374749-0EF8-4092-9C4A-2E67502D7194}|DX11_Basic.vcxproj|C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\Shader\\unlitColorVS.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{58374749-0EF8-4092-9C4A-2E67502D7194}|DX11_Basic.vcxproj|solutionrelative:Shader\\unlitColorVS.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{58374749-0EF8-4092-9C4A-2E67502D7194}|DX11_Basic.vcxproj|C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\Source\\main.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{58374749-0EF8-4092-9C4A-2E67502D7194}|DX11_Basic.vcxproj|solutionrelative:Source\\main.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{6324226f-61b6-4f28-92ee-18d4b5fe1e48}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "manager.cpp",
+              "DocumentMoniker": "C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\Source\\manager.cpp",
+              "RelativeDocumentMoniker": "Source\\manager.cpp",
+              "ToolTip": "C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\Source\\manager.cpp",
+              "RelativeToolTip": "Source\\manager.cpp",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAABEAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-05-19T05:42:03.494Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "renderer.cpp",
+              "DocumentMoniker": "C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\Source\\DX11\\renderer.cpp",
+              "RelativeDocumentMoniker": "Source\\DX11\\renderer.cpp",
+              "ToolTip": "C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\Source\\DX11\\renderer.cpp",
+              "RelativeToolTip": "Source\\DX11\\renderer.cpp",
+              "ViewState": "AgIAANsAAAAAAAAAAAAAAPcAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-05-19T05:41:54.517Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "unlitTexturePS.hlsl",
+              "DocumentMoniker": "C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\Shader\\unlitTexturePS.hlsl",
+              "RelativeDocumentMoniker": "Shader\\unlitTexturePS.hlsl",
+              "ToolTip": "C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\Shader\\unlitTexturePS.hlsl",
+              "RelativeToolTip": "Shader\\unlitTexturePS.hlsl",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002777|",
+              "WhenOpened": "2025-05-19T05:41:38.756Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "sprite.cpp",
+              "DocumentMoniker": "C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\Source\\sprite.cpp",
+              "RelativeDocumentMoniker": "Source\\sprite.cpp",
+              "ToolTip": "C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\Source\\sprite.cpp",
+              "RelativeToolTip": "Source\\sprite.cpp",
+              "ViewState": "AgIAABUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-05-19T05:41:26.756Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "unlitColorVS.hlsl",
+              "DocumentMoniker": "C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\Shader\\unlitColorVS.hlsl",
+              "RelativeDocumentMoniker": "Shader\\unlitColorVS.hlsl",
+              "ToolTip": "C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\Shader\\unlitColorVS.hlsl",
+              "RelativeToolTip": "Shader\\unlitColorVS.hlsl",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002777|",
+              "WhenOpened": "2025-05-19T05:40:31.147Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "main.h",
+              "DocumentMoniker": "C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\Source\\main.h",
+              "RelativeDocumentMoniker": "Source\\main.h",
+              "ToolTip": "C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\Source\\main.h",
+              "RelativeToolTip": "Source\\main.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-05-19T05:39:58.255Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "main.cpp",
+              "DocumentMoniker": "C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\Source\\main.cpp",
+              "RelativeDocumentMoniker": "Source\\main.cpp",
+              "ToolTip": "C:\\Users\\ths30712\\source\\DX11_base\\DX11_Basic\\Source\\main.cpp",
+              "RelativeToolTip": "Source\\main.cpp",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-05-19T05:39:55.796Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

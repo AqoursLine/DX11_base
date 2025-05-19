@@ -10,6 +10,9 @@ void main(in VS_INPUT In, out PS_INPUT Out)
 	//頂点座標を行列で変換
 	Out.Position = mul(In.Position, wvp);
 	
+	//頂点座標をワールド行列で変換
+	Out.WorldPosition = mul(In.Position, WorldMatrix);
+	
 	//法線をそのまま渡す
 	Out.Normal = In.Normal;
 	
