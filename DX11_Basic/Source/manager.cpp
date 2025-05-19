@@ -21,6 +21,11 @@ bool Manager::Initialize() {
 		return false;
 	}
 
+	//if (!m_sprite->Initialize()) {
+	//	ErrorMessage(L"スプライトの初期化に失敗しました", E_FAIL);
+	//	return false;
+	//}
+
 	return true;
 }
 

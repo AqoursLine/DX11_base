@@ -62,9 +62,10 @@ bool Sprite::Initialize(std::wstring fileName) {
 	CreateShaderResourceView(RENDERER.GetDevice(), scratchImg.GetImages(), scratchImg.GetImageCount(), metadata, m_texture.GetAddressOf());
 	assert(m_texture);
 
+	//テクスチャの幅と高さをキャストして取得
 	//テクスチャの幅と高さを取得
-	UINT width = metadata.width;
-	UINT height = metadata.height;
+	UINT width = static_cast<UINT>(metadata.width);
+	UINT height = static_cast<UINT>(metadata.height);
 
 	//テクスチャの幅と高さを半分にする
 	float halfWidth = static_cast<float>(width) * 0.5f;
