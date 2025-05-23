@@ -1,5 +1,5 @@
-﻿#include "main.h"
-#include "DX11/renderer.h"
+﻿#include "../main.h"
+#include "renderer.h"
 #include "sprite.h"
 
 bool Sprite::Initialize() {
@@ -127,6 +127,9 @@ void Sprite::Draw(const Vector3& pos, const Vector3& rot, const Vector3& scale) 
 	RENDERER.GetDeviceContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0);
 	// ピクセルシェーダーをセット
 	RENDERER.GetDeviceContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0);
+
+	//デフォルトのサンプラーステートセット
+	RENDERER.SetSamplerState();
 
 	//2D行列設定
 	RENDERER.Set2DMatrix();

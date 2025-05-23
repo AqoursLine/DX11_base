@@ -1,6 +1,6 @@
-#include "main.h"
+#include "../main.h"
 #include "field.h"
-#include "DX11/renderer.h"
+#include "renderer.h"
 
 
 bool Field::Initialize(std::wstring fileName) {
@@ -72,6 +72,9 @@ void Field::Draw(const Vector3& pos, const Vector3& rot, const Vector3& scale) c
 	RENDERER.GetDeviceContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0);
 	// ピクセルシェーダーをセット
 	RENDERER.GetDeviceContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0);
+
+	//デフォルトサンプラーステートセット
+	RENDERER.SetSamplerState();
 
 	// 描画のための行列を設定
 	XMMATRIX worldMatrix = XMMatrixScaling(scale.x, scale.y, scale.z) *

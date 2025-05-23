@@ -1,9 +1,9 @@
 ﻿#include "main.h"
 #include "manager.h"
 #include "DX11/renderer.h"
-#include "sprite.h"
+#include "DX11/sprite.h"
 #include "camera.h"
-#include "field.h"
+#include "DX11/field.h"
 #include "System/input.h"
 
 bool Manager::m_isFinished = false;

@@ -174,15 +174,12 @@ bool Renderer::Initialize(HWND hWnd) {
 	samplerDesc.MaxAnisotropy = 4;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-	ID3D11SamplerState* samplerState = nullptr;
-	hr = m_device->CreateSamplerState(&samplerDesc, &samplerState);
+	hr = m_device->CreateSamplerState(&samplerDesc, m_samplerState.GetAddressOf());
 	if (FAILED(hr)) {
 		ErrorMessage(L"サンプラーステートの初期化に失敗しました。", hr);
 		return false;
 	}
-	m_deviceContext->PSSetSamplers(0, 1, &samplerState);
-	samplerState->Release();
-	
+	SetSamplerState();
 
 	//定数バッファの初期化
 	D3D11_BUFFER_DESC bufferDesc = {};
@@ -276,6 +273,10 @@ void Renderer::SetATCEnable(bool enable) {
 	} else {
 		m_deviceContext->OMSetBlendState(m_blendState.Get(), blendFactor, 0xffffffff);
 	}
+}
+
+void Renderer::SetSamplerState() {
+	m_deviceContext->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
 }
 
 void Renderer::Set2DMatrix() {

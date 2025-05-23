@@ -65,6 +65,8 @@ public:
 	void SetDepthStencilState(bool enable);
 	//ブレンドステート設定
 	void SetATCEnable(bool enable);
+	//デフォルトサンプラーステート設定
+	void SetSamplerState();
 
 	//2D用行列設定
 	void Set2DMatrix();
@@ -99,12 +101,19 @@ private:
 	ComPtr<ID3D11RenderTargetView> m_renderTargetView;
 	ComPtr<ID3D11DepthStencilView> m_depthStencilView;
 
+
+	//ブレンドステート
 	ComPtr<ID3D11BlendState> m_blendState;
 	ComPtr<ID3D11BlendState> m_blendStateATC;
 
+	//深度ステンシルステート
 	ComPtr<ID3D11DepthStencilState> m_depthStencilStateEnable;
 	ComPtr<ID3D11DepthStencilState> m_depthStencilStateDisable;
 
+	//サンプラーステート
+	ComPtr<ID3D11SamplerState> m_samplerState;
+
+	//コンスタントバッファ
 	ComPtr<ID3D11Buffer> m_worldBuffer;
 	ComPtr<ID3D11Buffer> m_viewBuffer;
 	ComPtr<ID3D11Buffer> m_projectionBuffer;
