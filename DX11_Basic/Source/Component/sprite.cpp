@@ -1,5 +1,5 @@
-﻿#include "../main.h"
-#include "renderer.h"
+﻿#include "main.h"
+#include "DX11/renderer.h"
 #include "sprite.h"
 
 bool Sprite::Initialize() {
@@ -130,6 +130,12 @@ void Sprite::Draw(const Vector3& pos, const Vector3& rot, const Vector3& scale) 
 
 	//デフォルトのサンプラーステートセット
 	RENDERER.SetSamplerState();
+
+	//マテリアルセット
+	MATERIAL material = {};
+	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.textureEnable = true;
+	RENDERER.SetMaterial(material);
 
 	//2D行列設定
 	RENDERER.Set2DMatrix();

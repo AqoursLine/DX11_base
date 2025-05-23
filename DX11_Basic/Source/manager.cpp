@@ -1,10 +1,12 @@
 ﻿#include "main.h"
 #include "manager.h"
 #include "DX11/renderer.h"
-#include "DX11/sprite.h"
-#include "camera.h"
-#include "DX11/field.h"
+#include "GameObject/camera.h"
 #include "System/input.h"
+#include "GameObject/world.h"
+#include "GameObject/tmp2D.h"
+#include "GameObject/fieldObject.h"
+#include "GameObject/player.h"
 
 bool Manager::m_isFinished = false;
 
@@ -17,23 +19,20 @@ Manager::~Manager() {
 bool Manager::Initialize() {
 	m_isFinished = false;
 
-	//スプライトの初期化
-	m_sprite = new Sprite();
-	if (!m_sprite->Initialize(L"Asset\\Texture\\yukino.png")) {
-		ErrorMessage(L"スプライトの初期化に失敗しました", E_FAIL);
-		return false;
-	}
+	//ワールド作成
+	m_world = new World();
+
+	//ゆきのん初期化
+	m_world->AddGameObject(new Temp2D());
+
+	//フィールドオブジェクト
+	m_world->AddGameObject(new FieldObject());
+
+	//プレイヤー
+	m_world->AddGameObject(new Player());
 
 	//カメラの初期化
-	m_camera = new Camera();
-	m_camera->Initialize();
-
-	//フィールドの初期化
-	m_field = new Field();
-	if (!m_field->Initialize(L"Asset\\Texture\\大崎甜花_ゲーミング.png")) {
-		ErrorMessage(L"スプライトの初期化に失敗しました", E_FAIL);
-		return false;
-	}
+	m_world->AddGameObject(new Camera());
 
 	//inputの初期化
 	Input::Init();
@@ -42,23 +41,9 @@ bool Manager::Initialize() {
 }
 
 void Manager::Finalize() {
-	if (m_sprite) {
-		m_sprite->Finalize();
-		delete m_sprite;
-		m_sprite = nullptr;
-	}
-
-	if (m_camera) {
-		m_camera->Finalize();
-		delete m_camera;
-		m_camera = nullptr;
-	}
-
-	if (m_field) {
-		m_field->Finalize();
-		delete m_field;
-		m_field = nullptr;
-	}
+	//ワールドの終了
+	m_world->Finalize();
+	delete m_world;
 
 	Input::Uninit();
 }
@@ -68,22 +53,17 @@ void Manager::Update(double dt) {
 	//Inputの更新
 	Input::Update();
 
-	//カメラの更新
-	m_camera->Update(dt);
+	//ワールドの更新
+	m_world->Update(dt);
+
 }
 
 void Manager::Draw() const {
 	//描画開始
 	RENDERER.BeginDraw();
 
-	//カメラの描画
-	m_camera->Draw();
-
-	//フィールドの描画
-	m_field->Draw(Vector3(0.0f, 0.0f, 0.0f), Vector3(0.0f, 0.0f, 0.0f), Vector3(16.0f, 1.0f, 9.0f));
-
-	//描画処理
-	m_sprite->Draw(Vector3(500.0f, 500.0f, 0.0f), Vector3(0.0f, 0.0f, 0.0f), Vector3(1.0f, 1.0f, 1.0f));
+	//ワールドの描画
+	m_world->Draw();
 
 	//描画終了
 	RENDERER.EndDraw();
@@ -94,6 +74,9 @@ bool Manager::CleanUp() {
 	if (m_isFinished) {
 		return true;
 	}
+
+	//ワールドのクリーン
+	m_world->CleanUp();
 
 	return false;
 }

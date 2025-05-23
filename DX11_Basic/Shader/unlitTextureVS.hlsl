@@ -19,5 +19,5 @@ void main( in VS_INPUT In, out PS_INPUT Out )
 	Out.TexCoord = In.TexCoord;
 	
 	//’¸“_ƒJƒ‰[‚ğ‚»‚Ì‚Ü‚Ü“n‚·
-	Out.Diffuse = In.Diffuse;
+	Out.Diffuse = In.Diffuse * Material.Diffuse;
 }

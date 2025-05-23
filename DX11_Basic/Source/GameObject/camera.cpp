@@ -4,9 +4,13 @@
 #include "System/input.h"
 
 //カメラクラス初期化
-void Camera::Initialize() {
+bool Camera::Initialize() {
 	//回転量をラジアン角で初期化
-	m_rotateSpeed = XMConvertToRadians(30.0f);
+	m_rotateSpeed = XMConvertToRadians(45.0f);
+
+	m_position = {0.0f, 2.0f, -5.0f}; //カメラ位置
+
+	return true;
 }
 
 //カメラクラス終了処理
@@ -89,6 +93,9 @@ void Camera::Draw() const {
 	);
 	//ビュー行列を設定
 	RENDERER.SetViewMatrix(view);
+}
+
+void Camera::CleanUp() {
 }
 
 //カメラクラスのベクトル計算

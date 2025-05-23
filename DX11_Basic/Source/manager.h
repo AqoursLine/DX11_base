@@ -1,8 +1,6 @@
 ﻿#pragma once
 
-class Sprite;
-class Camera;
-class Field;
+class World;
 
 class Manager {
 public:
@@ -22,8 +20,6 @@ private:
 	//終了したか
 	static bool m_isFinished;
 
-	Sprite* m_sprite = nullptr;
-	Camera* m_camera = nullptr;
-	Field* m_field = nullptr;
+	World* m_world;
 
 };

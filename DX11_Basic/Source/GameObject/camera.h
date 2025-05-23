@@ -1,14 +1,17 @@
 #pragma once
 
-class Camera {
+#include "gameObject.h"
+
+class Camera : public GameObject {
 public:
-	Camera() = default;
+	Camera() : GameObject(TYPE_CAMERA) {}
 	~Camera() = default;
 
-	virtual void Initialize();
-	virtual void Finalize();
-	virtual void Update(double deltaTime);
-	virtual void Draw() const;
+	virtual bool Initialize() override;
+	virtual void Finalize() override;
+	virtual void Update(double deltaTime) override;
+	virtual void Draw() const override;
+	virtual void CleanUp() override;
 
 protected:
 	void CalculateVector();
@@ -20,14 +23,11 @@ protected:
 	void MoveForward(bool isForward, double deltaTime);
 
 	//ˆÚ“®—Ê
-	float m_moveSpeed = 3.0f;
+	float m_moveSpeed = 5.0f;
 	//‰ñ“]—Ê
 	float m_rotateSpeed = 0.5f;
 
 private:
-	Vector3 m_position { 0.0f, 0.3f, -5.0f };
-	Vector3 m_rotation { 0.0f, 0.0f, 0.0f };
-
 	Vector3 m_up { 0.0f, 1.0f, 0.0f };
 	Vector3 m_right { 1.0f, 0.0f, 0.0f };
 	Vector3 m_forward { 0.0f, 0.0f, 1.0f };

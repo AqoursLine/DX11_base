@@ -1,6 +1,6 @@
-#include "../main.h"
+#include "main.h"
 #include "field.h"
-#include "renderer.h"
+#include "DX11/renderer.h"
 
 
 bool Field::Initialize(std::wstring fileName) {
@@ -75,6 +75,12 @@ void Field::Draw(const Vector3& pos, const Vector3& rot, const Vector3& scale) c
 
 	//デフォルトサンプラーステートセット
 	RENDERER.SetSamplerState();
+
+	//マテリアルセット
+	MATERIAL material = {};
+	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.textureEnable = true;
+	RENDERER.SetMaterial(material);
 
 	// 描画のための行列を設定
 	XMMATRIX worldMatrix = XMMatrixScaling(scale.x, scale.y, scale.z) *

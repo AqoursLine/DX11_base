@@ -3,7 +3,13 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include <assimp/matrix4x4.h>
+
+
+#ifdef _DEBUG
+#pragma comment (lib, "assimp-vc143-mtd.lib")
+#else
+#pragma comment (lib, "assimp-vc143-mt.lib")
+#endif // _DEBUG
 
 //モデル用マテリアル構造体
 struct MODEL_MATERIAL {
@@ -13,6 +19,18 @@ struct MODEL_MATERIAL {
 	float shininess;
 	ID3D11ShaderResourceView* texture;
 	std::string texturePath;
+
+	//マテリアルのハッシュキーを生成
+	std::string GenerateHashKey() const {
+		char buffer[512];
+		snprintf(buffer, sizeof(buffer),
+			"D:%.3f%.3f%.3f%.3f S:%.3f%.3f%.3f%.3f A:%.3f%.3f%.3f%.3f Sh:%.2f T:%s",
+			diffuse.x, diffuse.y, diffuse.z, diffuse.w,
+			specular.x, specular.y, specular.z, specular.w,
+			ambient.x, ambient.y, ambient.z, ambient.w,
+			shininess, texturePath.c_str());
+		return std::string(buffer);
+	}
 
 };
 
@@ -36,6 +54,14 @@ struct TEXTURE_CACHE_ENTRY {
 	TEXTURE_CACHE_ENTRY(ID3D11ShaderResourceView* srvPtr) : srv(srvPtr), referenceCount(1) {}
 };
 
+//マテリアルキャッシュエントリ
+struct MATERIAL_CACHE_ENTRY {
+	MODEL_MATERIAL material;
+	int referenceCount;
+	MATERIAL_CACHE_ENTRY() : referenceCount(0) {}
+	MATERIAL_CACHE_ENTRY(const MODEL_MATERIAL& mat) : material(mat), referenceCount(1) {}
+};
+
 class Model {
 public:
 	Model() = default;
@@ -44,9 +70,9 @@ public:
 	bool LoadModelFBX(const std::string& fileName);
 	void ReleaseModel();
 
-	void Draw() const;
+	void Draw(const Vector3& position, const Vector3& rotation, const Vector3& scale) const;
 
-	static void CleaeCache();
+	static void ClearCache();
 
 private:
 	//ノード処理
@@ -55,7 +81,7 @@ private:
 	void ProcessMesh(aiMesh* mesh, const aiScene* scene, const std::string& modelDirectory);
 
 	//マテリアルロード
-	MATERIAL LoadMaterial(aiMaterial* material, const aiScene* scene, const std::string& modeDirectory);
+	MODEL_MATERIAL LoadMaterial(aiMaterial* aiMat, const aiScene* scene, const std::string& modeDirectory);
 	//組み込みテクスチャをロード
 	ID3D11ShaderResourceView* LoadEmbeddedTexture(const aiTexture* embeddedTexture, int textureIndex);
 	//キャッシュを使用してテクスチャをロード
@@ -72,4 +98,11 @@ private:
 
 	//テクスチャパスリスト
 	std::vector<std::string> m_usedTexturePaths;
+
+	//マテリアルキャッシュ
+	static std::unordered_map<std::string, MATERIAL_CACHE_ENTRY> m_materialCache;
+
+	//マテリアルキーリスト
+	std::vector<std::string> m_usedMaterialKeys;
+
 };

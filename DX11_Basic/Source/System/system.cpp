@@ -1,7 +1,8 @@
-#include "../main.h"
+#include "main.h"
 #include "system.h"
-#include "../manager.h"
+#include "manager.h"
 #include "timer.h"
+#include "Component/model.h"
 
 //システム初期化
 bool System::Initialize() {
@@ -30,6 +31,10 @@ void System::Finalize() {
 		delete m_manager;
 		m_manager = nullptr;
 	}
+
+	//モデルのキャッシュをクリア
+	Model::ClearCache();
+
 	//タイマー終了
 	if (m_timer) {
 		m_timer->Stop();
