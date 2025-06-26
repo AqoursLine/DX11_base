@@ -3,7 +3,7 @@
 
 bool Player::Initialize() {
 	m_model = new Model();
-	if (!m_model->LoadModelFBX("Asset\\Model\\bear.fbx")) {
+	if (!m_model->LoadModelFBX("Asset\\Model\\TheHerta.fbx")) {
 		return false;
 	}
 
