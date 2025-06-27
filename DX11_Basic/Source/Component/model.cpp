@@ -307,7 +307,7 @@ MODEL_MATERIAL Model::LoadMaterial(aiMaterial* aiMat, const aiScene* scene, cons
 	//テクスチャパスを取得
 	aiString texturePath;
 	if (aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS) {
-		tmpMaterial.texturePath = texturePath.C_Str();	//テクスチャパスを取得
+		tmpMaterial.texturePath = texturePath.C_Str();	//テクスチャパスを保存
 	}
 
 	//マテリアルのハッシュキーを生成
@@ -328,15 +328,20 @@ MODEL_MATERIAL Model::LoadMaterial(aiMaterial* aiMat, const aiScene* scene, cons
 	//テクスチャをロード
 	if (!tmpMaterial.texturePath.empty()) {
 		//組み込みテクスチャかどうかを確認
-		if (tmpMaterial.texturePath[0] == '*') {
-			int textureIndex = std::atoi(&tmpMaterial.texturePath.c_str()[1]);
-			if (textureIndex < static_cast<int>(scene->mNumTextures)) {
-				//組み込みテクスチャをロード
-				newMaterial.texture = LoadEmbeddedTexture(scene->mTextures[textureIndex], textureIndex);
-				//失敗
-				if (!newMaterial.texture) {
-					ErrorMessage(L"組み込みテクスチャのロードに失敗しました。", E_FAIL);
+		UINT texnum = scene->mNumTextures;
+		if (texnum > 0) {
+			int textureIndex = 0;
+			for (textureIndex = 0; textureIndex < scene->mNumTextures; textureIndex++) {
+				if (strcmp(scene->mTextures[textureIndex]->mFilename.C_Str(), newMaterial.texturePath.c_str()) == 0) {
+					break;
 				}
+			}
+			aiMat->GetTextureCount(aiTextureType_DIFFUSE);	//テクスチャの数を取得
+			//組み込みテクスチャをロード
+			newMaterial.texture = LoadEmbeddedTexture(scene->mTextures[textureIndex], textureIndex);
+			//失敗
+			if (!newMaterial.texture) {
+				ErrorMessage(L"組み込みテクスチャのロードに失敗しました。", E_FAIL);
 			}
 		} else {
 			//外部テクスチャをロード
@@ -393,12 +398,11 @@ ID3D11ShaderResourceView* Model::LoadEmbeddedTexture(const aiTexture* embeddedTe
 
 	if (embeddedTexture->mHeight == 0) {
 		//圧縮されたテクスチャ形式
-
 		//フォーマットを判別
-		if (strncmp(reinterpret_cast<const char*>(embeddedTexture->pcData), "DDS", 4)) {
+		if (strncmp(reinterpret_cast<const char*>(embeddedTexture->achFormatHint), "DDS", 4) == 0) {
 			//DDS形式
 			hr = LoadFromDDSMemory((uint8_t*)embeddedTexture->pcData, embeddedTexture->mWidth, DDS_FLAGS_NONE, nullptr, image);
-		}else if (strncmp(reinterpret_cast<const char*>(embeddedTexture->pcData), "TGA", 4)) {
+		}else if (strncmp(reinterpret_cast<const char*>(embeddedTexture->achFormatHint), "TGA", 4) == 0) {
 			//TGA形式
 			hr = LoadFromTGAMemory((uint8_t*)embeddedTexture->pcData, embeddedTexture->mWidth, TGA_FLAGS_NONE, nullptr, image);
 		} else {

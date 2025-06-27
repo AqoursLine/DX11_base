@@ -3,13 +3,12 @@
 #include "gameObject.h"
 
 bool World::Initialize() {
-	// 追加待ちのGameObjectを追加する
-	SetGameObject();
-
 	// GameObjectの初期化
-	for (auto gameObject : m_gameObjects) {
-		if (!gameObject->Initialize()) {
-			return false;
+	for (auto& objects : m_gameObjects) {
+		for (auto& gameObject : objects) {
+			if (!gameObject->Initialize()) {
+				return false;
+			}
 		}
 	}
 
@@ -17,58 +16,45 @@ bool World::Initialize() {
 }
 
 void World::Finalize() {
-	for (auto gameObject : m_gameObjects) {
-		gameObject->Finalize();
-		delete gameObject;
+	for (auto& objects : m_gameObjects) {
+		for (auto& gameObject : objects) {
+			gameObject->Finalize();
+			delete gameObject;
+		}
+		objects.clear();
 	}
-
-	m_gameObjects.clear();
 }
 
 void World::Update(double deltaTime) {
-	for (auto gameObject : m_gameObjects) {
-		gameObject->Update(deltaTime);
+	for (auto& objects : m_gameObjects) {
+		for (auto& gameObject : objects) {
+			gameObject->Update(deltaTime);
+		}
 	}
-
-	//オブジェクトタイプ順にソート
-	m_gameObjects.sort([](const GameObject* a, const GameObject* b) {return a->GetType() < b->GetType(); });
 }
 
 void World::Draw() const {
-	for (auto gameObject : m_gameObjects) {
-		gameObject->Draw();
+	for (auto& objects : m_gameObjects) {
+		for (auto& gameObject : objects) {
+			gameObject->Draw();
+		}
 	}
 }
 
 void World::CleanUp() {
 	//isDestroyがtrueのGameObjectを削除する
-	for (auto it = m_gameObjects.begin(); it != m_gameObjects.end();) {
-		if ((*it)->IsDestroy()) {
-			delete *it;
-			it = m_gameObjects.erase(it);
-		}
-		else {
-			++it;
-		}
+	for (auto& objects : m_gameObjects) {
+		objects.remove_if([](GameObject* gameObject) {
+			return gameObject->IsDestroy();
+			});
 	}
-
-	SetGameObject();
 }
 
-void World::AddGameObject(GameObject* gameObject) {
+GameObject* World::AddGameObject(GameObject* gameObject, OBJECT_TYPE type) {
 	gameObject->SetWorld(this);
-	m_gameObjectsAddList.push_back(gameObject);
+	gameObject->Initialize();
+	m_gameObjects[type].push_back(gameObject);
+
+	return gameObject;
 }
 
-void World::SetGameObject() {
-	//追加待ちのGameObjectを追加する
-	for (auto lisObject : m_gameObjectsAddList) {
-		m_gameObjects.push_back(lisObject);
-	}
-	//追加待ちだったオブジェクトを初期化
-	for (auto obj : m_gameObjectsAddList) {
-		obj->Initialize();
-	}
-
-	m_gameObjectsAddList.clear();
-}

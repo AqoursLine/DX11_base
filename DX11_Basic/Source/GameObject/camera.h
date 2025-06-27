@@ -4,7 +4,7 @@
 
 class Camera : public GameObject {
 public:
-	Camera() : GameObject(TYPE_CAMERA) {}
+	Camera() = default;
 	~Camera() = default;
 
 	virtual bool Initialize() override;

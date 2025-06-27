@@ -23,16 +23,16 @@ bool Manager::Initialize() {
 	m_world = new World();
 
 	//ゆきのん初期化
-	m_world->AddGameObject(new Temp2D());
+	m_world->AddGameObject(new Temp2D(), TYPE_2D);
 
 	//フィールドオブジェクト
-	m_world->AddGameObject(new FieldObject());
+	m_world->AddGameObject(new FieldObject(), TYPE_3D);
 
 	//プレイヤー
-	m_world->AddGameObject(new Player());
+	m_world->AddGameObject(new Player(), TYPE_3D);
 
 	//カメラの初期化
-	m_world->AddGameObject(new Camera());
+	m_world->AddGameObject(new Camera(), TYPE_CAMERA);
 
 	//inputの初期化
 	Input::Init();

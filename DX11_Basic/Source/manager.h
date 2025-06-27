@@ -21,5 +21,4 @@ private:
 	static bool m_isFinished;
 
 	World* m_world;
-
 };

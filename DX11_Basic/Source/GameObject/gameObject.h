@@ -2,20 +2,12 @@
 
 #include "main.h"
 
-enum OBJECT_TYPE {
-	TYPE_NONE = 0,
-	TYPE_CAMERA,
-	TYPE_3D,
-	TYPE_2D,
-};
-
 class World;
 
 class GameObject {
 public:
 	//コンストラクタ
-	GameObject() = delete;
-	GameObject(OBJECT_TYPE type) : m_type(type) {}
+	GameObject() = default;
 
 	//デストラクタ
 	~GameObject() = default;
@@ -27,8 +19,6 @@ public:
 	virtual void CleanUp() {}
 
 	void SetWorld(World* world) { m_world = world; }
-
-	const OBJECT_TYPE GetType() const { return m_type; }
 
 	void SetActive(bool active) { isActive = active; }
 	bool IsActive() const { return isActive; }
@@ -44,8 +34,6 @@ public:
 	Vector3 GetScale() const { return m_scale; }
 
 protected:
-	OBJECT_TYPE m_type = TYPE_NONE;
-
 	Vector3 m_position = Vector3(0.0f, 0.0f, 0.0f);
 	Vector3 m_rotation = Vector3(0.0f, 0.0f, 0.0f);
 	Vector3 m_scale = Vector3(1.0f, 1.0f, 1.0f);

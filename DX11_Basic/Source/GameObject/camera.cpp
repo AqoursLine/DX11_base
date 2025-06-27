@@ -79,7 +79,7 @@ void Camera::Draw() const {
 	XMMATRIX projection = XMMatrixPerspectiveFovLH(
 		XMConvertToRadians(45.0f), //視野角
 		static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT), //アスペクト比
-		0.5f, //近くのクリッピング面
+		0.05f, //近くのクリッピング面
 		1000.0f //遠くのクリッピング面
 	);
 	//プロジェクション行列を設定

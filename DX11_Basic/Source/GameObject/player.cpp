@@ -8,6 +8,7 @@ bool Player::Initialize() {
 	}
 
 	m_scale = {1.0f, 1.0f, 1.0f};
+	m_rotation = {-(XM_PI * 0.5f),0.0f, 0.0f};
 
 	return true;
 }

@@ -4,7 +4,7 @@
 
 class Player : public GameObject {
 public:
-	Player() : GameObject(TYPE_3D) {}
+	Player() = default;
 	~Player() = default;
 
 	bool Initialize() override;

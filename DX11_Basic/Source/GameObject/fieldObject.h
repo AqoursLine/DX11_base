@@ -4,7 +4,7 @@
 
 class FieldObject : public GameObject {
 public:
-	FieldObject() : GameObject(TYPE_3D) {}
+	FieldObject() = default;
 	~FieldObject() = default;
 
 	bool Initialize() override;

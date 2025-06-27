@@ -7,7 +7,7 @@ bool FieldObject::Initialize() {
 		return false;
 	}
 
-	m_scale = {16.0f, 1.0f, 9.0f};
+	m_scale = {0.01f, 1.0f, 0.01f};
 
 	return true;
 }

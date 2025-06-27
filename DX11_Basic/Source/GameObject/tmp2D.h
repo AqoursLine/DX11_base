@@ -3,7 +3,7 @@
 
 class Temp2D : public GameObject {
 public:
-	Temp2D() : GameObject(TYPE_2D) {}
+	Temp2D() = default;
 	~Temp2D() = default;
 
 	bool Initialize() override;
@@ -13,5 +13,5 @@ public:
 	void CleanUp() override;
 
 private:
-	class Sprite* m_sprite;
+	class Sprite* m_sprite = nullptr;
 };
