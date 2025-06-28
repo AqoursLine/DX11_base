@@ -240,6 +240,9 @@ bool Renderer::Initialize(HWND hWnd) {
 	MATERIAL material = {};
 	material.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.shininess = 32.0f; // シャイニネスの値を設定
+
 	SetMaterial(material);
 
 	return true;
@@ -373,5 +376,25 @@ void Renderer::CreatePixelShader(ID3D11PixelShader** pixelShader, std::wstring f
 		return;
 	}
 
+	shaderBlob->Release();
+}
+
+void Renderer::CreateComputeShader(ID3D11ComputeShader** computeShader, std::wstring fileName) {
+	HRESULT hr = S_OK;
+	ID3DBlob* shaderBlob = nullptr;
+	ID3DBlob* errorBlob = nullptr;
+	//CSOファイルの読み込み
+	hr = D3DReadFileToBlob(fileName.c_str(), &shaderBlob);
+	if (FAILED(hr)) {
+		ErrorMessage(L"CSOファイルの読み込みに失敗しました。", hr);
+		return;
+	}
+	//シェーダーの作成
+	hr = m_device->CreateComputeShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, computeShader);
+	if (FAILED(hr)) {
+		ErrorMessage(L"コンピュートシェーダーの作成に失敗しました。", hr);
+		shaderBlob->Release();
+		return;
+	}
 	shaderBlob->Release();
 }

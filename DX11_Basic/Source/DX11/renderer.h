@@ -91,6 +91,8 @@ public:
 	void CreateVertexShader(ID3D11VertexShader** vertexShader, ID3D11InputLayout** inputLayout, std::wstring fileName);
 	//ピクセルシェーダー作成
 	void CreatePixelShader(ID3D11PixelShader** pixelShader, std::wstring fileName);
+	//コンピュートシェーダー作成
+	void CreateComputeShader(ID3D11ComputeShader** computeShader, std::wstring fileName);
 
 private:
 	ComPtr<IDXGISwapChain> m_swapChain;

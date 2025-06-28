@@ -48,6 +48,14 @@ cbuffer LightBuffer : register(b4)
 	LIGHT Light;
 };
 
+cbuffer CameraBuffer : register(b5)
+{
+	float4 CameraPosition; // カメラの位置
+	float4 CameraDirection; // カメラの方向
+	float4 CameraUp; // カメラの上方向
+	float4 CameraRight; // カメラの右方向
+};
+
 //頂点シェーダー入力構造体
 struct VS_INPUT
 {
