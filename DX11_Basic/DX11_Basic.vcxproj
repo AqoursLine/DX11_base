@@ -155,6 +155,7 @@
     <ClCompile Include="Source\System\input.cpp" />
     <ClCompile Include="Source\System\system.cpp" />
     <ClCompile Include="Source\System\timer.cpp" />
+    <ClCompile Include="Source\System\webtest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Component\field.h" />
@@ -174,6 +175,7 @@
     <ClInclude Include="Source\System\system.h" />
     <ClInclude Include="Source\System\timer.h" />
     <ClInclude Include="Source\System\vector3.h" />
+    <ClInclude Include="Source\System\webtest.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\common.hlsl">

@@ -1,5 +1,7 @@
 ﻿#pragma once
+//#define _WINSOCKAPI_ 
 
+#include <ixwebsocket/IXWebSocket.h>
 #include <windows.h>
 #include <iostream>
 #include <string>

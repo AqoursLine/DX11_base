@@ -75,6 +75,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	g_hWnd = hWnd;
 
+#ifdef _DEBUG
+	// デバッグ用のコンソールを作成
+	AllocConsole();
+
+	//標準出力ストリームをコンソールにリダイレクト
+	freopen_s(reinterpret_cast<FILE**>(stdout), "CONOUT$", "w", stdout);
+	freopen_s(reinterpret_cast<FILE**>(stderr), "CONOUT$", "w", stderr);
+
+#endif // _DEBUG
+
+
 	//DirectX11初期化
 	Renderer::CreateInstance();
 	RENDERER.Initialize(hWnd);
