@@ -14,9 +14,11 @@ bool GameWebSocketClient::Connect(const std::string& url) {
 	int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (result != 0) {
 		std::cout << "WSAStartup failed: " << result << std::endl;
-		return -1;
+		return false;
 	}
 	// WebSocketクライアントの初期化
+	m_client.setHandshakeTimeout(5); // タイムアウトを5秒に設定
+
 	m_url = url;
 	m_client.setUrl(m_url);
 
@@ -34,6 +36,8 @@ bool GameWebSocketClient::Connect(const std::string& url) {
 			std::cout << "Received message: " << msg->str << std::endl;
 		}
 		});
+
+	m_client.disableAutomaticReconnection(); // 自動再接続を無効化
 
 	m_client.start();
 

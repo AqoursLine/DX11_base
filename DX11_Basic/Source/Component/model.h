@@ -105,4 +105,8 @@ private:
 	//マテリアルキーリスト
 	std::vector<std::string> m_usedMaterialKeys;
 
+	//シェーダー
+	ID3D11VertexShader* m_vertexShader = nullptr;
+	ID3D11PixelShader* m_pixelShader = nullptr;
+	ID3D11InputLayout* m_inputLayout = nullptr;
 };

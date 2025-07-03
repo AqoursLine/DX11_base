@@ -228,6 +228,16 @@ bool Renderer::Initialize(HWND hWnd) {
 	m_deviceContext->PSSetConstantBuffers(4, 1, m_lightBuffer.GetAddressOf());
 	m_deviceContext->VSSetConstantBuffers(4, 1, m_lightBuffer.GetAddressOf());
 
+	//カメラバッファの作成
+	bufferDesc.ByteWidth = sizeof(XMFLOAT4);
+	hr = m_device->CreateBuffer(&bufferDesc, nullptr, m_cameraBuffer.GetAddressOf());
+	if (FAILED(hr)) {
+		ErrorMessage(L"カメラバッファの初期化に失敗しました。", hr);
+		return false;
+	}
+	m_deviceContext->PSSetConstantBuffers(5, 1, m_cameraBuffer.GetAddressOf());
+	//m_deviceContext->PSSetConstantBuffers(5, 1, m_cameraBuffer.GetAddressOf());
+
 	//ライト初期化
 	LIGHT light = {};
 	light.enable = true;
@@ -312,6 +322,13 @@ void Renderer::SetMaterial(const MATERIAL& material) {
 
 void Renderer::SetLight(const LIGHT& light) {
 	m_deviceContext->UpdateSubresource(m_lightBuffer.Get(), 0, nullptr, &light, 0, 0);
+}
+
+void Renderer::SetCameraPosition(const Vector3& position) {
+	XMFLOAT4 cameraPos = { position.x, position.y, position.z, 0.0f };
+	m_deviceContext->UpdateSubresource(m_cameraBuffer.Get(), 0, nullptr, &cameraPos, 0, 0);
+	m_deviceContext->PSSetConstantBuffers(5, 1, m_cameraBuffer.GetAddressOf());
+	m_deviceContext->VSSetConstantBuffers(5, 1, m_cameraBuffer.GetAddressOf());
 }
 
 void Renderer::CreateVertexShader(ID3D11VertexShader** vertexShader, ID3D11InputLayout** inputLayout, std::wstring fileName) {

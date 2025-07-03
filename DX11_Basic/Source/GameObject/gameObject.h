@@ -29,6 +29,19 @@ public:
 	void SetDestroy(bool destroy) { isDestroy = destroy; }
 	bool IsDestroy() const { return isDestroy; }
 
+	GameObject* SetPosition(const Vector3& position) {
+		m_position = position;
+		return this;
+	}
+	GameObject* SetRotation(const Vector3& rotation) {
+		m_rotation = rotation;
+		return this;
+	}
+	GameObject* SetScale(const Vector3& scale) {
+		m_scale = scale;
+		return this;
+	}
+
 	Vector3 GetPosition() const { return m_position; }
 	Vector3 GetRotation() const { return m_rotation; }
 	Vector3 GetScale() const { return m_scale; }

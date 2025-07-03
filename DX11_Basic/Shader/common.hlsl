@@ -48,6 +48,12 @@ cbuffer LightBuffer : register(b4)
 	LIGHT Light;
 };
 
+//カメラ位置バッファ
+cbuffer CameraPositionBuffer : register(b5)
+{
+	float4 CameraPosition; // カメラの位置
+};
+
 //頂点シェーダー入力構造体
 struct VS_INPUT
 {

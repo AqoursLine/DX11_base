@@ -37,6 +37,10 @@ bool Model::LoadModelFBX(const std::string& fileName) {
 	//ルートノードから処理を開始
 	ProcessNode(scene->mRootNode, scene, m_directory);
 
+	//シェーダーの作成
+	RENDERER.CreateVertexShader(&m_vertexShader, &m_inputLayout, L"Shader\\pixelLightingVS.cso");
+	RENDERER.CreatePixelShader(&m_pixelShader, L"Shader\\pixelLightingPS.cso");
+
 	return true;
 }
 
@@ -109,6 +113,13 @@ void Model::Draw(const Vector3& position, const Vector3& rotation, const Vector3
 		return;
 	}
 	RENDERER.GetDeviceContext()->PSSetSamplers(0, 1, &samplerState);	//サンプラーステートをセット
+
+	//入力レイアウトをセット
+	RENDERER.GetDeviceContext()->IASetInputLayout(m_inputLayout);	//入力レイアウトをセット
+	//頂点シェーダーをセット
+	RENDERER.GetDeviceContext()->VSSetShader(m_vertexShader, nullptr, 0);	//頂点シェーダーをセット
+	//ピクセルシェーダーをセット
+	RENDERER.GetDeviceContext()->PSSetShader(m_pixelShader, nullptr, 0);	//ピクセルシェーダーをセット
 
 	//メッシュを描画
 	for (const auto& mesh : m_meshes) {
@@ -330,7 +341,7 @@ MODEL_MATERIAL Model::LoadMaterial(aiMaterial* aiMat, const aiScene* scene, cons
 		//組み込みテクスチャかどうかを確認
 		UINT texnum = scene->mNumTextures;
 		if (texnum > 0) {
-			int textureIndex = 0;
+			unsigned int textureIndex = 0;
 			for (textureIndex = 0; textureIndex < scene->mNumTextures; textureIndex++) {
 				if (strcmp(scene->mTextures[textureIndex]->mFilename.C_Str(), newMaterial.texturePath.c_str()) == 0) {
 					break;

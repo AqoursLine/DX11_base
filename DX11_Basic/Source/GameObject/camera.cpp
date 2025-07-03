@@ -93,6 +93,9 @@ void Camera::Draw() const {
 	);
 	//ビュー行列を設定
 	RENDERER.SetViewMatrix(view);
+
+	//カメラ位置をレンダラーに設定
+	RENDERER.SetCameraPosition(m_position);
 }
 
 void Camera::CleanUp() {

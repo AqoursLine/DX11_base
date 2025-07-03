@@ -81,6 +81,8 @@ public:
 	void SetMaterial(const MATERIAL& material);
 	//ライト設定
 	void SetLight(const LIGHT& light);
+	//カメラ位置設定
+	void SetCameraPosition(const Vector3& position);
 
 	//デバイス取得
 	ID3D11Device* GetDevice() { return m_device.Get(); }
@@ -119,6 +121,7 @@ private:
 	ComPtr<ID3D11Buffer> m_projectionBuffer;
 	ComPtr<ID3D11Buffer> m_lightBuffer;
 	ComPtr<ID3D11Buffer> m_materialBuffer;
+	ComPtr<ID3D11Buffer> m_cameraBuffer;
 
 };
 
