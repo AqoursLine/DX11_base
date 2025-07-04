@@ -2,6 +2,8 @@
 
 class Timer;
 class Manager;
+class GameWebSocketClient;
+class Physics;
 
 class System {
 public:
@@ -12,6 +14,8 @@ public:
 	bool Excute();
 
 	Manager* GetManager() const { return m_manager; }
+	GameWebSocketClient* GetWebSocketClient() const { return m_webSocketClient; }
+	Physics* GetPhysics() const { return m_physics; }
 
 private:
 	static System* s_instance;
@@ -20,8 +24,8 @@ private:
 
 	Timer* m_timer = nullptr;
 	Manager* m_manager = nullptr;
-	class GameWebSocketClient* m_webSocketClient = nullptr; // WebSocketクライアントのポインタ
-
+	GameWebSocketClient* m_webSocketClient = nullptr; // WebSocketクライアントのポインタ
+	Physics* m_physics = nullptr; // Physicsクラスのポインタ
 public:
 	static System* CreateInstance() {
 		DestroyInstance();

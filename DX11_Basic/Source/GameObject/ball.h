@@ -2,17 +2,18 @@
 
 #include "gameObject.h"
 
-class FieldObject : public GameObject {
+class Ball : public GameObject {
 public:
-	FieldObject() = default;
-	~FieldObject() = default;
+	Ball() = default;
+	~Ball() = default;
 
 	bool Initialize() override;
 	void Finalize() override;
 	void Update(double deltaTime) override;
 	void Draw() const override;
-private:
-	class Field* m_field = nullptr;
 
+private:
+	class Model* m_model = nullptr;
 	class btRigidBody* m_body = nullptr; // 物理オブジェクトのポインタ
+
 };

@@ -1,5 +1,7 @@
 #include "fieldObject.h"
 #include "Component/field.h"
+#include "System/system.h"
+#include "System/physics.h"
 
 bool FieldObject::Initialize() {
 	m_field = new Field();
@@ -7,7 +9,14 @@ bool FieldObject::Initialize() {
 		return false;
 	}
 
-	m_scale = {0.01f, 1.0f, 0.01f};
+	m_scale = { 16.0f, 1.0f, 9.0f };
+
+	// 物理オブジェクトの作成
+	m_body = SYSTEM.GetPhysics()->CreateStaticBox(
+		m_position,
+		m_rotation,
+		m_scale
+	);
 
 	return true;
 }

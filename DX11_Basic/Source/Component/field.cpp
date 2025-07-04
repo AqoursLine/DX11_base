@@ -16,18 +16,18 @@ bool Field::Initialize(std::wstring fileName) {
 	assert(m_texture);
 
 	// テクスチャの半分の幅と高さを取得
-	float halfWidth = static_cast<float>(metadata.width) * 0.5f;
-	float halfHeight = static_cast<float>(metadata.height) * 0.5f;
+	float halfWidth = 0.5f;
+	float halfHeight = 0.5f;
 
 
 	//頂点データの作成
 	VERTEX_3D vertices[4] = {};
 
 	//三次元ポリゴンの座標を設定
-	vertices[0].position = XMFLOAT3(-halfWidth, 0.0f, halfHeight);
-	vertices[1].position = XMFLOAT3(halfWidth, 0.0f, halfHeight);
-	vertices[2].position = XMFLOAT3(-halfWidth, 0.0f, -halfHeight);
-	vertices[3].position = XMFLOAT3(halfWidth, 0.0f, -halfHeight);
+	vertices[0].position = XMFLOAT3(-halfWidth, 0.5f, halfHeight);
+	vertices[1].position = XMFLOAT3(halfWidth, 0.5f, halfHeight);
+	vertices[2].position = XMFLOAT3(-halfWidth, 0.5f, -halfHeight);
+	vertices[3].position = XMFLOAT3(halfWidth, 0.5f, -halfHeight);
 
 	vertices[0].normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	vertices[1].normal = XMFLOAT3(0.0f, 0.0f, 0.0f);

@@ -36,6 +36,16 @@ void Player::Update(double deltaTime) {
 		}
 	}
 
+	//デバッグ用に上下
+#ifdef _DEBUG
+	if (Input::GetKeyPress(KK_SPACE)) {
+		m_position.y += m_moveSpeed * static_cast<float>(deltaTime) * 0.1f;
+	} else if (Input::GetKeyPress(KK_LEFTSHIFT)) {
+		m_position.y -= m_moveSpeed * static_cast<float>(deltaTime) * 0.1f;
+	}
+#endif // _DEBUG
+
+
 	if (Input::GetKeyPress(KK_A)) {
 		m_rotation.y -= m_rotateSpeed * static_cast<float>(deltaTime);
 	} else if (Input::GetKeyPress(KK_D)) {
@@ -51,11 +61,6 @@ void Player::Update(double deltaTime) {
 		m_velocity.z = -30.0f; // 最小速度制限
 	}
 	m_position += forward * m_velocity.z * static_cast<float>(deltaTime);
-
-	std::cout << "Player Position: " << m_position.x << ", " << m_position.y << ", " << m_position.z << std::endl;
-	std::cout << "Player Velocity: " << m_velocity.x << ", " << m_velocity.y << ", " << m_velocity.z << std::endl;
-	std::cout << "Player Acceleration: " << m_acceleration.x << ", " << m_acceleration.y << ", " << m_acceleration.z << std::endl;
-	std::cout << "Player Rotation: " << m_rotation.x << ", " << m_rotation.y << ", " << m_rotation.z << std::endl;
 }
 
 void Player::Draw() const {

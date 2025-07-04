@@ -23,11 +23,22 @@ void Camera::Finalize() {
 
 //カメラクラス更新処理
 void Camera::Update(double deltaTime) {
+	static float ofy = 0.0f;
+	if (Input::GetKeyPress(KK_UP)) {
+		ofy += 0.1f; // 上に移動
+	}
+	if (Input::GetKeyPress(KK_DOWN)) {
+		ofy -= 0.1f; // 下に移動
+	}
+
 	auto player = SYSTEM.GetManager()->GetScene()->GetGameObject<Player>();
 
 	if (player) {
 		//プレイヤーの位置をカメラのターゲット位置に設定
 		m_targetPosition = player->GetPosition();
+
+		//カメラ回転分上を向く
+		m_targetPosition.y += ofy;
 
 		//カメラの位置をプレイヤーの向いてる方向の後ろに設定
 		Vector3 playerForward = player->GetForward();

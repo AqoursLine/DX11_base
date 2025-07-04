@@ -5,6 +5,7 @@
 #include "System/input.h"
 #include "GameObject/scene.h"
 #include "GameObject/tmp2D.h"
+#include "GameObject/ball.h"
 #include "GameObject/fieldObject.h"
 #include "GameObject/player.h"
 
@@ -33,6 +34,9 @@ bool Manager::Initialize() {
 
 	//カメラの初期化
 	m_scene->AddGameObject(new Camera(), TYPE_CAMERA);
+
+	//ボールの初期化
+	m_scene->AddGameObject(new Ball(), TYPE_3D);
 
 	//inputの初期化
 	Input::Init();
