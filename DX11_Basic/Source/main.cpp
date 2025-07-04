@@ -91,8 +91,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	RENDERER.Initialize(hWnd);
 
 	//システムクラス初期化
-	System* system = new System();
-	bool isSystemInitialized = system->Initialize();
+	System::CreateInstance();
+	bool isSystemInitialized = SYSTEM.Initialize();
 	if (!isSystemInitialized) {
 		ErrorMessage(L"システム初期化に失敗しました", E_FAIL);
 		return -1;
@@ -138,7 +138,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		while (elapsedTime >= frameTime) {
 			//フレーム時間を引く
 			elapsedTime -= frameTime;
-			if (system->Excute()) {
+			if (SYSTEM.Excute()) {
 				isLoop = false;
 				break;
 			}
@@ -146,8 +146,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	//システムクラス終了
-	system->Finalize();
-	delete system;
+	SYSTEM.Finalize();
+	//システムクラス破棄
+	System::DestroyInstance();
 
 	//DirectX11終了
 	RENDERER.Finalize();

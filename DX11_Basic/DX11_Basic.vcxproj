@@ -151,7 +151,7 @@
     <ClCompile Include="Source\GameObject\fieldObject.cpp" />
     <ClCompile Include="Source\GameObject\player.cpp" />
     <ClCompile Include="Source\GameObject\tmp2D.cpp" />
-    <ClCompile Include="Source\GameObject\world.cpp" />
+    <ClCompile Include="Source\GameObject\scene.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\manager.cpp" />
     <ClCompile Include="Source\System\input.cpp" />
@@ -169,7 +169,7 @@
     <ClInclude Include="Source\GameObject\gameObject.h" />
     <ClInclude Include="Source\GameObject\player.h" />
     <ClInclude Include="Source\GameObject\tmp2D.h" />
-    <ClInclude Include="Source\GameObject\world.h" />
+    <ClInclude Include="Source\GameObject\scene.h" />
     <ClInclude Include="Source\main.h" />
     <ClInclude Include="Source\manager.h" />
     <ClInclude Include="Source\System\input.h" />

@@ -91,10 +91,11 @@ void Model::Draw(const Vector3& position, const Vector3& rotation, const Vector3
 	RENDERER.GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	//ワールド行列を設定
-	XMMATRIX worldMatrix = XMMatrixIdentity();	//単位行列
-	worldMatrix *= XMMatrixScaling(scale.x, scale.y, scale.z);	//スケーリング
-	worldMatrix *= XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z);	//回転
-	worldMatrix *= XMMatrixTranslation(position.x, position.y, position.z);	//平行移動
+	XMMATRIX worldMatrix, scaleMatrix, rotMatrix, posMatrix;	//単位行列
+	scaleMatrix = XMMatrixScaling(scale.x, scale.y, scale.z);	//スケーリング
+	rotMatrix = XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z);	//回転
+	posMatrix = XMMatrixTranslation(position.x, position.y, position.z);	//平行移動
+	worldMatrix = scaleMatrix * rotMatrix * posMatrix;	//ワールド行列を計算
 	RENDERER.SetWorldMatrix(worldMatrix);	//ワールド行列をセット
 
 	//サンプラーステートをセット

@@ -1,12 +1,12 @@
 #include "main.h"
-#include "world.h"
+#include "scene.h"
 #include "gameObject.h"
 
-bool World::Initialize() {
+bool Scene::Initialize() {
 	// GameObject‚Ì‰Šú‰»
 	for (auto& objects : m_gameObjects) {
 		for (auto& gameObject : objects) {
-			if (!gameObject->Initialize()) {
+			if (!gameObject->InitializeBase()) {
 				return false;
 			}
 		}
@@ -15,7 +15,7 @@ bool World::Initialize() {
 	return true;
 }
 
-void World::Finalize() {
+void Scene::Finalize() {
 	for (auto& objects : m_gameObjects) {
 		for (auto& gameObject : objects) {
 			gameObject->Finalize();
@@ -25,23 +25,23 @@ void World::Finalize() {
 	}
 }
 
-void World::Update(double deltaTime) {
+void Scene::Update(double deltaTime) {
 	for (auto& objects : m_gameObjects) {
 		for (auto& gameObject : objects) {
-			gameObject->Update(deltaTime);
+			gameObject->UpdateBase(deltaTime);
 		}
 	}
 }
 
-void World::Draw() const {
+void Scene::Draw() {
 	for (auto& objects : m_gameObjects) {
 		for (auto& gameObject : objects) {
-			gameObject->Draw();
+			gameObject->DrawBase();
 		}
 	}
 }
 
-void World::CleanUp() {
+void Scene::CleanUp() {
 	//isDestroy‚ªtrue‚ÌGameObject‚ðíœ‚·‚é
 	for (auto& objects : m_gameObjects) {
 		objects.remove_if([](GameObject* gameObject) {
@@ -50,9 +50,7 @@ void World::CleanUp() {
 	}
 }
 
-GameObject* World::AddGameObject(GameObject* gameObject, OBJECT_TYPE type) {
-	gameObject->SetWorld(this);
-	gameObject->Initialize();
+GameObject* Scene::AddGameObject(GameObject* gameObject, OBJECT_TYPE type) {
 	m_gameObjects[type].push_back(gameObject);
 
 	return gameObject;

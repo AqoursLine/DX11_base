@@ -36,7 +36,7 @@
     <ClCompile Include="Source\System\system.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\GameObject\world.cpp">
+    <ClCompile Include="Source\GameObject\scene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\GameObject\camera.cpp">
@@ -92,7 +92,7 @@
     <ClInclude Include="Source\GameObject\gameObject.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\GameObject\world.h">
+    <ClInclude Include="Source\GameObject\scene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\GameObject\camera.h">

@@ -5,16 +5,39 @@ class Manager;
 
 class System {
 public:
-	System() = default;
 	~System() = default;
 
 	bool Initialize();
 	void Finalize();
 	bool Excute();
 
+	Manager* GetManager() const { return m_manager; }
+
 private:
+	static System* s_instance;
+	System() = default;
+
+
 	Timer* m_timer = nullptr;
 	Manager* m_manager = nullptr;
 	class GameWebSocketClient* m_webSocketClient = nullptr; // WebSocketクライアントのポインタ
-	bool m_isConnected = false;
+
+public:
+	static System* CreateInstance() {
+		DestroyInstance();
+
+		s_instance = new System();
+		return s_instance;
+	}
+	static System& GetInstance() {
+		return *s_instance;
+	}
+	static void DestroyInstance() {
+		if (s_instance) {
+			delete s_instance;
+			s_instance = nullptr;
+		}
+	}
 };
+
+#define SYSTEM System::GetInstance()

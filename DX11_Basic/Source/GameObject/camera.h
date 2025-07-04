@@ -14,8 +14,6 @@ public:
 	virtual void CleanUp() override;
 
 protected:
-	void CalculateVector();
-
 	//左右移動関数
 	void MoveSide(bool isRight, double deltaTime);
 
@@ -27,8 +25,10 @@ protected:
 	//回転量
 	float m_rotateSpeed = 0.5f;
 
-private:
 	Vector3 m_up { 0.0f, 1.0f, 0.0f };
 	Vector3 m_right { 1.0f, 0.0f, 0.0f };
 	Vector3 m_forward { 0.0f, 0.0f, 1.0f };
+
+	Vector3 m_targetPosition { 0.0f, 0.0f, 0.0f };
+	Vector3 m_offset { 0.0f, 3.0f, -10.0f }; // カメラのオフセット位置
 };

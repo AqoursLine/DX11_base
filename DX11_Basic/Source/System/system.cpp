@@ -9,6 +9,8 @@
 #include "input.h"
 #endif // _DEBUG
 
+// シングルトンインスタンスの初期化
+System* System::s_instance = nullptr;
 
 //システム初期化
 bool System::Initialize() {
@@ -29,10 +31,8 @@ bool System::Initialize() {
 	m_webSocketClient = new GameWebSocketClient();
 	//WebSocketクライアントの接続
 	if (!m_webSocketClient->Connect("ws://localhost:9002")) {
-		m_isConnected = false;
 		std::cerr << "WebSocket client connection failed." << std::endl;
 	} else {
-		m_isConnected = true;
 		std::cout << "WebSocket client connected successfully." << std::endl;
 	}
 

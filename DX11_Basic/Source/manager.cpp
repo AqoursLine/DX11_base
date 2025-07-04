@@ -3,7 +3,7 @@
 #include "DX11/renderer.h"
 #include "GameObject/camera.h"
 #include "System/input.h"
-#include "GameObject/world.h"
+#include "GameObject/scene.h"
 #include "GameObject/tmp2D.h"
 #include "GameObject/fieldObject.h"
 #include "GameObject/player.h"
@@ -20,19 +20,19 @@ bool Manager::Initialize() {
 	m_isFinished = false;
 
 	//ワールド作成
-	m_world = new World();
+	m_scene = new Scene();
 
 	//ゆきのん初期化
-	m_world->AddGameObject(new Temp2D(), TYPE_2D);
+	m_scene->AddGameObject(new Temp2D(), TYPE_2D);
 
 	//フィールドオブジェクト
-	m_world->AddGameObject(new FieldObject(), TYPE_3D);
+	m_scene->AddGameObject(new FieldObject(), TYPE_3D);
 
 	//プレイヤー
-	m_world->AddGameObject(new Player(), TYPE_3D);
+	m_scene->AddGameObject(new Player(), TYPE_3D);
 
 	//カメラの初期化
-	m_world->AddGameObject(new Camera(), TYPE_CAMERA);
+	m_scene->AddGameObject(new Camera(), TYPE_CAMERA);
 
 	//inputの初期化
 	Input::Init();
@@ -42,8 +42,8 @@ bool Manager::Initialize() {
 
 void Manager::Finalize() {
 	//ワールドの終了
-	m_world->Finalize();
-	delete m_world;
+	m_scene->Finalize();
+	delete m_scene;
 
 	Input::Uninit();
 }
@@ -54,16 +54,16 @@ void Manager::Update(double dt) {
 	Input::Update();
 
 	//ワールドの更新
-	m_world->Update(dt);
+	m_scene->Update(dt);
 
 }
 
-void Manager::Draw() const {
+void Manager::Draw() {
 	//描画開始
 	RENDERER.BeginDraw();
 
 	//ワールドの描画
-	m_world->Draw();
+	m_scene->Draw();
 
 	//描画終了
 	RENDERER.EndDraw();
@@ -76,7 +76,7 @@ bool Manager::CleanUp() {
 	}
 
 	//ワールドのクリーン
-	m_world->CleanUp();
+	m_scene->CleanUp();
 
 	return false;
 }
