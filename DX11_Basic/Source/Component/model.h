@@ -67,7 +67,7 @@ public:
 	Model() = default;
 	~Model() = default;
 
-	bool LoadModelFBX(const std::string& fileName);
+	bool LoadModelFBX(const std::string& fileName, const std::wstring& vertexShader = L"Shader\\pixelLightingVS.cso", const std::wstring& pixelShader = L"Shader\\pixelLightingPS.cso");
 	void ReleaseModel();
 
 	void Draw(const Vector3& position, const Vector3& rotation, const Vector3& scale) const;

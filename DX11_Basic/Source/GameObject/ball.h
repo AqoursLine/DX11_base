@@ -14,6 +14,4 @@ public:
 
 private:
 	class Model* m_model = nullptr;
-	class btRigidBody* m_body = nullptr; // 物理オブジェクトのポインタ
-
 };

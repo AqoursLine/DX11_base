@@ -11,7 +11,7 @@ std::unordered_map<std::string, MATERIAL_CACHE_ENTRY> Model::m_materialCache;
 
 
 //assimpでFBXを読み込むための設定
-bool Model::LoadModelFBX(const std::string& fileName) {
+bool Model::LoadModelFBX(const std::string& fileName, const std::wstring& vertexShader, const std::wstring& pixelShader) {
 	//ファイルパスからディレクトリパスを抽出
 	m_directory = fileName.substr(0, fileName.find_last_of("/\\"));
 
@@ -38,8 +38,8 @@ bool Model::LoadModelFBX(const std::string& fileName) {
 	ProcessNode(scene->mRootNode, scene, m_directory);
 
 	//シェーダーの作成
-	RENDERER.CreateVertexShader(&m_vertexShader, &m_inputLayout, L"Shader\\pixelLightingVS.cso");
-	RENDERER.CreatePixelShader(&m_pixelShader, L"Shader\\pixelLightingPS.cso");
+	RENDERER.CreateVertexShader(&m_vertexShader, &m_inputLayout, vertexShader);
+	RENDERER.CreatePixelShader(&m_pixelShader, pixelShader);
 
 	return true;
 }

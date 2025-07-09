@@ -62,4 +62,6 @@ void GameWebSocketClient::Disconnect() {
 	if (m_connected) {
 		m_client.stop();
 	}
+
+	WSACleanup(); // Winsockのクリーンアップ
 }

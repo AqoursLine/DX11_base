@@ -4,11 +4,11 @@
 
 bool Player::Initialize() {
 	m_model = new Model();
-	if (!m_model->LoadModelFBX("Asset\\Model\\sportcar3.fbx")) {
+	if (!m_model->LoadModelFBX("Asset\\Model\\TheHerta2.fbx")) {
 		return false;
 	}
 
-	m_scale = {0.01f, 0.01f, 0.01f};
+	m_scale = {1.0f, 1.0f, 1.0f};
 	m_rotation = {0.0f, 0.0f, 0.0f};
 
 	m_position.z = 2.0f;
@@ -19,6 +19,7 @@ bool Player::Initialize() {
 void Player::Finalize() {
 	if (m_model) {
 		m_model->ReleaseModel();
+		delete m_model;
 	}
 }
 

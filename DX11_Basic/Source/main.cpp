@@ -3,6 +3,10 @@
 #include "DX11/renderer.h"
 #include "System/system.h"
 
+#ifdef _DEBUG
+#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#endif // _DEBUG
+
 
 HWND g_hWnd = nullptr;
 
@@ -38,6 +42,8 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
 	std::wstring className = L"DirectX11";
 
 	//ウィンドウクラス作成
@@ -135,10 +141,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		elapsedTime += timer.GetDeltaTime();
 
 		//経過時間がフレームレートを超えたら
-		while (elapsedTime >= frameTime) {
+		if (elapsedTime >= frameTime) {
+
 			std::cout << "Frame Time:" << frameTime << ";" << "Frame Time: " << elapsedTime << " seconds" << std::endl;
 			//フレーム時間を引く
-			elapsedTime -= frameTime;
+			elapsedTime = 0.0;
 			if (SYSTEM.Excute()) {
 				isLoop = false;
 				break;
