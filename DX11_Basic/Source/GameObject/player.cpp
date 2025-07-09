@@ -19,6 +19,7 @@ bool Player::Initialize() {
 void Player::Finalize() {
 	if (m_model) {
 		m_model->ReleaseModel();
+		delete m_model;
 	}
 }
 
@@ -51,11 +52,6 @@ void Player::Update(double deltaTime) {
 		m_velocity.z = -30.0f; // ç≈è¨ë¨ìxêßå¿
 	}
 	m_position += forward * m_velocity.z * static_cast<float>(deltaTime);
-
-	std::cout << "Player Position: " << m_position.x << ", " << m_position.y << ", " << m_position.z << std::endl;
-	std::cout << "Player Velocity: " << m_velocity.x << ", " << m_velocity.y << ", " << m_velocity.z << std::endl;
-	std::cout << "Player Acceleration: " << m_acceleration.x << ", " << m_acceleration.y << ", " << m_acceleration.z << std::endl;
-	std::cout << "Player Rotation: " << m_rotation.x << ", " << m_rotation.y << ", " << m_rotation.z << std::endl;
 }
 
 void Player::Draw() const {

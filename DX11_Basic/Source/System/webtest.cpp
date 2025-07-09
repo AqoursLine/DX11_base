@@ -59,7 +59,5 @@ void GameWebSocketClient::SendMessage(const std::string& message) {
 }
 
 void GameWebSocketClient::Disconnect() {
-	if (m_connected) {
-		m_client.stop();
-	}
+	m_client.stop();
 }

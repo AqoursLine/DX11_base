@@ -47,10 +47,9 @@ bool Renderer::Initialize(HWND hWnd) {
 
 
 	//レンダーターゲットビューの初期化
-	ID3D11Texture2D* backBuffer = nullptr;
-	hr = m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBuffer);
-	m_device->CreateRenderTargetView(backBuffer, nullptr, m_renderTargetView.GetAddressOf());
-	backBuffer->Release();
+	ComPtr<ID3D11Texture2D> backBuffer;
+	hr = m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)backBuffer.GetAddressOf());
+	m_device->CreateRenderTargetView(backBuffer.Get(), nullptr, m_renderTargetView.GetAddressOf());
 
 	if (FAILED(hr)) {
 		ErrorMessage(L"レンダーターゲットビューの初期化に失敗しました。", hr);
@@ -69,8 +68,9 @@ bool Renderer::Initialize(HWND hWnd) {
 	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 	depthStencilDesc.CPUAccessFlags = 0;
 	depthStencilDesc.MiscFlags = 0;
-	ID3D11Texture2D* depthStencilBuffer = nullptr;
-	hr = m_device->CreateTexture2D(&depthStencilDesc, nullptr, &depthStencilBuffer);
+
+	ComPtr<ID3D11Texture2D> depthStencilBuffer;
+	hr = m_device->CreateTexture2D(&depthStencilDesc, nullptr, depthStencilBuffer.GetAddressOf());
 	if (FAILED(hr)) {
 		ErrorMessage(L"デプスステンシルバッファの初期化に失敗しました。", hr);
 		return false;
@@ -80,8 +80,7 @@ bool Renderer::Initialize(HWND hWnd) {
 	depthStencilViewDesc.Format = depthStencilDesc.Format;
 	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	depthStencilViewDesc.Flags = 0;
-	hr = m_device->CreateDepthStencilView(depthStencilBuffer, &depthStencilViewDesc, m_depthStencilView.GetAddressOf());
-	depthStencilBuffer->Release();
+	hr = m_device->CreateDepthStencilView(depthStencilBuffer.Get(), &depthStencilViewDesc, m_depthStencilView.GetAddressOf());
 	if (FAILED(hr)) {
 		ErrorMessage(L"デプスステンシルビューの初期化に失敗しました。", hr);
 		return false;
@@ -105,14 +104,13 @@ bool Renderer::Initialize(HWND hWnd) {
 	rasterizerDesc.DepthClipEnable = TRUE;
 	rasterizerDesc.MultisampleEnable = FALSE;
 
-	ID3D11RasterizerState* rasterizerState = nullptr;
-	hr = m_device->CreateRasterizerState(&rasterizerDesc, &rasterizerState);
+	ComPtr<ID3D11RasterizerState> rasterizerState;
+	hr = m_device->CreateRasterizerState(&rasterizerDesc, rasterizerState.GetAddressOf());
 	if (FAILED(hr)) {
 		ErrorMessage(L"ラスタライザーステートの初期化に失敗しました。", hr);
 		return false;
 	}
-	m_deviceContext->RSSetState(rasterizerState);
-	rasterizerState->Release();
+	m_deviceContext->RSSetState(rasterizerState.Get());
 
 	//ブレンドステートの初期化
 	D3D11_BLEND_DESC blendDesc = {};
@@ -333,11 +331,11 @@ void Renderer::SetCameraPosition(const Vector3& position) {
 
 void Renderer::CreateVertexShader(ID3D11VertexShader** vertexShader, ID3D11InputLayout** inputLayout, std::wstring fileName) {
 	HRESULT hr = S_OK;
-	ID3DBlob* shaderBlob = nullptr;
-	ID3DBlob* errorBlob = nullptr;
+	ComPtr<ID3DBlob> shaderBlob;
+	ComPtr<ID3DBlob> errorBlob;
 
 	//CSOファイルの読み込み
-	hr = D3DReadFileToBlob(fileName.c_str(), &shaderBlob);
+	hr = D3DReadFileToBlob(fileName.c_str(), shaderBlob.GetAddressOf());
 	if (FAILED(hr)) {
 		ErrorMessage(L"CSOファイルの読み込みに失敗しました。", hr);
 		return;
@@ -372,11 +370,11 @@ void Renderer::CreateVertexShader(ID3D11VertexShader** vertexShader, ID3D11Input
 
 void Renderer::CreatePixelShader(ID3D11PixelShader** pixelShader, std::wstring fileName) {
 	HRESULT hr = S_OK;
-	ID3DBlob* shaderBlob = nullptr;
-	ID3DBlob* errorBlob = nullptr;
+	ComPtr<ID3DBlob> shaderBlob;
+	ComPtr<ID3DBlob> errorBlob;
 
 	//CSOファイルの読み込み
-	hr = D3DReadFileToBlob(fileName.c_str(), &shaderBlob);
+	hr = D3DReadFileToBlob(fileName.c_str(), shaderBlob.GetAddressOf());
 	if (FAILED(hr)) {
 		ErrorMessage(L"CSOファイルの読み込みに失敗しました。", hr);
 		return;

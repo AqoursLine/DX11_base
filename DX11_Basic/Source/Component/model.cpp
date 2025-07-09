@@ -38,8 +38,8 @@ bool Model::LoadModelFBX(const std::string& fileName) {
 	ProcessNode(scene->mRootNode, scene, m_directory);
 
 	//シェーダーの作成
-	RENDERER.CreateVertexShader(&m_vertexShader, &m_inputLayout, L"Shader\\pixelLightingVS.cso");
-	RENDERER.CreatePixelShader(&m_pixelShader, L"Shader\\pixelLightingPS.cso");
+	RENDERER.CreateVertexShader(m_vertexShader.GetAddressOf(), m_inputLayout.GetAddressOf(), L"Shader\\pixelLightingVS.cso");
+	RENDERER.CreatePixelShader(m_pixelShader.GetAddressOf(), L"Shader\\pixelLightingPS.cso");
 
 	return true;
 }
@@ -116,11 +116,11 @@ void Model::Draw(const Vector3& position, const Vector3& rotation, const Vector3
 	RENDERER.GetDeviceContext()->PSSetSamplers(0, 1, &samplerState);	//サンプラーステートをセット
 
 	//入力レイアウトをセット
-	RENDERER.GetDeviceContext()->IASetInputLayout(m_inputLayout);	//入力レイアウトをセット
+	RENDERER.GetDeviceContext()->IASetInputLayout(m_inputLayout.Get());	//入力レイアウトをセット
 	//頂点シェーダーをセット
-	RENDERER.GetDeviceContext()->VSSetShader(m_vertexShader, nullptr, 0);	//頂点シェーダーをセット
+	RENDERER.GetDeviceContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0);	//頂点シェーダーをセット
 	//ピクセルシェーダーをセット
-	RENDERER.GetDeviceContext()->PSSetShader(m_pixelShader, nullptr, 0);	//ピクセルシェーダーをセット
+	RENDERER.GetDeviceContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0);	//ピクセルシェーダーをセット
 
 	//メッシュを描画
 	for (const auto& mesh : m_meshes) {

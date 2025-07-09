@@ -2,9 +2,13 @@
 #include "System/timer.h"
 #include "DX11/renderer.h"
 #include "System/system.h"
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
 
 
 HWND g_hWnd = nullptr;
+
+#define WNDOW_CLASS_NAME L"DirectX11Window"
 
 void ErrorMessage(std::wstring msg, HRESULT hr) {
 	//エラーメッセージを表示
@@ -38,7 +42,9 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-	std::wstring className = L"DirectX11";
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
+//	_CrtSetBreakAlloc(453);
 
 	//ウィンドウクラス作成
 	WNDCLASSEX wc = {};
@@ -52,7 +58,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	wc.hbrBackground = nullptr;
 	wc.lpszMenuName = nullptr;
-	wc.lpszClassName = className.c_str();
+	wc.lpszClassName = WNDOW_CLASS_NAME;
 	wc.hIconSm = nullptr;
 	
 	//ウィンドウクラス登録
@@ -63,17 +69,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
 
 	//ウィンドウ作成
-	HWND hWnd = CreateWindowEx(0, className.c_str(), L"とりあえず", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance, nullptr);
+	g_hWnd = CreateWindowEx(0, WNDOW_CLASS_NAME, L"とりあえず", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance, nullptr);
 
 	//COMライブラリ初期化
 	CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
 
-	//ウィンドウ表示
-	ShowWindow(hWnd, nCmdShow);
-	//ウィンドウ更新
-	UpdateWindow(hWnd);
+	//DirectX11初期化
+	Renderer::CreateInstance();
+	RENDERER.Initialize(g_hWnd);
 
-	g_hWnd = hWnd;
+	//ウィンドウ表示
+	ShowWindow(g_hWnd, nCmdShow);
+	//ウィンドウ更新
+	UpdateWindow(g_hWnd);
 
 #ifdef _DEBUG
 	// デバッグ用のコンソールを作成
@@ -83,12 +91,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	freopen_s(reinterpret_cast<FILE**>(stdout), "CONOUT$", "w", stdout);
 	freopen_s(reinterpret_cast<FILE**>(stderr), "CONOUT$", "w", stderr);
 
+	//コンソールが閉じる時にメインウィンドウも閉じるように設定
+	SetConsoleCtrlHandler([](DWORD ctrlType) -> BOOL {
+		if (ctrlType == CTRL_CLOSE_EVENT || ctrlType == CTRL_C_EVENT) {
+			DestroyWindow(g_hWnd);
+			return TRUE;
+		}
+		return FALSE;
+		}, TRUE);
+
 #endif // _DEBUG
-
-
-	//DirectX11初期化
-	Renderer::CreateInstance();
-	RENDERER.Initialize(hWnd);
 
 	//システムクラス初期化
 	System::CreateInstance();
@@ -135,9 +147,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		elapsedTime += timer.GetDeltaTime();
 
 		//経過時間がフレームレートを超えたら
-		while (elapsedTime >= frameTime) {
+		if (elapsedTime >= frameTime) {
+			std::cout << "Frame Time: " << elapsedTime << " seconds" << std::endl;
+
 			//フレーム時間を引く
-			elapsedTime -= frameTime;
+			elapsedTime = 0;
 			if (SYSTEM.Excute()) {
 				isLoop = false;
 				break;
@@ -155,7 +169,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	Renderer::DestroyInstance();
 
 	//ウィンドウ登録解除
-	UnregisterClass(className.c_str(), wc.hInstance);
+	UnregisterClass(WNDOW_CLASS_NAME, wc.hInstance);
 
 	//COMライブラリ終了
 	CoUninitialize();

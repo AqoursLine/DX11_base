@@ -33,3 +33,4 @@ void ErrorMessage(std::wstring msg, HRESULT hr);
 
 constexpr int SCREEN_WIDTH = 1920;
 constexpr int SCREEN_HEIGHT = 1080;
+

@@ -37,13 +37,19 @@ private:
 
 public:
 	/// シングルトンパターン
-	static void CreateInstance() {
-		DestroyInstance();
+	Renderer(const Renderer&) = delete; // コピーコンストラクタを削除
+	Renderer& operator=(const Renderer&) = delete; // コピー代入演算子を削除
+	Renderer(Renderer&&) = delete; // ムーブコンストラクタを削除
+	Renderer& operator=(Renderer&&) = delete; // ムーブ代入演算子を削除
 
-		s_instance = new Renderer();
+	static void CreateInstance() {
+		if (s_instance == nullptr) {
+			s_instance = new Renderer();
+		}
 	}
 	static void DestroyInstance() {
 		if (s_instance != nullptr) {
+			s_instance->Finalize(); // 既存のインスタンスを終了
 			delete s_instance;
 			s_instance = nullptr;
 		}

@@ -27,7 +27,7 @@ public:
 	}
 private:
 	ix::WebSocket m_client;
-	bool m_connected;
+	bool m_connected = false;
 	std::string m_url;
 };
 
