@@ -1,6 +1,6 @@
 #include "main.h"
 #include "field.h"
-#include "DX11/renderer.h"
+#include "renderer.h"
 
 
 bool Field::Initialize(std::wstring fileName) {

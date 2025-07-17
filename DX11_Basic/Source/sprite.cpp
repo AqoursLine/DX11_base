@@ -1,5 +1,5 @@
 ﻿#include "main.h"
-#include "DX11/renderer.h"
+#include "renderer.h"
 #include "sprite.h"
 
 bool Sprite::Initialize() {
@@ -63,12 +63,9 @@ bool Sprite::Initialize(std::wstring fileName) {
 	assert(m_texture);
 
 	//テクスチャの幅と高さを取得
-	UINT width = static_cast<UINT>(metadata.width);
-	UINT height = static_cast<UINT>(metadata.height);
-
 	//テクスチャの幅と高さを半分にする
-	float halfWidth = static_cast<float>(width) * 0.5f;
-	float halfHeight = static_cast<float>(height) * 0.5f;
+	float halfWidth = 0.5f;
+	float halfHeight = 0.5f;
 
 	//頂点データの作成
 	VERTEX_3D vertices[4] = {};

@@ -12,6 +12,7 @@ public:
 	void Update(double deltaTime) override;
 	void Draw() const override;
 
+	Vector3 GetVelocity() const { return m_velocity; }
 private:
 	class Model* m_model = nullptr;
 

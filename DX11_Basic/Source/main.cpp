@@ -1,7 +1,7 @@
 ﻿#include "main.h"
-#include "System/timer.h"
-#include "DX11/renderer.h"
-#include "System/system.h"
+#include "timer.h"
+#include "renderer.h"
+#include "system.h"
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 

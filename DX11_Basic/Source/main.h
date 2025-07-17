@@ -17,7 +17,7 @@ using Microsoft::WRL::ComPtr;
 #include <DirectXMath.h>
 using namespace DirectX;
 
-#include "DX11/DirectXTex.h"
+#include "DirectXTex.h"
 
 #ifdef _DEBUG
 #pragma comment (lib, "DirectXTex_Debug.lib")
@@ -26,7 +26,7 @@ using namespace DirectX;
 #endif // _DEBUG
 
 
-#include "System/vector3.h"
+#include "vector3.h"
 
 
 void ErrorMessage(std::wstring msg, HRESULT hr);

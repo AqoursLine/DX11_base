@@ -1,5 +1,5 @@
 #include "fieldObject.h"
-#include "Component/field.h"
+#include "field.h"
 
 bool FieldObject::Initialize() {
 	m_field = new Field();

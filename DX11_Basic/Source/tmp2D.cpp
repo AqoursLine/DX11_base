@@ -1,5 +1,5 @@
 #include "tmp2D.h"
-#include "Component/sprite.h"
+#include "sprite.h"
 
 bool Temp2D::Initialize() {
 	m_sprite = new Sprite();
@@ -10,6 +10,7 @@ bool Temp2D::Initialize() {
 
 	m_position = {200.0f, 200.0f, 0.0f};
 	m_rotation.z = XMConvertToRadians(45.0f);
+	m_scale = { 459.0f, 600.0f, 1.0f };
 
 	return true;
 }

@@ -1,5 +1,5 @@
 #include "main.h"
-#include "Dx11/renderer.h"
+#include "renderer.h"
 #include "model.h"
 #include <fstream>
 

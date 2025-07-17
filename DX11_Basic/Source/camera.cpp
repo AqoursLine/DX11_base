@@ -1,11 +1,11 @@
 #include "main.h"
 #include "camera.h"
-#include "DX11/renderer.h"
-#include "System/input.h"
-#include "System/system.h"
+#include "renderer.h"
+#include "input.h"
+#include "system.h"
 #include "manager.h"
-#include "GameObject/player.h"
-#include "GameObject/scene.h"
+#include "player.h"
+#include "scene.h"
 
 //カメラクラス初期化
 bool Camera::Initialize() {
@@ -26,12 +26,14 @@ void Camera::Update(double deltaTime) {
 	auto player = SYSTEM.GetManager()->GetScene()->GetGameObject<Player>();
 
 	if (player) {
+		auto oldposition = m_targetPosition;
+
 		//プレイヤーの位置をカメラのターゲット位置に設定
 		m_targetPosition = player->GetPosition();
 
 		//カメラの位置をプレイヤーの向いてる方向の後ろに設定
-		Vector3 playerForward = player->GetForward();
-		m_position = player->GetPosition() + playerForward * m_offset.z + Vector3(0.0f, m_offset.y, 0.0f);
+		Vector3 forward = player->GetVelocity();
+		m_position = m_targetPosition + (-forward + m_offset);
 
 	} else {
 		//プレイヤーが見つからない場合はデフォルトのターゲット位置

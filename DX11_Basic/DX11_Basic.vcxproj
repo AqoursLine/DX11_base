@@ -105,12 +105,12 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>Library\webrtc\include;Source;Library\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Library\cri\include;Library\webrtc\include;Source;Library\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>Library\webrtc\lib;Library;Library/assimp/build/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>Library\cri\libs\x64;Library\webrtc\lib;Library;Library/assimp/build/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <DelayLoadDLLs>assimp-vc143-mtd.dll</DelayLoadDLLs>
     </Link>
     <FxCompile>
@@ -127,14 +127,14 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>Library\webrtc\include;Source;Library\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Library\cri\include;Library\webrtc\include;Source;Library\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>Library\webrtc\lib;Library;Library/assimp/build/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>Library\cri\libs\x64;Library\webrtc\lib;Library;Library/assimp/build/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <DelayLoadDLLs>assimp-vc143-mt.dll</DelayLoadDLLs>
     </Link>
     <FxCompile>
@@ -142,43 +142,6 @@
       <ObjectFileOutput>Shader\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="Source\Component\field.cpp" />
-    <ClCompile Include="Source\Component\model.cpp" />
-    <ClCompile Include="Source\Component\sprite.cpp" />
-    <ClCompile Include="Source\DX11\renderer.cpp" />
-    <ClCompile Include="Source\GameObject\camera.cpp" />
-    <ClCompile Include="Source\GameObject\fieldObject.cpp" />
-    <ClCompile Include="Source\GameObject\player.cpp" />
-    <ClCompile Include="Source\GameObject\tmp2D.cpp" />
-    <ClCompile Include="Source\GameObject\scene.cpp" />
-    <ClCompile Include="Source\main.cpp" />
-    <ClCompile Include="Source\manager.cpp" />
-    <ClCompile Include="Source\System\input.cpp" />
-    <ClCompile Include="Source\System\system.cpp" />
-    <ClCompile Include="Source\System\timer.cpp" />
-    <ClCompile Include="Source\System\webtest.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Source\Component\field.h" />
-    <ClInclude Include="Source\Component\model.h" />
-    <ClInclude Include="Source\Component\sprite.h" />
-    <ClInclude Include="Source\DX11\renderer.h" />
-    <ClInclude Include="Source\GameObject\camera.h" />
-    <ClInclude Include="Source\GameObject\fieldObject.h" />
-    <ClInclude Include="Source\GameObject\gameObject.h" />
-    <ClInclude Include="Source\GameObject\player.h" />
-    <ClInclude Include="Source\GameObject\tmp2D.h" />
-    <ClInclude Include="Source\GameObject\scene.h" />
-    <ClInclude Include="Source\main.h" />
-    <ClInclude Include="Source\manager.h" />
-    <ClInclude Include="Source\System\input.h" />
-    <ClInclude Include="Source\System\keybordEnum.h" />
-    <ClInclude Include="Source\System\system.h" />
-    <ClInclude Include="Source\System\timer.h" />
-    <ClInclude Include="Source\System\vector3.h" />
-    <ClInclude Include="Source\System\webtest.h" />
-  </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\common.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -228,6 +191,50 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Shader\%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Shader\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\camera.cpp" />
+    <ClCompile Include="Source\criAudioCapture.cpp" />
+    <ClCompile Include="Source\field.cpp" />
+    <ClCompile Include="Source\fieldObject.cpp" />
+    <ClCompile Include="Source\input.cpp" />
+    <ClCompile Include="Source\main.cpp" />
+    <ClCompile Include="Source\manager.cpp" />
+    <ClCompile Include="Source\model.cpp" />
+    <ClCompile Include="Source\player.cpp" />
+    <ClCompile Include="Source\renderer.cpp" />
+    <ClCompile Include="Source\scene.cpp" />
+    <ClCompile Include="Source\sprite.cpp" />
+    <ClCompile Include="Source\system.cpp" />
+    <ClCompile Include="Source\timer.cpp" />
+    <ClCompile Include="Source\tmp2D.cpp" />
+    <ClCompile Include="Source\webtest.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\avSynchronizer.h" />
+    <ClInclude Include="Source\camera.h" />
+    <ClInclude Include="Source\criAudioCapture.h" />
+    <ClInclude Include="Source\DirectXTex.h" />
+    <ClInclude Include="Source\field.h" />
+    <ClInclude Include="Source\fieldObject.h" />
+    <ClInclude Include="Source\gameObject.h" />
+    <ClInclude Include="Source\input.h" />
+    <ClInclude Include="Source\keybordEnum.h" />
+    <ClInclude Include="Source\main.h" />
+    <ClInclude Include="Source\manager.h" />
+    <ClInclude Include="Source\model.h" />
+    <ClInclude Include="Source\player.h" />
+    <ClInclude Include="Source\renderer.h" />
+    <ClInclude Include="Source\scene.h" />
+    <ClInclude Include="Source\sprite.h" />
+    <ClInclude Include="Source\system.h" />
+    <ClInclude Include="Source\timer.h" />
+    <ClInclude Include="Source\tmp2D.h" />
+    <ClInclude Include="Source\vector3.h" />
+    <ClInclude Include="Source\webtest.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\DirectXTex.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

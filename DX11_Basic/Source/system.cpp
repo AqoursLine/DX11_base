@@ -2,7 +2,7 @@
 #include "system.h"
 #include "manager.h"
 #include "timer.h"
-#include "Component/model.h"
+#include "model.h"
 #include "webtest.h"
 
 #ifdef _DEBUG

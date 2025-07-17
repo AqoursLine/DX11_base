@@ -1,12 +1,12 @@
 ﻿#include "main.h"
 #include "manager.h"
-#include "DX11/renderer.h"
-#include "GameObject/camera.h"
-#include "System/input.h"
-#include "GameObject/scene.h"
-#include "GameObject/tmp2D.h"
-#include "GameObject/fieldObject.h"
-#include "GameObject/player.h"
+#include "renderer.h"
+#include "camera.h"
+#include "input.h"
+#include "scene.h"
+#include "tmp2D.h"
+#include "fieldObject.h"
+#include "player.h"
 
 bool Manager::m_isFinished = false;
 

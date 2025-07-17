@@ -1,6 +1,6 @@
 #include "player.h"
-#include "Component/model.h"
-#include "System/input.h"
+#include "model.h"
+#include "input.h"
 
 bool Player::Initialize() {
 	m_model = new Model();
