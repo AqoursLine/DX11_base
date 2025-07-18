@@ -1,6 +1,7 @@
 #include "main.h"
 #include "scene.h"
 #include "gameObject.h"
+#include "texture.h"
 
 bool Scene::Initialize() {
 	// GameObjectの初期化
@@ -23,6 +24,8 @@ void Scene::Finalize() {
 		}
 		objects.clear();
 	}
+
+	Texture::ReleaseAll(); // テクスチャのキャッシュを解放
 }
 
 void Scene::Update(double deltaTime) {

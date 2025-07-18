@@ -28,3 +28,8 @@
 *.exe
 *.out
 *.app
+
+*/.vs/*
+*/x64/*
+*/DX11_Basic/*
+

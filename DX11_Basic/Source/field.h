@@ -21,5 +21,5 @@ private:
 	ComPtr<ID3D11InputLayout> m_inputLayout;
 
 	//テクスチャ
-	ComPtr<ID3D11ShaderResourceView> m_texture;
+	class Texture* m_texture = nullptr;
 };

@@ -86,7 +86,7 @@
     <ClCompile Include="Source\webtest.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\criAudioCapture.cpp">
+    <ClCompile Include="Source\texture.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -148,10 +148,7 @@
     <ClInclude Include="Source\webtest.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\avSynchronizer.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\criAudioCapture.h">
+    <ClInclude Include="Source\texture.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

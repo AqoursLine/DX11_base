@@ -68,7 +68,7 @@ public:
 		return *this;
 	}
 
-	void normalize() {
+	Vector3& normalize() {
 		float magSq = x * x + y * y + z * z;
 		if (magSq > 0.0f) {
 			float oneOver = 1.0f / sqrt(magSq);
@@ -76,5 +76,26 @@ public:
 			y *= oneOver;
 			z *= oneOver;
 		}
+		return *this;
+	}
+
+	float length() const {
+		return sqrt(x * x + y * y + z * z);
+	}
+
+	float lengthSq() const {
+		return x * x + y * y + z * z;
+	}
+
+	float dot(const Vector3& a) const {
+		return x * a.x + y * a.y + z * a.z;
+	}
+
+	Vector3 cross(const Vector3& a) const {
+		return Vector3(
+			y * a.z - z * a.y,
+			z * a.x - x * a.z,
+			x * a.y - y * a.x
+		);
 	}
 };

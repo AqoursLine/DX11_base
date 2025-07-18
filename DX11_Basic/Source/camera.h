@@ -20,15 +20,15 @@ protected:
 	//前後移動関数
 	void MoveForward(bool isForward, double deltaTime);
 
-	//移動量
-	float m_moveSpeed = 5.0f;
-	//回転量
-	float m_rotateSpeed = 0.5f;
+	//ターゲットを中心にしてm_rotationからカメラを回転させる関数
+	void RotateAroundTarget(double deltaTime);
 
-	Vector3 m_up { 0.0f, 1.0f, 0.0f };
-	Vector3 m_right { 1.0f, 0.0f, 0.0f };
-	Vector3 m_forward { 0.0f, 0.0f, 1.0f };
+
+	//移動量
+	float m_moveSpeed = 0.0f;
+	//回転量
+	float m_rotateSpeed = 0.0f;
 
 	Vector3 m_targetPosition { 0.0f, 0.0f, 0.0f };
-	Vector3 m_offset { 0.0f, 3.0f, -10.0f }; // カメラのオフセット位置
+	Vector3 m_offset { 0.0f, 0.0f, 0.0f }; // カメラのオフセット位置
 };

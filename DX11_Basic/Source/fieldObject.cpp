@@ -3,11 +3,11 @@
 
 bool FieldObject::Initialize() {
 	m_field = new Field();
-	if (!m_field->Initialize(L"Asset\\Texture\\‘åè“[‰Ô_ƒQ[ƒ~ƒ“ƒO.png")) {
+	if (!m_field->Initialize(L"Asset\\Texture\\race.jpg")) {
 		return false;
 	}
 
-	m_scale = {0.01f, 1.0f, 0.01f};
+	m_scale = {1024.0f, 1.0f, 640.0f};
 
 	return true;
 }

@@ -12,12 +12,15 @@ public:
 	void Update(double deltaTime) override;
 	void Draw() const override;
 
-	Vector3 GetVelocity() const { return m_velocity; }
 private:
 	class Model* m_model = nullptr;
 
-	float m_moveSpeed = 30.0f; // 移動速度
-	float m_rotateSpeed = 2.0f; // 回転速度
-	Vector3 m_velocity { 0.0f, 0.0f, 0.0f }; // 速度ベクトル
-	Vector3 m_acceleration { 0.0f, 0.0f, 0.0f }; // 加速度ベクトル
+	float m_moveSpeed = 0.0f; // 移動速度
+	float m_acceleration = 0.0f; // 加速度
+	float m_deceleration = 0.0f; // 減速度
+	float m_maxSpeed = 00.0f; // 最大速度
+
+	float m_sideForce = 0.0f; // 横移動の力
+	float m_sideAcceleration = 0.0f; // 横移動の加速度
+	float m_sideMaxForce = 0.0f; // 横移動の最大速度
 };

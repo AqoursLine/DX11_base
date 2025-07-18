@@ -148,7 +148,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		//経過時間がフレームレートを超えたら
 		if (elapsedTime >= frameTime) {
-			std::cout << "Frame Time: " << elapsedTime << " seconds" << std::endl;
+//			std::cout << "Frame Time: " << elapsedTime << " seconds" << std::endl;
 
 			//フレーム時間を引く
 			elapsedTime = 0;
