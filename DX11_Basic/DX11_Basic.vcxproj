@@ -230,6 +230,7 @@
     <ClInclude Include="Source\timer.h" />
     <ClInclude Include="Source\tmp2D.h" />
     <ClInclude Include="Source\vector3.h" />
+    <ClInclude Include="Source\vehicle.h" />
     <ClInclude Include="Source\webtest.h" />
   </ItemGroup>
   <ItemGroup>
