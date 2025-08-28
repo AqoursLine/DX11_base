@@ -12,6 +12,8 @@ struct VehicleParams {
 	float maxBrakingForce = 100.0f; //ブレーキの最大出力
 	float maxSteeringAngle = 0.3f; //ハンドルの最大回転角(rad)
 
+	float maxSpeed = 200.0f; //最大速度(km/h)
+
 	//車体設定
 	float chassisMass = 800.0f; //車体の質量
 	Vector3 chassisSize = { 2.0f, 0.6f, 4.0f }; //車体のサイズ
@@ -21,7 +23,7 @@ struct VehicleParams {
 	float wheelRadius = 0.5f; //ホイールの半径
 	float wheelWidth = 0.4f; //ホイールの幅
 	float wheelFriction = 1000.0f; //ホイールの摩擦係数
-	float wheelDamping = 0.2f; //ホイールのダンピング
+	float wheelDamping = 0.8f; //ホイールのダンピング
 	float wheelCompression = 0.84f; //ホイールの圧縮率
 	float suspensionStiffness = 20.0f; //サスペンションの硬さ
 	float suspensionRestLength = 0.6f; //サスペンションの伸び縮みの長さ
@@ -51,6 +53,7 @@ public:
 
 	//ビークル状態取得
 	[[nodiscard]] float GetCurrentSpeed() const; //現在の速度取得
+	[[nodiscard]] float GetMaxSpeed() const { return m_params.maxSpeed; } //最大速度取得
 	[[nodiscard]] float GetEngineForce() const { return m_currentEngineForce; }
 	[[nodiscard]] float GetSteeringValue() const { return m_currentSteering; }
 	[[nodiscard]] float GetBrekingForce() const {	return m_currentBrakingForce; }

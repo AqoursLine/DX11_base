@@ -33,8 +33,8 @@ bool Manager::Initialize() {
 	m_scene->AddGameObject(new Player(), TYPE_3D);
 
 	//カメラの初期化
-//	m_scene->AddGameObject(new Camera(), TYPE_CAMERA);
-	m_scene->AddGameObject(new FpsCamera(), TYPE_CAMERA);
+	m_scene->AddGameObject(new Camera(), TYPE_CAMERA);
+//	m_scene->AddGameObject(new FpsCamera(), TYPE_CAMERA);
 
 	//inputの初期化
 	Input::Init();

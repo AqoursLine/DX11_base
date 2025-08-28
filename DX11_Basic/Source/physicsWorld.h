@@ -21,7 +21,7 @@ public:
 	btDiscreteDynamicsWorld* GetDynamicsWorld() const { return m_dynamicsWorld.get(); }
 
 	//地面や静的オブジェクトの生成
-	void CreateGround(float width = 1000.0f, float depth = 1000.0, float y = -10.0f);
+	void CreateGround(float width = 1000.0f, float depth = 1000.0, float y = -3.0f);
 	void AddStaticMesh(btCollisionShape* shape, const btTransform& transform);
 
 	//デバッグ描画
