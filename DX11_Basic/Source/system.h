@@ -2,6 +2,7 @@
 
 class Timer;
 class Manager;
+class PhysicsWorld;
 
 class System {
 public:
@@ -12,6 +13,7 @@ public:
 	bool Excute();
 
 	Manager* GetManager() const { return m_manager; }
+	PhysicsWorld* GetPhysicsWorld() const { return m_physicsWorld; }
 
 private:
 	static System* s_instance;
@@ -21,6 +23,7 @@ private:
 	Timer* m_timer = nullptr;
 	Manager* m_manager = nullptr;
 	class GameWebSocketClient* m_webSocketClient = nullptr; // WebSocketクライアントのポインタ
+	PhysicsWorld* m_physicsWorld = nullptr;
 
 public:
 	static System* CreateInstance() {

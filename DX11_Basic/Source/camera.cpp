@@ -9,14 +9,11 @@
 
 //カメラクラス初期化
 bool Camera::Initialize() {
-	//回転量をラジアン角で初期化
-	m_rotateSpeed = XMConvertToRadians(45.0f);
-
 	m_offset = { 0.0f, 3.0f, -10.0f }; // カメラのオフセット位置
 	m_position = m_offset; // 初期位置をオフセット位置に設定
 
-	m_moveSpeed = 10.0f; // カメラの移動速度
-	m_rotateSpeed = 10.0f; // カメラの回転速度
+	m_moveSpeed = 20.0f; // カメラの移動速度
+	m_rotateSpeed = 3.0f; // カメラの回転速度
 
 	return true;
 }
@@ -98,6 +95,13 @@ void Camera::MoveForward(bool isForward, double deltaTime) {
 	m_position += direction * (isForward ? 1.0f : -1.0f) * m_moveSpeed * static_cast<float>(deltaTime);
 	//ターゲット位置も同様に移動
 	m_targetPosition += direction * (isForward ? 1.0f : -1.0f) * m_moveSpeed * static_cast<float>(deltaTime);
+}
+
+void Camera::MoveUpDown(bool isUp, double deltaTime) {
+	//移動
+	m_position.y += (isUp ? 1.0f : -1.0f) * m_moveSpeed * static_cast<float>(deltaTime);
+	//ターゲット位置も同様に移動
+	m_targetPosition.y += (isUp ? 1.0f : -1.0f) * m_moveSpeed * static_cast<float>(deltaTime);
 }
 
 void Camera::RotateAroundTarget(double deltaTime) {

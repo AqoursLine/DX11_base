@@ -7,6 +7,7 @@
 #include "tmp2D.h"
 #include "fieldObject.h"
 #include "player.h"
+#include "fpsCamera.h"
 
 bool Manager::m_isFinished = false;
 
@@ -32,7 +33,8 @@ bool Manager::Initialize() {
 	m_scene->AddGameObject(new Player(), TYPE_3D);
 
 	//カメラの初期化
-	m_scene->AddGameObject(new Camera(), TYPE_CAMERA);
+//	m_scene->AddGameObject(new Camera(), TYPE_CAMERA);
+	m_scene->AddGameObject(new FpsCamera(), TYPE_CAMERA);
 
 	//inputの初期化
 	Input::Init();

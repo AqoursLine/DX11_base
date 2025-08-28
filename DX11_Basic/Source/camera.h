@@ -20,6 +20,9 @@ protected:
 	//前後移動関数
 	void MoveForward(bool isForward, double deltaTime);
 
+	//上下移動関数
+	void MoveUpDown(bool isUp, double deltaTime);
+
 	//ターゲットを中心にしてm_rotationからカメラを回転させる関数
 	void RotateAroundTarget(double deltaTime);
 

@@ -4,6 +4,7 @@
 #include "timer.h"
 #include "model.h"
 #include "webtest.h"
+#include "physicsWorld.h"
 
 #ifdef _DEBUG
 #include "input.h"
@@ -14,6 +15,13 @@ System* System::s_instance = nullptr;
 
 //システム初期化
 bool System::Initialize() {
+	//物理ワールド初期化
+	m_physicsWorld = new PhysicsWorld();
+	if (!m_physicsWorld->Initialize()) {
+		ErrorMessage(L"物理ワールドの初期化に失敗しました", E_FAIL);
+		return false;
+	}
+
 	//マネージャークラス
 	m_manager = new Manager();
 	bool isInitialized = m_manager->Initialize();
@@ -59,6 +67,13 @@ void System::Finalize() {
 		m_timer = nullptr;
 	}
 
+	//物理ワールドの終了
+	if (m_physicsWorld) {
+		m_physicsWorld->Finalize();
+		delete m_physicsWorld;
+		m_physicsWorld = nullptr;
+	}
+
 	//WebSocketクライアントの終了
 	if (m_webSocketClient) {
 		m_webSocketClient->Disconnect();
@@ -70,6 +85,10 @@ void System::Finalize() {
 bool System::Excute() {
 	m_timer->Tick();
 
+	//物理演算更新
+	m_physicsWorld->StepSimulation(m_timer->GetDeltaTime());
+
+	//マネージャークラス更新
 	m_manager->Update(m_timer->GetDeltaTime());
 	m_manager->Draw();
 	if (m_manager->CleanUp()) {
