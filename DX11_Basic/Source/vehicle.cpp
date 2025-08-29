@@ -102,10 +102,12 @@ void Vehicle::SetSteeringValue(float steering) {
 void Vehicle::SetBrakingForce(float brake) {
 	m_currentBrakingForce = std::clamp(brake, 0.0f, m_params.maxBrakingForce);
 	if (m_vehicle) {
-		//全てのホイールにブレーキ力を適用
-		for (int i = 0; i < m_vehicle->getNumWheels(); i++) {
-			m_vehicle->setBrake(m_currentBrakingForce, i);
-		}
+		//後輪にブレーキ力を適用
+		m_vehicle->setBrake(m_currentBrakingForce, WheelIndex::REAR_LEFT);
+		m_vehicle->setBrake(m_currentBrakingForce, WheelIndex::REAR_RIGHT);
+		//前輪にもブレーキ力を適用(前輪ブレーキ)
+		m_vehicle->setBrake(m_currentBrakingForce * 0.5f, WheelIndex::FRONT_LEFT);
+		m_vehicle->setBrake(m_currentBrakingForce * 0.5f, WheelIndex::FRONT_RIGHT);
 	}
 }
 
@@ -122,6 +124,37 @@ btTransform Vehicle::GetWheelTransform(int wheelIndex) const {
 	}
 
 	return m_vehicle->getWheelTransformWS(wheelIndex);
+}
+
+Vector3 Vehicle::QuaternionToEuler(const btQuaternion& q) {
+	//角変数
+	float x = q.getX();
+	float y = q.getY();
+	float z = q.getZ();
+	float w = q.getW();
+
+	//Yaw
+	float siny_cosp = 2.0f * (w * z + x * y);
+	float cosy_cosp = 1.0f - 2.0f * (y * y + z * z);
+	float yaw = std::atan2(siny_cosp, cosy_cosp);
+
+	//Pitch
+	float sinp = 2.0f * (w * y - z * x);
+	float pitch;
+	if (std::abs(sinp) >= 1.0f) {
+		pitch = std::copysign(XM_PI / 2.0f, sinp);
+	} else {
+		pitch = std::asin(sinp);
+	}
+
+	//Roll
+	float sinr_cosp = 2.0f * (w * x + y * z);
+	float cosr_cosp = 1.0f - 2.0f * (x * x + y * y);
+	float roll = std::atan2(sinr_cosp, cosr_cosp);
+
+	//正規化して返す
+	return Vector3(WrapAngle(roll), WrapAngle(pitch), WrapAngle(yaw));
+
 }
 
 void Vehicle::CreateChassis() {
@@ -240,9 +273,10 @@ void Vehicle::UpdateTransform() {
 	btVector3 origin = trans.getOrigin();
 	m_position = ToVector3(origin);
 
-	//回転をクォータニオンからオイラー角に変換
+	//回転をオイラー角に変換
 	btQuaternion rotation = trans.getRotation();
 	btScalar roll, pitch, yaw;
-	rotation.getEulerZYX(yaw, pitch, roll);
-	m_rotation = Vector3(pitch, yaw, roll);
+	rotation.getEulerZYX(yaw, pitch, roll); // ZYX順にオイラー角を取得
+	m_rotation = { roll, pitch, yaw };
+
 }

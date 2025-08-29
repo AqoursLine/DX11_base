@@ -15,7 +15,7 @@ struct VehicleParams {
 	float maxSpeed = 200.0f; //最大速度(km/h)
 
 	//車体設定
-	float chassisMass = 800.0f; //車体の質量
+	float chassisMass = 1000.0f; //車体の質量
 	Vector3 chassisSize = { 2.0f, 0.6f, 4.0f }; //車体のサイズ
 	Vector3 localInertia = { 0.0f, 0.0f, 0.0f }; //車体の慣性モーメント
 
@@ -27,7 +27,7 @@ struct VehicleParams {
 	float wheelCompression = 0.84f; //ホイールの圧縮率
 	float suspensionStiffness = 20.0f; //サスペンションの硬さ
 	float suspensionRestLength = 0.6f; //サスペンションの伸び縮みの長さ
-	float rollInfluence = 0.1f; //ロールの影響度
+	float rollInfluence = 0.03f; //ロールの影響度
 
 	//ホイール接続点(ローカル座標)
 	Vector3 frontLeftWheelPos = { -1.0f, -0.3f, 1.5f };
@@ -96,17 +96,25 @@ protected:
 		WHEEL_COUNT = 4
 	};
 
+	[[nodiscard]] Vector3 ToVector3(const btVector3& v) const noexcept {
+		return Vector3(v.getX(), v.getY(), v.getZ());
+	}
+
+	//クォータニオンをオイラー角に変換
+	[[nodiscard]] Vector3 QuaternionToEuler(const btQuaternion& q);
+
 private:
 	void CreateChassis(); //車体の作成
 	void AddWheels(); //ホイールの追加
 	void UpdateTransform(); //物理世界からグラフィックス世界へ変換更新
+	inline float WrapAngle(float angle) const {
+		while (angle > XM_PI) angle -= XM_2PI;
+		while (angle <= -XM_PI) angle += XM_2PI;
+		return angle;
+	}
 
 	//Vector3とbtVector3の変換ヘルパー
 	[[nodiscard]] btVector3 ToBtVector3(const Vector3& v) const noexcept {
 		return btVector3(v.x, v.y, v.z);
-	}
-
-	[[nodiscard]] Vector3 ToVector3(const btVector3& v) const noexcept {
-		return Vector3(v.getX(), v.getY(), v.getZ());
 	}
 };

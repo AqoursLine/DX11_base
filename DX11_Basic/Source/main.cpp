@@ -10,6 +10,15 @@ HWND g_hWnd = nullptr;
 
 #define WNDOW_CLASS_NAME L"DirectX11Window"
 
+#ifdef _DEBUG
+//コンソールカーソルを左上に移動
+void MoveConsoleCursorToTopLeft() {
+	COORD coord = { 0, 0 };
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+}
+#endif // _DEBUG
+
+
 void ErrorMessage(std::wstring msg, HRESULT hr) {
 	//エラーメッセージを表示
 
@@ -130,6 +139,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//ループフラグ
 	bool isLoop = true;
 
+	int frameCount = 0;
+
 	//メインループ
 	while (isLoop) {
 		//メッセージ処理
@@ -156,6 +167,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				isLoop = false;
 				break;
 			}
+
+#ifdef _DEBUG
+			frameCount++;
+			if (frameCount > 3) {
+				MoveConsoleCursorToTopLeft();
+				frameCount = 0;
+			}
+#endif // _DEBUG
+
 		}
 	}
 

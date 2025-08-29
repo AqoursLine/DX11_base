@@ -50,4 +50,7 @@ private:
 	void SmoothInput(double deltaTime);
 	//エンジン力更新
 	[[nodiscard]] float CalculateRPM() const;
+
+	//タイヤ描画
+	void DrawWheels() const;
 };
