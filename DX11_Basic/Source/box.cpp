@@ -142,3 +142,45 @@ void Box::Draw(const Vector3& pos, const Vector3& rot, const Vector3& scale) con
 
 }
 
+// クォータニオン版
+void Box::Draw(const Vector3& pos, const Vector4& rot, const Vector3& scale) const {
+	// 入力レイアウトをセット
+	RENDERER.GetDeviceContext()->IASetInputLayout(m_inputLayout.Get());
+	// 頂点シェーダーをセット
+	RENDERER.GetDeviceContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0);
+	// ピクセルシェーダーをセット
+	RENDERER.GetDeviceContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0);
+
+	//デフォルトサンプラーステートセット
+	RENDERER.SetSamplerState();
+
+	//マテリアルセット
+	MATERIAL material = {};
+	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.textureEnable = false;
+	RENDERER.SetMaterial(material);
+
+	// クォータニオンを回転行列に変換
+	XMMATRIX rotMatrix = XMMatrixRotationQuaternion(XMVectorSet(rot.x, rot.y, rot.z, rot.w));
+	// ワールド行列を設定
+	XMMATRIX worldMatrix, scaleMatrix, posMatrix;	//単位行列
+	scaleMatrix = XMMatrixScaling(scale.x, scale.y, scale.z);	//スケーリング
+	posMatrix = XMMatrixTranslation(pos.x, pos.y, pos.z);	//平行移動
+	worldMatrix = scaleMatrix * rotMatrix * posMatrix;	//ワールド行列を計算
+	RENDERER.SetWorldMatrix(worldMatrix);	//ワールド行列をセット
+
+	// プリミティブトポロジをセット
+	RENDERER.GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// 頂点バッファをセット
+	UINT stride = sizeof(VERTEX_3D);
+	UINT offset = 0;
+	RENDERER.GetDeviceContext()->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
+
+	// インデックスバッファをセット
+	RENDERER.GetDeviceContext()->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+
+	// インデックスを使って描画
+	RENDERER.GetDeviceContext()->DrawIndexed(m_numIndices, 0, 0);
+}
+

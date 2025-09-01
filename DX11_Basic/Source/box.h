@@ -8,6 +8,7 @@ public:
 	bool Initialize();
 	void Finalize();
 	void Draw(const Vector3& pos, const Vector3& rot, const Vector3& scale) const;
+	void Draw(const Vector3& pos, const Vector4& rot, const Vector3& scale) const;
 
 private:
 	//頂点バッファ

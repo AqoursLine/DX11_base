@@ -273,10 +273,8 @@ void Vehicle::UpdateTransform() {
 	btVector3 origin = trans.getOrigin();
 	m_position = ToVector3(origin);
 
-	//回転をオイラー角に変換
+	//回転を取得
 	btQuaternion rotation = trans.getRotation();
-	btScalar roll, pitch, yaw;
-	rotation.getEulerZYX(yaw, pitch, roll); // ZYX順にオイラー角を取得
-	m_rotation = { roll, pitch, yaw };
+	m_quaternion = ToVector4(rotation);
 
 }

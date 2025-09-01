@@ -8,7 +8,7 @@
 
 struct VehicleParams {
 	//エンジン設定
-	float maxEngineForce = 3000.0f; //エンジンの最大出力
+	float maxEngineForce = 3500.0f; //エンジンの最大出力
 	float maxBrakingForce = 100.0f; //ブレーキの最大出力
 	float maxSteeringAngle = 0.3f; //ハンドルの最大回転角(rad)
 
@@ -96,9 +96,17 @@ protected:
 		WHEEL_COUNT = 4
 	};
 
+
+	//Vector3とbtVector3の変換ヘルパー
 	[[nodiscard]] Vector3 ToVector3(const btVector3& v) const noexcept {
 		return Vector3(v.getX(), v.getY(), v.getZ());
 	}
+
+	//Vector4とbtQuaternionの変換ヘルパー
+	[[nodiscard]] Vector4 ToVector4(const btQuaternion& q) const noexcept {
+		return Vector4(q.getX(), q.getY(), q.getZ(), q.getW());
+	}
+
 
 	//クォータニオンをオイラー角に変換
 	[[nodiscard]] Vector3 QuaternionToEuler(const btQuaternion& q);

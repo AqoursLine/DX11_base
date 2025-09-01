@@ -26,7 +26,7 @@ using namespace DirectX;
 #endif // _DEBUG
 
 
-#include "vector3.h"
+#include "gwVector.h"
 
 
 void ErrorMessage(std::wstring msg, HRESULT hr);

@@ -70,7 +70,10 @@ public:
 	bool LoadModelFBX(const std::string& fileName);
 	void ReleaseModel();
 
+	//描画関数
 	void Draw(const Vector3& position, const Vector3& rotation, const Vector3& scale) const;
+	//クォータニオン回転で描画
+	void Draw(const Vector3& position, const Vector4& rotation, const Vector3& scale) const;
 
 	static void ClearCache();
 

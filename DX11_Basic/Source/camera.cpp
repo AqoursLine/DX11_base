@@ -34,8 +34,8 @@ void Camera::Update(double deltaTime) {
 		m_targetPosition.y += 1.0f; // プレイヤーの高さを少し上げる
 
 		//カメラのオフセット位置を計算
-		Vector3 forward = player->GetForward();
-		m_position = m_targetPosition + forward * m_offset.z + player->GetUp() * m_offset.y;
+		Vector3 forward = player->GetForwardQ();
+		m_position = m_targetPosition + forward * m_offset.z + player->GetUpQ() * m_offset.y;
 
 	} else {
 		//プレイヤーが見つからない場合はデフォルトのターゲット位置
@@ -76,7 +76,7 @@ void Camera::MoveSide(bool isRight, double deltaTime) {
 
 	//地面に対して平行なベクトル
 	Vector3 direction = Vector3(right.x, 0.0f, right.z);
-	direction.normalize();
+	direction.Normalize();
 
 	//移動
 	m_position += direction * (isRight ? 1.0f : -1.0f) * m_moveSpeed * static_cast<float>(deltaTime);
@@ -89,7 +89,7 @@ void Camera::MoveForward(bool isForward, double deltaTime) {
 
 	//地面に対して平行なベクトル
 	Vector3 direction = Vector3(forward.x, 0.0f, forward.z);
-	direction.normalize();
+	direction.Normalize();
 
 	//移動
 	m_position += direction * (isForward ? 1.0f : -1.0f) * m_moveSpeed * static_cast<float>(deltaTime);

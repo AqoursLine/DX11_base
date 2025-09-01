@@ -82,20 +82,13 @@ void Player::Update(double deltaTime) {
 
 void Player::Draw() const {
 //	m_model->Draw(m_position, m_rotation, m_scale);
-	m_box->Draw(m_position, m_rotation, m_scale);
+	m_box->Draw(m_position, m_quaternion, m_scale);
 
 	DrawWheels();
 
 	//デバッグ表示
 	std::cout << "Speed: " << GetCurrentSpeed() << " km/h" << std::endl;
 	std::cout << "Position: (" << m_position.x << ", " << m_position.y << ", " << m_position.z << ")" << std::endl;
-
-	Vector3 degRot = {
-		XMConvertToDegrees(m_rotation.x),
-		XMConvertToDegrees(m_rotation.y),
-		XMConvertToDegrees(m_rotation.z)
-	};
-	std::cout << "Rotation: (" << degRot.x << ", " << degRot.y << ", " << degRot.z << ")" << std::endl;
 }
 
 void Player::UpdateInput(double deltaTime) {
@@ -194,10 +187,7 @@ void Player::DrawWheels() const {
 
 			Vector3 pos = ToVector3(btpos);
 
-			//回転をオイラー角に変換
-			btScalar roll, pitch, yaw;
-			btrot.getEulerZYX(yaw, pitch, roll);
-			Vector3 rot = Vector3(roll, pitch, yaw);
+			Vector4 rot = { btrot.getX(), btrot.getY(), btrot.getZ(), btrot.getW() };
 
 			Vector3 scale = { 0.5f, 1.0f, 1.0f };
 

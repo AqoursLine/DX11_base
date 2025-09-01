@@ -154,7 +154,7 @@
     <ClInclude Include="Source\tmp2D.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\vector3.h">
+    <ClInclude Include="Source\gwVector.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\webtest.h">

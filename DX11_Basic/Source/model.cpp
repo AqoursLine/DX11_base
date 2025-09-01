@@ -155,6 +155,72 @@ void Model::Draw(const Vector3& position, const Vector3& rotation, const Vector3
 	}
 }
 
+void Model::Draw(const Vector3& position, const Vector4& rotation, const Vector3& scale) const {
+	//クォータニオンを回転行列に変換
+	XMMATRIX rotMatrix = XMMatrixRotationQuaternion(XMVectorSet(rotation.x, rotation.y, rotation.z, rotation.w));
+	//プリミティブトポロジーを設定
+	RENDERER.GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	//ワールド行列を設定
+	XMMATRIX worldMatrix, scaleMatrix, posMatrix;	//単位行列
+	scaleMatrix = XMMatrixScaling(scale.x, scale.y, scale.z);	//スケーリング
+	posMatrix = XMMatrixTranslation(position.x, position.y, position.z);	//平行移動
+	worldMatrix = scaleMatrix * rotMatrix * posMatrix;	//ワールド行列を計算
+	RENDERER.SetWorldMatrix(worldMatrix);	//ワールド行列をセット
+
+	//サンプラーステートをセット
+	D3D11_SAMPLER_DESC samplerDesc = {};
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;	//線形フィルタリング
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;	//テクスチャ座標のラッピング
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;	//テクスチャ座標のラッピング
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;	//テクスチャ座標のラッピング
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;	//最大LOD
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;	//比較関数
+
+	ID3D11SamplerState* samplerState = nullptr;
+	HRESULT hr = RENDERER.GetDevice()->CreateSamplerState(&samplerDesc, &samplerState);
+	if (FAILED(hr)) {
+		ErrorMessage(L"サンプラーステートの作成に失敗しました。", hr);
+		return;
+	}
+	RENDERER.GetDeviceContext()->PSSetSamplers(0, 1, &samplerState);	//サンプラーステートをセット
+
+	//入力レイアウトをセット
+	RENDERER.GetDeviceContext()->IASetInputLayout(m_inputLayout.Get());	//入力レイアウトをセット
+	//頂点シェーダーをセット
+	RENDERER.GetDeviceContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0);	//頂点シェーダーをセット
+	//ピクセルシェーダーをセット
+	RENDERER.GetDeviceContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0);	//ピクセルシェーダーをセット
+
+	//メッシュを描画
+	for (const auto& mesh : m_meshes) {
+		//頂点バッファをセット
+		UINT stride = sizeof(VERTEX_3D);
+		UINT offset = 0;
+		RENDERER.GetDeviceContext()->IASetVertexBuffers(0, 1, &mesh.vertexBuffer, &stride, &offset);
+		//インデックスバッファをセット
+		RENDERER.GetDeviceContext()->IASetIndexBuffer(mesh.indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		//マテリアルをD3D用に変換してセット
+		MATERIAL mat = {};
+		mat.diffuse = mesh.material.diffuse;
+		mat.specular = mesh.material.specular;
+		mat.ambient = mesh.material.ambient;
+		mat.shininess = mesh.material.shininess;
+		mat.textureEnable = (mesh.material.texture != nullptr);
+		RENDERER.SetMaterial(mat);	//マテリアルをセット
+		//テクスチャをセット
+		if (mesh.material.texture) {
+			RENDERER.GetDeviceContext()->PSSetShaderResources(0, 1, &mesh.material.texture);	//テクスチャをセット
+		}
+		//描画
+		RENDERER.GetDeviceContext()->DrawIndexed(mesh.numIndices, 0, 0);
+	}
+
+	//サンプラーステートを解放
+	if (samplerState) {
+		samplerState->Release();	//サンプラーステートを解放
+	}
+}
+
 void Model::ClearCache() {
 	//テクスチャキャッシュをクリア
 	for (auto& it : m_textureCache) {
