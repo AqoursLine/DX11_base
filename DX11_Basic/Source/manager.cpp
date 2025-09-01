@@ -8,6 +8,7 @@
 #include "fieldObject.h"
 #include "player.h"
 #include "fpsCamera.h"
+#include "raceCourseManager.h"
 
 bool Manager::m_isFinished = false;
 
@@ -31,6 +32,9 @@ bool Manager::Initialize() {
 
 	//プレイヤー
 	m_scene->AddGameObject(new Player(), TYPE_3D);
+
+	//コースマネージャー
+	m_scene->AddGameObject(new RaceCourseManager(), TYPE_3D);
 
 	//カメラの初期化
 	m_scene->AddGameObject(new Camera(), TYPE_CAMERA);

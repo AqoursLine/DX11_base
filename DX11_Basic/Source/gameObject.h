@@ -8,7 +8,7 @@ public:
 	GameObject() = default;
 
 	//デストラクタ
-	~GameObject() = default;
+	virtual ~GameObject() = default;
 
 	bool InitializeBase()
 	{
