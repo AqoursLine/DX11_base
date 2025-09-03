@@ -5,6 +5,8 @@
 
 RaceCourseManager::RaceCourseManager()
 	: m_totalLength(0.0f), m_isClosed(false) {
+
+	m_renderer = std::make_unique<CourseRenderer>();
 }
 
 void RaceCourseManager::AddPoint(const Vector3& point, const Vector3& nextHandle, const Vector3& prevHandle) {
@@ -146,6 +148,10 @@ const BezierControlPoint& RaceCourseManager::GetControlPoint(int index) const {
 }
 
 bool RaceCourseManager::Initialize() {
+	AddPoint({ 0.0f, 0.0f, 0.0f }, { 10.0f, 0.0f, 0.0f }, { -10.0f, 0.0f, 0.0f });
+	AddPoint({ 20.0f, 0.0f, 0.0f }, { 30.0f, 0.0f, 10.0f }, { 10.0f, 0.0f, -10.0f });
+	AddPoint({ 40.0f, 0.0f, 20.0f }, { 50.0f, 0.0f, 30.0f }, { 30.0f, 0.0f, 10.0f });
+
 	//描画オブジェクト初期化
 	if (!m_renderer->Initialize()) {
 		return false;

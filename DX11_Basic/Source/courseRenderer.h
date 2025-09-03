@@ -1,6 +1,7 @@
 #pragma once
 
 class RaceCourseManager;
+struct VERTEX_3D;
 
 //コースを描画するクラス
 class CourseRenderer {

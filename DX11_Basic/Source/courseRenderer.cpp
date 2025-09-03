@@ -103,7 +103,7 @@ void CourseRenderer::UpdateLineMesh(const RaceCourseManager* course) {
 	//頂点・インデックスデータ生成
 	std::vector<VERTEX_3D> vertices;
 	std::vector<UINT> indices;
-	//GenerateLineVertices(course, vertices, indices);
+	GenerateLineVertices(course, vertices, indices);
 	//頂点バッファ作成
 	if (!CreateBuffer(m_lineVertexBuffer, vertices.data(), static_cast<UINT>(vertices.size() * sizeof(VERTEX_3D)), D3D11_BIND_VERTEX_BUFFER)) {
 		return;
@@ -120,7 +120,7 @@ void CourseRenderer::UpdatePointMesh(const RaceCourseManager* course) {
 	//頂点・インデックスデータ生成
 	std::vector<VERTEX_3D> vertices;
 	std::vector<UINT> indices;
-	//GeneratePointVertices(course, vertices, indices);
+	GeneratePointVertices(course, vertices, indices);
 	//頂点バッファ作成
 	if (!CreateBuffer(m_pointVertexBuffer, vertices.data(), static_cast<UINT>(vertices.size() * sizeof(VERTEX_3D)), D3D11_BIND_VERTEX_BUFFER)) {
 		return;
