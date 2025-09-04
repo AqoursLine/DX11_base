@@ -12,7 +12,7 @@ enum class VehicleState {
 //車両パラメータ
 struct VehicleParams {
 	//エンジン設定
-	float maxEngineForce = 3500.0f; //エンジンの最大出力
+	float maxEngineForce = 4500.0f; //エンジンの最大出力
 	float maxBrakingForce = 100.0f; //ブレーキの最大出力
 	float maxSteeringAngle = 0.5f; //ハンドルの最大回転角(rad)
 	float maxSpeed = 200.0f; //最大速度(km/h)

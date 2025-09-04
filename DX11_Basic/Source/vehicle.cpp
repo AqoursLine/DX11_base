@@ -216,7 +216,7 @@ void Vehicle::ApplyFriction(float deltaTime) {
 
 	//ドリフト中は摩擦を大幅に減らす
 	if (m_vehicleState == VehicleState::DRIFT_ACTIVE) {
-		frictionCoeff *= 0.6f;
+		frictionCoeff *= 0.8f;
 	}
 
 	//摩擦による減速を調整(高速域での過度な減速を防ぐ)
@@ -241,9 +241,9 @@ void Vehicle::ApplyFriction(float deltaTime) {
 	m_velocity.z *= frictionFactor;
 
 	//角速度の減衰
-	float angularFriction =frictionCoeff;
+	float angularFriction = frictionCoeff;
 	if (m_vehicleState == VehicleState::DRIFT_ACTIVE) {
-		angularFriction += 0.1f; //ドリフト中は回転の減衰を強く
+		angularFriction += 0.05f; //ドリフト中は回転の減衰を強く
 	}
 	m_angularVelocity *= std::pow(angularFriction, deltaTime * 0.5f);
 }
@@ -437,7 +437,7 @@ void Vehicle::CalculateLateralForce(float deltaTime) {
 
 void Vehicle::ApplyHandbrakeDrift(float deltaTime) {
 	float brakeFactor = 1.0f - 2.0f * deltaTime;
-	brakeFactor = std::max(0.7f, brakeFactor);
+	brakeFactor = std::max(0.85f, brakeFactor);
 
 	//ドリフト状態でない場合は通常の減速のみ
 	if (m_vehicleState == VehicleState::GRIP_DRIVING) {
@@ -463,8 +463,8 @@ void Vehicle::ApplyHandbrakeDrift(float deltaTime) {
 		m_angularVelocity += driftTorque * deltaTime;
 
 		//ドリフト用の適度な減速
-		float driftBrakeFactor = 1.0f - 1.0f * deltaTime;
-		driftBrakeFactor = std::max(0.8f, driftBrakeFactor);
+		float driftBrakeFactor = 1.0f - 0.6f * deltaTime;
+		driftBrakeFactor = std::max(0.9f, driftBrakeFactor);
 		m_velocity.x *= driftBrakeFactor;
 		m_velocity.z *= driftBrakeFactor;
 
