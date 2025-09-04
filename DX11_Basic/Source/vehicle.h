@@ -1,39 +1,50 @@
-#pragma once
+ï»¿#pragma once
 
 #include "gameObject.h"
-#include <bullet/btBulletDynamicsCommon.h>
-#include <bullet/BulletDynamics/Vehicle/btRaycastVehicle.h>
-#include <bullet/BulletDynamics/Vehicle/btVehicleRaycaster.h>
 
+enum class VehicleState {
+	GRIP_DRIVING, //ã‚°ãƒªãƒƒãƒ—èµ°è¡Œ
+	DRIFT_INITIATE, //ãƒ‰ãƒªãƒ•ãƒˆé–‹å§‹
+	DRIFT_ACTIVE, //ãƒ‰ãƒªãƒ•ãƒˆä¸­
+	DRIFT_RECOVERY //ãƒ‰ãƒªãƒ•ãƒˆå›žå¾©
+};
 
+//è»Šä¸¡ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
 struct VehicleParams {
-	//ƒGƒ“ƒWƒ“Ý’è
-	float maxEngineForce = 3500.0f; //ƒGƒ“ƒWƒ“‚ÌÅ‘åo—Í
-	float maxBrakingForce = 100.0f; //ƒuƒŒ[ƒL‚ÌÅ‘åo—Í
-	float maxSteeringAngle = 0.3f; //ƒnƒ“ƒhƒ‹‚ÌÅ‘å‰ñ“]Šp(rad)
+	//ã‚¨ãƒ³ã‚¸ãƒ³è¨­å®š
+	float maxEngineForce = 3500.0f; //ã‚¨ãƒ³ã‚¸ãƒ³ã®æœ€å¤§å‡ºåŠ›
+	float maxBrakingForce = 100.0f; //ãƒ–ãƒ¬ãƒ¼ã‚­ã®æœ€å¤§å‡ºåŠ›
+	float maxSteeringAngle = 0.5f; //ãƒãƒ³ãƒ‰ãƒ«ã®æœ€å¤§å›žè»¢è§’(rad)
+	float maxSpeed = 200.0f; //æœ€å¤§é€Ÿåº¦(km/h)
+	//è»Šä½“è¨­å®š
+	float chassisMass = 1000.0f; //è»Šä½“ã®è³ªé‡
+	Vector3 chassisSize = { 2.0f, 0.6f, 4.0f }; //è»Šä½“ã®ã‚µã‚¤ã‚º
 
-	float maxSpeed = 200.0f; //Å‘å‘¬“x(km/h)
+	//ç‰©ç†è¨­å®š
+	float acceleration = 18.0f; //åŠ é€Ÿåº¦
+	float deceleration = 6.0f; //æ¸›é€Ÿåº¦
+	float friction = 0.992f; //æ‘©æ“¦ä¿‚æ•°
+	float airResistance = 0.008f; //ç©ºæ°—æŠµæŠ—
+	float steeringSensitivity = 2.2f; //ã‚¹ãƒ†ã‚¢ãƒªãƒ³ã‚°æ„Ÿåº¦
 
-	//ŽÔ‘ÌÝ’è
-	float chassisMass = 1000.0f; //ŽÔ‘Ì‚ÌŽ¿—Ê
-	Vector3 chassisSize = { 2.0f, 0.6f, 4.0f }; //ŽÔ‘Ì‚ÌƒTƒCƒY
-	Vector3 localInertia = { 0.0f, 0.0f, 0.0f }; //ŽÔ‘Ì‚ÌŠµ«ƒ‚[ƒƒ“ƒg
+	//å¾Œé€€è¨­å®š
+	float reverseForceRatio = 0.7f; //å¾Œé€€æ™‚ã‚¨ãƒ³ã‚¸ãƒ³åŠ›å‰²åˆ
 
-	//ƒzƒC[ƒ‹Ý’è
-	float wheelRadius = 0.5f; //ƒzƒC[ƒ‹‚Ì”¼Œa
-	float wheelWidth = 0.4f; //ƒzƒC[ƒ‹‚Ì•
-	float wheelFriction = 1000.0f; //ƒzƒC[ƒ‹‚Ì–€ŽCŒW”
-	float wheelDamping = 0.8f; //ƒzƒC[ƒ‹‚Ìƒ_ƒ“ƒsƒ“ƒO
-	float wheelCompression = 0.84f; //ƒzƒC[ƒ‹‚Ìˆ³k—¦
-	float suspensionStiffness = 20.0f; //ƒTƒXƒyƒ“ƒVƒ‡ƒ“‚Ìd‚³
-	float suspensionRestLength = 0.6f; //ƒTƒXƒyƒ“ƒVƒ‡ƒ“‚ÌL‚Ñk‚Ý‚Ì’·‚³
-	float rollInfluence = 0.03f; //ƒ[ƒ‹‚Ì‰e‹¿“x
+	//ãƒ‰ãƒªãƒ•ãƒˆè¨­å®š
+	float driftThreshold = 30.0f; //ãƒ‰ãƒªãƒ•ãƒˆé–‹å§‹é€Ÿåº¦é–¾å€¤(km/h)
+	float driftInitiateForce = 3.0f; //ãƒ‰ãƒªãƒ•ãƒˆé–‹å§‹ã®ãŸã‚ã®æ¨ªæ–¹å‘åŠ›
+	float driftSustainForce = 1.5f; //ãƒ‰ãƒªãƒ•ãƒˆç¶­æŒã®ãŸã‚ã®æ¨ªæ–¹å‘åŠ›
+	float rearSlipMuktiplier = 2.5f; //å¾Œè¼ªã‚¹ãƒªãƒƒãƒ—å€çŽ‡
+	float frontGripStrength = 0.95f; //å‰è¼ªã‚°ãƒªãƒƒãƒ—åŠ›
+	float rearGripLoss = 0.7f; //å¾Œè¼ªã‚°ãƒªãƒƒãƒ—å–ªå¤±çŽ‡
+	float driftRecoveryRate = 3.0f; //ãƒ‰ãƒªãƒ•ãƒˆå›žå¾©é€Ÿåº¦
 
-	//ƒzƒC[ƒ‹Ú‘±“_(ƒ[ƒJƒ‹À•W)
-	Vector3 frontLeftWheelPos = { -1.0f, -0.3f, 1.5f };
-	Vector3 frontRightWheelPos = { 1.0f, -0.3f, 1.5f };
-	Vector3 rearLeftWheelPos = { -1.0f, -0.3f, -1.5f };
-	Vector3 rearRightWheelPos = { 1.0f, -0.3f, -1.5f };
+	//ãƒ›ã‚¤ãƒ¼ãƒ«è¨­å®š
+	float wheelRadius = 0.5f; //ãƒ›ã‚¤ãƒ¼ãƒ«ã®åŠå¾„
+	Vector3 frontLeftWheelPos = { -1.0f, -0.3f, 1.5f }; //å·¦å‰ãƒ›ã‚¤ãƒ¼ãƒ«ä½ç½®
+	Vector3 frontRightWheelPos = { 1.0f, -0.3f, 1.5f }; //å³å‰ãƒ›ã‚¤ãƒ¼ãƒ«ä½ç½®
+	Vector3 rearLeftWheelPos = { -1.0f, -0.3f, -1.5f }; //å·¦å¾Œãƒ›ã‚¤ãƒ¼ãƒ«ä½ç½®
+	Vector3 rearRightWheelPos = { 1.0f, -0.3f, -1.5f }; //å³å¾Œãƒ›ã‚¤ãƒ¼ãƒ«ä½ç½®
 };
 
 class Vehicle : public GameObject {
@@ -41,53 +52,65 @@ public:
 	Vehicle();
 	virtual ~Vehicle() = default;
 
-	//GameObjectŒp³ƒƒ\ƒbƒh
+	//GameObjectç¶™æ‰¿é–¢æ•°
 	virtual bool Initialize() override;
-	virtual void Update(double deltaTime) override;
 	virtual void Finalize() override;
+	virtual void Update(double deltaTime) override;
 
-	//ƒr[ƒNƒ‹‘€ì
-	virtual void SetEngineForce(float force); //ƒGƒ“ƒWƒ“o—ÍÝ’è
-	virtual void SetSteeringValue(float steering); //ƒnƒ“ƒhƒ‹‘€ì
-	virtual void SetBrakingForce(float brake); //ƒuƒŒ[ƒL—ÍÝ’è
+	//ãƒ“ãƒ¼ã‚¯ãƒ«æ“ä½œ
+	virtual void SetEngineForce(float force); //ã‚¨ãƒ³ã‚¸ãƒ³åŠ›è¨­å®š
+	virtual void SetSteeringValue(float steering); //ã‚¹ãƒ†ã‚¢ãƒªãƒ³ã‚°è¨­å®š
+	virtual void SetBrakingForce(float brake); //ãƒ–ãƒ¬ãƒ¼ã‚­åŠ›è¨­å®š
+	virtual void SetHandbrake(bool handbrake); //ãƒãƒ³ãƒ‰ãƒ–ãƒ¬ãƒ¼ã‚­è¨­å®š
 
-	//ƒr[ƒNƒ‹ó‘ÔŽæ“¾
-	[[nodiscard]] float GetCurrentSpeed() const; //Œ»Ý‚Ì‘¬“xŽæ“¾
-	[[nodiscard]] float GetMaxSpeed() const { return m_params.maxSpeed; } //Å‘å‘¬“xŽæ“¾
+	//ãƒ“ãƒ¼ã‚¯ãƒ«çŠ¶æ…‹å–å¾—
+	[[nodiscard]] float GetCurrentSpeed() const { return m_currentSpeed; }
+	[[nodiscard]] float GetMaxSpeed() const { return m_params.maxSpeed; }
 	[[nodiscard]] float GetEngineForce() const { return m_currentEngineForce; }
-	[[nodiscard]] float GetSteeringValue() const { return m_currentSteering; }
-	[[nodiscard]] float GetBrekingForce() const {	return m_currentBrakingForce; }
+	[[nodiscard]] float GetSteeringAngle() const { return m_currentSteering; }
+	[[nodiscard]] float GetBrakingForce() const { return m_currentBrakingForce; }
+	[[nodiscard]] bool IsReversing() const { return m_isReversing; }
+	[[nodiscard]] bool IsHandbrakeActive() const { return m_handbrakeActive; }
+	[[nodiscard]] bool IsDrifting() const { return m_vehicleState != VehicleState::GRIP_DRIVING; }
+	[[nodiscard]] VehicleState GetVehicleState() const { return m_vehicleState; }
+	[[nodiscard]] float GetDriftAngle() const { return m_driftAngle; }
+	[[nodiscard]] float GetSripRatio() const {return m_slipRatio; }
+	[[nodiscard]] float GetRearSlipFactor() const { return m_rearSlipFactor; }
 
-	//•¨—ƒ{ƒfƒBŽæ“¾
-	[[nodiscard]] btRigidBody* GetChassisBody() const { return m_vehicleBody; }
-	[[nodiscard]] btRaycastVehicle* GetVehicle() const { return m_vehicle; }
-
-	//ƒzƒC[ƒ‹î•ñŽæ“¾
-	[[nodiscard]] btTransform GetWheelTransform(int wheelIndex) const;
-	[[nodiscard]] int GetNumWheels() const { return m_vehicle ? m_vehicle->getNumWheels() : 0; }
+	//ãƒ›ã‚¤ãƒ¼ãƒ«çŠ¶æ…‹å–å¾—
+	[[nodiscard]] Vector3 GetWheelPosition(int wheelIndex) const;
+	[[nodiscard]] Vector3 GetWheelRotation(int wheelIndex) const;
+	[[nodiscard]] int GetNumWheels() const { return 4; }
 
 protected:
-	//•¨—¢ŠE
-	btDynamicsWorld* m_dynamicsWorld = nullptr;
-
-	//ƒr[ƒNƒ‹•¨—ƒIƒuƒWƒFƒNƒg
-	btRigidBody* m_vehicleBody = nullptr; //ŽÔ‘Ì‚Ì„‘Ì
-	btRaycastVehicle* m_vehicle = nullptr; //ƒr[ƒNƒ‹–{‘Ì
-	btVehicleRaycaster* m_vehicleRayCaster = nullptr; //ƒŒƒCƒLƒƒƒXƒ^[
-	btRaycastVehicle::btVehicleTuning m_tuning; //ƒr[ƒNƒ‹ƒ`ƒ…[ƒjƒ“ƒO
-
-	//ŽÔ‘ÌŒ`ó
-	btCollisionShape* m_chassisShape = nullptr; //ŽÔ‘Ì‚ÌŒ`ó
-
-	//ƒr[ƒNƒ‹ƒpƒ‰ƒ[ƒ^
+	//ãƒ“ãƒ¼ã‚¯ãƒ«ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
 	VehicleParams m_params;
 
-	//Œ»Ý‚Ì‘€ì’l
-	float m_currentEngineForce = 0.0f; //Œ»Ý‚ÌƒGƒ“ƒWƒ“o—Í
-	float m_currentSteering = 0.0f; //Œ»Ý‚Ìƒnƒ“ƒhƒ‹‘€ì
-	float m_currentBrakingForce = 0.0f; //Œ»Ý‚ÌƒuƒŒ[ƒL—Í
+	//ç¾åœ¨ã®æ“ä½œå€¤
+	float m_currentEngineForce = 0.0f; //ç¾åœ¨ã®ã‚¨ãƒ³ã‚¸ãƒ³åŠ›
+	float m_currentSteering = 0.0f; //ç¾åœ¨ã®ã‚¹ãƒ†ã‚¢ãƒªãƒ³ã‚°è§’
+	float m_currentBrakingForce = 0.0f; //ç¾åœ¨ã®ãƒ–ãƒ¬ãƒ¼ã‚­åŠ›
+	bool m_handbrakeActive = false; //ãƒãƒ³ãƒ‰ãƒ–ãƒ¬ãƒ¼ã‚­çŠ¶æ…‹
 
-	//ƒzƒC[ƒ‹ƒCƒ“ƒfƒbƒNƒX
+	//ç‰©ç†çŠ¶æ…‹
+	float m_currentSpeed = 0.0f; //ç¾åœ¨ã®é€Ÿåº¦(km/h)
+	Vector3 m_velocity = {0.0f, 0.0f, 0.0f}; //ç¾åœ¨ã®é€Ÿåº¦ãƒ™ã‚¯ãƒˆãƒ«
+	Vector3 m_acceleration = { 0.0f, 0.0f, 0.0f }; //ç¾åœ¨ã®åŠ é€Ÿåº¦ãƒ™ã‚¯ãƒˆãƒ«
+	float m_angularVelocity = 0.0f; //Yè»¸å‘¨ã‚Šã®è§’é€Ÿåº¦(rad/s)
+	bool m_isReversing = false; //å¾Œé€€ä¸­ãƒ•ãƒ©ã‚°
+
+	//ãƒ‰ãƒªãƒ•ãƒˆçŠ¶æ…‹
+	VehicleState m_vehicleState = VehicleState::GRIP_DRIVING; //ç¾åœ¨ã®ãƒ“ãƒ¼ã‚¯ãƒ«çŠ¶æ…‹
+	float m_driftAngle = 0.0f; //ãƒ‰ãƒªãƒ•ãƒˆè§’(rad)
+	float m_slipRatio = 0.0f; //ã‚¹ãƒªãƒƒãƒ—æ¯”
+	float m_driftIntensity = 0.0f; //ãƒ‰ãƒªãƒ•ãƒˆå¼·åº¦
+	float m_rearSlipFactor = 0.0f; //å¾Œè¼ªã‚¹ãƒªãƒƒãƒ—ä¿‚æ•°
+	float m_driftTimer = 0.0f; //ãƒ‰ãƒªãƒ•ãƒˆæ™‚é–“
+
+	//ãƒ›ã‚¤ãƒ¼ãƒ«çŠ¶æ…‹
+	float m_wheelRotationAngle = 0.0f; //ãƒ›ã‚¤ãƒ¼ãƒ«ã®å›žè»¢è§’
+	float m_frontWheelSteeringAngle = 0.0f; //å‰è¼ªã®ã‚¹ãƒ†ã‚¢ãƒªãƒ³ã‚°è§’
+
 	enum WheelIndex {
 		FRONT_LEFT = 0,
 		FRONT_RIGHT = 1,
@@ -95,34 +118,32 @@ protected:
 		REAR_RIGHT = 3,
 		WHEEL_COUNT = 4
 	};
-
-
-	//Vector3‚ÆbtVector3‚Ì•ÏŠ·ƒwƒ‹ƒp[
-	[[nodiscard]] Vector3 ToVector3(const btVector3& v) const noexcept {
-		return Vector3(v.getX(), v.getY(), v.getZ());
-	}
-
-	//Vector4‚ÆbtQuaternion‚Ì•ÏŠ·ƒwƒ‹ƒp[
-	[[nodiscard]] Vector4 ToVector4(const btQuaternion& q) const noexcept {
-		return Vector4(q.getX(), q.getY(), q.getZ(), q.getW());
-	}
-
-
-	//ƒNƒH[ƒ^ƒjƒIƒ“‚ðƒIƒCƒ‰[Šp‚É•ÏŠ·
-	[[nodiscard]] Vector3 QuaternionToEuler(const btQuaternion& q);
-
 private:
-	void CreateChassis(); //ŽÔ‘Ì‚Ìì¬
-	void AddWheels(); //ƒzƒC[ƒ‹‚Ì’Ç‰Á
-	void UpdateTransform(); //•¨—¢ŠE‚©‚çƒOƒ‰ƒtƒBƒbƒNƒX¢ŠE‚Ö•ÏŠ·XV
-	inline float WrapAngle(float angle) const {
+	//ç‰©ç†è¨ˆç®—
+	void UpdatePhysics(double deltaTime);
+	void ApplyEngineForce(float deltaTime);
+	void ApplySteering(float deltaTime);
+	void ApplyFriction(float deltaTime);
+	void ApplyAirResistance(float deltaTime);
+	void UpdateWheelRotation(float deltaTime);
+
+	//ã‚¹ãƒ†ãƒ¼ãƒˆç®¡ç†
+	void UpdateVehicleState(float deltaTime);
+	void HandleGripDriving(float deltaTime);
+	void HandleDriftInitiate(float deltaTime);
+	void HandleDriftActive(float deltaTime);
+	void HandleDriftRecovery(float deltaTime);
+
+	//ãƒ‰ãƒªãƒ•ãƒˆç‰©ç†
+	void CalculateLateralForce(float deltaTime);
+	void ApplyHandbrakeDrift(float deltaTime);
+	void CalculateDriftAngle();
+
+	//ãƒ›ã‚¤ãƒ¼ãƒ«ãƒ©ãƒƒãƒ”ãƒ³ã‚°
+	float WrapAngle(float angle) const {
 		while (angle > XM_PI) angle -= XM_2PI;
 		while (angle <= -XM_PI) angle += XM_2PI;
 		return angle;
 	}
-
-	//Vector3‚ÆbtVector3‚Ì•ÏŠ·ƒwƒ‹ƒp[
-	[[nodiscard]] btVector3 ToBtVector3(const Vector3& v) const noexcept {
-		return btVector3(v.x, v.y, v.z);
-	}
 };
+

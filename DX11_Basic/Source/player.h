@@ -1,13 +1,13 @@
-#pragma once
+ï»¿#pragma once
 
 #include "vehicle.h"
 
 struct VehicleInput {
-	float forward = 0.0f; //ƒAƒNƒZƒ‹“ü—Í	(0.0f ~ 1.0f)
-	float reverse = 0.0f; //ƒŠƒo[ƒX“ü—Í	(0.0f ~ 1.0f)
-	float brake = 0.0f; //ƒuƒŒ[ƒL“ü—Í		(0.0f ~ 1.0f)
-	float steering = 0.0f; //ƒnƒ“ƒhƒ‹“ü—Í	(-1.0f ~ 1.0f)
-	bool handbrake = false; //ƒTƒCƒhƒuƒŒ[ƒL	(true/false)
+	float forward = 0.0f; //ã‚¢ã‚¯ã‚»ãƒ«å…¥åŠ›	(0.0f ~ 1.0f)
+	float reverse = 0.0f; //ãƒªãƒãƒ¼ã‚¹å…¥åŠ›	(0.0f ~ 1.0f)
+	float brake = 0.0f; //ãƒ–ãƒ¬ãƒ¼ã‚­å…¥åŠ›		(0.0f ~ 1.0f)
+	float steering = 0.0f; //ãƒãƒ³ãƒ‰ãƒ«å…¥åŠ›	(-1.0f ~ 1.0f)
+	bool handbrake = false; //ã‚µã‚¤ãƒ‰ãƒ–ãƒ¬ãƒ¼ã‚­	(true/false)
 };
 
 class Player : public Vehicle {
@@ -27,30 +27,34 @@ private:
 
 	class Box* m_box = nullptr;
 
+	class Field* m_field = nullptr;
+
 	VehicleInput m_currentInput;
 	VehicleInput m_smoothedInput;
 
-	//“ü—Í•½ŠŠ‰»—pƒpƒ‰ƒ[ƒ^
-	float m_forwardSmoothRate = 5.0f; //‘Sg•½ŠŠ‰»ƒŒ[ƒg
-	float m_reverseSmoothRate = 4.0f; //ƒŠƒo[ƒX•½ŠŠ‰»ƒŒ[ƒg
-	float m_brakeSmoothRate = 8.0f; //ƒuƒŒ[ƒL•½ŠŠ‰»ƒŒ[ƒg
-	float m_steerSmoothRate = 6.0f; //ƒXƒeƒAƒŠƒ“ƒO•½ŠŠ‰»ƒŒ[ƒg
+	//å…¥åŠ›å¹³æ»‘åŒ–ç”¨ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
+	float m_forwardSmoothRate = 5.0f; //å…¨èº«å¹³æ»‘åŒ–ãƒ¬ãƒ¼ãƒˆ
+	float m_reverseSmoothRate = 4.0f; //ãƒªãƒãƒ¼ã‚¹å¹³æ»‘åŒ–ãƒ¬ãƒ¼ãƒˆ
+	float m_brakeSmoothRate = 8.0f; //ãƒ–ãƒ¬ãƒ¼ã‚­å¹³æ»‘åŒ–ãƒ¬ãƒ¼ãƒˆ
+	float m_steerSmoothRate = 6.0f; //ã‚¹ãƒ†ã‚¢ãƒªãƒ³ã‚°å¹³æ»‘åŒ–ãƒ¬ãƒ¼ãƒˆ
 
-	//ƒGƒ“ƒWƒ“İ’è
-	float m_idleRPM = 800.0f; //ƒAƒCƒhƒŠƒ“ƒO‰ñ“]”
-	float m_maxRPM = 8000.0f; //Å‘å‰ñ“]”
+	//ã‚¨ãƒ³ã‚¸ãƒ³è¨­å®š
+	float m_idleRPM = 800.0f; //ã‚¢ã‚¤ãƒ‰ãƒªãƒ³ã‚°å›è»¢æ•°
+	float m_maxRPM = 8000.0f; //æœ€å¤§å›è»¢æ•°
 
-	//Œã‘ŞŠÖ˜A
-	float m_reverseForceRatio = 0.75f; //Œã‘ŞƒGƒ“ƒWƒ“—ÍŠ„‡
-	bool m_isReversing = false; //Œã‘Ş’†ƒtƒ‰ƒO
+	//åœæ­¢ä¸­ãƒ•ãƒ©ã‚°
+	bool m_isStationary = false;
 
-	//“ü—ÍXV
+	//å…¥åŠ›æ›´æ–°
 	void UpdateInput(double deltaTime);
-	//“ü—Í•½ŠŠ‰»
+	//å…¥åŠ›å¹³æ»‘åŒ–
 	void SmoothInput(double deltaTime);
-	//ƒGƒ“ƒWƒ“—ÍXV
+	//ã‚¨ãƒ³ã‚¸ãƒ³åŠ›æ›´æ–°
 	[[nodiscard]] float CalculateRPM() const;
 
-	//ƒ^ƒCƒ„•`‰æ
+	//ã‚¿ã‚¤ãƒ¤æç”»
 	void DrawWheels() const;
+
+	//åœæ­¢çŠ¶æ…‹ç®¡ç†
+	void UpdateStationaryState();
 };

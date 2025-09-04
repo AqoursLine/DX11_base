@@ -1,6 +1,8 @@
 ﻿#pragma once
 //#define _WINSOCKAPI_ 
 
+#define NOMINMAX
+
 #include <ixwebsocket/IXWebSocket.h>
 #include <windows.h>
 #include <iostream>

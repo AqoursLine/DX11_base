@@ -1,4 +1,4 @@
-#include "main.h"
+ï»¿#include "main.h"
 #include "camera.h"
 #include "renderer.h"
 #include "input.h"
@@ -7,64 +7,64 @@
 #include "player.h"
 #include "scene.h"
 
-//ƒJƒƒ‰ƒNƒ‰ƒX‰Šú‰»
+//ã‚«ãƒ¡ãƒ©ã‚¯ãƒ©ã‚¹åˆæœŸåŒ–
 bool Camera::Initialize() {
-	m_offset = { 0.0f, 3.0f, -10.0f }; // ƒJƒƒ‰‚ÌƒIƒtƒZƒbƒgˆÊ’u
-	m_position = m_offset; // ‰ŠúˆÊ’u‚ğƒIƒtƒZƒbƒgˆÊ’u‚Éİ’è
+	m_offset = { 0.0f, 3.0f, -10.0f }; // ã‚«ãƒ¡ãƒ©ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆä½ç½®
+	m_position = m_offset; // åˆæœŸä½ç½®ã‚’ã‚ªãƒ•ã‚»ãƒƒãƒˆä½ç½®ã«è¨­å®š
 
-	m_moveSpeed = 20.0f; // ƒJƒƒ‰‚ÌˆÚ“®‘¬“x
-	m_rotateSpeed = 3.0f; // ƒJƒƒ‰‚Ì‰ñ“]‘¬“x
+	m_moveSpeed = 20.0f; // ã‚«ãƒ¡ãƒ©ã®ç§»å‹•é€Ÿåº¦
+	m_rotateSpeed = 3.0f; // ã‚«ãƒ¡ãƒ©ã®å›è»¢é€Ÿåº¦
 
 	return true;
 }
 
-//ƒJƒƒ‰ƒNƒ‰ƒXI—¹ˆ—
+//ã‚«ãƒ¡ãƒ©ã‚¯ãƒ©ã‚¹çµ‚äº†å‡¦ç†
 void Camera::Finalize() {
 }
 
-//ƒJƒƒ‰ƒNƒ‰ƒXXVˆ—
+//ã‚«ãƒ¡ãƒ©ã‚¯ãƒ©ã‚¹æ›´æ–°å‡¦ç†
 void Camera::Update(double deltaTime) {
 	auto player = SYSTEM.GetManager()->GetScene()->GetGameObject<Player>();
 
 	if (player) {
 		auto oldposition = m_targetPosition;
 
-		//ƒvƒŒƒCƒ„[‚ÌˆÊ’u‚ğƒJƒƒ‰‚Ìƒ^[ƒQƒbƒgˆÊ’u‚Éİ’è
+		//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ä½ç½®ã‚’ã‚«ãƒ¡ãƒ©ã®ã‚¿ãƒ¼ã‚²ãƒƒãƒˆä½ç½®ã«è¨­å®š
 		m_targetPosition = player->GetPosition();
-		m_targetPosition.y += 1.0f; // ƒvƒŒƒCƒ„[‚Ì‚‚³‚ğ­‚µã‚°‚é
+		m_targetPosition.y += 1.0f; // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®é«˜ã•ã‚’å°‘ã—ä¸Šã’ã‚‹
 
-		//ƒJƒƒ‰‚ÌƒIƒtƒZƒbƒgˆÊ’u‚ğŒvZ
-		Vector3 forward = player->GetForwardQ();
+		//ã‚«ãƒ¡ãƒ©ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆä½ç½®ã‚’è¨ˆç®—
+		Vector3 forward = player->GetForward();
 		m_position = m_targetPosition + forward * m_offset.z + player->GetUpQ() * m_offset.y;
 
 	} else {
-		//ƒvƒŒƒCƒ„[‚ªŒ©‚Â‚©‚ç‚È‚¢ê‡‚ÍƒfƒtƒHƒ‹ƒg‚Ìƒ^[ƒQƒbƒgˆÊ’u
+		//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒè¦‹ã¤ã‹ã‚‰ãªã„å ´åˆã¯ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®ã‚¿ãƒ¼ã‚²ãƒƒãƒˆä½ç½®
 		m_targetPosition = {0.0f, 0.0f, 0.0f};
 	}
 }
 
-//ƒJƒƒ‰ƒNƒ‰ƒX•`‰æˆ—
+//ã‚«ãƒ¡ãƒ©ã‚¯ãƒ©ã‚¹æç”»å‡¦ç†
 void Camera::Draw() const {
-	//ƒvƒƒWƒFƒNƒVƒ‡ƒ“s—ñ‚ğİ’è
+	//ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³è¡Œåˆ—ã‚’è¨­å®š
 	XMMATRIX projection = XMMatrixPerspectiveFovLH(
-		XMConvertToRadians(45.0f), //‹–ìŠp
-		static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT), //ƒAƒXƒyƒNƒg”ä
-		0.05f, //‹ß‚­‚ÌƒNƒŠƒbƒsƒ“ƒO–Ê
-		1000.0f //‰“‚­‚ÌƒNƒŠƒbƒsƒ“ƒO–Ê
+		XMConvertToRadians(45.0f), //è¦–é‡è§’
+		static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT), //ã‚¢ã‚¹ãƒšã‚¯ãƒˆæ¯”
+		0.05f, //è¿‘ãã®ã‚¯ãƒªãƒƒãƒ”ãƒ³ã‚°é¢
+		1000.0f //é ãã®ã‚¯ãƒªãƒƒãƒ”ãƒ³ã‚°é¢
 	);
-	//ƒvƒƒWƒFƒNƒVƒ‡ƒ“s—ñ‚ğİ’è
+	//ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³è¡Œåˆ—ã‚’è¨­å®š
 	RENDERER.SetProjectionMatrix(projection);
 
-	//ƒJƒƒ‰ˆÊ’u‚ğİ’è
+	//ã‚«ãƒ¡ãƒ©ä½ç½®ã‚’è¨­å®š
 	XMMATRIX view = XMMatrixLookAtLH(
-		XMVectorSet(m_position.x, m_position.y, m_position.z, 0.0f), //ƒJƒƒ‰ˆÊ’u
-		XMVectorSet(m_targetPosition.x, m_targetPosition.y, m_targetPosition.z, 0.0f), //ƒJƒƒ‰‚Ì‘O•ûƒxƒNƒgƒ‹
-		XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f) //ƒJƒƒ‰‚Ìã•ûŒüƒxƒNƒgƒ‹
+		XMVectorSet(m_position.x, m_position.y, m_position.z, 0.0f), //ã‚«ãƒ¡ãƒ©ä½ç½®
+		XMVectorSet(m_targetPosition.x, m_targetPosition.y, m_targetPosition.z, 0.0f), //ã‚«ãƒ¡ãƒ©ã®å‰æ–¹ãƒ™ã‚¯ãƒˆãƒ«
+		XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f) //ã‚«ãƒ¡ãƒ©ã®ä¸Šæ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«
 	);
-	//ƒrƒ…[s—ñ‚ğİ’è
+	//ãƒ“ãƒ¥ãƒ¼è¡Œåˆ—ã‚’è¨­å®š
 	RENDERER.SetViewMatrix(view);
 
-	//ƒJƒƒ‰ˆÊ’u‚ğƒŒƒ“ƒ_ƒ‰[‚Éİ’è
+	//ã‚«ãƒ¡ãƒ©ä½ç½®ã‚’ãƒ¬ãƒ³ãƒ€ãƒ©ãƒ¼ã«è¨­å®š
 	RENDERER.SetCameraPosition(m_position);
 }
 
@@ -74,42 +74,42 @@ void Camera::CleanUp() {
 void Camera::MoveSide(bool isRight, double deltaTime) {
 	Vector3 right = GetRight();
 
-	//’n–Ê‚É‘Î‚µ‚Ä•½s‚ÈƒxƒNƒgƒ‹
+	//åœ°é¢ã«å¯¾ã—ã¦å¹³è¡Œãªãƒ™ã‚¯ãƒˆãƒ«
 	Vector3 direction = Vector3(right.x, 0.0f, right.z);
 	direction.Normalize();
 
-	//ˆÚ“®
+	//ç§»å‹•
 	m_position += direction * (isRight ? 1.0f : -1.0f) * m_moveSpeed * static_cast<float>(deltaTime);
-	//ƒ^[ƒQƒbƒgˆÊ’u‚à“¯—l‚ÉˆÚ“®
+	//ã‚¿ãƒ¼ã‚²ãƒƒãƒˆä½ç½®ã‚‚åŒæ§˜ã«ç§»å‹•
 	m_targetPosition += direction * (isRight ? 1.0f : -1.0f) * m_moveSpeed * static_cast<float>(deltaTime);
 }
 
 void Camera::MoveForward(bool isForward, double deltaTime) {
 	Vector3 forward = GetForward();
 
-	//’n–Ê‚É‘Î‚µ‚Ä•½s‚ÈƒxƒNƒgƒ‹
+	//åœ°é¢ã«å¯¾ã—ã¦å¹³è¡Œãªãƒ™ã‚¯ãƒˆãƒ«
 	Vector3 direction = Vector3(forward.x, 0.0f, forward.z);
 	direction.Normalize();
 
-	//ˆÚ“®
+	//ç§»å‹•
 	m_position += direction * (isForward ? 1.0f : -1.0f) * m_moveSpeed * static_cast<float>(deltaTime);
-	//ƒ^[ƒQƒbƒgˆÊ’u‚à“¯—l‚ÉˆÚ“®
+	//ã‚¿ãƒ¼ã‚²ãƒƒãƒˆä½ç½®ã‚‚åŒæ§˜ã«ç§»å‹•
 	m_targetPosition += direction * (isForward ? 1.0f : -1.0f) * m_moveSpeed * static_cast<float>(deltaTime);
 }
 
 void Camera::MoveUpDown(bool isUp, double deltaTime) {
-	//ˆÚ“®
+	//ç§»å‹•
 	m_position.y += (isUp ? 1.0f : -1.0f) * m_moveSpeed * static_cast<float>(deltaTime);
-	//ƒ^[ƒQƒbƒgˆÊ’u‚à“¯—l‚ÉˆÚ“®
+	//ã‚¿ãƒ¼ã‚²ãƒƒãƒˆä½ç½®ã‚‚åŒæ§˜ã«ç§»å‹•
 	m_targetPosition.y += (isUp ? 1.0f : -1.0f) * m_moveSpeed * static_cast<float>(deltaTime);
 }
 
 void Camera::RotateAroundTarget(double deltaTime) {
-	// ƒJƒƒ‰‚ÌƒIƒtƒZƒbƒgˆÊ’u‚ğŒvZ
+	// ã‚«ãƒ¡ãƒ©ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆä½ç½®ã‚’è¨ˆç®—
 	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(m_rotation.x, m_rotation.y, m_rotation.z);
 	XMVECTOR offsetVector = XMVectorSet(m_offset.x, m_offset.y, m_offset.z, 0.0f);
 	offsetVector = XMVector3Transform(offsetVector, rotationMatrix);
-	// ƒJƒƒ‰‚ÌˆÊ’u‚ğƒ^[ƒQƒbƒgˆÊ’u‚©‚çƒIƒtƒZƒbƒgˆÊ’u‚ğ‰Á‚¦‚½ˆÊ’u‚Éİ’è
+	// ã‚«ãƒ¡ãƒ©ã®ä½ç½®ã‚’ã‚¿ãƒ¼ã‚²ãƒƒãƒˆä½ç½®ã‹ã‚‰ã‚ªãƒ•ã‚»ãƒƒãƒˆä½ç½®ã‚’åŠ ãˆãŸä½ç½®ã«è¨­å®š
 	m_position = Vector3(
 		m_targetPosition.x + XMVectorGetX(offsetVector),
 		m_targetPosition.y + XMVectorGetY(offsetVector),

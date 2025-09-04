@@ -1,8 +1,7 @@
-#pragma once
+ï»¿#pragma once
 
 class Timer;
 class Manager;
-class PhysicsWorld;
 
 class System {
 public:
@@ -13,7 +12,6 @@ public:
 	bool Excute();
 
 	Manager* GetManager() const { return m_manager; }
-	PhysicsWorld* GetPhysicsWorld() const { return m_physicsWorld; }
 
 private:
 	static System* s_instance;
@@ -22,8 +20,7 @@ private:
 
 	Timer* m_timer = nullptr;
 	Manager* m_manager = nullptr;
-	class GameWebSocketClient* m_webSocketClient = nullptr; // WebSocketƒNƒ‰ƒCƒAƒ“ƒg‚Ìƒ|ƒCƒ“ƒ^
-	PhysicsWorld* m_physicsWorld = nullptr;
+	class GameWebSocketClient* m_webSocketClient = nullptr; // WebSocketã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã®ãƒã‚¤ãƒ³ã‚¿
 
 public:
 	static System* CreateInstance() {

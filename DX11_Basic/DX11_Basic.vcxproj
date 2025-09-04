@@ -203,7 +203,6 @@
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\manager.cpp" />
     <ClCompile Include="Source\model.cpp" />
-    <ClCompile Include="Source\physicsWorld.cpp" />
     <ClCompile Include="Source\player.cpp" />
     <ClCompile Include="Source\raceCourseManager.cpp" />
     <ClCompile Include="Source\renderer.cpp" />
@@ -230,7 +229,6 @@
     <ClInclude Include="Source\main.h" />
     <ClInclude Include="Source\manager.h" />
     <ClInclude Include="Source\model.h" />
-    <ClInclude Include="Source\physicsWorld.h" />
     <ClInclude Include="Source\player.h" />
     <ClInclude Include="Source\raceCourseManager.h" />
     <ClInclude Include="Source\renderer.h" />

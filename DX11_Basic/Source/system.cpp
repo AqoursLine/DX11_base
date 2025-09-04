@@ -1,43 +1,35 @@
-#include "main.h"
+ï»¿#include "main.h"
 #include "system.h"
 #include "manager.h"
 #include "timer.h"
 #include "model.h"
 #include "webtest.h"
-#include "physicsWorld.h"
 
 #ifdef _DEBUG
 #include "input.h"
 #endif // _DEBUG
 
-// ƒVƒ“ƒOƒ‹ƒgƒ“ƒCƒ“ƒXƒ^ƒ“ƒX‚Ì‰Šú‰»
+// ã‚·ãƒ³ã‚°ãƒ«ãƒˆãƒ³ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã®åˆæœŸåŒ–
 System* System::s_instance = nullptr;
 
-//ƒVƒXƒeƒ€‰Šú‰»
+//ã‚·ã‚¹ãƒ†ãƒ åˆæœŸåŒ–
 bool System::Initialize() {
-	//•¨—ƒ[ƒ‹ƒh‰Šú‰»
-	m_physicsWorld = new PhysicsWorld();
-	if (!m_physicsWorld->Initialize()) {
-		ErrorMessage(L"•¨—ƒ[ƒ‹ƒh‚Ì‰Šú‰»‚ÉŽ¸”s‚µ‚Ü‚µ‚½", E_FAIL);
-		return false;
-	}
-
-	//ƒ}ƒl[ƒWƒƒ[ƒNƒ‰ƒX
+	//ãƒžãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã‚¯ãƒ©ã‚¹
 	m_manager = new Manager();
 	bool isInitialized = m_manager->Initialize();
 
 	if (!isInitialized) {
-		ErrorMessage(L"ƒ}ƒl[ƒWƒƒ[ƒNƒ‰ƒX‚Ì‰Šú‰»‚ÉŽ¸”s‚µ‚Ü‚µ‚½", E_FAIL);
+		ErrorMessage(L"ãƒžãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã‚¯ãƒ©ã‚¹ã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸ", E_FAIL);
 		return false;
 	}
 
-	//ƒ^ƒCƒ}[‰Šú‰»
+	//ã‚¿ã‚¤ãƒžãƒ¼åˆæœŸåŒ–
 	m_timer = new Timer();
 	m_timer->Reset();
 	m_timer->Start();
 
 	m_webSocketClient = new GameWebSocketClient();
-	//WebSocketƒNƒ‰ƒCƒAƒ“ƒg‚ÌÚ‘±
+	//WebSocketã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã®æŽ¥ç¶š
 	if (!m_webSocketClient->Connect("ws://localhost:9002")) {
 		std::cerr << "WebSocket client connection failed." << std::endl;
 	} else {
@@ -47,19 +39,19 @@ bool System::Initialize() {
 	return true;
 }
 
-//ƒVƒXƒeƒ€I—¹
+//ã‚·ã‚¹ãƒ†ãƒ çµ‚äº†
 void System::Finalize() {
-	//ƒ}ƒl[ƒWƒƒ[ƒNƒ‰ƒX‚ÌI—¹
+	//ãƒžãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã‚¯ãƒ©ã‚¹ã®çµ‚äº†
 	if (m_manager) {
 		m_manager->Finalize();
 		delete m_manager;
 		m_manager = nullptr;
 	}
 
-	//ƒ‚ƒfƒ‹‚ÌƒLƒƒƒbƒVƒ…‚ðƒNƒŠƒA
+	//ãƒ¢ãƒ‡ãƒ«ã®ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’ã‚¯ãƒªã‚¢
 	Model::ClearCache();
 
-	//ƒ^ƒCƒ}[I—¹
+	//ã‚¿ã‚¤ãƒžãƒ¼çµ‚äº†
 	if (m_timer) {
 		m_timer->Stop();
 		m_timer->Reset();
@@ -67,14 +59,7 @@ void System::Finalize() {
 		m_timer = nullptr;
 	}
 
-	//•¨—ƒ[ƒ‹ƒh‚ÌI—¹
-	if (m_physicsWorld) {
-		m_physicsWorld->Finalize();
-		delete m_physicsWorld;
-		m_physicsWorld = nullptr;
-	}
-
-	//WebSocketƒNƒ‰ƒCƒAƒ“ƒg‚ÌI—¹
+	//WebSocketã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã®çµ‚äº†
 	if (m_webSocketClient) {
 		m_webSocketClient->Disconnect();
 		delete m_webSocketClient;
@@ -85,10 +70,7 @@ void System::Finalize() {
 bool System::Excute() {
 	m_timer->Tick();
 
-	//•¨—‰‰ŽZXV
-	m_physicsWorld->StepSimulation(m_timer->GetDeltaTime());
-
-	//ƒ}ƒl[ƒWƒƒ[ƒNƒ‰ƒXXV
+	//ãƒžãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã‚¯ãƒ©ã‚¹æ›´æ–°
 	m_manager->Update(m_timer->GetDeltaTime());
 	m_manager->Draw();
 	if (m_manager->CleanUp()) {

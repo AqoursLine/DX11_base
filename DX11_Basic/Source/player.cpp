@@ -1,7 +1,8 @@
-#include "player.h"
+ï»¿#include "player.h"
 #include "model.h"
 #include "input.h"
 #include "box.h"
+#include "field.h"
 #include <algorithm>
 
 bool Player::Initialize() {
@@ -12,6 +13,11 @@ bool Player::Initialize() {
 
 	m_box = new Box();
 	if (!m_box->Initialize()) {
+		return false;
+	}
+
+	m_field = new Field();
+	if (!m_field->Initialize(L"Asset\\Texture\\arrow.png")) {
 		return false;
 	}
 
@@ -35,85 +41,97 @@ void Player::Finalize() {
 		m_box->Finalize();
 		delete m_box;
 	}
+	if (m_field) {
+		m_field->Finalize();
+		delete m_field;
+	}
+
 	Vehicle::Finalize();
 }
 
 void Player::Update(double deltaTime) {
 	UpdateInput(deltaTime);
 
-	//ƒGƒ“ƒWƒ“—ÍŒvZ
+	//åœæ­¢çŠ¶æ…‹ç®¡ç†
+	UpdateStationaryState();
+
+	//ã‚¨ãƒ³ã‚¸ãƒ³åŠ›è¨ˆç®—
 	float engineForce = 0.0f;
 	if (m_smoothedInput.forward > 0.01f) {
-		//‘Oi
+		//å‰é€²
 		engineForce = m_smoothedInput.forward * m_params.maxEngineForce;
-		m_isReversing = false;
 	}else if (m_smoothedInput.reverse > 0.01f) {
-		//Œã‘Ş
-		engineForce = -m_smoothedInput.reverse * m_params.maxEngineForce * m_reverseForceRatio;
-		m_isReversing = true;
+		//å¾Œé€€
+		engineForce = -m_smoothedInput.reverse * m_params.maxEngineForce;
 	} else {
-		//ƒjƒ…[ƒgƒ‰ƒ‹
+		//ãƒ‹ãƒ¥ãƒ¼ãƒˆãƒ©ãƒ«
 		engineForce = 0.0f;
-
-		//Œ»İ‚Ì‘¬“x‚ª¬‚³‚¢ê‡‚ÍŒã‘Şƒtƒ‰ƒO‚ğ‰ğœ
-		if (std::abs(GetCurrentSpeed()) < 1.0f) {
-			m_isReversing = false;
-		}
 	}
 
-	//ƒGƒ“ƒWƒ“—Í‚ğ“K—p
+	//ã‚¨ãƒ³ã‚¸ãƒ³åŠ›ã‚’é©ç”¨
 	SetEngineForce(engineForce);
 
-	//ƒXƒeƒAƒŠƒ“ƒO‚ğ“K—p
+	//ã‚¹ãƒ†ã‚¢ãƒªãƒ³ã‚°ã‚’é©ç”¨
 	SetSteeringValue(m_smoothedInput.steering * m_params.maxSteeringAngle);
 
-	//ƒuƒŒ[ƒL—Í‚ğ“K—p
+	//ãƒ–ãƒ¬ãƒ¼ã‚­åŠ›ã‚’é©ç”¨
 	float brakeForce = m_smoothedInput.brake * m_params.maxBrakingForce;
-
-	//ƒTƒCƒhƒuƒŒ[ƒL
-	if (m_smoothedInput.handbrake) {
-		brakeForce = m_params.maxBrakingForce;
-	}
-
 	SetBrakingForce(brakeForce);
+
+	//ã‚µã‚¤ãƒ‰ãƒ–ãƒ¬ãƒ¼ã‚­
+	SetHandbrake(m_smoothedInput.handbrake);
+
 
 	Vehicle::Update(deltaTime);
 }
 
 void Player::Draw() const {
 //	m_model->Draw(m_position, m_rotation, m_scale);
-	m_box->Draw(m_position, m_quaternion, m_scale);
+	m_box->Draw(m_position, m_rotation, m_scale);
 
 	DrawWheels();
 
-	//ƒfƒoƒbƒO•\¦
+	//é€²è¡Œæ–¹å‘æç”»
+	Vector3 arrowPos = m_position + Vector3 { 0.0f, 1.0f, 0.0f };
+
+	//velocityã‹ã‚‰é€²è¡Œæ–¹å‘ã‚’è¨ˆç®—
+	Vector3 arrowRot = Vector3::ZERO;
+	Vector3 velNorm = m_velocity;
+	velNorm.Normalize();
+
+	arrowRot.y = std::atan2f(velNorm.x, velNorm.z);
+
+	m_field->Draw(arrowPos, arrowRot, Vector3 { 1.0f, 1.0f, 1.0f });
+
+	//ãƒ‡ãƒãƒƒã‚°è¡¨ç¤º
 	std::cout << "Speed: " << GetCurrentSpeed() << " km/h" << std::endl;
-	std::cout << "Position: (" << m_position.x << ", " << m_position.y << ", " << m_position.z << ")" << std::endl;
+	std::cout << "Engine Force: " << m_currentEngineForce << " N" << std::endl;
+	std::cout << "Current State: " << static_cast<int>(m_vehicleState) << std::endl;
 }
 
 void Player::UpdateInput(double deltaTime) {
-	//‘Oi
+	//å‰é€²
 	if (Input::GetKeyPress(KK_W)) {
 		m_currentInput.forward = 1.0f;
 	} else {
 		m_currentInput.forward = 0.0f;
 	}
 
-	//Œã‘Ş
+	//å¾Œé€€
 	if (Input::GetKeyPress(KK_S)) {
 		m_currentInput.reverse = 1.0f;
 	} else {
 		m_currentInput.reverse = 0.0f;
 	}
 
-	//ƒuƒŒ[ƒL
+	//ãƒ–ãƒ¬ãƒ¼ã‚­
 	if (Input::GetKeyPress(KK_SPACE)) {
 		m_currentInput.brake = 1.0f;
 	} else {
 		m_currentInput.brake = 0.0f;
 	}
 
-	//ƒXƒeƒAƒŠƒ“ƒO
+	//ã‚¹ãƒ†ã‚¢ãƒªãƒ³ã‚°
 	if (Input::GetKeyPress(KK_A)) {
 		m_currentInput.steering = -1.0f;
 	} else if (Input::GetKeyPress(KK_D)) {
@@ -122,7 +140,7 @@ void Player::UpdateInput(double deltaTime) {
 		m_currentInput.steering = 0.0f;
 	}
 
-	//ƒnƒ“ƒhƒuƒŒ[ƒL
+	//ãƒãƒ³ãƒ‰ãƒ–ãƒ¬ãƒ¼ã‚­
 	if (Input::GetKeyPress(KK_LEFTSHIFT)) {
 		m_currentInput.handbrake = true;
 	} else {
@@ -135,43 +153,50 @@ void Player::UpdateInput(double deltaTime) {
 void Player::SmoothInput(double deltaTime) {
 	float dt = static_cast<float>(deltaTime);
 
-	//‘Oi“ü—Í‚Ì•½ŠŠ‰»
+	//åœæ­¢ä¸­ã¯ã‚¹ãƒ†ã‚¢ãƒªãƒ³ã‚°ã®å¹³æ»‘åŒ–ã‚’é€Ÿãã™ã‚‹
+	float steerRate;
+	if (m_isStationary) {
+		steerRate = std::min(1.0f, m_steerSmoothRate * 2.0f * dt);
+	} else {
+		steerRate = std::min(1.0f, m_steerSmoothRate * dt);
+
+		//ã‚¹ãƒ†ã‚¢ãƒªãƒ³ã‚°ã‚’æˆ»ã™æ™‚ã¯é€Ÿãã™ã‚‹
+		if (std::fabsf(m_currentInput.steering) < std::fabsf(m_smoothedInput.steering)) {
+			steerRate *= 1.5f;
+			steerRate = std::min(1.0f, steerRate);
+		}
+	}
+
+	//å‰é€²å…¥åŠ›ã®å¹³æ»‘åŒ–
 	float forwardRate = m_forwardSmoothRate * dt;
 	m_smoothedInput.forward = std::lerp(m_smoothedInput.forward, m_currentInput.forward, forwardRate);
 
-	//Œã‘Ş“ü—Í‚Ì•½ŠŠ‰»(Œã‘Ş‚Í‘Oi‚æ‚è‚à‚ä‚Á‚­‚è”½‰‚·‚é)
+	//å¾Œé€€å…¥åŠ›ã®å¹³æ»‘åŒ–(å¾Œé€€ã¯å‰é€²ã‚ˆã‚Šã‚‚ã‚†ã£ãã‚Šåå¿œã™ã‚‹)
 	float reverseRate = m_reverseSmoothRate * dt;
 	m_smoothedInput.reverse = std::lerp(m_smoothedInput.reverse, m_currentInput.reverse, reverseRate);
 
-	//ƒuƒŒ[ƒL“ü—Í‚Ì•½ŠŠ‰»(ƒuƒŒ[ƒL‚Í‘f‘‚­”½‰‚·‚é)
+	//ãƒ–ãƒ¬ãƒ¼ã‚­å…¥åŠ›ã®å¹³æ»‘åŒ–(ãƒ–ãƒ¬ãƒ¼ã‚­ã¯ç´ æ—©ãåå¿œã™ã‚‹)
 	float brakeRate = m_brakeSmoothRate * dt;
 	m_smoothedInput.brake = std::lerp(m_smoothedInput.brake, m_currentInput.brake, brakeRate);
 
-	//ƒXƒeƒAƒŠƒ“ƒO“ü—Í‚Ì•½ŠŠ‰»
-	float steerRate = m_steerSmoothRate * dt;
-
-	//ƒXƒeƒAƒŠƒ“ƒO‚ğ–ß‚·‚Í‚æ‚è‘‚­–ß‚é
-	if (std::abs(m_currentInput.steering) < std::abs(m_smoothedInput.steering)) {
-		steerRate *= 1.5f;
-	}
-
+	//ã‚¹ãƒ†ã‚¢ãƒªãƒ³ã‚°å…¥åŠ›ã®å¹³æ»‘åŒ–
 	m_smoothedInput.steering = std::lerp(m_smoothedInput.steering, m_currentInput.steering, steerRate);
 
-	//ƒnƒ“ƒhƒuƒŒ[ƒL‚Í‘¦À‚É”½‰f
+	//ãƒãƒ³ãƒ‰ãƒ–ãƒ¬ãƒ¼ã‚­ã¯å³åº§ã«åæ˜ 
 	m_smoothedInput.handbrake = m_currentInput.handbrake;
 }
 
 float Player::CalculateRPM() const {
-	//Œ»İ‚Ì‘¬“x‚ğæ“¾
+	//ç¾åœ¨ã®é€Ÿåº¦ã‚’å–å¾—
 	float speed = std::abs(GetCurrentSpeed());
 	float maxSpeed = GetMaxSpeed();
 
-	//‘¬“x”ä‚©‚çRPM‚ğŒvZ
+	//é€Ÿåº¦æ¯”ã‹ã‚‰RPMã‚’è¨ˆç®—
 	float speedRatio = speed / maxSpeed;
 	speedRatio = std::clamp(speedRatio, 0.0f, 1.0f);
 
-	//ƒAƒNƒZƒ‹“ü—Í‚àl—¶
-	float throttle = max(max( m_smoothedInput.forward, m_smoothedInput.reverse), 0.1f );
+	//ã‚¢ã‚¯ã‚»ãƒ«å…¥åŠ›ã‚‚è€ƒæ…®
+	float throttle = std::max(std::max(m_smoothedInput.forward, m_smoothedInput.reverse), 0.1f );
 
 	float rpm = m_idleRPM + (m_maxRPM - m_idleRPM) * speedRatio * throttle;
 
@@ -179,25 +204,15 @@ float Player::CalculateRPM() const {
 }
 
 void Player::DrawWheels() const {
-	if (m_vehicle) {
-		for (int i = 0; i < 4 && i < m_vehicle->getNumWheels(); i++) {
-			btTransform wheelTrans = GetWheelTransform(i);
-			btVector3 btpos = wheelTrans.getOrigin();
-			btQuaternion btrot = wheelTrans.getRotation();
-
-			Vector3 pos = ToVector3(btpos);
-
-			Vector4 rot = { btrot.getX(), btrot.getY(), btrot.getZ(), btrot.getW() };
-
-			Vector3 scale = { 0.5f, 1.0f, 1.0f };
-
-			m_model->Draw(pos, rot, scale);
-
-			//ƒfƒoƒbƒO•\¦
-			std::cout << "Wheel " << i << " Rotation: ("
-				<< XMConvertToDegrees(rot.x) << ", "
-				<< XMConvertToDegrees(rot.y) << ", "
-				<< XMConvertToDegrees(rot.z) << ")" << std::endl;
-		}
+	//ãƒ›ã‚¤ãƒ¼ãƒ«æç”»
+	for (int i = 0; i < 4; i++) {
+		Vector3 wheelPos = GetWheelPosition(i);
+		Vector3 wheelRot = GetWheelRotation(i);
+		Vector3 wheelScale = { 0.5f, 1.0f, 1.0f };
+		m_model->Draw(wheelPos, wheelRot, wheelScale);
 	}
+}
+
+void Player::UpdateStationaryState() {
+	m_isStationary = (std::abs(GetCurrentSpeed()) < 1.8f);
 }

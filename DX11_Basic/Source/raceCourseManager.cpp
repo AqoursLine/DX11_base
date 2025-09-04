@@ -150,10 +150,15 @@ const BezierControlPoint& RaceCourseManager::GetControlPoint(int index) const {
 bool RaceCourseManager::Initialize() {
 	AddPoint({ 0.0f, 0.0f, 0.0f }, { 10.0f, 0.0f, 0.0f }, { -10.0f, 0.0f, 0.0f });
 	AddPoint({ 20.0f, 0.0f, 0.0f }, { 30.0f, 0.0f, 10.0f }, { 10.0f, 0.0f, -10.0f });
-	AddPoint({ 40.0f, 0.0f, 20.0f }, { 50.0f, 0.0f, 30.0f }, { 30.0f, 0.0f, 10.0f });
+	AddPoint({ 20.0f, 0.0f, 20.0f }, { 10.0f, 0.0f, 30.0f }, { 30.0f, 0.0f, 10.0f });
+	AddPoint({ 0.0f, 0.0f, 20.0f }, { -10.0f, 0.0f, 10.0f }, { 10.0f, 0.0f, 30.0f });
+
+	//コースを閉じる
+	CloseCourse();
 
 	//描画オブジェクト初期化
 	if (!m_renderer->Initialize()) {
+		ErrorMessage(L"CourseRendererの初期化に失敗しました。", E_FAIL);
 		return false;
 	}
 	return true;
