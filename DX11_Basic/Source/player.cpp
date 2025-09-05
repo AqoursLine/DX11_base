@@ -106,7 +106,16 @@ void Player::Draw() const {
 	//デバッグ表示
 	std::cout << "Speed: " << GetCurrentSpeed() << " km/h" << std::endl;
 	std::cout << "Engine Force: " << m_currentEngineForce << " N" << std::endl;
-	std::cout << "Current State: " << static_cast<int>(m_vehicleState) << std::endl;
+
+	//タイヤ情報表示
+	for (int i = 0; i < 4; i++) {
+		//座標
+		Vector3 wheelPos = GetWheelPosition(i);
+		std::cout << "Wheel " << i << " Position: (" << wheelPos.x << ", " << wheelPos.y << ", " << wheelPos.z << ")" << std::endl;
+		//回転
+		Vector3 wheelRot = GetWheelRotation(i);
+		std::cout << "Wheel " << i << " Rotation: (" << wheelRot.x << ", " << wheelRot.y << ", " << wheelRot.z << ")" << std::endl;
+	}
 }
 
 void Player::UpdateInput(double deltaTime) {

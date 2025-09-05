@@ -2,148 +2,135 @@
 
 #include "gameObject.h"
 
-enum class VehicleState {
-	GRIP_DRIVING, //グリップ走行
-	DRIFT_INITIATE, //ドリフト開始
-	DRIFT_ACTIVE, //ドリフト中
-	DRIFT_RECOVERY //ドリフト回復
+//ホイール情報構造体
+struct WheelInfo {
+	Vector3 localPosition;	//ホイールのローカル位置
+	Vector3 worldPosition;	//ホイールのワールド位置
+	Vector3 rotation;		//ホイールの回転角度
+	float suspensionLength;	//サスペンションの伸縮長
+	bool isGrounded;		//地面に接地しているか
+	float grip;				//グリップ力
+	float slipRatio;		//スリップ比
+	Vector3 velocity;		//ホイールの速度
+	Vector3 forwardDir;		//ホイールの前方向ベクトル
+	Vector3 rightDir;		//ホイールの右方向ベクトル
 };
 
-//車両パラメータ
+//ビークルパラメータ構造体
 struct VehicleParams {
-	//エンジン設定
-	float maxEngineForce = 4500.0f; //エンジンの最大出力
-	float maxBrakingForce = 100.0f; //ブレーキの最大出力
-	float maxSteeringAngle = 0.5f; //ハンドルの最大回転角(rad)
-	float maxSpeed = 200.0f; //最大速度(km/h)
-	//車体設定
-	float chassisMass = 1000.0f; //車体の質量
-	Vector3 chassisSize = { 2.0f, 0.6f, 4.0f }; //車体のサイズ
+	//エンジン関連
+	float maxEngineForce = 30000.0f;	//最大エンジン力 (N)
+	float maxBrakingForce = 12000.0f;	//最大ブレーキ力 (N)
+	float maxSteeringAngle = 0.5f;		//最大ステアリング角度(rad)
 
-	//物理設定
-	float acceleration = 18.0f; //加速度
-	float deceleration = 6.0f; //減速度
-	float friction = 0.992f; //摩擦係数
-	float airResistance = 0.008f; //空気抵抗
-	float steeringSensitivity = 2.2f; //ステアリング感度
+	//車体関連
+	float mass = 1200.0f;				//車体質量 (kg)
+	float dragCoefficient = 0.01f;		//空気抵抗係数
+	float rollingResistance = 0.005f;	//転がり抵抗係数
+	float centerOfMassHeight = 0.5f;	//重心高さ (m)
 
-	//後退設定
-	float reverseForceRatio = 0.7f; //後退時エンジン力割合
+	//ロール関連
+	float rollStiffness = 50000.0f;		//ロール剛性(Nm/rad)
+	float rollDamping = 5000.0f;		//ロール減衰(Nm*s/rad)
+	float maxRollAngle = 0.4f;			//最大ロール角度 (度)
 
-	//ドリフト設定
-	float driftThreshold = 30.0f; //ドリフト開始速度閾値(km/h)
-	float driftInitiateForce = 3.0f; //ドリフト開始のための横方向力
-	float driftSustainForce = 1.5f; //ドリフト維持のための横方向力
-	float rearSlipMuktiplier = 2.5f; //後輪スリップ倍率
-	float frontGripStrength = 0.95f; //前輪グリップ力
-	float rearGripLoss = 0.7f; //後輪グリップ喪失率
-	float driftRecoveryRate = 3.0f; //ドリフト回復速度
+	//タイヤ関連
+	float maxTireGrip = 1.2f;			//最大タイヤグリップ
+	float minTireGrip = 0.3f;			//最小タイヤグリップ
+	float slipThreshold = 0.3f;			//スリップ開始閾値
+	float driftThreshold = 0.6f;		//ドリフト開始閾値
 
-	//ホイール設定
-	float wheelRadius = 0.5f; //ホイールの半径
-	Vector3 frontLeftWheelPos = { -1.0f, -0.3f, 1.5f }; //左前ホイール位置
-	Vector3 frontRightWheelPos = { 1.0f, -0.3f, 1.5f }; //右前ホイール位置
-	Vector3 rearLeftWheelPos = { -1.0f, -0.3f, -1.5f }; //左後ホイール位置
-	Vector3 rearRightWheelPos = { 1.0f, -0.3f, -1.5f }; //右後ホイール位置
+	//サスペンション関連
+	float suspensionStiffness = 80000.0f;//サスペンション剛性 (N/m)
+	float suspensionDamping = 4000.0f;	//サスペンション減衰 (N*s/m)
+	float maxSuspensionTravel = 0.3f;	//最大サスペンション伸縮長 (m)
+
+	//ハンドブレーキ関連
+	float handbrakeGripReduction = 0.7f; //ハンドブレーキ時のグリップ低下率
 };
 
 class Vehicle : public GameObject {
 public:
-	Vehicle();
-	virtual ~Vehicle() = default;
+	Vehicle() = default;
+	~Vehicle() = default;
 
-	//GameObject継承関数
-	virtual bool Initialize() override;
-	virtual void Finalize() override;
-	virtual void Update(double deltaTime) override;
+	bool Initialize() override;
+	void Finalize() override;
+	void Update(double deltaTime) override;
 
-	//ビークル操作
-	virtual void SetEngineForce(float force); //エンジン力設定
-	virtual void SetSteeringValue(float steering); //ステアリング設定
-	virtual void SetBrakingForce(float brake); //ブレーキ力設定
-	virtual void SetHandbrake(bool handbrake); //ハンドブレーキ設定
+	//車両制御インターフェース
+	void SetEngineForce(float force);
+	void SetBrakingForce(float brake);
+	void SetSteeringValue(float steering);
+	void SetHandbrake(bool active);
 
-	//ビークル状態取得
-	[[nodiscard]] float GetCurrentSpeed() const { return m_currentSpeed; }
-	[[nodiscard]] float GetMaxSpeed() const { return m_params.maxSpeed; }
-	[[nodiscard]] float GetEngineForce() const { return m_currentEngineForce; }
-	[[nodiscard]] float GetSteeringAngle() const { return m_currentSteering; }
-	[[nodiscard]] float GetBrakingForce() const { return m_currentBrakingForce; }
-	[[nodiscard]] bool IsReversing() const { return m_isReversing; }
-	[[nodiscard]] bool IsHandbrakeActive() const { return m_handbrakeActive; }
-	[[nodiscard]] bool IsDrifting() const { return m_vehicleState != VehicleState::GRIP_DRIVING; }
-	[[nodiscard]] VehicleState GetVehicleState() const { return m_vehicleState; }
-	[[nodiscard]] float GetDriftAngle() const { return m_driftAngle; }
-	[[nodiscard]] float GetSripRatio() const {return m_slipRatio; }
-	[[nodiscard]] float GetRearSlipFactor() const { return m_rearSlipFactor; }
+	//状態取得
+	[[nodiscard]] float GetCurrentSpeed() const;
+	[[nodiscard]] float GetMaxSpeed() const;
+	[[nodiscard]] bool IsDrifting() const;
+	[[nodiscard]] float GetRollAngle() const { return m_rollAngle; } //ラジアン
 
-	//ホイール状態取得
-	[[nodiscard]] Vector3 GetWheelPosition(int wheelIndex) const;
-	[[nodiscard]] Vector3 GetWheelRotation(int wheelIndex) const;
-	[[nodiscard]] int GetNumWheels() const { return 4; }
+	//タイヤ情報取得
+	Vector3 GetWheelPosition(int wheelIndex) const;
+	Vector3 GetWheelRotation(int wheelIndex) const;
+	float GetWheelSlipRatio(int wheelIndex) const;
 
 protected:
-	//ビークルパラメータ
+	//車両パラメータ
 	VehicleParams m_params;
 
-	//現在の操作値
+	//車両物理状態
+	Vector3 m_velocity = Vector3::ZERO; //車体の速度
+	Vector3 m_angularVelocity = Vector3::ZERO; //車体の角速度
+	Vector3 m_acceleration = Vector3::ZERO; //車体の加速度
+
+	//ロール関連
+	float m_rollAngle = 0.0f; //車体のロール角度 (ラジアン)
+	float m_rollVelocity = 0.0f; //車体のロール角速度 (ラジアン/秒)
+
+	//入力値
 	float m_currentEngineForce = 0.0f; //現在のエンジン力
-	float m_currentSteering = 0.0f; //現在のステアリング角
 	float m_currentBrakingForce = 0.0f; //現在のブレーキ力
+	float m_currentSteeringAngle = 0.0f; //現在のステアリング角度
 	bool m_handbrakeActive = false; //ハンドブレーキ状態
 
-	//物理状態
-	float m_currentSpeed = 0.0f; //現在の速度(km/h)
-	Vector3 m_velocity = {0.0f, 0.0f, 0.0f}; //現在の速度ベクトル
-	Vector3 m_acceleration = { 0.0f, 0.0f, 0.0f }; //現在の加速度ベクトル
-	float m_angularVelocity = 0.0f; //Y軸周りの角速度(rad/s)
-	bool m_isReversing = false; //後退中フラグ
+	//タイヤ情報
+	WheelInfo m_wheels[4]; //4輪分のホイール情報
 
-	//ドリフト状態
-	VehicleState m_vehicleState = VehicleState::GRIP_DRIVING; //現在のビークル状態
-	float m_driftAngle = 0.0f; //ドリフト角(rad)
-	float m_slipRatio = 0.0f; //スリップ比
-	float m_driftIntensity = 0.0f; //ドリフト強度
-	float m_rearSlipFactor = 0.0f; //後輪スリップ係数
-	float m_driftTimer = 0.0f; //ドリフト時間
+	//物理計算用
+	Vector3 m_centerOfMass = Vector3::ZERO; //重心オフセット
+	float m_wheelBase = 2.8f; //ホイールベース (前後輪間距離)
+	float m_trackWidth = 1.5f; //トレッド幅 (左右輪間距離)
 
-	//ホイール状態
-	float m_wheelRotationAngle = 0.0f; //ホイールの回転角
-	float m_frontWheelSteeringAngle = 0.0f; //前輪のステアリング角
-
-	enum WheelIndex {
-		FRONT_LEFT = 0,
-		FRONT_RIGHT = 1,
-		REAR_LEFT = 2,
-		REAR_RIGHT = 3,
-		WHEEL_COUNT = 4
-	};
 private:
-	//物理計算
+	//物理演算更新
 	void UpdatePhysics(double deltaTime);
-	void ApplyEngineForce(float deltaTime);
-	void ApplySteering(float deltaTime);
-	void ApplyFriction(float deltaTime);
-	void ApplyAirResistance(float deltaTime);
-	void UpdateWheelRotation(float deltaTime);
+	void UpdateWheels(double deltaTime);
+	void CalculateForces(double deltaTime);
+	void ApplyForces(double deltaTime);
+	void UpdateTireGrip();
+	void CalculateSuspension();
+	void UpdateRollPhysics(double deltaTime);
 
-	//ステート管理
-	void UpdateVehicleState(float deltaTime);
-	void HandleGripDriving(float deltaTime);
-	void HandleDriftInitiate(float deltaTime);
-	void HandleDriftActive(float deltaTime);
-	void HandleDriftRecovery(float deltaTime);
+	//タイヤ物理
+	Vector3 CalculateTireForce(int wheelIndex, const Vector3& wheelVelocity);
+	float CalculateSlipRatio(const Vector3& wheelVelocity, const Vector3& wheelForward);
+	float CalculateSlipAngle(const Vector3& wheelVelocity, const Vector3& wheelForward, const Vector3& wheelRight);
+	float GetGripMultiplier(float slipRatio, float slipAngle, bool handbrakeActive);
 
-	//ドリフト物理
-	void CalculateLateralForce(float deltaTime);
-	void ApplyHandbrakeDrift(float deltaTime);
-	void CalculateDriftAngle();
+	//車両状態更新
+	void UpdateWheelPosition();
+	void UpdateWheelRotations(double deltaTime);
 
-	//ホイールラッピング
-	float WrapAngle(float angle) const {
-		while (angle > XM_PI) angle -= XM_2PI;
-		while (angle <= -XM_PI) angle += XM_2PI;
-		return angle;
-	}
+	//抵抗力計算
+	Vector3 CalculateAirResistance() const;
+	Vector3 CalculateRollingResistance() const;
+
+	//ロール計算
+	float CalculateLateralAcceleration() const;
+	float CalculateRollMoment() const;
+
+	//内部状態
+	float m_wheelRotationAngle[4] = { 0.0f }; //ホイールの回転角度 (ラジアン)
+	bool m_isReversing = false; //後退中フラグ
 };
-

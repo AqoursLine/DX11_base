@@ -20,8 +20,6 @@ public:
 	void Update(double deltaTime) override;
 	void Draw() const override;
 
-	[[nodiscard]] bool IsReversing() const { return m_isReversing; }
-
 private:
 	class Model* m_model = nullptr;
 
