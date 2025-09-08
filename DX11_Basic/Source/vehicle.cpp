@@ -1,479 +1,714 @@
 ﻿#include "vehicle.h"
 
-#include <algorithm>
+Vehicle::Vehicle()
+	: m_velocity(Vector3::ZERO)
+	, m_angularVelocity(Vector3::ZERO)
+	, m_acceleration(Vector3::ZERO)
+	, m_centerOfMass(0.0f, 0.0f, 0.0f) // 重心位置（ローカル座標系）
+	, m_mass(1200.0f) // 車両質量（kg）
+	, m_inertiaTensor(400.0f, 800.0f, 1200.0f) // 慣性テンソル（簡易的な値）
+	, m_steerInput(0.0f)
+	, m_throttleInput(0.0f)
+	, m_brakeInput(0.0f)
+	, m_handbrakeInput(0.0f)
+	, m_wheelBase(2.5f) // ホイールベース（m）
+	, m_trackWidth(1.6f) // トレッド幅（m）
+	, m_maxSteerAngle(0.6f) // 最大ステアリング角（ラジアン）
+	, m_dragCoefficient(0.3f) // 空気抵抗係数
+	, m_frontalArea(2.2f) // 正面投影面積（m^2）
+	, m_groundHeight(0.0f)
 
-bool Vehicle::Initialize() {
-	//タイヤの初期位置設定
-	m_wheels[0].localPosition = { -m_trackWidth * 0.5f, -0.4f, m_wheelBase * 0.5f }; //前左
-	m_wheels[1].localPosition = { m_trackWidth * 0.5f, -0.4f, m_wheelBase * 0.5f };  //前右
-	m_wheels[2].localPosition = { -m_trackWidth * 0.5f, -0.4f, -m_wheelBase * 0.5f }; //後左
-	m_wheels[3].localPosition = { m_trackWidth * 0.5f, -0.4f, -m_wheelBase * 0.5f };  //後右
+{
+}
 
-	//初期状態設定
-	for (int i = 0; i < 4; i++) {
-		m_wheels[i].suspensionLength = 0.2f;
-		m_wheels[i].isGrounded = true;
-		m_wheels[i].grip = m_params.maxTireGrip;
-		m_wheels[i].slipRatio = 0.0f;
-		m_wheels[i].velocity = Vector3::ZERO;
-		m_wheelRotationAngle[i] = 0.0f;
+Vehicle::WheelRenderInfo Vehicle::GetWheelRenderInfo(int wheelIndex) const {
+	if (wheelIndex < 0 || wheelIndex >= static_cast<int>(m_wheels.size())) {
+		return {};
 	}
 
-	m_centerOfMass = { 0.0f, -0.2f, 0.0f };
+	const Wheel& wheel = m_wheels[wheelIndex];
+	WheelRenderInfo info;
+
+	//ワールド位置
+	info.position = wheel.worldPosition;
+
+	//サスペンション圧縮による位置調整
+	if (wheel.isGrounded) {
+		float compressionOffset = wheel.compressionRatio * m_suspensions[wheelIndex].maxCompression;
+		info.position.y -= compressionOffset;
+	}
+
+	//回転角
+	info.rotation.x = wheel.rotationAngle;
+	info.rotation.y = wheel.steerAngle + m_rotation.y;
+	info.rotation.z = m_rotation.z;
+
+	//その他の情報
+	info.compressionRatio = wheel.compressionRatio;
+	info.isGrounded = wheel.isGrounded;
+	info.radius = wheel.radius;
+	info.width = wheel.width;
+	info.isFrontWheel = wheel.isFrontWheel;
+	info.isDrivenWheel = wheel.isDriveWheel;
+
+	return info;
+}
+
+std::vector<Vehicle::WheelRenderInfo> Vehicle::GetAllWheelRenderInfo() const {
+	std::vector<WheelRenderInfo> infos;
+	infos.reserve(m_wheels.size());
+
+	for (size_t i = 0; i < m_wheels.size(); i++) {
+		infos.push_back(GetWheelRenderInfo(static_cast<int>(i)));
+	}
+	return infos;
+}
+
+bool Vehicle::Initialize() {
+	// タイヤとサスペンションの初期化
+	m_wheels.resize(4);
+	m_suspensions.resize(4);
+
+	//ホイールの位置設定(前左、前右、後左、後右)
+	m_wheels[0].localPosition = Vector3(-m_trackWidth * 0.5f, 0.0f, m_wheelBase * 0.5f); // 前左
+	m_wheels[1].localPosition = Vector3(m_trackWidth * 0.5f, 0.0f, m_wheelBase * 0.5f);  // 前右
+	m_wheels[2].localPosition = Vector3(-m_trackWidth * 0.5f, 0.0f, -m_wheelBase * 0.5f); // 後左
+	m_wheels[3].localPosition = Vector3(m_trackWidth * 0.5f, 0.0f, -m_wheelBase * 0.5f);  // 後右
+
+	//前輪設定
+	m_wheels[0].isFrontWheel = true;
+	m_wheels[1].isFrontWheel = true;
+
+	//駆動輪設定(全輪駆動)
+	m_wheels[0].isDriveWheel = true;
+	m_wheels[1].isDriveWheel = true;
+	//m_wheels[2].isDriveWheel = true;
+	//m_wheels[3].isDriveWheel = true;
+
+	//全タイヤの基本パラメータ設定
+	for (auto& wheel : m_wheels) {
+		wheel.radius = 0.32f;
+		wheel.width = 0.22f;
+		wheel.frictionCoefficient = 1.0f;
+	}
+
+	//前輪と後輪で異なる特性
+	m_wheels[0].maxGripForce = 3500.0f;
+	m_wheels[1].maxGripForce = 3500.0f;
+	m_wheels[2].maxGripForce = 5000.0f;
+	m_wheels[3].maxGripForce = 5000.0f;
+
+	//サスペンション設定
+	for (auto& suspension : m_suspensions) {
+		suspension.springConstant = 15000.0f;	// バネ定数
+		suspension.damperConstant = 1500.0f;	// ダンパー定数
+		suspension.restLength = 0.35f;			// 自然長
+		suspension.maxCompression = 0.25f;		// 最大圧縮量
+		suspension.currentLength = suspension.restLength;
+		suspension.lastLength = suspension.restLength;
+	}
+
+	//重心位置設定(ローカル座標系)
+	m_centerOfMass = Vector3(0.0f, -0.3f, 0.8f);
+
+	m_inertiaTensor = { 2000.0f, 1600.0f, 1200.0f };
+
+	//エンジン設定
+	m_engine.maxTorque = 400.0f;		// 最大トルク (Nm)
+	m_engine.idleRPM = 800.0f;			// アイドリング回転数 (RPM)
+	m_engine.maxRPM = 7000.0f;			// 最大回転数 (RPM)
+	m_engine.currentRPM = m_engine.idleRPM; // 現在の回転数 (RPM)
+	m_engine.engineBraking = 50.0f;		// エンジンブレーキ係数
+
+	//空気抵抗設定
+	m_dragCoefficient = 0.3f;	// 空気抵抗係数
+	m_frontalArea = 2.2f;		// 正面投影面積 (m^2)
+
+	UpdateWheelPositions();
 
 	return true;
 }
 
-void Vehicle::Finalize() {
-}
-
 void Vehicle::Update(double deltaTime) {
+	float dt = static_cast<float>(deltaTime);
 
-	//車両物理更新
-	UpdatePhysics(deltaTime);
+	//エンジンパラメータ設定
+	m_engine.throttleInput = std::abs(m_throttleInput);
 
-	//位置と回転を更新
-	m_position += m_velocity * static_cast<float>(deltaTime);
-	m_rotation.y += m_angularVelocity.y * static_cast<float>(deltaTime);
-
-	//タイヤ更新
-	UpdateWheels(deltaTime);
-
-	//ロール物理更新
-	UpdateRollPhysics(deltaTime);
-
-	//タイヤ回転更新
-	UpdateWheelRotations(deltaTime);
-
-	//ロール各を回転に反映
-	m_rotation.z = m_rollAngle;
+	UpdatePhysics(dt);
+	UpdateWheelPositions();
 }
 
-void Vehicle::SetEngineForce(float force) {
-	m_currentEngineForce = std::clamp(force, -m_params.maxEngineForce, m_params.maxEngineForce);
+void Vehicle::UpdatePhysics(float deltaTime) {
+	UpdateEngine(deltaTime);
+	CalculateSuspensionForces(deltaTime);
+	CalculateWheelForces(deltaTime);
+	UpdateAllWheelRotations(deltaTime);
+	CalculateAerodynamicsForces();
+	IntegrateForces(deltaTime);
 }
 
-void Vehicle::SetBrakingForce(float brake) {
-	m_currentBrakingForce = std::clamp(brake, 0.0f, m_params.maxBrakingForce);
-}
+void Vehicle::UpdateEngine(float deltaTime) {
+	//車両からエンジンRPMを計算
+	float wheelSpeed = 0.0f;
+	int drivenWheelCount = 0;
 
-void Vehicle::SetSteeringValue(float steering) {
-	m_currentSteeringAngle = std::clamp(steering, -m_params.maxSteeringAngle, m_params.maxSteeringAngle);
-}
-
-void Vehicle::SetHandbrake(bool active) {
-	m_handbrakeActive = active;
-}
-
-float Vehicle::GetCurrentSpeed() const {
-	float speed = m_velocity.Length() * 3.6f; //m/s to km/h
-	return speed;
-}
-
-float Vehicle::GetMaxSpeed() const {
-	//理論最高速度を計算(空気抵抗との平衡点)
-	float maxSpeed = std::sqrt(m_params.maxEngineForce / (0.5f * m_params.dragCoefficient * 1.225f));
-	return maxSpeed * 3.6f; //m/s to km/h
-}
-
-bool Vehicle::IsDrifting() const {
-	//少なくとも一つのタイヤがスリップしているか
-	for (int i = 0; i < 4; i++) {
-		if (m_wheels[i].slipRatio > m_params.driftThreshold) {
-			return true;
+	for (const auto& wheel : m_wheels) {
+		if (wheel.isDriveWheel && wheel.isGrounded) {
+			wheelSpeed += std::abs(wheel.angularVelocity * wheel.radius);
+			drivenWheelCount++;
 		}
 	}
-	return false;
-}
 
-Vector3 Vehicle::GetWheelPosition(int wheelIndex) const {
-	if (wheelIndex < 0 || wheelIndex >= 4) return Vector3::ZERO;
-	return m_wheels[wheelIndex].worldPosition;
-}
-
-Vector3 Vehicle::GetWheelRotation(int wheelIndex) const {
-	if (wheelIndex < 0 || wheelIndex >= 4) return Vector3::ZERO;
-
-	Vector3 wheelRot = m_rotation;
-
-	//フロントタイヤにステアリング角を適用
-	if (wheelIndex < 2) {
-		wheelRot.y += m_currentSteeringAngle;
-	}
-
-	//タイヤの回転を適用
-	wheelRot.x = m_wheelRotationAngle[wheelIndex];
-
-	//サスペンション長が自然長から伸びている場合のみロール回転を適用
-	if (m_wheels[wheelIndex].suspensionLength < m_params.maxSuspensionTravel * 0.9f) {
-		wheelRot.z = m_rollAngle;
+	//スロットル入力によるRPM調整
+	if (m_engine.throttleInput > 0.0f) {
+		float targetRPM = m_engine.idleRPM + (m_engine.maxRPM - m_engine.idleRPM) * m_engine.throttleInput;
+		if (targetRPM > m_engine.currentRPM) {
+			m_engine.currentRPM += (targetRPM - m_engine.currentRPM) * deltaTime * 8.0f;
+		}
 	} else {
-		wheelRot.z = 0.0f;
+		if (drivenWheelCount > 0) {
+			wheelSpeed /= drivenWheelCount;
+
+			//簡単なギア比
+			float gearRatio = 1.0f; // 仮のギア比
+			float targetRPM = (wheelSpeed / (m_wheels[0].radius * 2.0f * 3.14159f)) * 60.0f * gearRatio;
+			targetRPM = std::max(targetRPM, m_engine.idleRPM);
+
+			//RPMの変化をスムーズに
+			float rpmDiff = targetRPM - m_engine.currentRPM;
+			m_engine.currentRPM += rpmDiff * deltaTime * 3.0f; // レスポンスの速さ
+		} else {
+			m_engine.currentRPM += (m_engine.idleRPM - m_engine.currentRPM) * deltaTime * 2.0f;
+		}
+
 	}
 
-	return wheelRot;
+	m_engine.currentRPM = std::clamp(m_engine.currentRPM, m_engine.idleRPM, m_engine.maxRPM);
+
 }
 
-float Vehicle::GetWheelSlipRatio(int wheelIndex) const {
-	if (wheelIndex < 0 || wheelIndex >= 4) return 0.0f;
-	return m_wheels[wheelIndex].slipRatio;
-}
-
-void Vehicle::UpdatePhysics(double deltaTime) {
-	//力の計算と適用
-	CalculateForces(deltaTime);
-	ApplyForces(deltaTime);
-
-	//タイヤグリップ更新
-	UpdateTireGrip();
-
-	//サスペンション計算
-	CalculateSuspension();
-}
-
-void Vehicle::UpdateWheels(double deltaTime) {
-	UpdateWheelPosition();
-
+void Vehicle::CalculateSuspensionForces(float deltaTime) {
 	for (int i = 0; i < 4; i++) {
-		//タイヤのワールド速度を計算
-		Vector3 wheelWorldPos = m_wheels[i].worldPosition;
-		Vector3 relativePos = wheelWorldPos - (m_position + m_centerOfMass);
+		Wheel& wheel = m_wheels[i];
+		Suspension& suspension = m_suspensions[i];
 
-		//車体の回転による速度成分を計算
-		Vector3 rotationalVelocity = m_angularVelocity.Cross(relativePos);
-		m_wheels[i].velocity = m_velocity + rotationalVelocity;
+		//地面との距離を計算
+		float groundHeight = GetGroundHeight(wheel.worldPosition);
+		float wheelBottomHeight = wheel.worldPosition.y - wheel.radius;
 
-		//タイヤの方向ベクトルを更新
-		float steerAngle = (i < 2) ? m_currentSteeringAngle : 0.0f; //前輪のみステアリング角を適用
-		float totalYawAngle = m_rotation.y + steerAngle;
+		//サスペンションの圧縮量を計算
+		float compressionDistance = suspension.restLength - (wheelBottomHeight - groundHeight);
+		compressionDistance = std::clamp(compressionDistance, 0.0f, suspension.maxCompression);
 
-		//前方向ベクトル
-		m_wheels[i].forwardDir = { std::sin(totalYawAngle), 0.0f, std::cos(totalYawAngle) };
+		suspension.lastLength = suspension.currentLength;
+		suspension.currentLength = suspension.restLength - compressionDistance;
 
-		//右方向ベクトル(ロールも考慮)
-		m_wheels[i].rightDir = { std::cos(totalYawAngle), 0.0f, -std::sin(totalYawAngle) };
+		wheel.compressionRatio = compressionDistance / suspension.maxCompression;
+		wheel.isGrounded = (compressionDistance > 0.001f);
 
-		//スリップ率を計算
-		Vector3 wheelVel = m_wheels[i].velocity;
-		m_wheels[i].slipRatio = CalculateSlipRatio(wheelVel, m_wheels[i].forwardDir);
+		if (wheel.isGrounded) {
+			//スプリング力
+			float springForce = compressionDistance * suspension.springConstant;
+
+			//ダンパー力
+			float compressionVelocity = (suspension.lastLength - suspension.currentLength) / deltaTime;
+			float dmaperForce = compressionVelocity * suspension.damperConstant;
+
+			//上向きの力
+			float totalForce = springForce + dmaperForce;
+
+			//過度な力を防ぐ
+			totalForce = std::clamp(totalForce, 0.0f, m_mass * 9.81f * 2.0f);
+
+			wheel.suspensionForce = Vector3(0.0f, totalForce, 0.0f);
+		} else {
+			wheel.suspensionForce = Vector3::ZERO;
+		}
 	}
+
 }
 
-void Vehicle::CalculateForces(double deltaTime) {
+void Vehicle::CalculateWheelForces(float deltaTime) {
 	Vector3 totalForce = Vector3::ZERO;
 	Vector3 totalTorque = Vector3::ZERO;
 
-	//各タイヤの力を計算
+	//重力を加える
+	Vector3 gravity = Vector3(0.0f, -9.81f * m_mass, 0.0f);
+	totalForce += gravity;
+
+	//スピン検出と安定化
+	float yawRate = std::abs(m_angularVelocity.y);
+	float spinThreshold = 1.5f; // スピン検出閾値
+	bool isSpinning = yawRate > spinThreshold;
+
+	//スピン中は安定化力を適用
+	float stabilityFactor = 1.0f;
+	if (isSpinning) {
+		stabilityFactor = std::max(0.1f, 1.0f - (yawRate - spinThreshold) * 0.3f);
+	}
+
 	for (int i = 0; i < 4; i++) {
-		//接地していないタイヤはスキップ
-		if (!m_wheels[i].isGrounded) continue;
+		Wheel& wheel = m_wheels[i];
 
-		Vector3 tireForce = CalculateTireForce(i, m_wheels[i].velocity);
-
-		//ブレーキ力を適用
-		if (m_currentBrakingForce > 0.0f) {
-			Vector3 brakeDirection = -m_wheels[i].velocity;
-			brakeDirection.Normalize();
-			Vector3 brakeForce = brakeDirection * m_currentBrakingForce * 0.25f; //4輪で分割
-			tireForce += brakeForce;
+		if (!wheel.isGrounded) {
+			wheel.tireForce = Vector3::ZERO;
+			wheel.angularVelocity *= 0.95f; // 空転時の減衰
+			continue;
 		}
 
-		//ハンドブレーキ力を後輪に適用
-		if (m_handbrakeActive && i >= 2) {
-			Vector3 handbrakeDirection = -m_wheels[i].velocity;
-			if (handbrakeDirection.Length() > 0.01f) {
-				handbrakeDirection.Normalize();
-				Vector3 handbrakeForce = handbrakeDirection * m_params.maxBrakingForce * 0.3f;
-				tireForce += handbrakeForce;
+		//ワールド座標での車輪の速度を計算
+		Vector3 wheelWorldPos = wheel.worldPosition;
+		Vector3 relativePos = wheelWorldPos - (GetPosition() + m_centerOfMass);
+		Vector3 wheelVelocity = m_velocity + m_angularVelocity.Cross(relativePos);
+
+		//ステアリング角度設定
+		if (wheel.isFrontWheel) {
+			wheel.steerAngle = m_steerInput * m_maxSteerAngle;
+		}
+
+		//タイヤ力を計算
+		Vector3 tireForce = CalculateTireForce(wheel, wheelVelocity);
+
+		//慣性時のステアリング追従力を追加
+		ApplyInertiaSteeringForce(wheel, wheelVelocity, tireForce);
+
+		//スピン中は後輪の横力を強化
+		if (isSpinning && !wheel.isFrontWheel) {
+			Vector3 right = GetRight();
+			if (wheel.isFrontWheel) {
+				float cosSteer = cosf(wheel.steerAngle);
+				float sinSteer = sinf(wheel.steerAngle);
+				Vector3 forward = GetForward();
+				right = forward * -sinSteer + right * cosSteer;
 			}
+
+			float lateralVel = wheelVelocity.Dot(right);
+			Vector3 antiSpinForce = right * (-lateralVel * 500.0f);
+			tireForce += antiSpinForce;
 		}
 
-		totalForce += tireForce;
+		//駆動力を追加
+		if (wheel.isDriveWheel && std::abs(m_throttleInput) > 0.001f) {
+			//エンジンRPMから駆動力を計算
+			float engineRPMFactor = m_engine.currentRPM / m_engine.maxRPM;
+			float throttleFactor = std::abs(m_throttleInput);
 
-		//トルク計算
-		Vector3 leverArm = m_wheels[i].localPosition;
-		//ローカル座標をワールド座標系でのトルク計算用に回転
-		float cosY = std::cos(m_rotation.y);
-		float sinY = std::sin(m_rotation.y);
-		Vector3 worldLeverArm;
-		worldLeverArm.x = leverArm.x * cosY - leverArm.z * sinY;
-		worldLeverArm.y = leverArm.y;
-		worldLeverArm.z = leverArm.x * sinY + leverArm.z * cosY;
+			//基準駆動力
+			float baseDriveForce = 4000.0f; // 仮の基準駆動力
+			float driveForce = baseDriveForce * engineRPMFactor * throttleFactor;
 
-		Vector3 torque = worldLeverArm.Cross(tireForce);
-		totalTorque += torque;
-	}
+			//スピン中は駆動力を減少
+			if (isSpinning) {
+				driveForce *= 0.3f;
+			}
 
-	//エンジン力を後輪に適用
-	if (std::abs(m_currentEngineForce) > 0.1f) {
-		Vector3 forwardDir = { std::sin(m_rotation.y), 0.0f, std::cos(m_rotation.y) };
-		Vector3 engineForce = forwardDir * m_currentEngineForce;
-		totalForce += engineForce;
-	}
+			//前進後退の方向
+			Vector3 driveDirection = GetForward();
 
-	//空気抵抗を追加
-	totalForce += CalculateAirResistance();
+			//ステアリング角度を考慮
+			if (wheel.isFrontWheel) {
+				float cosSteer = cosf(wheel.steerAngle);
+				float sinSteer = sinf(wheel.steerAngle);
+				driveDirection = driveDirection * cosSteer + GetRight() * sinSteer;
+			}
 
-	//転がり抵抗を追加
-	totalForce += CalculateRollingResistance();
+			//後退時は逆方向
+			if (m_throttleInput < 0.0f) {
+				driveDirection = -driveDirection;
+			}
 
-	//加速度計算
-	m_acceleration = totalForce / m_params.mass;
-
-	//角加速度を計算
-	Vector3 angularAcceleration = totalTorque / (m_params.mass * 0.5f);
-	m_angularVelocity += angularAcceleration * static_cast<float>(deltaTime);
-
-	//角速度に減衰を適用
-	m_angularVelocity *= 0.95f;
-
-}
-
-void Vehicle::ApplyForces(double deltaTime) {
-	//速度更新
-	m_velocity += m_acceleration * static_cast<float>(deltaTime);
-
-	//最小速度での摩擦を減らす
-	if (m_velocity.Length() > 0.01f) {
-		m_velocity *= 0.999f;
-	}
-}
-
-void Vehicle::UpdateTireGrip() {
-	for (int i = 0; i < 4; i++) {
-		float slipRatio = std::abs(m_wheels[i].slipRatio);
-		float slipAngle = CalculateSlipAngle(m_wheels[i].velocity, m_wheels[i].forwardDir, m_wheels[i].rightDir);
-
-		//グリップ係数を計算
-		float gripMultiplier = GetGripMultiplier(slipRatio, slipAngle, m_handbrakeActive && i >= 2);
-		m_wheels[i].grip = m_params.maxTireGrip * gripMultiplier;
-	}
-}
-
-void Vehicle::CalculateSuspension() {
-	//サスペンションの伸縮を計算
-	for (int i = 0; i < 4; i++) {
-		//地面との接触判定	(簡易的にy = 0平面とする)
-		float groundHeight = 0.0f;
-		float wheelHeight = m_wheels[i].worldPosition.y;
-
-		if (wheelHeight <= groundHeight + 0.1f) {
-			m_wheels[i].isGrounded = true;
-			m_wheels[i].suspensionLength = std::max(0.0f, wheelHeight - groundHeight);
-		} else {
-			m_wheels[i].isGrounded = false;
-			m_wheels[i].suspensionLength = m_params.maxSuspensionTravel;
+			tireForce += driveDirection * driveForce;
 		}
-	}
-}
 
-void Vehicle::UpdateRollPhysics(double deltaTime) {
-	//横方向の加速度を計算
-	float lateralAccel = CalculateLateralAcceleration();
-
-	//遠心力によるロールモーメントを計算
-	float rollMoment = CalculateRollMoment();
-
-	//横方向加速度によるロールモーメント
-	float centrifugalRollMoment = lateralAccel * m_params.mass * m_params.centerOfMassHeight;
-	rollMoment += centrifugalRollMoment;
-
-	//ロール復元力
-	float restoreForce = -m_rollAngle * m_params.rollStiffness;
-
-	//ロール減衰力
-	float dampingForce = -m_rollVelocity * m_params.rollDamping;
-
-	//総ロールモーメント
-	float totalRollMoment = rollMoment + restoreForce + dampingForce;
-
-	//ロール慣性モーメント
-	float rollInertia = m_params.mass * m_trackWidth * m_trackWidth * 0.1f;
-
-	//ロール角加速度
-	float rollAcceleration = totalRollMoment / rollInertia;
-
-	//ロール角速度と角度を更新
-	m_rollVelocity += rollAcceleration * static_cast<float>(deltaTime);
-	m_rollAngle += m_rollVelocity * static_cast<float>(deltaTime);
-
-	//ロール角を制限
-	m_rollAngle = std::clamp(m_rollAngle, -m_params.maxRollAngle, m_params.maxRollAngle);
-
-	//減衰を適用
-	m_rollVelocity *= 0.98f;
-}
-
-Vector3 Vehicle::CalculateTireForce(int wheelIndex, const Vector3& wheelVelocity) {
-	const WheelInfo& wheel = m_wheels[wheelIndex];
-
-	if (!wheel.isGrounded) return Vector3::ZERO;
-
-	//横宝庫の力(コーナリングフォース)
-	Vector3 lateralVelocity = wheel.rightDir * wheel.velocity.Dot(wheel.rightDir);
-	Vector3 lateralForce = -lateralVelocity * wheel.grip * 1000.0f;
-
-	//縦方向の力(駆動/制動制限)
-	Vector3 longitudinalVelocity = wheel.forwardDir * wheel.velocity.Dot(wheel.forwardDir);
-	Vector3 longitudinalForce = -longitudinalVelocity * wheel.grip * 500.0f;
-
-	//合成力を制限
-	Vector3 totalForce = lateralForce + longitudinalForce;
-	float maxForce = wheel.grip * m_params.mass * 9.81f * 0.25f; //タイヤ1本あたりの最大力
-
-	if (totalForce.Length() > maxForce) {
-		totalForce.Normalize();
-		totalForce *= maxForce;
-	}
-
-	return totalForce;
-}
-
-float Vehicle::CalculateSlipRatio(const Vector3& wheelVelocity, const Vector3& wheelForward) {
-	float forwardVel = wheelVelocity.Dot(wheelForward);
-	float wheelSpeed = std::abs(forwardVel);
-
-	if (wheelSpeed < 0.1f) return 0.0f;
-
-	//簡略化したスリップ率計算
-	float slipRatio = std::abs(forwardVel) / (wheelSpeed + 1.0f);
-	return std::clamp(slipRatio, 0.0f, 1.0f);
-}
-
-float Vehicle::CalculateSlipAngle(const Vector3& wheelVelocity, const Vector3& wheelForward, const Vector3& wheelRight) {
-	float forwardVel = wheelVelocity.Dot(wheelForward);
-	float lateralVel = wheelVelocity.Dot(wheelRight);
-
-	if (std::abs(forwardVel) < 0.1f) return 0.0f;
-
-	return std::atan2(lateralVel, std::abs(forwardVel));
-}
-
-float Vehicle::GetGripMultiplier(float slipRatio, float slipAngle, bool handbrakeActive) {
-	//ハンドブレーキが有効な場合はグリップを大幅に低減
-	if (handbrakeActive) {
-		return m_params.handbrakeGripReduction;
-	}
-
-	//スリップ率とスリップ角度に基づくグリップ低減
-	float gripRatio = 1.0f;
-
-	if (slipRatio > m_params.slipThreshold) {
-		float excessSlip = slipAngle - m_params.slipThreshold;
-		float maxExcess = 1.0f - m_params.slipThreshold;
-		float reduction = excessSlip / maxExcess;
-
-		gripRatio = 1.0f - reduction * (1.0f - m_params.minTireGrip / m_params.maxTireGrip);
-	}
-
-	//スリップ角による追加低減
-	float angleEffect = std::abs(slipAngle) / (XM_PI * 0.25f); //約45度で最大低減
-	angleEffect = std::clamp(angleEffect, 0.0f, 1.0f);
-	gripRatio *= (1.0f - angleEffect * 0.3f);
-
-	return std::clamp(gripRatio, m_params.minTireGrip / m_params.maxTireGrip, 1.0f);
-}
-
-void Vehicle::UpdateWheelPosition() {
-	//車体の回転行列を作成
-	float cosY = std::cos(m_rotation.y);
-	float sinY = std::sin(m_rotation.y);
-
-	for (int i = 0; i < 4; i++) {
-		//ローカル位置をワールド座標に変換
-		Vector3 localPos = m_wheels[i].localPosition;
-		Vector3 rotatedPos;
-
-		//Y軸回転
-		rotatedPos.x = localPos.x * cosY + localPos.z * sinY;
-		rotatedPos.y = localPos.y;
-		rotatedPos.z = -localPos.x * sinY + localPos.z * cosY;
-
-		m_wheels[i].worldPosition = m_position + rotatedPos;
-	}
-}
-
-void Vehicle::UpdateWheelRotations(double deltaTime) {
-	for (int i = 0; i < 4; i++) {
-		//タイヤの回転速度を計算
-		float wheelRadius = 0.5f; //タイヤ半径(仮定)
-		float forwardSpeed = m_wheels[i].velocity.Dot(m_wheels[i].forwardDir);
-		float angularVel = forwardSpeed / wheelRadius; //rad/s
-
-		m_wheelRotationAngle[i] += angularVel * static_cast<float>(deltaTime);
-
-		//角度を0～2πにラップ
-		while (m_wheelRotationAngle[i] > XM_2PI) {
-			m_wheelRotationAngle[i] -= XM_2PI;
+		//ブレーキ力を追加
+		if (m_brakeInput > 0.001f) {
+			Vector3 brakeDirection = -wheelVelocity;
+			brakeDirection.Normalize();
+			float brakeForce = m_brakeInput * 8000.0f; // 仮のブレーキ力
+			tireForce += brakeDirection * brakeForce;
 		}
-		while (m_wheelRotationAngle[i] < 0.0f) {
-			m_wheelRotationAngle[i] += XM_2PI;
+
+		//ハンドブレーキ力を追加（後輪のみ）
+		if (m_handbrakeInput && !wheel.isFrontWheel) {
+			Vector3 handbrakeDirection = -wheelVelocity;
+			handbrakeDirection.Normalize();
+			float handbrakeForce = 12000.0f; // 仮のハンドブレーキ力
+			tireForce += handbrakeDirection * handbrakeForce;
 		}
+
+		wheel.tireForce = tireForce;
+
+
+		//車体に作用する力とトルクを計算
+		totalForce += wheel.suspensionForce + tireForce;
+
+		Vector3 wheelRelativePos = wheel.worldPosition - GetPosition();
+		Vector3 appliedTorque = wheelRelativePos.Cross(tireForce);
+
+		//ピッチトルクを抑制
+		appliedTorque.x *= 0.3f;
+
+		//スピン中はトルクを制限
+		appliedTorque *= stabilityFactor;
+		totalTorque += appliedTorque;	
+	}
+
+	m_acceleration = totalForce / m_mass;
+
+	//角加速度
+	Vector3 angularAcceleration;
+	angularAcceleration.x = totalTorque.x / m_inertiaTensor.x;
+	angularAcceleration.y = totalTorque.y / m_inertiaTensor.y;
+	angularAcceleration.z = totalTorque.z / m_inertiaTensor.z;
+
+	m_angularVelocity += angularAcceleration * deltaTime;
+
+}
+
+void Vehicle::UpdateAllWheelRotations(float deltaTime) {
+	for (int i = 0; i < static_cast<int>(m_wheels.size()); i++) {
+		Wheel& wheel = m_wheels[i];
+
+		//ワールド座標での車輪の速度を計算
+		Vector3 wheelWorldPos = wheel.worldPosition;
+		Vector3 relativePos = wheelWorldPos - (GetPosition() + m_centerOfMass);
+		Vector3 wheelVelocity = m_velocity + m_angularVelocity.Cross(relativePos);
+
+		UpdateWheelRotation(i, wheelVelocity, deltaTime);
 	}
 }
 
-Vector3 Vehicle::CalculateAirResistance() const {
-	//低速時は空気抵抗をなし
-	if (m_velocity.Length() < 0.1f) return Vector3::ZERO;
-
-	Vector3 airResistance = -m_velocity;
+void Vehicle::CalculateAerodynamicsForces() {
+	//空気抵抗
 	float speed = m_velocity.Length();
-	airResistance.Normalize();
+	if (speed > 1.0f) {
+		Vector3 dragDirection = -m_velocity;
+		dragDirection.Normalize();
 
-	//空気抵抗　= 0.5 * p * Cd * A * v^2
-	airResistance *= 0.5f * 1.225f * m_params.dragCoefficient * 2.5f * speed * speed;
+		float dragForce = 0.5f * 1.225f * speed * speed * (m_dragCoefficient * 0.1f) * m_frontalArea;
+		m_acceleration += dragDirection * (dragForce / m_mass);
 
-	return airResistance;
+		//ダウンフォース
+		float downforceCoefficient = 0.8f; // ダウンフォース係数
+		float downforce = 0.5f * 1.225f * speed * speed * downforceCoefficient * m_frontalArea;
+
+		//速度の2乗に比例して下向きの力を加える
+		Vector3 downforceVec = Vector3(0.0f, -downforce / m_mass, 0.0f);
+		m_acceleration += downforceVec;
+
+		//各車輪への荷重分配
+		//ダウンフォースを各車輪のグリップに反映
+		float wheelDownforce = downforce / 4.0f; // 仮に均等分配
+		for (auto& wheel : m_wheels) {
+			//速度が上がるほどグリップが向上
+			float speedBonus = std::min(speed * 0.05f, 1.5f);
+			wheel.maxGripForce = wheel.maxGripForce * (1.0f + speedBonus);
+		}
+	}
 }
 
-Vector3 Vehicle::CalculateRollingResistance() const {
-	//低速時は転がり抵抗をなし
-	if (m_velocity.Length() < 0.1f) return Vector3::ZERO;
+void Vehicle::IntegrateForces(float deltaTime) {
+	//線形運動の積分
+	m_velocity += m_acceleration * deltaTime;
+	m_position += m_velocity * deltaTime;
 
-	Vector3 rollingResistance = -m_velocity;
-	rollingResistance.Normalize();
+	//回転運動の積分
+	Vector3 angularDisplacement = m_angularVelocity * deltaTime;
 
-	//転がり抵抗 = Crr * m * g
-	rollingResistance *= m_params.rollingResistance * m_params.mass * 9.81f;
-	return rollingResistance;
-}
-
-float Vehicle::CalculateLateralAcceleration() const {
-	//車体の右方向ベクトルを計算
-	float cosY = std::cos(m_rotation.y);
-	float sinY = std::sin(m_rotation.y);
-	Vector3 rightDir = { cosY, 0.0f, -sinY };
-
-	//横方向の速度成分
-	float lateralVelocity = m_velocity.Dot(rightDir);
-
-	//角速度による遠心加速度
-	float angularVel = m_angularVelocity.y;
-	float foewardVel = m_velocity.Dot({ sinY, 0.0f, cosY });
-	float centripetal = angularVel * foewardVel;
-
-	//総横方向加速度
-	return lateralVelocity * 10.0f + centripetal;
-}
-
-float Vehicle::CalculateRollMoment() const {
-	float rollMoment = 0.0f;
-
-	//各タイヤのロールモーメントを計算
-	for (int i = 0; i < 4; i++) {
-		if (!m_wheels[i].isGrounded) continue;
-
-		//タイヤの横方向の力
-		Vector3 rightdir = m_wheels[i].rightDir;
-		float lateralForce = m_wheels[i].velocity.Dot(rightdir) * m_wheels[i].grip * -1000.0f;
-
-		//レバーアーム(タイヤから重心までの距離)
-		float leverArm = m_wheels[i].localPosition.x;
-
-		//ロールモーメントに寄与
-		rollMoment += lateralForce * leverArm;
+	//Y軸回転の制限でスピン防止
+	float maxYawRate = 2.0f; // 最大ヨーレート (ラジアン/秒)
+	if (std::abs(m_angularVelocity.y) > maxYawRate) {
+		float sign = m_angularVelocity.y > 0.0f ? 1.0f : -1.0f;
+		m_angularVelocity.y = sign * maxYawRate;
+		angularDisplacement.y = m_angularVelocity.y * deltaTime;
 	}
 
-	return rollMoment;
+	//現在の回転に角変位を適用
+	m_rotation += angularDisplacement;
+
+	//適度の減衰を加える
+	m_velocity *= 0.9995f;
+
+	//角速度も減衰(yaw軸は少し強めに)
+	m_angularVelocity.x *= 0.98f;
+	m_angularVelocity.y *= 0.98f;
+	m_angularVelocity.z *= 0.995f;
+
+	//非常に小さい値は0にして安定化
+	if (m_velocity.Length() < 0.05f) {
+		m_velocity = Vector3::ZERO;
+	}
 }
 
+void Vehicle::UpdateWheelPositions() {
+	for (int i = 0; i < 4; i++) {
+		m_wheels[i].worldPosition = LocalToWorld(m_wheels[i].localPosition);
+	}
+}
+
+Vector3 Vehicle::CalculateTireForce(const Wheel& wheel, const Vector3& wheelVelocity) {
+	Vector3 tireForce = Vector3::ZERO;
+
+	//ローカル座標系でのタイヤ方向を計算
+	Vector3 forward = GetForward();
+	Vector3 right = GetRight();
+
+	//ステアリング角度を適用(前輪のみ)
+	if (wheel.isFrontWheel) {
+		float cosSteer = cosf(wheel.steerAngle);
+		float sinSteer = sinf(wheel.steerAngle);
+
+		Vector3 steerForward = forward * cosSteer + right * sinSteer;
+		Vector3 steerRight = right * cosSteer - forward * sinSteer;
+
+		forward = steerForward;
+		right = steerRight;
+	}
+
+	//横方向と前方向の速度成分を計算
+	float longitudinalVel = wheelVelocity.Dot(forward);
+	float lateralVel = wheelVelocity.Dot(right);
+
+	//速度依存のグリップ係数
+	float speed = wheelVelocity.Length();
+
+	//縦方向の力
+	float maxLongitudinalForce = wheel.maxGripForce * wheel.frictionCoefficient;
+	float longitudinalResponse = std::max(80.0f, 150.0f - speed * 5.0f); // 速度に応じたレスポンス
+	float longitudinalForce = -longitudinalVel * longitudinalResponse;
+	longitudinalForce = std::clamp(longitudinalForce, -maxLongitudinalForce, maxLongitudinalForce);
+
+	//横方向の力
+	float maxLateralForce = wheel.maxGripForce * wheel.frictionCoefficient;
+
+	float lateralResponse;
+	if (wheel.isFrontWheel) {
+		//慣性による横滑りを抑制
+		float baseResponse = std::max(80.0f, 180.0f - speed * 4.0f);
+
+		//ステアリング入力がある場合は横力を強化
+		float steerFactor = 1.0f + std::abs(wheel.steerAngle) * 1.5f;
+		lateralResponse = baseResponse * steerFactor;
+	} else {
+		//車体方向への追従を重視
+		lateralResponse = std::max(120.0f, 250.0f - speed * 4.0f);
+
+		//車体方向のズレが大きい場合はさらに横力を強化
+	}
+	float lateralForce = -lateralVel * lateralResponse;
+	lateralForce = std::clamp(lateralForce, -maxLateralForce, maxLateralForce);
+
+	//速度が0に近い場合の安定化
+	if (speed < 0.5f) {
+		//停止時は非常に強いフリップで安定させる
+		longitudinalForce = -longitudinalVel * 500.0f;
+		lateralForce = -lateralVel * 500.0f;
+
+		longitudinalForce = std::clamp(longitudinalForce, -maxLongitudinalForce, maxLongitudinalForce);
+		lateralForce = std::clamp(lateralForce, -maxLateralForce, maxLateralForce);
+	}
+
+	tireForce = forward * longitudinalForce + right * lateralForce;
+
+	//グリップサークルの制限
+	float combinedMagnitude = tireForce.Length();
+	float maxCombinedForce = wheel.maxGripForce * wheel.frictionCoefficient;
+
+	//高い閾値で制限
+	if (combinedMagnitude > maxCombinedForce) {
+		tireForce = tireForce * (maxCombinedForce / combinedMagnitude);
+	}
+
+	return tireForce;
+}
+
+float Vehicle::CalculateSlipRatio(const Wheel& wheel, const Vector3& wheelVelocity) {
+	Vector3 forward = GetForward();
+
+	if (wheel.isFrontWheel) {
+		//ステアリング角度を考慮
+		float cosSteer = cosf(wheel.steerAngle);
+		float sinSteer = sinf(wheel.steerAngle);
+		Vector3 right = GetRight();
+		forward = forward * cosSteer + right * sinSteer;
+	}
+
+	float wheelSpeed = wheel.angularVelocity * wheel.radius;
+	float vehicleSpeed = wheelVelocity.Dot(forward);
+
+	if (std::abs(vehicleSpeed) < 0.1f) {
+		return 0.0f;
+	}
+
+	return (wheelSpeed - vehicleSpeed) / std::abs(vehicleSpeed);
+}
+
+float Vehicle::CalculateSlipAngle(const Wheel& wheel, const Vector3& wheelVelocity) {
+	Vector3 forward = GetForward();
+	Vector3 right = GetRight();
+
+	if (wheel.isFrontWheel) {
+		//ステアリング角度を考慮
+		float cosSteer = cosf(wheel.steerAngle);
+		float sinSteer = sinf(wheel.steerAngle);
+		forward = forward * cosSteer + right * sinSteer;
+		right = right * cosSteer - forward * sinSteer;
+	}
+
+	float longitudinalVel = wheelVelocity.Dot(forward);
+	float lateralVel = wheelVelocity.Dot(right);
+
+	if (std::abs(longitudinalVel) < 0.1f) {
+		return 0.0f;
+	}
+
+	return atan2f(lateralVel, std::abs(longitudinalVel));
+}
+
+void Vehicle::UpdateWheelRotation(int wheelIndex, const Vector3& wheelVelocity, float deltaTime) {
+	if (wheelIndex < 0 || wheelIndex >= static_cast<int>(m_wheels.size())) {
+		return;
+	}
+
+	Wheel& wheel = m_wheels[wheelIndex];
+
+	//車輪の前進方向を計算
+	Vector3 wheelForward = GetForward();
+
+	//前輪の場合はステアリング角度を考慮
+	if (wheel.isFrontWheel) {
+		float cosSteer = cosf(wheel.steerAngle);
+		float sinSteer = sinf(wheel.steerAngle);
+		Vector3 right = GetRight();
+		wheelForward = wheelForward * cosSteer + right * sinSteer;
+	}
+
+	//車輪の前進方向の速度成分を計算
+	float wheelSpeed = wheelVelocity.Dot(wheelForward);
+
+	//角速度を計算
+	float targetAngularVelocity = wheelSpeed / wheel.radius;
+
+	//駆動輪の場合はエンジンの影響を考慮
+	if (wheel.isDriveWheel && std::abs(m_throttleInput) > 0.001f) {
+		float gearRatio = 1.0f; // 仮のギア比
+		float engineAngularVelocity = (m_engine.currentRPM * 2.0f * 3.14159f / 60.0f) / gearRatio; // RPMをrad/sに変換
+
+		//エンジン回転と車輪速度をブレンド
+		float blendFactor = std::abs(m_throttleInput);
+		targetAngularVelocity = targetAngularVelocity * (1.0f - blendFactor) + engineAngularVelocity * blendFactor;
+	}
+
+	//角速度のスムーズな変化
+	float angularAcceleration = (targetAngularVelocity - wheel.angularVelocity) * 10.0f; // 仮の比例定数
+	wheel.angularVelocity += angularAcceleration * deltaTime;
+
+	//回転角度を更新
+	wheel.rotationAngle += wheel.angularVelocity * deltaTime;
+
+	//角度を0~2πの範囲に収める
+	while (wheel.rotationAngle > XM_2PI) {
+		wheel.rotationAngle -= XM_2PI;
+	}
+	while (wheel.rotationAngle < 0.0f) {
+		wheel.rotationAngle += XM_2PI;
+	}
+}
+
+void Vehicle::ApplyInertiaSteeringForce(Wheel& wheel, const Vector3& wheelVelocity, Vector3& tireForce) {
+	//前輪のみに適用
+	if (!wheel.isFrontWheel) {
+		return;
+	}
+
+	//車両の前進速度を取得
+	float forwardSpeed = m_velocity.Dot(GetForward());
+
+	//前進慣性がある場合のみ適用
+	if (forwardSpeed < 1.0f) {
+		return;
+	}
+
+	//ステアリング角度がある場合
+	if (std::abs(wheel.steerAngle) > 0.01f) {
+		//ステアリング方向の単位ベクトルを計算
+		Vector3 forward = GetForward();
+		Vector3 right = GetRight();
+
+		//y軸成分を0にして水平化
+		forward.y = 0.0f;
+		right.y = 0.0f;
+		forward.Normalize();
+		right.Normalize();
+
+		float cosSteer = cosf(wheel.steerAngle);
+		float sinSteer = sinf(wheel.steerAngle);
+		Vector3 steerDirection = forward * cosSteer + right * sinSteer;
+
+		//現在の進行方向
+		Vector3 currentDirection = m_velocity;
+		currentDirection.y = 0.0f;
+		if (currentDirection.Length() > 0.1f) {
+			currentDirection.Normalize();
+		} else {
+			return;
+		}
+
+		//ステアリング方向と現在の進行方向の角度差を計算
+		Vector3 directionDiff = steerDirection - currentDirection;
+		directionDiff.y = 0.0f;
+
+		//慣性による前進力に比例したステアリング力を生産
+		float steerForceMagnitude = forwardSpeed * std::abs(wheel.steerAngle) * 1500.0f; // 仮の比例定数
+
+		//速度に応じて効果を調整(高速時は効果を抑制)
+		float speedFactor = std::max(0.3f, 1.0f - forwardSpeed * 0.05f);
+		steerForceMagnitude *= speedFactor;
+
+		//ステアリング力をタイヤ力に加算
+		Vector3 steerForce = directionDiff * steerForceMagnitude;
+		steerForce.y = 0.0f;
+
+		//最大値を制限
+		float maxSteerForce = wheel.maxGripForce * 0.4f; // 最大ステアリング力
+		if (steerForce.Length() > maxSteerForce) {
+			steerForce = steerForce * (maxSteerForce / steerForce.Length());
+		}
+
+		tireForce += steerForce;
+	}
+}
+
+float Vehicle::GetGroundHeight(const Vector3& position) const {
+	return m_groundHeight;
+}
+
+Vector3 Vehicle::LocalToWorld(const Vector3& localPos) const {
+	//オイラー角からの回転行列を適用
+	XMMATRIX rotMatrix = XMMatrixRotationRollPitchYaw(GetRotation().x, GetRotation().y, GetRotation().z);
+
+	XMVECTOR localVec = XMVectorSet(localPos.x, localPos.y, localPos.z, 0.0f);
+	XMVECTOR worldVec = XMVector3Transform(localVec, rotMatrix);
+
+	Vector3 result;
+	XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&result), worldVec);
+
+	return GetPosition() + result;
+
+}
+
+Vector3 Vehicle::WorldToLocal(const Vector3& worldPos) const {
+	Vector3 relativePos = worldPos - GetPosition();
+
+	//逆回転行列を適用
+	XMMATRIX rotMatrix = XMMatrixRotationRollPitchYaw(-GetRotation().x, -GetRotation().y, -GetRotation().z);
+
+	XMVECTOR worldVec = XMVectorSet(relativePos.x, relativePos.y, relativePos.z, 0.0f);
+	XMVECTOR localVec = XMVector3Transform(worldVec, rotMatrix);
+
+	Vector3 result;
+	XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&result), localVec);
+	return result;
+
+}

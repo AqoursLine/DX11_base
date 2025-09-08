@@ -36,23 +36,11 @@ private:
 	float m_brakeSmoothRate = 8.0f; //ブレーキ平滑化レート
 	float m_steerSmoothRate = 6.0f; //ステアリング平滑化レート
 
-	//エンジン設定
-	float m_idleRPM = 800.0f; //アイドリング回転数
-	float m_maxRPM = 8000.0f; //最大回転数
-
-	//停止中フラグ
-	bool m_isStationary = false;
-
 	//入力更新
 	void UpdateInput(double deltaTime);
 	//入力平滑化
 	void SmoothInput(double deltaTime);
-	//エンジン力更新
-	[[nodiscard]] float CalculateRPM() const;
 
 	//タイヤ描画
 	void DrawWheels() const;
-
-	//停止状態管理
-	void UpdateStationaryState();
 };

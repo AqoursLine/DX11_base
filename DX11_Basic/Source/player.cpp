@@ -3,7 +3,6 @@
 #include "input.h"
 #include "box.h"
 #include "field.h"
-#include <algorithm>
 
 bool Player::Initialize() {
 	m_model = new Model();
@@ -23,7 +22,7 @@ bool Player::Initialize() {
 
 	m_scale = {2.0, 0.6f, 4.0f};
 	m_rotation = {0.0f, 0.0f, 0.0f};
-	m_position = { 0.0f, 0.5f, 0.0f };
+	m_position = { 0.0f, 1.0f, 0.0f };
 
 	if(!Vehicle::Initialize()) {
 		return false;
@@ -52,35 +51,12 @@ void Player::Finalize() {
 void Player::Update(double deltaTime) {
 	UpdateInput(deltaTime);
 
-	//停止状態管理
-	UpdateStationaryState();
-
-	//エンジン力計算
-	float engineForce = 0.0f;
-	if (m_smoothedInput.forward > 0.01f) {
-		//前進
-		engineForce = m_smoothedInput.forward * m_params.maxEngineForce;
-	}else if (m_smoothedInput.reverse > 0.01f) {
-		//後退
-		engineForce = -m_smoothedInput.reverse * m_params.maxEngineForce;
-	} else {
-		//ニュートラル
-		engineForce = 0.0f;
-	}
-
-	//エンジン力を適用
-	SetEngineForce(engineForce);
-
-	//ステアリングを適用
-	SetSteeringValue(m_smoothedInput.steering * m_params.maxSteeringAngle);
-
-	//ブレーキ力を適用
-	float brakeForce = m_smoothedInput.brake * m_params.maxBrakingForce;
-	SetBrakingForce(brakeForce);
-
-	//サイドブレーキ
-	SetHandbrake(m_smoothedInput.handbrake);
-
+	//入力を車両制御に反映
+	float throttle = m_smoothedInput.forward - m_smoothedInput.reverse;
+	SetThrottleInput(throttle);
+	SetBrakeInput(m_smoothedInput.brake);
+	SetSteerInput(m_smoothedInput.steering);
+	SetHandbrakeInput(m_smoothedInput.handbrake);
 
 	Vehicle::Update(deltaTime);
 }
@@ -104,18 +80,12 @@ void Player::Draw() const {
 	m_field->Draw(arrowPos, arrowRot, Vector3 { 1.0f, 1.0f, 1.0f });
 
 	//デバッグ表示
-	std::cout << "Speed: " << GetCurrentSpeed() << " km/h" << std::endl;
-	std::cout << "Engine Force: " << m_currentEngineForce << " N" << std::endl;
-
-	//タイヤ情報表示
-	for (int i = 0; i < 4; i++) {
-		//座標
-		Vector3 wheelPos = GetWheelPosition(i);
-		std::cout << "Wheel " << i << " Position: (" << wheelPos.x << ", " << wheelPos.y << ", " << wheelPos.z << ")" << std::endl;
-		//回転
-		Vector3 wheelRot = GetWheelRotation(i);
-		std::cout << "Wheel " << i << " Rotation: (" << wheelRot.x << ", " << wheelRot.y << ", " << wheelRot.z << ")" << std::endl;
-	}
+	std::cout << "Speed: " << GetSpeedKmh() << " km/h" << std::endl;
+	std::cout << "RPM: " << GetRPM() << " rpm" << std::endl;
+	std::cout << "Position: (" << m_position.x << ", " << m_position.y << ", " << m_position.z << ")" << std::endl;
+	std::cout << "Velocity: (" << m_velocity.x << ", " << m_velocity.y << ", " << m_velocity.z << ")" << std::endl;
+	std::cout << "Rotation: (" << m_rotation.x << ", " << m_rotation.y << ", " << m_rotation.z << ")" << std::endl;
+	std::cout << "Angular Velocity: (" << m_angularVelocity.x << ", " << m_angularVelocity.y << ", " << m_angularVelocity.z << ")" << std::endl;
 }
 
 void Player::UpdateInput(double deltaTime) {
@@ -162,18 +132,13 @@ void Player::UpdateInput(double deltaTime) {
 void Player::SmoothInput(double deltaTime) {
 	float dt = static_cast<float>(deltaTime);
 
-	//停止中はステアリングの平滑化を速くする
 	float steerRate;
-	if (m_isStationary) {
-		steerRate = std::min(1.0f, m_steerSmoothRate * 2.0f * dt);
-	} else {
-		steerRate = std::min(1.0f, m_steerSmoothRate * dt);
+	steerRate = std::min(1.0f, m_steerSmoothRate * dt);
 
-		//ステアリングを戻す時は速くする
-		if (std::fabsf(m_currentInput.steering) < std::fabsf(m_smoothedInput.steering)) {
-			steerRate *= 1.5f;
-			steerRate = std::min(1.0f, steerRate);
-		}
+	//ステアリングを戻す時は速くする
+	if (std::fabsf(m_currentInput.steering) < std::fabsf(m_smoothedInput.steering)) {
+		steerRate *= 1.5f;
+		steerRate = std::min(1.0f, steerRate);
 	}
 
 	//前進入力の平滑化
@@ -195,33 +160,10 @@ void Player::SmoothInput(double deltaTime) {
 	m_smoothedInput.handbrake = m_currentInput.handbrake;
 }
 
-float Player::CalculateRPM() const {
-	//現在の速度を取得
-	float speed = std::abs(GetCurrentSpeed());
-	float maxSpeed = GetMaxSpeed();
-
-	//速度比からRPMを計算
-	float speedRatio = speed / maxSpeed;
-	speedRatio = std::clamp(speedRatio, 0.0f, 1.0f);
-
-	//アクセル入力も考慮
-	float throttle = std::max(std::max(m_smoothedInput.forward, m_smoothedInput.reverse), 0.1f );
-
-	float rpm = m_idleRPM + (m_maxRPM - m_idleRPM) * speedRatio * throttle;
-
-	return rpm;
-}
-
 void Player::DrawWheels() const {
 	//ホイール描画
 	for (int i = 0; i < 4; i++) {
-		Vector3 wheelPos = GetWheelPosition(i);
-		Vector3 wheelRot = GetWheelRotation(i);
-		Vector3 wheelScale = { 0.5f, 1.0f, 1.0f };
-		m_model->Draw(wheelPos, wheelRot, wheelScale);
+		WheelRenderInfo info = GetWheelRenderInfo(i);
+		m_model->Draw(info.position, info.rotation, Vector3 { 0.5f, 1.0f, 1.0f });
 	}
-}
-
-void Player::UpdateStationaryState() {
-	m_isStationary = (std::abs(GetCurrentSpeed()) < 1.8f);
 }

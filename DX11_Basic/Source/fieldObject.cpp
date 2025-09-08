@@ -1,4 +1,4 @@
-#include "fieldObject.h"
+﻿#include "fieldObject.h"
 #include "field.h"
 
 bool FieldObject::Initialize() {
@@ -7,7 +7,7 @@ bool FieldObject::Initialize() {
 		return false;
 	}
 
-	m_scale = {512.0, 1.0f, 320.0};
+	m_scale = {256.0, 1.0f, 160.0};
 	m_position = { 0.0f, -2.0f, 0.0f };
 
 	return true;
