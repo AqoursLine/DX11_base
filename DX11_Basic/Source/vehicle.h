@@ -207,6 +207,8 @@ private:
 	void UpdateWheelRotation(int wheelIndex, const Vector3& wheelVelocity, float deltaTime);
 
 	void ApplyInertiaSteeringForce(Wheel& wheel, const Vector3& wheelVelocity, Vector3& tireForce);
+	void ApplyDirectionTrackingForce();
+	void CalculateAckermannSteering();
 
 	//地面との衝突判定
 	float GetGroundHeight(const Vector3& position) const;
