@@ -1,13 +1,13 @@
-#pragma once
+ï»¿#pragma once
 
 #include "main.h"
 
 class GameObject {
 public:
-	//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	GameObject() = default;
 
-	//ƒfƒXƒgƒ‰ƒNƒ^
+	//ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	virtual ~GameObject() = default;
 
 	bool InitializeBase()
@@ -68,15 +68,15 @@ public:
 	Vector3 GetRotation() const { return m_rotation; }
 	Vector3 GetScale() const { return m_scale; }
 
-	// ‘O•ûƒxƒNƒgƒ‹‚ğæ“¾
+	// å‰æ–¹ãƒ™ã‚¯ãƒˆãƒ«ã‚’å–å¾—
 	Vector3 GetForward() const {
 		XMMATRIX rotMatrix = XMMatrixRotationRollPitchYaw(m_rotation.x, m_rotation.y, m_rotation.z);
 		Vector3 forward;
-		XMStoreFloat3((XMFLOAT3*)&forward, rotMatrix.r[2]); // Z²•ûŒü
+		XMStoreFloat3((XMFLOAT3*)&forward, rotMatrix.r[2]); // Zè»¸æ–¹å‘
 		forward.Normalize();
 		return forward;
 	}
-	//ƒNƒH[ƒ^ƒjƒIƒ“”Å
+	//ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ç‰ˆ
 	Vector3 GetForwardQ() const {
 		XMVECTOR quat = XMVectorSet(m_quaternion.x, m_quaternion.y, m_quaternion.z, m_quaternion.w);
 		XMVECTOR forward = XMVector3Rotate(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), quat);
@@ -86,15 +86,15 @@ public:
 		return result;
 	}
 
-	// ‰E•ûŒüƒxƒNƒgƒ‹‚ğæ“¾
+	// å³æ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«ã‚’å–å¾—
 	Vector3 GetRight() const {
 		XMMATRIX rotMatrix = XMMatrixRotationRollPitchYaw(m_rotation.x, m_rotation.y, m_rotation.z);
 		Vector3 right;
-		XMStoreFloat3((XMFLOAT3*)&right, rotMatrix.r[0]); // X²•ûŒü
+		XMStoreFloat3((XMFLOAT3*)&right, rotMatrix.r[0]); // Xè»¸æ–¹å‘
 		right.Normalize();
 		return right;
 	}
-	//ƒNƒH[ƒ^ƒjƒIƒ“”Å
+	//ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ç‰ˆ
 	Vector3 GetRightQ() const {
 		XMVECTOR quat = XMVectorSet(m_quaternion.x, m_quaternion.y, m_quaternion.z, m_quaternion.w);
 		XMVECTOR right = XMVector3Rotate(XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), quat);
@@ -104,15 +104,15 @@ public:
 		return result;
 	}
 
-	// ã•ûŒüƒxƒNƒgƒ‹‚ğæ“¾
+	// ä¸Šæ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«ã‚’å–å¾—
 	Vector3 GetUp() const {
 		XMMATRIX rotMatrix = XMMatrixRotationRollPitchYaw(m_rotation.x, m_rotation.y, m_rotation.z);
 		Vector3 up;
-		XMStoreFloat3((XMFLOAT3*)&up, rotMatrix.r[1]); // Y²•ûŒü
+		XMStoreFloat3((XMFLOAT3*)&up, rotMatrix.r[1]); // Yè»¸æ–¹å‘
 		up.Normalize();
 		return up;
 	}
-	//ƒNƒH[ƒ^ƒjƒIƒ“”Å
+	//ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ç‰ˆ
 	Vector3 GetUpQ() const {
 		XMVECTOR quat = XMVectorSet(m_quaternion.x, m_quaternion.y, m_quaternion.z, m_quaternion.w);
 		XMVECTOR up = XMVector3Rotate(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), quat);

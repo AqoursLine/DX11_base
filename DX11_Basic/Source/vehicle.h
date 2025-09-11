@@ -55,6 +55,9 @@ protected:
 	void SetBrake(float brake);
 
 private:
+	//タイヤデータ
+	WheelData m_wheels[4];
+
 	//入力値
 	float m_throttleInput;	//アクセル入力
 	float m_steeringInput;	//ハンドル入力
@@ -92,17 +95,34 @@ private:
 	float m_trackWidth;		//トレッド幅(m)
 	float m_cgHeight;		//重心高(m)
 
+	//4輪物理用パラメータ
+	float m_frontAxlePosition;		//前輪軸位置(重心からの距離)
+	float m_rearAxlePosition;		//後輪軸位置(重心からの距離)
+	float m_frontBrakeRatio;		//前輪ブレーキ比率
+	float m_antiRollStiffness;		//アンチロール剛性
+	float m_cornerStiffnessFront;	//前輪コーナリング剛性
+
 	//内部状態
 	bool m_isEngineRunning; //エンジン稼働状態
 	float m_gearRatio;		//ギア比
 	float m_angularVelocity; //車両の角速度(rad/s)
 	Vector3 m_lateralVelocity; //横方向速度
 
+	//タイヤ位置初期化
+	void InitializeWheelPositions();
+
 	//物理計算
 	void UpdateEngine(float deltaTime);
 	void UpdateSteering(float deltaTime);
+	void UpdateWheelPhysics(float deltaTime);
 	void UpdatePhysics(float deltaTime);
 	void UpdateMovement(float deltaTime);
+
+	//4輪独立物理計算
+	void CalculateWheelLoads();
+	void CalculateWheelVelocities();
+	void CalculateWheelForces();
+	void ApplyWheelForces(float deltaTime);
 
 	//力の計算
 	Vector3 CalculateEngineForce();
@@ -115,5 +135,11 @@ private:
 	Vector3 CalculateLateralForce() const;
 	float CalculateSteerAngle() const;
 	float CalculateTurnRadius() const;
+
+	//4輪個別計算
+	Vector3 CalculateWheelForce(int wheelIndex);
+	float CalculateSlipRatio(int wheelIndex, float wheelSpeed);
+	float CalculateSlipAngle(int wheelIndex);
+	float CalculateGripFactor(float slip, float load);
 };
 
