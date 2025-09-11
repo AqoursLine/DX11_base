@@ -1,115 +1,38 @@
 ﻿#pragma once
 
 #include "gameObject.h"
-#include <algorithm>
 
+//タイヤの位置を表す列挙型
+enum class WheelPosition {
+	FRONT_LEFT = 0,
+	FRONT_RIGHT,
+	REAR_LEFT,
+	REAR_RIGHT,
+};
 
-struct Wheel {
-	Vector3 localPosition;		//ローカル位置
-	Vector3 worldPosition;		//ワールド位置
-	Vector3 suspensionForce;	//サスペンション力
-	Vector3 tireForce;			//タイヤ力
+//個別タイヤの状態を管理する構造体
+struct WheelData {
+	Vector3 position; //タイヤの相対位置
+	Vector3 velocity; //タイヤの速度
+	Vector3 force;    //タイヤが発生する力
+	float load;    //タイヤにかかる荷重
+	float grip;   //タイヤのグリップ力
+	float slipRatio; //タイヤのスリップ率
+	float slipAngle; //タイヤのスリップ角
+	float steerAngle; //タイヤのステア角
+	bool isGrounded; //タイヤが地面に接地しているか
 
-	float radius;				//タイヤ半径
-	float width;				//タイヤ幅
-	float steerAngle;			//ステアリング角
-	float rotationAngle;		//回転角
-	float angularVelocity;		//角速度
-
-	bool isGrounded;			//接地しているか
-	bool isFrontWheel;			//前輪か
-	bool isDriveWheel;			//駆動輪か
-	float compressionRatio;			//サスペンションの圧縮率
-
-	//タイヤ物理パラメータ
-	float maxGripForce;			//最大グリップ力
-	float frictionCoefficient;	//摩擦係数
-	float slipRatio;			//スリップ率
-	float slipAngle;			//スリップ角
-
-	Wheel()
-		: localPosition(Vector3::ZERO)
-		, worldPosition(Vector3::ZERO)
-		, suspensionForce(Vector3::ZERO)
-		, tireForce(Vector3::ZERO)
-		, radius(0.3f)
-		, width(0.2f)
-		, steerAngle(0.0f)
-		, rotationAngle(0.0f)
-		, angularVelocity(0.0f)
-		, isGrounded(false)
-		, isFrontWheel(false)
-		, isDriveWheel(false)
-		, compressionRatio(0.0f)
-		, maxGripForce(2000.0f)
-		, frictionCoefficient(0.8f)
+	WheelData()
+		: position(0.0f, 0.0f, 0.0f)
+		, velocity(0.0f, 0.0f, 0.0f)
+		, force(0.0f, 0.0f, 0.0f)
+		, load(0.0f)
+		, grip(1.0f)
 		, slipRatio(0.0f)
 		, slipAngle(0.0f)
-	{
+		, steerAngle(0.0f)
+		, isGrounded(true) {
 	}
-};
-
-struct Suspension {
-	float springConstant;	//バネ定数
-	float damperConstant;	//ダンパー定数
-	float restLength;		//自然長
-	float maxCompression;	//最大圧縮量
-	float currentLength;	//現在の長さ
-	float lastLength;		//前フレームの長さ
-	Vector3 compressionVelocity; //圧縮速度
-
-	Suspension()
-		: springConstant(15000.0f)
-		, damperConstant(1500.0f)
-		, restLength(0.35f)
-		, maxCompression(0.25f)
-		, currentLength(0.4f)
-		, lastLength(0.4f)
-		, compressionVelocity(Vector3::ZERO)
-	{
-	}
-};
-
-struct Engine {
-	float maxTorque;			//最大トルク
-	float maxRPM;				//最大回転数
-	float currentRPM;			//現在の回転数
-	float throttleInput;			//スロットル入力
-	float idleRPM;				//アイドル回転数
-	float engineBraking;		//エンジンブレーキ係数
-
-	Engine()
-		: maxTorque(800.0f)
-		, maxRPM(7000.0f)
-		, currentRPM(800.0f)
-		, throttleInput(0.0f)
-		, idleRPM(800.0f)
-		, engineBraking(50.0f)
-	{
-	}
-
-	//トルクカーブの計算
-	float GetTorque() const {
-		if (currentRPM <= 0) return 0.0f;
-
-		//シンプルなトルクカーブ
-		float normalizedRPM = currentRPM / maxRPM;
-		float torqueMultiplier;
-		
-		if (normalizedRPM < 0.3f) {
-			//低回転域
-			torqueMultiplier = 0.5f + (normalizedRPM / 0.3f) * 0.5f;
-		} else if (normalizedRPM < 0.7f) {
-			//最適回転域
-			torqueMultiplier = 1.0f;
-		} else {
-			//高回転域
-			torqueMultiplier = 1.0f - ((normalizedRPM - 0.7f) / 0.3f) * 0.4f;
-		}
-
-		return maxTorque * torqueMultiplier * throttleInput;
-	}
-
 };
 
 class Vehicle : public GameObject {
@@ -117,104 +40,80 @@ public:
 	Vehicle();
 	virtual ~Vehicle() = default;
 
-	//制御入力の設定
-	void SetSteerInput(float input) { m_steerInput = std::clamp(input, -1.0f, 1.0f); }
-	void SetThrottleInput(float input) { m_throttleInput = std::clamp(input, -1.0f, 1.0f); }
-	void SetBrakeInput(float input) { m_brakeInput = std::clamp(input, 0.0f, 1.0f); }
-	void SetHandbrakeInput(bool input) { m_handbrakeInput = input; }
-
-	//状態取得
-	Vector3 GetVelocity() const { return m_velocity; }
-	float GetSpeed() const { return m_velocity.Length(); }
-	float GetSpeedKmh() const { return GetSpeed() * 3.6f; } // m/s to km/h
-	float GetRPM() const { return m_engine.currentRPM; }
-	Vector3 GetAngularVelocity() const { return m_angularVelocity; }
-
-	//車両パラメータ取得
-	float GetMass() const { return m_mass; }
-	const std::vector<Wheel>& GetWheels() const { return m_wheels; }
-	const Engine& GetEngine() const { return m_engine; }
-
-	//タイヤ描画用の情報取得
-	struct WheelRenderInfo {
-		Vector3 position;		//ワールド位置
-		Vector3 rotation;		//回転角
-		float compressionRatio;	//サスペンション圧縮率 (0.0f ~ 1.0f)
-		bool isGrounded;		//接地しているか
-		float radius;			//タイヤ半径
-		float width;			//タイヤ幅
-		bool isFrontWheel;		//前輪か
-		bool isDrivenWheel;		//駆動輪か
-	};
-
-	//指定したインデックスのタイヤ情報を取得
-	WheelRenderInfo GetWheelRenderInfo(int wheelIndex) const;
-
-	//全タイヤの情報を取得
-	std::vector<WheelRenderInfo> GetAllWheelRenderInfo() const;
+	//車両状態取得
+	float GetSpeed() const { return m_currentSpeed; } //速度(m/s)
+	Vector3 GetVelocity() const { return m_velocity; } //速度ベクトル(m/s)
+	float GetRPM() const { return m_engineRPM; } //エンジン回転数(rpm)
 
 protected:
-	//物理プロパティ
-	Vector3 m_velocity;			//速度
-	Vector3 m_angularVelocity;	//角速度
-	Vector3 m_acceleration;		//加速度
-	Vector3 m_centerOfMass;		//重心位置
+	virtual bool Initialize() override;
+	virtual void Update(double deltaTime) override;
+	virtual void Finalize() override;
 
-	float m_mass;				//質量
-	Vector3 m_inertiaTensor;	//慣性テンソル
-
-	//車両コンポーネント
-	std::vector<Wheel> m_wheels;			//タイヤ
-	std::vector<Suspension> m_suspensions; //サスペンション
-	Engine m_engine;						//エンジン
-
-	//制御入力
-	float m_steerInput;		//ステアリング入力 (-1.0f ~ 1.0f)
-	float m_throttleInput;	//スロットル入力 (-1.0f ~ 1.0f)
-	float m_brakeInput;		//ブレーキ入力 (0.0f ~ 1.0f)
-	bool m_handbrakeInput;	//ハンドブレーキ
-
-	//車両パラメータ
-	float m_wheelBase;			//ホイールベース
-	float m_trackWidth;			//トレッド幅
-	float m_maxSteerAngle;		//最大ステアリング角
-
-	//空気抵抗
-	float m_dragCoefficient;	//空気抵抗係数
-	float m_frontalArea;		//正面投影面積
-
-	//地面接触
-	float m_groundHeight;		//地面の高さ
-
-	bool Initialize() override;
-	void Update(double deltaTime) override;
+	void SetThrottle(float throttle);
+	void SetSteering(float streering);
+	void SetBrake(float brake);
 
 private:
+	//入力値
+	float m_throttleInput;	//アクセル入力
+	float m_steeringInput;	//ハンドル入力
+	float m_brakeInput;		//ブレーキ入力
+
+	//物理パラメータ
+	Vector3 m_velocity;		//速度
+	Vector3 m_acceleration;	//加速度
+	float m_currentSpeed;	//現在の速度(スカラ―)
+	float m_mass;			//質量(kg)
+
+	//エンジンパラメータ
+	float m_engineRPM;		//エンジン回転数
+	float m_maxRPM;			//最大回転数
+	float m_idleRPM;		//アイドリング回転数
+	float m_enginePower;	//エンジン出力(kw)
+
+	//車両特性
+	float m_maxSpeed;			//最高速度(m/s)
+	float m_accelerrationForce; //加速力(N)
+	float m_brakeForce;			//制動力(N)
+	float m_friction;			//摩擦抵抗係数
+	float m_airResistance;		//空気抵抗係数
+	float m_rollingResistance;	//転がり抵抗係数
+
+	//ステアリング特性
+	float m_maxSteerAngle;		//最大ステア各(rad)
+	float m_steerSpeed;			//ステアリング応答速度(rad/s)
+	float m_currentSteerAngle;	//現在のステア角(rad)
+	float m_lateralGrip;		//横方向グリップ係数
+	float m_underSteerGradient; //アンダーステア係数
+
+	//車両寸法
+	float m_wheelBase;		//ホイールベース(m)
+	float m_trackWidth;		//トレッド幅(m)
+	float m_cgHeight;		//重心高(m)
+
+	//内部状態
+	bool m_isEngineRunning; //エンジン稼働状態
+	float m_gearRatio;		//ギア比
+	float m_angularVelocity; //車両の角速度(rad/s)
+	Vector3 m_lateralVelocity; //横方向速度
+
 	//物理計算
-	void UpdatePhysics(float deltaTime);
 	void UpdateEngine(float deltaTime);
-	void CalculateSuspensionForces(float deltaTime);
-	void CalculateWheelForces(float deltTime);
-	void UpdateAllWheelRotations(float deltaTime);
-	void CalculateAerodynamicsForces();
-	void IntegrateForces(float deltaTime);
-	void UpdateWheelPositions();
+	void UpdateSteering(float deltaTime);
+	void UpdatePhysics(float deltaTime);
+	void UpdateMovement(float deltaTime);
 
-	//タイヤ物理
-	Vector3 CalculateTireForce(const Wheel& wheel, const Vector3& wheelVelocity);
-	float CalculateSlipRatio(const Wheel& wheel, const Vector3& wheelVelocity);
-	float CalculateSlipAngle(const Wheel& wheel, const Vector3& wheelVelocity);
-	void UpdateWheelRotation(int wheelIndex, const Vector3& wheelVelocity, float deltaTime);
+	//力の計算
+	Vector3 CalculateEngineForce();
+	Vector3 CalculateBrakeForce();
+	Vector3 CalculateFrictionForce();
+	Vector3 CalculateAirResistance();
+	Vector3 CalculateSteeringForce();
 
-	void ApplyInertiaSteeringForce(Wheel& wheel, const Vector3& wheelVelocity, Vector3& tireForce);
-	void ApplyDirectionTrackingForce();
-	void CalculateAckermannSteering();
-
-	//地面との衝突判定
-	float GetGroundHeight(const Vector3& position) const;
-
-	//座標変換ヘルパー
-	Vector3 LocalToWorld(const Vector3& localPos) const;
-	Vector3 WorldToLocal(const Vector3& worldPos) const;
-
+	//ステアリング計算
+	Vector3 CalculateLateralForce() const;
+	float CalculateSteerAngle() const;
+	float CalculateTurnRadius() const;
 };
+

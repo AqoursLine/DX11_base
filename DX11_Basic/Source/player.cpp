@@ -52,11 +52,9 @@ void Player::Update(double deltaTime) {
 	UpdateInput(deltaTime);
 
 	//入力を車両制御に反映
-	float throttle = m_smoothedInput.forward - m_smoothedInput.reverse;
-	SetThrottleInput(throttle);
-	SetBrakeInput(m_smoothedInput.brake);
-	SetSteerInput(m_smoothedInput.steering);
-	SetHandbrakeInput(m_smoothedInput.handbrake);
+	SetThrottle(m_smoothedInput.forward - m_smoothedInput.reverse);
+	SetSteering(m_smoothedInput.steering);
+	SetBrake(m_smoothedInput.brake);
 
 	Vehicle::Update(deltaTime);
 }
@@ -72,20 +70,18 @@ void Player::Draw() const {
 
 	//velocityから進行方向を計算
 	Vector3 arrowRot = Vector3::ZERO;
-	Vector3 velNorm = m_velocity;
+	Vector3 velNorm = GetVelocity();
 	velNorm.Normalize();
 
 	arrowRot.y = std::atan2f(velNorm.x, velNorm.z);
 
 	m_field->Draw(arrowPos, arrowRot, Vector3 { 1.0f, 1.0f, 1.0f });
 
-	//デバッグ表示
-	std::cout << "Speed: " << GetSpeedKmh() << " km/h" << std::endl;
+	//デバッグ情報表示
+	std::cout << "Speed: " << GetSpeed() * 3.6f << " km/h" << std::endl;
 	std::cout << "RPM: " << GetRPM() << " rpm" << std::endl;
-	std::cout << "Position: (" << m_position.x << ", " << m_position.y << ", " << m_position.z << ")" << std::endl;
-	std::cout << "Velocity: (" << m_velocity.x << ", " << m_velocity.y << ", " << m_velocity.z << ")" << std::endl;
-	std::cout << "Rotation: (" << m_rotation.x << ", " << m_rotation.y << ", " << m_rotation.z << ")" << std::endl;
-	std::cout << "Angular Velocity: (" << m_angularVelocity.x << ", " << m_angularVelocity.y << ", " << m_angularVelocity.z << ")" << std::endl;
+
+
 }
 
 void Player::UpdateInput(double deltaTime) {
@@ -162,8 +158,14 @@ void Player::SmoothInput(double deltaTime) {
 
 void Player::DrawWheels() const {
 	//ホイール描画
-	for (int i = 0; i < 4; i++) {
-		WheelRenderInfo info = GetWheelRenderInfo(i);
-		m_model->Draw(info.position, info.rotation, Vector3 { 0.5f, 1.0f, 1.0f });
-	}
+	//for (int i = 0; i < 4; i++) {
+	//	Vector3 wheelPos = GetWheelPosition(i);
+	//	float steerAngle = GetWheelSteerAngle(i);
+	//	Vector3 wheelRot = Vector3::ZERO;
+	//	wheelRot.x = m_wheelRotations[i];
+	//	wheelRot.y = m_rotation.y + steerAngle;
+
+	//	m_model->Draw(wheelPos, wheelRot, Vector3 { 0.5f, 1.0f, 1.0f });
+
+	//}
 }

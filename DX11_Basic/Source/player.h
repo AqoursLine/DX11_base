@@ -43,4 +43,5 @@ private:
 
 	//タイヤ描画
 	void DrawWheels() const;
+
 };
