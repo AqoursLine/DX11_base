@@ -78,10 +78,10 @@ void Player::Draw() const {
 	m_field->Draw(arrowPos, arrowRot, Vector3 { 1.0f, 1.0f, 1.0f });
 
 	//デバッグ情報表示
-	std::cout << "Speed: " << GetSpeed() * 3.6f << " km/h" << std::endl;
-	std::cout << "RPM: " << GetRPM() << " rpm" << std::endl;
-	std::cout << "Position: (" << m_position.x << ", " << m_position.y << ", " << m_position.z << ")" << std::endl;
-	std::cout << "Rotation: (" << m_rotation.x << ", " << m_rotation.y << ", " << m_rotation.z << ")" << std::endl;
+	//std::cout << "Speed: " << GetSpeed() * 3.6f << " km/h" << std::endl;
+	//std::cout << "RPM: " << GetRPM() << " rpm" << std::endl;
+	//std::cout << "Position: (" << m_position.x << ", " << m_position.y << ", " << m_position.z << ")" << std::endl;
+	//std::cout << "Rotation: (" << m_rotation.x << ", " << m_rotation.y << ", " << m_rotation.z << ")" << std::endl;
 
 }
 

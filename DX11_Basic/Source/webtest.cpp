@@ -1,4 +1,4 @@
-#include "main.h"
+ï»¿#include "main.h"
 #include "webtest.h"
 #include <nlohmann/json.hpp>
 
@@ -16,13 +16,13 @@ bool GameWebSocketClient::Connect(const std::string& url) {
 		std::cout << "WSAStartup failed: " << result << std::endl;
 		return false;
 	}
-	// WebSocketƒNƒ‰ƒCƒAƒ“ƒg‚Ì‰Šú‰»
-	m_client.setHandshakeTimeout(5); // ƒ^ƒCƒ€ƒAƒEƒg‚ğ5•b‚Éİ’è
+	// WebSocketã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã®åˆæœŸåŒ–
+	m_client.setHandshakeTimeout(5); // ã‚¿ã‚¤ãƒ ã‚¢ã‚¦ãƒˆã‚’5ç§’ã«è¨­å®š
 
 	m_url = url;
 	m_client.setUrl(m_url);
 
-	//Ú‘±ƒCƒxƒ“ƒg‚Ìİ’è
+	//æ¥ç¶šã‚¤ãƒ™ãƒ³ãƒˆã®è¨­å®š
 	m_client.setOnMessageCallback([this](const ix::WebSocketMessagePtr& msg) {
 		if (msg->type == ix::WebSocketMessageType::Open) {
 			m_connected = true;
@@ -37,7 +37,7 @@ bool GameWebSocketClient::Connect(const std::string& url) {
 		}
 		});
 
-	m_client.disableAutomaticReconnection(); // ©“®ÄÚ‘±‚ğ–³Œø‰»
+	m_client.disableAutomaticReconnection(); // è‡ªå‹•å†æ¥ç¶šã‚’ç„¡åŠ¹åŒ–
 
 	m_client.start();
 
@@ -46,14 +46,14 @@ bool GameWebSocketClient::Connect(const std::string& url) {
 
 void GameWebSocketClient::SendMessage(const std::string& message) {
 	if (m_connected) {
-		// JSONŒ`®‚ÌƒƒbƒZ[ƒW‚ğì¬
+		// JSONå½¢å¼ã®ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’ä½œæˆ
 		nlohmann::json jsonMessage;
-		jsonMessage["type"] = "message"; // ƒƒbƒZ[ƒW‚Ìƒ^ƒCƒv
+		jsonMessage["type"] = "message"; // ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã®ã‚¿ã‚¤ãƒ—
 		jsonMessage["message"] = message;
 		jsonMessage["timestamp"] = std::chrono::system_clock::now().time_since_epoch().count();
-		jsonMessage["client_id"] = "client_123"; // ƒNƒ‰ƒCƒAƒ“ƒgID‚È‚Ç‚Ì’Ç‰Áî•ñ
+		jsonMessage["client_id"] = "client_123"; // ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆIDãªã©ã®è¿½åŠ æƒ…å ±
 		std::string jsonString = jsonMessage.dump();
-		// ƒƒbƒZ[ƒW‚ğ‘—M
+		// ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’é€ä¿¡
 		m_client.send(jsonString);
 	}
 }

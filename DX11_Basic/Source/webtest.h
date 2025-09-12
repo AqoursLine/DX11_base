@@ -1,14 +1,13 @@
-#pragma once
-
-#pragma once
+ï»¿#pragma once
 
 //#define WIN32_LEAN_AND_MEAN
 
 #pragma comment(lib, "ixwebsocket.lib")
+#pragma comment(lib, "synchronization.lib")
 #pragma comment(lib, "ws2_32.lib")
-#pragma comment(lib, "crypt32.lib")    // CertOpenStore, CertCloseStore“™
-#pragma comment(lib, "secur32.lib")    // SSL/TLS‹@”\
-#pragma comment(lib, "bcrypt.lib")     // ˆÃ†‰»ƒvƒŠƒ~ƒeƒBƒu
+#pragma comment(lib, "crypt32.lib")    // CertOpenStore, CertCloseStoreç­‰
+#pragma comment(lib, "secur32.lib")    // SSL/TLSæ©Ÿèƒ½
+#pragma comment(lib, "bcrypt.lib")     // æš—å·åŒ–ãƒ—ãƒªãƒŸãƒ†ã‚£ãƒ–
 #pragma comment(lib, "advapi32.lib")
 
 class GameWebSocketClient {

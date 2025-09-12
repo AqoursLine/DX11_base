@@ -106,6 +106,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>Library\cri\include;Library\webrtc\include;Source;Library\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -128,6 +129,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>Library\cri\include;Library\webrtc\include;Source;Library\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -213,7 +215,6 @@
     <ClCompile Include="Source\timer.cpp" />
     <ClCompile Include="Source\tmp2D.cpp" />
     <ClCompile Include="Source\vehicle.cpp" />
-    <ClCompile Include="Source\webtest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\box.h" />
@@ -240,7 +241,6 @@
     <ClInclude Include="Source\tmp2D.h" />
     <ClInclude Include="Source\gwVector.h" />
     <ClInclude Include="Source\vehicle.h" />
-    <ClInclude Include="Source\webtest.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\DirectXTex.inl" />

@@ -169,11 +169,26 @@ void Vehicle::UpdatePhysics(float deltaTime) {
 	Vector3 frictionForce = CalculateFrictionForce();
 	Vector3 airResistance = CalculateAirResistance();
 
+	//デバッグ
+	Vector3 oldAccel = m_acceleration;
+	std::cout << "=== Physics Debug ===" << std::endl;
+	std::cout << "Old Acceleration: (" << oldAccel.x << ", " << oldAccel.y << ", " << oldAccel.z << ") m/s²" << std::endl;
+	std::cout << "Friction Force: (" << frictionForce.x << ", " << frictionForce.y << ", " << frictionForce.z << ") N" << std::endl;
+	std::cout << "Air Resistance: (" << airResistance.x << ", " << airResistance.y << ", " << airResistance.z << ") N" << std::endl;
+
 	//抵抗力を加算
 	m_acceleration += (frictionForce + airResistance) / m_mass;
 
+	//デバッグ
+	std::cout << "New Acceleration: (" << m_acceleration.x << ", " << m_acceleration.y << ", " << m_acceleration.z << ") m/s²" << std::endl;
+
 	//速度を更新
+	Vector3 oldVelocity = m_velocity;
 	m_velocity += m_acceleration * deltaTime;
+
+	//デバッグ
+	std::cout << "Old Velocity: (" << oldVelocity.x << ", " << oldVelocity.y << ", " << oldVelocity.z << ") m/s" << std::endl;
+	std::cout << "New Velocity: (" << m_velocity.x << ", " << m_velocity.y << ", " << m_velocity.z << ") m/s" << std::endl;
 
 	//速度の大きさを計算
 	m_currentSpeed = m_velocity.Length();
@@ -183,7 +198,14 @@ void Vehicle::UpdatePhysics(float deltaTime) {
 		m_velocity.Normalize();
 		m_velocity *= m_maxSpeed;
 		m_currentSpeed = m_maxSpeed;
+
+		std::cout << "Speed limited to max: " << m_maxSpeed << " m/s" << std::endl;
 	}
+
+	std::cout << "Car Forward: (" << GetForward().x << ", " << GetForward().y << ", " << GetForward().z << ")" << std::endl;
+	std::cout << "Car Rotation Yaw: " << m_rotation.y << " rad" << std::endl;
+	std::cout << "Throttle Input: " << m_throttleInput << "Steeer Input: " << m_steeringInput << " Brake Input: " << m_brakeInput << std::endl;
+	std::cout << "=====================" << std::endl;
 }
 
 void Vehicle::UpdateMovement(float deltaTime) {
@@ -193,14 +215,11 @@ void Vehicle::UpdateMovement(float deltaTime) {
 	m_position = newPosition;
 
 	//回転を更新
-	Vector3 currentRotation = m_rotation;
-	float newYaw = currentRotation.y + m_angularVelocity * deltaTime;
+	float newYaw = m_angularVelocity * deltaTime;
 
-	//正規化
-	while (newYaw > XM_PI) newYaw -= XM_2PI;
-	while (newYaw < -XM_PI) newYaw += XM_2PI;
-
-	m_rotation.y = newYaw;
+	//y軸周りの回転クォータニオンを作成
+	float halfAngle = newYaw * 0.5f;
+	Vector4 rotationQuat(0.0f, std::sin(halfAngle), 0.0f, std::cos(halfAngle));
 }
 
 void Vehicle::CalculateWheelLoads() {
@@ -240,7 +259,9 @@ void Vehicle::CalculateWheelVelocities() {
 		Vector3 translationalVelocity = m_velocity;
 
 		//車体の回転による速度成分
-		Vector3 rotationalVelocity = Vector3(0.0f, m_angularVelocity, 0.0f).Cross(m_wheels[i].position);
+//		Vector3 rotationalVelocity = Vector3(0.0f, m_angularVelocity, 0.0f).Cross(m_wheels[i].position);
+		Vector3 angularVelocityVec(0.0f, m_angularVelocity, 0.0f);
+		Vector3 rotationalVelocity = angularVelocityVec.Cross(m_wheels[i].position);
 
 		//合成速度
 		m_wheels[i].velocity = translationalVelocity + rotationalVelocity;
@@ -262,7 +283,14 @@ void Vehicle::ApplyWheelForces(float deltaTime) {
 	Vector3 totalForce = Vector3::ZERO;
 	float totalTorque = 0.0f;
 
+	//デバッグ
+	std::cout << "=== Wheel Forces Debug ===" << std::endl;
+
 	for (int i = 0; i < 4; i++) {
+		std::cout << "Wheel " << i << " Force: (" << m_wheels[i].force.x << ", " << m_wheels[i].force.y << ", " << m_wheels[i].force.z << ") N" << std::endl;
+		std::cout << "Wheel " << i << " Velocity: (" << m_wheels[i].velocity.x << ", " << m_wheels[i].velocity.y << ", " << m_wheels[i].velocity.z << ") m/s" << std::endl;
+		std::cout << "Wheel " << i << " Steer Angle: " << m_wheels[i].steerAngle << " rad" << std::endl;
+
 		//並進力を合計
 		totalForce += m_wheels[i].force;
 
@@ -270,7 +298,12 @@ void Vehicle::ApplyWheelForces(float deltaTime) {
 		Vector3 leverArm = m_wheels[i].position;
 		Vector3 torqueVec = leverArm.Cross(m_wheels[i].force);
 		totalTorque += torqueVec.y; //y軸周りのトルクのみ考慮
+		std::cout << "Wheel " << i << " Torque Contribution: " << torqueVec.y << " Nm" << std::endl;
 	}
+
+	//デバッグ
+	std::cout << "Total Force: (" << totalForce.x << ", " << totalForce.y << ", " << totalForce.z << ") N" << std::endl;
+	std::cout << "Total Torque: " << totalTorque << " Nm" << std::endl;
 
 	//加速度を計算
 	m_acceleration = totalForce / m_mass;
@@ -278,9 +311,15 @@ void Vehicle::ApplyWheelForces(float deltaTime) {
 	//角加速度を計算(簡易モーメント使用)
 	float momentOfInertia = m_mass * (m_wheelBase * m_wheelBase + m_trackWidth * m_trackWidth) / 24.0f;
 	float angularAcceleration = totalTorque / momentOfInertia;
+	float oldAngularVelocity = m_angularVelocity;
 	m_angularVelocity += angularAcceleration * deltaTime;
 
-	std::cout << "Angular Velocity: " << m_angularVelocity << " rad/s" << std::endl;
+	//デバッグ
+	std::cout << "Angular Acceleration: " << angularAcceleration << " rad/s²" << std::endl;
+	std::cout << "Old Angular Velocity: " << oldAngularVelocity << " rad/s" << std::endl;
+	std::cout << "New Angular Velocity: " << m_angularVelocity << " rad/s" << std::endl;
+	std::cout << "=========================" << std::endl;
+
 }
 
 Vector3 Vehicle::CalculateEngineForce() {
@@ -395,16 +434,20 @@ Vector3 Vehicle::CalculateWheelForce(int wheelIndex) {
 	WheelData& wheel = m_wheels[wheelIndex];
 	Vector3 wheelForce = Vector3::ZERO;
 
-	//タイヤの向き(ステア各考慮)
-	float steerAngle = wheel.steerAngle;
-	Vector3 wheelForward = Vector3(std::sin(steerAngle), 0.0f, std::cos(steerAngle));
-	Vector3 wheelRight = Vector3(std::cos(steerAngle), 0.0f, -std::sin(steerAngle));
-
 	//車体座標系でのタイヤ向きに変換
 	Vector3 carForward = GetForward();
 	Vector3 carRight = GetRight();
-	Vector3 worldWheelForward = carForward * wheelForward.z + carRight * wheelForward.x;
-	Vector3 worldWheelRight = carForward * wheelRight.z + carRight * wheelRight.x;
+
+	float steerAngle = wheel.steerAngle;
+	Vector3 worldWheelForward = carForward * std::cos(steerAngle) + carRight * std::sin(steerAngle);
+	Vector3 worldWheelRight = carForward * (-std::sin(steerAngle)) + carRight * std::cos(steerAngle);
+
+	//デバッグ
+	if (wheelIndex == 0) {
+		std::cout << "Wheel 0 Debug:" << std::endl;
+		std::cout << "  Steer Angle: " << steerAngle << " rad" << std::endl;
+		std::cout << "  World Wheel Forward: (" << worldWheelForward.x << ", " << worldWheelForward.y << ", " << worldWheelForward.z << ")" << std::endl;
+	}
 
 	//タイヤ速度を分離
 	float longitudinalVel = wheel.velocity.Dot(worldWheelForward);
@@ -421,6 +464,11 @@ Vector3 Vehicle::CalculateWheelForce(int wheelIndex) {
 		if (std::abs(m_throttleInput) > 0.01f) {
 			float engineForce = m_accelerrationForce * std::abs(m_throttleInput) * 0.5f;
 			longitudinalForce = (m_throttleInput > 0.0f) ? engineForce : -engineForce * 0.7f; //後退は70%の力
+
+			//デバッグ
+			if (wheelIndex == 2) {
+				std::cout << "  Engine Force Applied: " << longitudinalForce << " N" << std::endl;
+			}
 		}
 	}
 

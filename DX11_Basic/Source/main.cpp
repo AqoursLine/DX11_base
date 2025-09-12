@@ -170,7 +170,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 #ifdef _DEBUG
 			frameCount++;
-			if (frameCount > 3) {
+			if (frameCount > 1) {
 				MoveConsoleCursorToTopLeft();
 				frameCount = 0;
 			}
