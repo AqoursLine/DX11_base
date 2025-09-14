@@ -290,6 +290,16 @@ public:
 		return Vector4(x * scalar, y * scalar, z * scalar, w * scalar);
 	}
 
+	//クォータニオン乗算
+	constexpr Vector4 operator*(const Vector4& q) const noexcept {
+		return Vector4(
+			w * q.x + x * q.w + y * q.z - z * q.y,
+			w * q.y - x * q.z + y * q.w + z * q.x,
+			w * q.z + x * q.y - y * q.x + z * q.w,
+			w * q.w - x * q.x - y * q.y - z * q.z
+		);
+	}
+
 	// スカラー除算
 	constexpr Vector4 operator/(float scalar) const noexcept {
 		const float inverseScalar = 1.0f / scalar;

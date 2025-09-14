@@ -202,7 +202,7 @@ void Vehicle::UpdatePhysics(float deltaTime) {
 		std::cout << "Speed limited to max: " << m_maxSpeed << " m/s" << std::endl;
 	}
 
-	std::cout << "Car Forward: (" << GetForward().x << ", " << GetForward().y << ", " << GetForward().z << ")" << std::endl;
+	std::cout << "Car Forward: (" << GetForwardQ().x << ", " << GetForwardQ().y << ", " << GetForwardQ().z << ")" << std::endl;
 	std::cout << "Car Rotation Yaw: " << m_rotation.y << " rad" << std::endl;
 	std::cout << "Throttle Input: " << m_throttleInput << "Steeer Input: " << m_steeringInput << " Brake Input: " << m_brakeInput << std::endl;
 	std::cout << "=====================" << std::endl;
@@ -218,8 +218,13 @@ void Vehicle::UpdateMovement(float deltaTime) {
 	float newYaw = m_angularVelocity * deltaTime;
 
 	//y軸周りの回転クォータニオンを作成
-	float halfAngle = newYaw * 0.5f;
-	Vector4 rotationQuat(0.0f, std::sin(halfAngle), 0.0f, std::cos(halfAngle));
+	Vector4 deltaRotation = Vector4::FromAxisAngle(Vector3::UP, newYaw);
+
+	//クォータニオン乗算で回転を更新
+	m_quaternion = deltaRotation * m_quaternion;
+
+	//クォータニオンを正規化
+	m_quaternion.Normalize();
 }
 
 void Vehicle::CalculateWheelLoads() {
@@ -228,14 +233,14 @@ void Vehicle::CalculateWheelLoads() {
 	float rearLoad = m_mass * 9.81f * (m_frontAxlePosition / m_wheelBase);
 
 	//加速による荷重変化
-	float longitudinalAccel = m_acceleration.Dot(GetForward());
+	float longitudinalAccel = m_acceleration.Dot(GetForwardQ());
 	float loadTransfer = (longitudinalAccel * m_mass * m_cgHeight) / m_wheelBase;
 
 	frontLoad -= loadTransfer; //加速時は前輪の荷重減少
 	rearLoad += loadTransfer;  //加速時は後輪の荷重増加
 
 	//横加速による荷重移動(簡易版)
-	float lateralAccel = m_acceleration.Dot(GetRight());
+	float lateralAccel = m_acceleration.Dot(GetRightQ());
 	float lateralLoadTransfer = (lateralAccel * m_mass * m_cgHeight) / m_trackWidth;
 
 	//各輪の荷重を設定
@@ -251,8 +256,8 @@ void Vehicle::CalculateWheelLoads() {
 }
 
 void Vehicle::CalculateWheelVelocities() {
-	Vector3 forward = GetForward();
-	Vector3 right = GetRight();
+	Vector3 forward = GetForwardQ();
+	Vector3 right = GetRightQ();
 
 	for (int i = 0; i < 4; i++) {
 		//車体の並進速度
@@ -336,7 +341,7 @@ Vector3 Vehicle::CalculateEngineForce() {
 	float engineForceAmount = m_accelerrationForce * std::abs(m_throttleInput) * efficiency;
 
 	//前進/後退の方向を決定
-	Vector3 forwardDirection = GetForward();
+	Vector3 forwardDirection = GetForwardQ();
 	if (m_throttleInput < 0.0f) {
 		engineForceAmount *= 0.7f; //後退は前進の70%の力
 		forwardDirection = -forwardDirection; //後退
@@ -398,8 +403,8 @@ Vector3 Vehicle::CalculateLateralForce() const {
 		return Vector3::ZERO;
 	}
 
-	Vector3 forward = GetForward();
-	Vector3 right = GetRight();
+	Vector3 forward = GetForwardQ();
+	Vector3 right = GetRightQ();
 
 	//現在の速度方向と車体方向の差を計算
 	Vector3 velocityDir = m_velocity;
@@ -435,8 +440,8 @@ Vector3 Vehicle::CalculateWheelForce(int wheelIndex) {
 	Vector3 wheelForce = Vector3::ZERO;
 
 	//車体座標系でのタイヤ向きに変換
-	Vector3 carForward = GetForward();
-	Vector3 carRight = GetRight();
+	Vector3 carForward = GetForwardQ();
+	Vector3 carRight = GetRightQ();
 
 	float steerAngle = wheel.steerAngle;
 	Vector3 worldWheelForward = carForward * std::cos(steerAngle) + carRight * std::sin(steerAngle);
@@ -493,7 +498,7 @@ Vector3 Vehicle::CalculateWheelForce(int wheelIndex) {
 	}
 
 	//横力(コーナリングフォース)の計算
-	float lateralForce = -wheel.slipAngle * m_cornerStiffnessFront * 0.1f;
+	float lateralForce = -wheel.slipAngle * m_cornerStiffnessFront * 0.01f;
 
 	//グリップファクターを計算
 	float combinedSlip = std::sqrt(wheel.slipRatio * wheel.slipRatio + wheel.slipAngle * wheel.slipAngle);
@@ -536,8 +541,8 @@ float Vehicle::CalculateSlipAngle(int wheelIndex) {
 	}
 
 	//タイヤの向き
-	Vector3 carForward = GetForward();
-	Vector3 carRight = GetRight();
+	Vector3 carForward = GetForwardQ();
+	Vector3 carRight = GetRightQ();
 
 	float steerAngle = wheel.steerAngle;
 	Vector3 wheelForward = carForward * std::cos(steerAngle) + carRight * std::sin(steerAngle);

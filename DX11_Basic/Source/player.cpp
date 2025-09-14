@@ -23,6 +23,7 @@ bool Player::Initialize() {
 	m_scale = {2.0, 0.6f, 4.0f};
 	m_rotation = {0.0f, 0.0f, 0.0f};
 	m_position = { 0.0f, 1.0f, 0.0f };
+	m_quaternion = Vector4::IDENTITY;
 
 	if(!Vehicle::Initialize()) {
 		return false;
@@ -61,7 +62,7 @@ void Player::Update(double deltaTime) {
 
 void Player::Draw() const {
 //	m_model->Draw(m_position, m_rotation, m_scale);
-	m_box->Draw(m_position, m_rotation, m_scale);
+	m_box->Draw(m_position, m_quaternion, m_scale);
 
 	DrawWheels();
 

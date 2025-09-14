@@ -34,7 +34,7 @@ void Camera::Update(double deltaTime) {
 		m_targetPosition.y += 1.0f; // プレイヤーの高さを少し上げる
 
 		//カメラのオフセット位置を計算
-		Vector3 forward = player->GetForward();
+		Vector3 forward = player->GetForwardQ();
 		m_position = m_targetPosition + forward * m_offset.z + player->GetUpQ() * m_offset.y;
 
 	} else {
