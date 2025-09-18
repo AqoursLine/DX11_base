@@ -195,6 +195,7 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\boat.cpp" />
     <ClCompile Include="Source\box.cpp" />
     <ClCompile Include="Source\brakeSystem.cpp" />
     <ClCompile Include="Source\camera.cpp" />
@@ -221,6 +222,7 @@
     <ClCompile Include="Source\wheel.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\boat.h" />
     <ClInclude Include="Source\box.h" />
     <ClInclude Include="Source\brakeSystem.h" />
     <ClInclude Include="Source\camera.h" />
