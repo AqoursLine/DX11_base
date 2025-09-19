@@ -2,15 +2,16 @@
 
 struct RippleData
 {
-	float4 PositionAndTime; // xyz:ˆÊ’u w:ŠJnŠÔ
-	float4 Params; // x:U• y:”g’· z:‘¬“x w:g—pƒtƒ‰ƒO
+	float4 PositionAndTime; // xyz:ä½ç½® w:é–‹å§‹æ™‚é–“
+	float4 Params; // x:æŒ¯å¹… y:æ³¢é•· z:é€Ÿåº¦ w:ä½¿ç”¨ãƒ•ãƒ©ã‚°
 };
 struct WakeTrailData
 {
-	float4 StartPos; // xyz:ŠJnˆÊ’u w:ŠÔ
-	float4 EndPos; // xyz:I—¹ˆÊ’u w:‹­‚³
-	float4 Params; // x:•, y:’·‚³, z:õ–½, w:g—pƒtƒ‰ƒO
+	float4 StartPos; // xyz:é–‹å§‹ä½ç½® w:æ™‚é–“
+	float4 EndPos; // xyz:çµ‚äº†ä½ç½® w:å¼·ã•
+	float4 Params; // x:å¹…, y:é•·ã•, z:å¯¿å‘½, w:ä½¿ç”¨ãƒ•ãƒ©ã‚°
 };
+
 
 cbuffer WaterConstantBuffer : register(b6)
 {
@@ -19,7 +20,7 @@ cbuffer WaterConstantBuffer : register(b6)
 	float WaterSize;
 	float padding1;
 	
-	//Šî–{”gƒpƒ‰ƒ[ƒ^
+	//åŸºæœ¬æ³¢ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
 	float BaseWaveFreq1;
 	float BaseWaveFreq2;
 	float BaseWaveFreq3;
@@ -28,80 +29,80 @@ cbuffer WaterConstantBuffer : register(b6)
 	float BaseWaveSpeed3;
 	float padding2[2];
 
-	//”g–äƒf[ƒ^
+	//æ³¢ç´‹ãƒ‡ãƒ¼ã‚¿
 	RippleData Ripples[10];
 	WakeTrailData WakeTrails[20];
 }
 
 void main(in PS_INPUT input, out float4 outDiffuse : SV_TARGET)
 {
-	//…‚ÌŠî–{F
-	float3 deepWaterColor = float3(0.1f, 0.3f, 0.5f); //[‚¢…‚ÌF
-	float3 shallowWaterColor = float3(0.3f, 0.7f, 0.9f); //ó‚¢…‚ÌF
-	float3 wakeColor = float3(0.7f, 0.9f, 1.9f); //qÕ”g‚ÌF
+	//æ°´ã®åŸºæœ¬è‰²
+	float3 deepWaterColor = float3(0.1f, 0.3f, 0.5f); //æ·±ã„æ°´ã®è‰²
+	float3 shallowWaterColor = float3(0.3f, 0.7f, 0.9f); //æµ…ã„æ°´ã®è‰²
+	float3 wakeColor = float3(0.7f, 0.9f, 1.9f); //èˆªè·¡æ³¢ã®è‰²
 	
-	//–@ü‚ğ³‹K‰»
+	//æ³•ç·šã‚’æ­£è¦åŒ–
 	float3 normal = normalize(input.Normal.xyz);
 	
-	//ƒ‰ƒCƒeƒBƒ“ƒOŒvZ
+	//ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°è¨ˆç®—
 	float3 lightDir = normalize(Light.Direction.xyz);
 	float3 lightColor = Light.Diffuse.rgb;
 	
-	//ƒ‰ƒ“ƒo[ƒgŠgU”½Ë
+	//ãƒ©ãƒ³ãƒãƒ¼ãƒˆæ‹¡æ•£åå°„
 	float NdotL = max(0.0f, dot(-lightDir, normal));
 	float3 diffuse = lightColor * NdotL;
 	
-	//ƒXƒyƒLƒ…ƒ‰[”½Ë(ƒuƒŠƒ“EƒtƒHƒ“”½Ëƒ‚ƒfƒ‹)
+	//ã‚¹ãƒšã‚­ãƒ¥ãƒ©ãƒ¼åå°„(ãƒ–ãƒªãƒ³ãƒ»ãƒ•ã‚©ãƒ³åå°„ãƒ¢ãƒ‡ãƒ«)
 	float3 viewDirection = normalize(CameraPosition.xyz - input.WorldPosition.xyz);
 	float3 halfVector = normalize(-lightDir + viewDirection);
 	float NdotH = max(0.0f, dot(normal, halfVector));
 	float3 specular = lightColor * pow(NdotH, 64.0f) * 0.8f;
 	
-	//ƒtƒŒƒlƒ‹Œø‰Ê(ŠÈˆÕ”Å)
+	//ãƒ•ãƒ¬ãƒãƒ«åŠ¹æœ(ç°¡æ˜“ç‰ˆ)
 	float fresnel = pow(1.0f - max(0.0f, dot(viewDirection, normal)), 2.0f);
 	fresnel = lerp(0.1f, 1.0f, fresnel);
 	
-	//…[‚É‚æ‚éF‚Ì•Ï‰»
+	//æ°´æ·±ã«ã‚ˆã‚‹è‰²ã®å¤‰åŒ–
 	float depth = abs(input.WorldPosition.y);
 	float depthFactor = saturate(depth / 2.0f);
 	float3 waterColor = lerp(shallowWaterColor, deepWaterColor, depthFactor);
 	
-	//”g‚Ì’¸“_‚ğ^‚Á”’‚É‚·‚éˆ—
-	float baseWaterLevel = 0.0f; //Šî€‚Æ‚È‚é…–Ê‚Ì‚‚³
+	//æ³¢ã®é ‚ç‚¹ã‚’çœŸã£ç™½ã«ã™ã‚‹å‡¦ç†
+	float baseWaterLevel = 0.0f; //åŸºæº–ã¨ãªã‚‹æ°´é¢ã®é«˜ã•
 	float waveHeight = input.WorldPosition.y - baseWaterLevel;
 	
-	//”g‚Ì‚‚³‚ÉŠî‚Ã‚­”’FŒø‰Ê
+	//æ³¢ã®é«˜ã•ã«åŸºã¥ãç™½è‰²åŠ¹æœ
 	float waveHeightNormalized = saturate(waveHeight / 3.0f);
 	float whiteFactor = 0.0f;
 	
-	//”g‚ª‚‚¢‚Ù‚Ç”’‚­‚·‚é(”ñüŒ`ƒJ[ƒu)
+	//æ³¢ãŒé«˜ã„ã»ã©ç™½ãã™ã‚‹(éç·šå½¢ã‚«ãƒ¼ãƒ–)
 	if (waveHeight > 0.2f)
 	{
-		//•½•ûªƒJ[ƒu
+		//å¹³æ–¹æ ¹ã‚«ãƒ¼ãƒ–
 		whiteFactor = pow(saturate((waveHeight - 0.2f) / 2.0f), 0.5f);
 	}
 	
-	//–@ü‚ÌŒX‚«‚©‚ç‚à”’F‚ğ’Ç‰Á
+	//æ³•ç·šã®å‚¾ãã‹ã‚‰ã‚‚ç™½è‰²ã‚’è¿½åŠ 
 	float slopeFactor = 1.0f - abs(dot(normal, float3(0.0f, 1.0f, 0.0f)));
 	slopeFactor = pow(saturate(slopeFactor), 2.0f);
 
-	//”g‚Ì’¸“_ŒŸo
+	//æ³¢ã®é ‚ç‚¹æ¤œå‡º
 	float peakFactor = 0.0f;
 	if (waveHeight > 0.5f && slopeFactor > 0.3f)
 	{
 		peakFactor = saturate((waveHeight - 0.5f) * slopeFactor * 2.0f);
 	}
 	
-	//ÅI“I‚È”’F‹­“x‚ğŒvZ
+	//æœ€çµ‚çš„ãªç™½è‰²å¼·åº¦ã‚’è¨ˆç®—
 	float totalWhiteness = max(whiteFactor, peakFactor);
 	totalWhiteness = saturate(totalWhiteness);
 	
-	//”g–ä‚É‚æ‚éF‚Ì•Ï‰»
+	//æ³¢ç´‹ã«ã‚ˆã‚‹è‰²ã®å¤‰åŒ–
 	float rippleIntensity = 0.0f;
 	[unroll]
 	for (int i = 0; i < 10; i++)
 	{
-		if (Ripples[i].Params.w <= 0.0f) continue; // g—pƒtƒ‰ƒO‚ª—§‚Á‚Ä‚¢‚È‚¢ê‡‚ÍƒXƒLƒbƒv
+		if (Ripples[i].Params.w <= 0.0f) continue; // ä½¿ç”¨ãƒ•ãƒ©ã‚°ãŒç«‹ã£ã¦ã„ãªã„å ´åˆã¯ã‚¹ã‚­ãƒƒãƒ—
 		
 		float3 ripplePos = Ripples[i].PositionAndTime.xyz;
 		float rippleStartTime = Ripples[i].PositionAndTime.w;
@@ -119,12 +120,12 @@ void main(in PS_INPUT input, out float4 outDiffuse : SV_TARGET)
 		}
 	}
 	
-	//qÕ”g‚É‚æ‚éF‚Ì•Ï‰»
+	//èˆªè·¡æ³¢ã«ã‚ˆã‚‹è‰²ã®å¤‰åŒ–
 	float wakeIntensity = 0.0f;
 	[unroll]
 	for (i = 0; i < 20; i++)
 	{
-		if (WakeTrails[i].Params.w <= 0.0f)	continue; // g—pƒtƒ‰ƒO‚ª—§‚Á‚Ä‚¢‚È‚¢ê‡‚ÍƒXƒLƒbƒv
+		if (WakeTrails[i].Params.w <= 0.0f)	continue; // ä½¿ç”¨ãƒ•ãƒ©ã‚°ãŒç«‹ã£ã¦ã„ãªã„å ´åˆã¯ã‚¹ã‚­ãƒƒãƒ—
 		
 		float3 startPos = WakeTrails[i].StartPos.xyz;
 		float3 endPos = WakeTrails[i].EndPos.xyz;
@@ -132,33 +133,33 @@ void main(in PS_INPUT input, out float4 outDiffuse : SV_TARGET)
 		float intensity = WakeTrails[i].EndPos.w;
 		float width = WakeTrails[i].Params.x;
 		
-		//qÕü•ª‚É‘Î‚·‚éÅ‹ßÚ“_‚ğŒvZ
+		//èˆªè·¡ç·šåˆ†ã«å¯¾ã™ã‚‹æœ€è¿‘æ¥ç‚¹ã‚’è¨ˆç®—
 		float3 wakeVec = endPos - startPos;
 		float3 pointVec = input.WorldPosition.xyz - startPos;
 		
 		float wakeLength = length(wakeVec);
-		if (wakeLength < 0.1f) continue; // ’·‚³‚ª‚Ù‚Ú0‚Ìê‡‚ÍƒXƒLƒbƒv)
+		if (wakeLength < 0.1f) continue; // é•·ã•ãŒã»ã¼0ã®å ´åˆã¯ã‚¹ã‚­ãƒƒãƒ—)
 		
 		float3 wakeDir = wakeVec / wakeLength;
 		float projLength = dot(pointVec, wakeDir);
 		
-		//qÕ‚Ì”ÍˆÍŠO‚È‚çƒXƒLƒbƒv
+		//èˆªè·¡ã®ç¯„å›²å¤–ãªã‚‰ã‚¹ã‚­ãƒƒãƒ—
 		if (projLength < 0.0f || projLength > wakeLength) continue;
 		
-		//Å‹ßÚ“_‚ğŒvZ
+		//æœ€è¿‘æ¥ç‚¹ã‚’è¨ˆç®—
 		float3 closestPoint = startPos + wakeDir * projLength;
 		
-		//Å‹ßÚ“_‚©‚ç‚Ì‹——£
+		//æœ€è¿‘æ¥ç‚¹ã‹ã‚‰ã®è·é›¢
 		float lateralDistance = length(input.WorldPosition.xyz - closestPoint);
 		
-		//qÕ‚Ì‰e‹¿”ÍˆÍ“à‚©ƒ`ƒFƒbƒN
+		//èˆªè·¡ã®å½±éŸ¿ç¯„å›²å†…ã‹ãƒã‚§ãƒƒã‚¯
 		if (lateralDistance < width * 1.5f)
 		{
 			float timeAttenuation = exp(-wakeTime * 0.08f);
 			float distanceAttenuation = 1.0f - saturate(lateralDistance / (width * 1.5f));
 			float wakeEffect = intensity * timeAttenuation * distanceAttenuation;
 			
-			//qÕ’†S‚Í”’‚Á‚Û‚­
+			//èˆªè·¡ä¸­å¿ƒã¯ç™½ã£ã½ã
 			if (lateralDistance < width * 0.3f)
 			{
 				wakeIntensity += wakeEffect * 0.6f;
@@ -170,39 +171,38 @@ void main(in PS_INPUT input, out float4 outDiffuse : SV_TARGET)
 		}
 	}
 	
-	//ŠÔ‚É‚æ‚é…–Ê‚Ì“®‚«
+	//æ™‚é–“ã«ã‚ˆã‚‹æ°´é¢ã®å‹•ã
 	float2 animUV = input.TexCoord + float2(sin(Time * 0.1f), cos(Time * 0.15f)) * 0.01f;
 	float foam = sin(animUV.x * 20.0f + Time * 2.0f) * sin(animUV.y * 15.0f + Time * 1.5f);
 	foam = max(0.0f, foam) * 0.1f;
 	
-	//ƒAƒ“ƒrƒGƒ“ƒgŒõ‚ğ‰ÁZ
+	//ã‚¢ãƒ³ãƒ“ã‚¨ãƒ³ãƒˆå…‰ã‚’åŠ ç®—
 	float3 ambient = Light.Ambient.rgb * waterColor;
 	
-	//ÅIF‚ğŒvZ
+	//æœ€çµ‚è‰²ã‚’è¨ˆç®—
 	float3 finalColor = ambient + waterColor * diffuse + specular * fresnel + foam;
 
-	//”g–äŒø‰Ê‚ğ’Ç‰Á
+	//æ³¢ç´‹åŠ¹æœã‚’è¿½åŠ 
 	finalColor += rippleIntensity * float3(0.6f, 0.8f, 1.0f);
 	
-	//qÕ”gŒø‰Ê‚ğ’Ç‰Á
+	//èˆªè·¡æ³¢åŠ¹æœã‚’è¿½åŠ 
 	finalColor = lerp(finalColor, wakeColor, wakeIntensity);
 	finalColor += wakeIntensity * float3(0.8f, 0.8f, 0.8f);
 
-	//”g‚Ì’¸“_‚ğ”’‚­
+	//æ³¢ã®é ‚ç‚¹ã‚’ç™½ã
 	float3 whiteColor = float3(1.0f, 1.0f, 1.0f);
 	finalColor = lerp(finalColor, whiteColor, totalWhiteness);
 
-	//‚³‚ç‚É‹­‚¢”’FŒø‰Ê
+	//ã•ã‚‰ã«å¼·ã„ç™½è‰²åŠ¹æœ
 	if (totalWhiteness > 0.7f)
 	{
 		finalColor += float3(0.3f, 0.3f, 0.3f);
 
 	}
-
-	//“ü—ÍƒJƒ‰[‚ğl—¶
+	//å…¥åŠ›ã‚«ãƒ©ãƒ¼ã‚’è€ƒæ…®
 	finalColor *= input.Diffuse.rgb;
 	
-	//“§–¾“xİ’è(qÕ•”•ª‚Í­‚µ•s“§–¾‚É)
+	//é€æ˜åº¦è¨­å®š(èˆªè·¡éƒ¨åˆ†ã¯å°‘ã—ä¸é€æ˜ã«)
 	float alpha = input.Diffuse.a * (0.7f + fresnel * 0.3f + wakeIntensity * 0.2f);
 	alpha = saturate(alpha);
 	
