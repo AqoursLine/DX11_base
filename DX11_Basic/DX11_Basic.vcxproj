@@ -193,14 +193,24 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Shader\%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Shader\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
+    <FxCompile Include="Shader\waterPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\waterVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\boat.cpp" />
+    <ClCompile Include="Source\bobber.cpp" />
     <ClCompile Include="Source\box.cpp" />
-    <ClCompile Include="Source\brakeSystem.cpp" />
     <ClCompile Include="Source\camera.cpp" />
-    <ClCompile Include="Source\courseRenderer.cpp" />
-    <ClCompile Include="Source\engine.cpp" />
     <ClCompile Include="Source\field.cpp" />
     <ClCompile Include="Source\fieldObject.cpp" />
     <ClCompile Include="Source\fpsCamera.cpp" />
@@ -217,20 +227,16 @@
     <ClCompile Include="Source\texture.cpp" />
     <ClCompile Include="Source\timer.cpp" />
     <ClCompile Include="Source\tmp2D.cpp" />
-    <ClCompile Include="Source\transmission.cpp" />
-    <ClCompile Include="Source\vehicle.cpp" />
-    <ClCompile Include="Source\wheel.cpp" />
+    <ClCompile Include="Source\water.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\boat.h" />
     <ClInclude Include="Source\box.h" />
-    <ClInclude Include="Source\brakeSystem.h" />
     <ClInclude Include="Source\camera.h" />
-    <ClInclude Include="Source\courseRenderer.h" />
     <ClInclude Include="Source\DirectXTex.h" />
-    <ClInclude Include="Source\engine.h" />
     <ClInclude Include="Source\field.h" />
     <ClInclude Include="Source\fieldObject.h" />
+    <ClInclude Include="Source\bobber.h" />
     <ClInclude Include="Source\fpsCamera.h" />
     <ClInclude Include="Source\gameObject.h" />
     <ClInclude Include="Source\input.h" />
@@ -248,9 +254,7 @@
     <ClInclude Include="Source\timer.h" />
     <ClInclude Include="Source\tmp2D.h" />
     <ClInclude Include="Source\gwVector.h" />
-    <ClInclude Include="Source\transmission.h" />
-    <ClInclude Include="Source\vehicle.h" />
-    <ClInclude Include="Source\wheel.h" />
+    <ClInclude Include="Source\water.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\DirectXTex.inl" />
