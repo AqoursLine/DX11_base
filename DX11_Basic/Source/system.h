@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 class Timer;
 class Manager;
@@ -20,7 +20,6 @@ private:
 
 	Timer* m_timer = nullptr;
 	Manager* m_manager = nullptr;
-	class GameWebSocketClient* m_webSocketClient = nullptr; // WebSocketクライアントのポインタ
 
 public:
 	static System* CreateInstance() {

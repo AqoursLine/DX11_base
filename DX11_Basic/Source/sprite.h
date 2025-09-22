@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 class Sprite {
 public:
@@ -13,7 +13,6 @@ public:
 private:
 	//頂点バッファ
 	ComPtr<ID3D11Buffer> m_vertexBuffer;
-
 	//頂点シェーダー
 	ComPtr<ID3D11VertexShader> m_vertexShader;
 	//ピクセルシェーダー

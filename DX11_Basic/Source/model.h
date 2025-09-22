@@ -11,7 +11,7 @@
 #pragma comment (lib, "assimp-vc143-mt.lib")
 #endif // _DEBUG
 
-//ƒ‚ƒfƒ‹—pƒ}ƒeƒŠƒAƒ‹\‘¢‘Ì
+//ãƒ¢ãƒ‡ãƒ«ç”¨ãƒãƒ†ãƒªã‚¢ãƒ«æ§‹é€ ä½“
 struct MODEL_MATERIAL {
 	XMFLOAT4 diffuse;
 	XMFLOAT4 specular;
@@ -20,7 +20,7 @@ struct MODEL_MATERIAL {
 	ID3D11ShaderResourceView* texture;
 	std::string texturePath;
 
-	//ƒ}ƒeƒŠƒAƒ‹‚ÌƒnƒbƒVƒ…ƒL[‚ğ¶¬
+	//ãƒãƒ†ãƒªã‚¢ãƒ«ã®ãƒãƒƒã‚·ãƒ¥ã‚­ãƒ¼ã‚’ç”Ÿæˆ
 	std::string GenerateHashKey() const {
 		char buffer[512];
 		snprintf(buffer, sizeof(buffer),
@@ -31,10 +31,9 @@ struct MODEL_MATERIAL {
 			shininess, texturePath.c_str());
 		return std::string(buffer);
 	}
-
 };
 
-//ƒƒbƒVƒ…\‘¢‘Ì
+//ãƒ¡ãƒƒã‚·ãƒ¥æ§‹é€ ä½“
 struct MESH {
 	const aiScene* scene = nullptr;
 
@@ -45,7 +44,7 @@ struct MESH {
 	MODEL_MATERIAL material;
 };
 
-//ƒeƒNƒXƒ`ƒƒƒLƒƒƒbƒVƒ…ƒGƒ“ƒgƒŠ
+//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚¨ãƒ³ãƒˆãƒª
 struct TEXTURE_CACHE_ENTRY {
 	ID3D11ShaderResourceView* srv;
 	int referenceCount;
@@ -54,7 +53,7 @@ struct TEXTURE_CACHE_ENTRY {
 	TEXTURE_CACHE_ENTRY(ID3D11ShaderResourceView* srvPtr) : srv(srvPtr), referenceCount(1) {}
 };
 
-//ƒ}ƒeƒŠƒAƒ‹ƒLƒƒƒbƒVƒ…ƒGƒ“ƒgƒŠ
+//ãƒãƒ†ãƒªã‚¢ãƒ«ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚¨ãƒ³ãƒˆãƒª
 struct MATERIAL_CACHE_ENTRY {
 	MODEL_MATERIAL material;
 	int referenceCount;
@@ -70,45 +69,45 @@ public:
 	bool LoadModelFBX(const std::string& fileName);
 	void ReleaseModel();
 
-	//•`‰æŠÖ”
+	//æç”»é–¢æ•°
 	void Draw(const Vector3& position, const Vector3& rotation, const Vector3& scale) const;
-	//ƒNƒH[ƒ^ƒjƒIƒ“‰ñ“]‚Å•`‰æ
+	//ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³å›è»¢ã§æç”»
 	void Draw(const Vector3& position, const Vector4& rotation, const Vector3& scale) const;
 
 	static void ClearCache();
 
 private:
-	//ƒm[ƒhˆ—
+	//ãƒãƒ¼ãƒ‰å‡¦ç†
 	void ProcessNode(aiNode* node, const aiScene* scene, const std::string& modelDirectory);
-	//ƒƒbƒVƒ…ˆ—
+	//ãƒ¡ãƒƒã‚·ãƒ¥å‡¦ç†
 	void ProcessMesh(aiMesh* mesh, const aiScene* scene, const std::string& modelDirectory);
 
-	//ƒ}ƒeƒŠƒAƒ‹ƒ[ƒh
+	//ãƒãƒ†ãƒªã‚¢ãƒ«ãƒ­ãƒ¼ãƒ‰
 	MODEL_MATERIAL LoadMaterial(aiMaterial* aiMat, const aiScene* scene, const std::string& modeDirectory);
-	//‘g‚İ‚İƒeƒNƒXƒ`ƒƒ‚ğƒ[ƒh
+	//çµ„ã¿è¾¼ã¿ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ãƒ­ãƒ¼ãƒ‰
 	ID3D11ShaderResourceView* LoadEmbeddedTexture(const aiTexture* embeddedTexture, int textureIndex);
-	//ƒLƒƒƒbƒVƒ…‚ğg—p‚µ‚ÄƒeƒNƒXƒ`ƒƒ‚ğƒ[ƒh
+	//ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’ä½¿ç”¨ã—ã¦ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ãƒ­ãƒ¼ãƒ‰
 	ID3D11ShaderResourceView* LoadTexture(const std::string& texturePath);
-	//ƒeƒNƒXƒ`ƒƒƒ[ƒh—pŠÖ”
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ­ãƒ¼ãƒ‰ç”¨é–¢æ•°
 	ID3D11ShaderResourceView* LoadTextureFromFile(const std::string& texturePath);
 
 
 	std::vector<MESH> m_meshes;
 	std::string m_directory;
 
-	//ƒeƒNƒXƒ`ƒƒƒLƒƒƒbƒVƒ…
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚­ãƒ£ãƒƒã‚·ãƒ¥
 	static std::unordered_map<std::string, TEXTURE_CACHE_ENTRY> m_textureCache;
 
-	//ƒeƒNƒXƒ`ƒƒƒpƒXƒŠƒXƒg
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ‘ã‚¹ãƒªã‚¹ãƒˆ
 	std::vector<std::string> m_usedTexturePaths;
 
-	//ƒ}ƒeƒŠƒAƒ‹ƒLƒƒƒbƒVƒ…
+	//ãƒãƒ†ãƒªã‚¢ãƒ«ã‚­ãƒ£ãƒƒã‚·ãƒ¥
 	static std::unordered_map<std::string, MATERIAL_CACHE_ENTRY> m_materialCache;
 
-	//ƒ}ƒeƒŠƒAƒ‹ƒL[ƒŠƒXƒg
+	//ãƒãƒ†ãƒªã‚¢ãƒ«ã‚­ãƒ¼ãƒªã‚¹ãƒˆ
 	std::vector<std::string> m_usedMaterialKeys;
 
-	//ƒVƒF[ƒ_[
+	//ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
 	ComPtr<ID3D11VertexShader> m_vertexShader;
 	ComPtr<ID3D11PixelShader> m_pixelShader;
 	ComPtr<ID3D11InputLayout> m_inputLayout;

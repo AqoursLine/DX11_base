@@ -5,17 +5,17 @@
 
 
 bool Field::Initialize(std::wstring fileName) {
-	//ƒeƒNƒXƒ`ƒƒ“Ç‚Ýž‚Ý
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£èª­ã¿è¾¼ã¿
 	m_texture = new Texture();
 	if (!m_texture->Load(fileName)) {
-		ErrorMessage(L"ƒtƒB[ƒ‹ƒh‚ÌƒeƒNƒXƒ`ƒƒ“Ç‚Ýž‚Ý‚ÉŽ¸”s‚µ‚Ü‚µ‚½B", E_FAIL);
+		ErrorMessage(L"ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£èª­ã¿è¾¼ã¿ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", E_FAIL);
 		return false;
 	}
 
-	//’¸“_ƒf[ƒ^‚Ìì¬
+	//é ‚ç‚¹ãƒ‡ãƒ¼ã‚¿ã®ä½œæˆ
 	VERTEX_3D vertices[4] = {};
 
-	//ŽOŽŸŒ³ƒ|ƒŠƒSƒ“‚ÌÀ•W‚ðÝ’è
+	//ä¸‰æ¬¡å…ƒãƒãƒªã‚´ãƒ³ã®åº§æ¨™ã‚’è¨­å®š
 	vertices[0].position = XMFLOAT3(-0.5f, 0.0f, 0.5f);
 	vertices[1].position = XMFLOAT3(0.5f, 0.0f, 0.5f);
 	vertices[2].position = XMFLOAT3(-0.5f, 0.0f, -0.5f);
@@ -36,7 +36,7 @@ bool Field::Initialize(std::wstring fileName) {
 	vertices[2].diffuse = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 	vertices[3].diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	//’¸“_ƒoƒbƒtƒ@‚ÌÝ’è
+	//é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã®è¨­å®š
 	D3D11_BUFFER_DESC bufferDesc = {};
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	bufferDesc.ByteWidth = sizeof(vertices);
@@ -48,11 +48,11 @@ bool Field::Initialize(std::wstring fileName) {
 
 	HRESULT hr = RENDERER.GetDevice()->CreateBuffer(&bufferDesc, &initData, m_vertexBuffer.GetAddressOf());
 	if (FAILED(hr)) {
-		ErrorMessage(L"’¸“_ƒoƒbƒtƒ@‚Ì‰Šú‰»‚ÉŽ¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return false;
 	}
 
-	//ƒVƒF[ƒ_[‚Ìì¬
+	//ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®ä½œæˆ
 	RENDERER.CreateVertexShader(&m_vertexShader, &m_inputLayout, L"Shader\\unlitTextureVS.cso");
 	RENDERER.CreatePixelShader(&m_pixelShader, L"Shader\\unlitTexturePS.cso");
 
@@ -60,49 +60,50 @@ bool Field::Initialize(std::wstring fileName) {
 }
 
 void Field::Finalize() {
-	// ƒeƒNƒXƒ`ƒƒ‚Ì‰ð•ú
+	// ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®è§£æ”¾
 	if (m_texture) {
 		delete m_texture;
 		m_texture = nullptr;
 	}
+
 }
 
 void Field::Draw(const Vector3& pos, const Vector3& rot, const Vector3& scale) const {
-	// “ü—ÍƒŒƒCƒAƒEƒg‚ðƒZƒbƒg
+	// å…¥åŠ›ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã‚’ã‚»ãƒƒãƒˆ
 	RENDERER.GetDeviceContext()->IASetInputLayout(m_inputLayout.Get());
-	// ’¸“_ƒVƒF[ƒ_[‚ðƒZƒbƒg
+	// é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ã‚»ãƒƒãƒˆ
 	RENDERER.GetDeviceContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0);
-	// ƒsƒNƒZƒ‹ƒVƒF[ƒ_[‚ðƒZƒbƒg
+	// ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ã‚»ãƒƒãƒˆ
 	RENDERER.GetDeviceContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0);
 
-	//ƒfƒtƒHƒ‹ƒgƒTƒ“ƒvƒ‰[ƒXƒe[ƒgƒZƒbƒg
+	//ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆã‚»ãƒƒãƒˆ
 	RENDERER.SetSamplerState();
 
-	//ƒ}ƒeƒŠƒAƒ‹ƒZƒbƒg
+	//ãƒžãƒ†ãƒªã‚¢ãƒ«ã‚»ãƒƒãƒˆ
 	MATERIAL material = {};
 	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	material.textureEnable = true;
 	RENDERER.SetMaterial(material);
 
-	// •`‰æ‚Ì‚½‚ß‚Ìs—ñ‚ðÝ’è
+	// æç”»ã®ãŸã‚ã®è¡Œåˆ—ã‚’è¨­å®š
 	XMMATRIX worldMatrix = XMMatrixScaling(scale.x, scale.y, scale.z) *
 		XMMatrixRotationRollPitchYaw(rot.x, rot.y, rot.z) *
 		XMMatrixTranslation(pos.x, pos.y, pos.z);
-	// ƒ[ƒ‹ƒhs—ñ‚ðƒZƒbƒg
+	// ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’ã‚»ãƒƒãƒˆ
 	RENDERER.SetWorldMatrix(worldMatrix);
 
-	// ’¸“_ƒoƒbƒtƒ@‚ðƒZƒbƒg
+	// é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã‚’ã‚»ãƒƒãƒˆ
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
 	RENDERER.GetDeviceContext()->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
 
-	//ƒeƒNƒXƒ`ƒƒƒZƒbƒg
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚»ãƒƒãƒˆ
 	RENDERER.GetDeviceContext()->PSSetShaderResources(0, 1, m_texture->GetTextureAddress());
 
-	// ƒvƒŠƒ~ƒeƒBƒuƒgƒ|ƒƒW‚ðƒZƒbƒg
+	// ãƒ—ãƒªãƒŸãƒ†ã‚£ãƒ–ãƒˆãƒãƒ­ã‚¸ã‚’ã‚»ãƒƒãƒˆ
 	RENDERER.GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
-	// •`‰æ
+	// æç”»
 	RENDERER.GetDeviceContext()->Draw(4, 0);
 }
 

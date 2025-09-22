@@ -1,4 +1,4 @@
-﻿#include "main.h"
+#include "main.h"
 #include "renderer.h"
 
 #include <d3dcompiler.h>
@@ -187,7 +187,6 @@ bool Renderer::Initialize(HWND hWnd) {
 	bufferDesc.CPUAccessFlags = 0;
 	bufferDesc.MiscFlags = 0;
 	bufferDesc.StructureByteStride = sizeof(float);
-
 	hr = m_device->CreateBuffer(&bufferDesc, nullptr, m_worldBuffer.GetAddressOf());
 	if (FAILED(hr)) {
 		ErrorMessage(L"ワールドバッファの初期化に失敗しました。", hr);

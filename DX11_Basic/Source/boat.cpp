@@ -1,459 +1,268 @@
-﻿#include "boat.h"
+#include "boat.h"
+#include "water.h"
 #include <algorithm>
 
-#include "system.h"
-#include "manager.h"
-#include "scene.h"
-#include "water.h"
-
 Boat::Boat()
-	: m_velocity(Vector3::ZERO)
-	, m_angularVelocity(Vector3::ZERO)
-	, m_mass(150.0f)				//質量
-	, m_drag(0.005f)			//抗力係数
-	, m_waterDrag(0.98f)		//水の抵抗係数
-	, m_thrustPower(500.0f)	//推進力
-	, m_steeringPower(1.0f)		//旋回力
-	, m_buoyancy(1.0f)			//浮力
-	, m_throttle(0.0f)			//推進入力 (-1.0f ~ 1.0f)
-	, m_steering(0.0f)			//旋回入力 (-1.0f ~ 1.0f)
-	, m_minBounds(Vector3(-1000.0f, -100.0f, -1000.0f))	//コースの最小座標
-	, m_maxBounds(Vector3(1000.0f, 100.0f, 1000.0f))	//コースの最大座標
-	, m_hasBounds(false)		//境界設定フラグ
-	, m_currentTime(0.0f)		//経過時間
-	, m_enableWaves(true)		//波の有効化フラグ
-	, m_enableBuoyancy(true)	//浮力の有効化フラグ
+	: m_throttleInput(0.0f)
+	, m_steeringInput(0.0f)
+	, m_brakeInput(0.0f)
+	, m_isReverse(false)
+	, m_mass(500.0f)			//質量(kg)
+	, m_waterDrag(0.8f)			//水の抵抗係数
+	, m_maxTurnRate(1.5)		//最大旋回速度(rad/s)
+	, m_maxSpeed(80.0f)			//最大前進速度(m/s)
+	, m_maxReverseSpeed(25.0f)	//最大後退速度(m/s)
+	, m_rollAmount(1.0f)		//ロール量
+	, m_velocity(0.0f, 0.0f, 0.0f)
+	, m_acceleration(0.0f, 0.0f, 0.0f)
+	, m_angularVelocity(0.0f, 0.0f, 0.0f)
+	, m_prevPosition(0.0f, 0.0f, 0.0f)
 	, m_water(nullptr)
+	, m_length(8.0f)			//ボートの長さ(m)
+	, m_width(2.5f)				//ボートの幅(m)
+	, m_height(1.5f)			//ボートの高さ(m)
+	, m_targetRoll(0.0f)
+	, m_targetPitch(0.0f)
+	, m_bobPhase(0.0f)
 {
+	m_engine.SetMaxPower(1500.0f);	//最大出力(W)
+	m_engine.SetAcceleration(1.8f);	//加速度
+	m_engine.SetDeceleration(2.5f);	//減速度
+}
+
+void Boat::SetThrottle(float throttle)
+{
+	m_throttleInput = std::clamp(throttle, 0.0f, 1.0f);
+	m_engine.SetThrottle(m_throttleInput);
+}
+
+void Boat::SetSteering(float steering) {
+	m_steeringInput = std::clamp(steering, -1.0f, 1.0f);
+}
+
+void Boat::SetBrake(float brake) {
+	m_brakeInput = std::clamp(brake, 0.0f, 1.0f);
+}
+
+void Boat::SetReverse(bool isReverse) {
+	m_isReverse = isReverse;
 }
 
 bool Boat::Initialize() {
-	m_position = Vector3::ZERO;
-	m_rotation = Vector3::ZERO;
-	m_quaternion = Vector4::IDENTITY;
-
-	m_water = SYSTEM.GetManager()->GetScene()->GetGameObject<Water>();
-
+	m_prevPosition = m_position;
 	return true;
 }
 
 void Boat::Update(double deltaTime) {
-	float dt = static_cast<float>(deltaTime);
-	m_currentTime += dt;
+	//エンジン更新
+	m_engine.Update(deltaTime);
 
-	//操舵更新
-//	UpdateSteering(dt);
-	UpdateSteeringRealistic(dt);
+	//前フレームの位置保存
+	m_prevPosition = m_position;
+
+	//deltaTimeをfloatに変換
+	float dt = static_cast<float>(deltaTime);
 
 	//物理計算
 	UpdatePhysics(dt);
 
-	//位置更新
-	m_position += m_velocity * dt;
+	//水面との相互作用更新
+	UpdateWaterInteraction(dt);
 
-	//コース境界チェック
-	if (m_hasBounds) {
-		CheckCourseBounds();
-	}
+	//姿勢制御
+	UpdateRotation(dt);
+	UpdateRoll(dt);
+	UpdatePitch(dt);
+	UpdateBobbing(dt);
+
 }
-
-void Boat::UpdateSteering(float deltaTime) {
-	//角速度を減衰
-	m_angularVelocity *= 0.95f;
-
-	//旋回入力の処理
-	if (std::abs(m_steering) >= 0.01f) {
-		//速度に応じた操舵効果
-		float speed = GetSpeed();
-
-		//基本操舵効果
-		float baseSteerEffect = m_steeringPower * m_steering * deltaTime * 0.5f;
-
-		//速度による操舵効果
-		float speedBasedSteerEffect = speed * m_steeringPower * m_steering * deltaTime;
-
-		//速度による操舵効果の減衰カーブ
-		float speedFactor;
-		if (speed < 5.0f) {
-			//低速域
-			speedFactor = 1.0f;
-		} else if (speed < 15.0f) {
-			//中速域
-			speedFactor = 1.0f - (speed - 5.0f) / 10.0f * 0.5f; //5~15の間で0.5まで減衰
-		} else if (speed < 30.0f) {
-			//高速域
-			speedFactor = 0.5f - (speed - 15.0f) / 15.0f * 0.3f; //15~30の間で0.2まで減衰
-		} else {
-			speedFactor = 0.2f; //30以上は0.2に固定
-		}
-
-		//最終的な操舵効果
-		float finalSteerEffect = baseSteerEffect + (speedBasedSteerEffect * speedFactor);
-
-		//y軸周りの角速度を更新
-		m_angularVelocity.y += finalSteerEffect;
-
-		//速度に応じた最大角速度の制限
-		float maxAngularSpeed;
-		if (speed < 10.0f) {
-			maxAngularSpeed = 3.0f; //低速域
-		} else if (speed < 20.0f) {
-			maxAngularSpeed = 2.0f; //中速域
-		} else {
-			maxAngularSpeed = 1.0f; //高速域
-		}
-
-		m_angularVelocity.y = std::clamp(m_angularVelocity.y, -maxAngularSpeed, maxAngularSpeed);
-	}
-
-	std::cout << "Angular Velocity: (" << m_angularVelocity.x << ", " << m_angularVelocity.y << ", " << m_angularVelocity.z << ")\n";
-
-	//ヨー角を更新
-	if (std::abs(m_angularVelocity.y) > 0.0001f) {
-		Vector3 yAxis(0.0f, 1.0f, 0.0f);
-		float yawAngle = m_angularVelocity.y * deltaTime;
-
-		Vector4 yawRotation = Vector4::FromAxisAngle(yAxis, yawAngle);
-		m_quaternion = m_quaternion * yawRotation;
-		m_quaternion.Normalize();
-		m_rotation = m_quaternion.ToEuler();
-	}
-}
-
-void Boat::UpdateSteeringRealistic(float deltaTime) {
-	//角速度を減衰
-	m_angularVelocity *= 0.95f;
-
-	//旋回入力の処理
-	if (std::abs(m_steering) >= 0.01f) {
-		float speed = GetSpeed();
-		float speedKmh = speed * 3.6f; //m/s -> km/h
-
-		//競艇のリアルな操舵特性を再現
-		//20km/h未満: 非常に良く曲がる
-		//20-40km/h: 適度に曲がる
-		//40-60km/h: 曲がりにくくなる
-		//60km/h以上: かなり曲がりにくい
-		float steeringEfficiency;
-		if (speedKmh < 20.0f) {
-			steeringEfficiency = 1.0f; //100%
-		} else if (speedKmh < 40.0f) {
-			//20-40km/h: 100% -> 70%
-			steeringEfficiency = 1.0f - (speedKmh - 20.0f) / 20.0f * 0.3f;
-		} else if (speedKmh < 60.0f) {
-			//40-60km/h: 70% -> 40%
-			steeringEfficiency = 0.7f - (speedKmh - 40.0f) / 20.0f * 0.3f;
-		} else {
-			//60km/h以上: 40 -> 25%
-			float excessSpeed = std::min(speedKmh - 60.0f, 40.0f); //最大100km/hまで考慮
-			steeringEfficiency = 0.4f - (excessSpeed / 40.0f * 0.15f);
-		}
-
-		//基本操舵力 + 速度による操舵力を組み合わせ
-		float baseSteer = m_steeringPower * m_steering * deltaTime * 0.3f;
-		float speedSteer = speed * m_steeringPower * m_steering * deltaTime * 0.1f;
-
-		float totalSteerEffect = (baseSteer + speedSteer) * steeringEfficiency;
-
-		//y軸周りの角速度を更新
-		m_angularVelocity.y += totalSteerEffect;
-
-		//速度に応じた最大角速度の制限
-		float maxAngularSpeed = 3.0f * steeringEfficiency; //最大3.0fから効率に応じて減少
-		maxAngularSpeed = std::max(maxAngularSpeed, 0.5f); //最低でも0.5fは確保
-
-		m_angularVelocity.y = std::clamp(m_angularVelocity.y, -maxAngularSpeed, maxAngularSpeed);
-	}
-
-	std::cout << "Angular Velocity: (" << m_angularVelocity.x << ", " << m_angularVelocity.y << ", " << m_angularVelocity.z << ")\n";
-
-	//ヨー角を更新
-	if (std::abs(m_angularVelocity.y) > 0.0001f) {
-		Vector3 yAxis(0.0f, 1.0f, 0.0f);
-		float yawAngle = m_angularVelocity.y * deltaTime;
-		Vector4 yawRotation = Vector4::FromAxisAngle(yAxis, yawAngle);
-		m_quaternion = m_quaternion * yawRotation;
-		m_quaternion.Normalize();
-		m_rotation = m_quaternion.ToEuler();
-	}
-}
-
 
 void Boat::UpdatePhysics(float deltaTime) {
-	//各種力を適用
-	ApplyThrust(deltaTime);
-	ApplyWaterResistance(deltaTime);
+	//推進力の計算
+	float enginePowerRatio = m_engine.GetCurrentPower() / m_engine.GetMaxPower(); //単純化のため、速度に比例する力とする
 
-	if (m_enableBuoyancy) {
-		ApplyBuoyancy(deltaTime);
+	float baseForce = 8000.0f; //最低限の推進力
+	float engineForce = baseForce + enginePowerRatio; //エンジン出力に応じた推進力
+
+
+	//リバースギア時は力を反転
+	if (m_isReverse) {
+		engineForce *= -0.6f; //リバースは前進の60%の力
 	}
 
-	if (m_enableWaves) {
-		ApplyWaveEffect(deltaTime);
-//		ApplyWaveEffectAlt(deltaTime);
-	}
+	//前進方向の力quaternion版
+	Vector3 forwardDir = GetForwardQ();
+	Vector3 thrustForce = forwardDir * engineForce;
 
-	//水面との相互作用更新
-	UpdateWaterInteraction(deltaTime);
+	//ブレーキ力
+	Vector3 brakeForce = -m_velocity * (m_brakeInput * 5.0f); //ブレーキ力は速度に比例
 
-}
+	//水の抵抗力
+	float speedSquared = m_velocity.LengthSquared();
+	Vector3 dragForce = -m_velocity * (m_waterDrag * speedSquared * 0.001f); //速度の2乗に比例
 
-void Boat::ApplyThrust(float deltaTime) {
-	//推進入力が無い場合は処理しない
-	if (std::abs(m_throttle) < 0.01f) {
-		return;
-	}
-
-	//前方向ベクトルを取得
-	Vector3 forward = GetForwardQ();
-
-	//推力を計算
-	float thrust = m_thrustPower * m_throttle;
+	//合計力
+	Vector3 totalForce = thrustForce + brakeForce + dragForce;
 
 	//加速度 = 力 / 質量
-	float acceleration = thrust / m_mass;
+	m_acceleration = totalForce / m_mass;
 
-	//速度に加算
-	m_velocity += forward * acceleration * deltaTime;
-}
+	//速度更新
+	m_velocity += m_acceleration * deltaTime;
 
-void Boat::ApplyWaterResistance(float deltaTime) {
-	//速度に応じた抵抗を適用(速度の2乗に比例)
-	float speed = GetSpeed();
-	if (speed < 0.01f) {
-		return;
+	//速度制限
+	Vector3 forwardVelocity = forwardDir * m_velocity.Dot(forwardDir); //前進成分
+	float forwardSpeed = forwardVelocity.Length();
+	bool movingForward = m_velocity.Dot(forwardDir) > 0.0f;
+
+	if (movingForward && forwardSpeed > m_maxSpeed) {
+		//前進速度制限
+		Vector3 lateralVelocity = m_velocity - forwardVelocity; //横成分
+		m_velocity = forwardDir * m_maxSpeed + lateralVelocity;
+	} else if (!movingForward && forwardSpeed > m_maxReverseSpeed) {
+		//後退速度制限
+		Vector3 lateralVelocity = m_velocity - forwardVelocity; //横成分
+		m_velocity = forwardDir * -m_maxReverseSpeed + lateralVelocity;
 	}
 
-	//正規化された速度ベクトル
-	Vector3 normVel = m_velocity;
-	normVel.Normalize();
-
-	//抵抗力を計算
-	const float dragCoefficient = 0.005f; //抗力係数
-	float dragForce = dragCoefficient * speed * speed;
-
-	//抗力による減速
-	Vector3 dragAcceleration = normVel * (-dragForce);
-	m_velocity += dragAcceleration * deltaTime;
-
-	//横滑り抵抗
-	Vector3 forward = GetForwardQ();
-	Vector3 right = GetRightQ();
-
-	//速度を前方成分と横成分に分解
-	float forwardSpeed = m_velocity.Dot(forward);
-	float rightSpeed = m_velocity.Dot(right);
-
-	//横方向の抵抗を強く適用
-	const float sidewaysResistanceCoeff = 5.0f;
-	float sidewaysDrag = rightSpeed * sidewaysResistanceCoeff * deltaTime;
-
-	Vector3 forwardVel = forward * forwardSpeed;
-	Vector3 sidewaysVel = right * (rightSpeed - sidewaysDrag);
-
-	m_velocity = forwardVel + sidewaysVel;
-
-	//抗力を適用
-	m_velocity.y *= 0.98f;
-}
-
-void Boat::ApplyWaveEffect(float deltaTime) {
-	if (!m_enableWaves) {
-		return;
-	}
-
-	Vector3 pos = m_position;
-
-	//波の高さを取得
-	float waveHeight = m_water->GetWaterHeight(m_position);
-
-	//y座標を波の高さに合わせる
-	m_position.y = waveHeight;
-
-	//ボートの前方と右方向の参考点を計算
-	float boatLength = m_scale.z;
-	float boatWidth = m_scale.x;
-
-	Vector3 forward = GetForwardQ();
-	Vector3 right = GetRightQ();
-
-	//ボートの前端と後端の波の高さを計算
-	Vector3 frontPos = pos + forward * (boatLength * 0.5f);
-	Vector3 backPos = pos - forward * (boatLength * 0.5f);
-
-	float frontHeight = m_water->GetWaterHeight(frontPos);
-	float backHeight = m_water->GetWaterHeight(backPos);
-
-	//ボートの右端と左端の波の高さを計算
-	Vector3 rightPos = pos + right * (boatWidth * 0.5f);
-	Vector3 leftPos = pos - right * (boatWidth * 0.5f);
-
-	float rightHeight = m_water->GetWaterHeight(rightPos);
-	float leftHeight = m_water->GetWaterHeight(leftPos);
-
-	//波の勾配からピッチを計算
-	float pitchAngle = std::atan2(frontHeight - backHeight, boatLength);
-
-	//波の勾配からロールを計算
-	float rollAngle = std::atan2(rightHeight - leftHeight, boatWidth);
-
-	//現在の操舵による回転を保持しつつ、波による回転を適用
-	Vector3 euler = m_quaternion.ToEuler();
-	float currentYaw = euler.z;
-
-	//ピッチとロールを制限
-	pitchAngle *= 0.4f; //ピッチの影響を弱める
-	rollAngle *= 0.4f;  //ロールの影響を弱める
-
-	//現在のクォータニオンをy軸成分とそれ以外に分解
-
-	//y軸成分を保持
-	Vector3 currentEuler = m_quaternion.ToEuler();
-	float currentYawAngle = currentEuler.x;
-
-	//ピッチとロールのクォータニオンを作成
-	Vector4 pitchRotation = Vector4::FromAxisAngle(Vector3(1.0f, 0.0f, 0.0f), pitchAngle);
-	Vector4 rollRotation = Vector4::FromAxisAngle(Vector3(0.0f, 0.0f, 1.0f), rollAngle);
-
-	//y軸回りの回転を作成
-	Vector4 yawRotation = Vector4::FromAxisAngle(Vector3(0.0f, 1.0f, 0.0f), currentYawAngle);
-
-	//新しいクォータニオンを計算
-	m_quaternion = yawRotation * pitchRotation * rollRotation;
-	m_quaternion.Normalize();
-
-	m_rotation = m_quaternion.ToEuler();
-}
-
-void Boat::ApplyWaveEffectAlt(float deltaTime) {
-	if (!m_enableWaves) {
-		return;
-	}
-
-	Vector3 pos = m_position;
-
-	//波の高さを計算
-	float waveHeight = m_water->GetWaterHeight(pos);
-	//y座標を波の高さに合わせる
-	m_position.y = waveHeight;
-
-	//ボートの前方と右方向の参考点を計算
-	float boatLength = m_scale.z;
-	float boatWidth = m_scale.x;
-
-	Vector3 forward = GetForwardQ();
-	Vector3 right = GetRightQ();
-
-	//ボートの前端と後端の波の高さを計算
-	Vector3 frontPos = pos + forward * (boatLength * 0.5f);
-	Vector3 backPos = pos - forward * (boatLength * 0.5f);
-
-	float frontHeight = m_water->GetWaterHeight(frontPos);
-	float backHeight = m_water->GetWaterHeight(backPos);
-
-	//ボートの右端と左端の波の高さを計算
-	Vector3 rightPos = pos + right * (boatWidth * 0.5f);
-	Vector3 leftPos = pos - right * (boatWidth * 0.5f);
-
-	float rightHeight = m_water->GetWaterHeight(rightPos);
-	float leftHeight = m_water->GetWaterHeight(leftPos);
-
-	//波の勾配からピッチとロールを計算
-	float pitchAngle = std::atan2(frontHeight - backHeight, boatLength);
-	float rollAngle = std::atan2(rightHeight - leftHeight, boatWidth);
-
-	//波の影響を弱める
-	pitchAngle *= 0.7f;
-	rollAngle *= 0.4f;
-
-
-
-	//波の傾きを小さな回転として追加
-	Vector4 pitchRotation = Vector4::FromAxisAngle(Vector3(1.0f, 0.0f, 0.0f), pitchAngle);
-	Vector4 rollRotation = Vector4::FromAxisAngle(Vector3(0.0f, 0.0f, 1.0f), rollAngle);
-
-	//現在のクォータニオンに波の回転を追加
-	m_quaternion = m_quaternion * pitchRotation * rollRotation;
-	m_quaternion.Normalize();
-
-	m_rotation = m_quaternion.ToEuler();
-
-}
-
-void Boat::ApplyBuoyancy(float deltaTime) {
-	//簡単な浮力計算
-	Vector3 pos = m_position;
-	float targetHeight = m_water->GetWaterHeight(pos);
-
-	//浮力の適用
-	if (pos.y < targetHeight) {
-		//水面下にある場合、浮力を適用
-		float heightDifference = targetHeight - pos.y;
-		float buoyancyForce = heightDifference * m_buoyancy * 50.0f;
-		m_velocity.y += buoyancyForce * deltaTime;
-	} else {
-		//水面上にある場合、重力を適用
-		const float gravity = -9.81f;
-		m_velocity.y += gravity * deltaTime;
-	}
-
-	//y方向の速度を制限
-	const float maxVerticalSpeed = 20.0f;
-	m_velocity.y = std::clamp(m_velocity.y, -maxVerticalSpeed, maxVerticalSpeed);
-}
-
-void Boat::CheckCourseBounds() {
-	Vector3 pos = m_position;
-	bool needsCorrection = false;
-
-	//X軸境界チェック
-	if (pos.x < m_minBounds.x) {
-		pos.x = m_minBounds.x;
-		m_velocity.x = std::max(0.0f, m_velocity.x); //内向きの速度のみ許可
-		needsCorrection = true;
-	} else if (pos.x > m_maxBounds.x) {
-		pos.x = m_maxBounds.x;
-		m_velocity.x = std::min(0.0f, m_velocity.x); //内向きの速度のみ許可
-		needsCorrection = true;
-	}
-
-	//Z軸境界チェック
-	if (pos.z < m_minBounds.z) {
-		pos.z = m_minBounds.z;
-		m_velocity.z = std::max(0.0f, m_velocity.z); //内向きの速度のみ許可
-		needsCorrection = true;
-	} else if (pos.z > m_maxBounds.z) {
-		pos.z = m_maxBounds.z;
-		m_velocity.z = std::min(0.0f, m_velocity.z); //内向きの速度のみ許可
-		needsCorrection = true;
-	}
-
-	if (needsCorrection) {
-		m_position = pos;
-		//速度を減衰
-		m_velocity *= 0.5f;
-	}
+	//位置更新
+	m_position += m_velocity * deltaTime;
 }
 
 void Boat::UpdateWaterInteraction(float deltaTime) {
-	if (!m_water) {
-		return;
+	if (!m_water) return;
+
+	//航跡の更新
+	Vector3 movement = m_position - m_prevPosition;
+	float moveDistance = movement.Length();
+	float currentSpeed = GetSpeed();
+
+	if (moveDistance > 0.1f && currentSpeed > 2.0f) {
+		//前進・後退の判定
+		Vector3 forwardDir = GetForwardQ();
+		bool movingForward = m_velocity.Dot(forwardDir) > 0.0f;
+
+		//後退時は航跡の強度を下げる
+		float wakeIntensity = movingForward ? 1.0f : 0.4f;
+
+		m_water->UpdateBoatWake(m_position, m_prevPosition, currentSpeed, m_width);
 	}
 
-	//現在の速度を取得
-	float speed = GetSpeed();
+	//高速時の追加波紋効果
+	Vector3 forwardDir = GetForwardQ();
+	bool movingForward = m_velocity.Dot(forwardDir) > 0.0f;
 
-	//一定速度以上でボートが動いている場合、航跡を生成
-	static Vector3 previousPosition = m_position;
-	m_water->UpdateBoatWake(m_position, previousPosition, speed, m_scale.x);
+	if (movingForward && currentSpeed > 15.0f) {
+		Vector3 rightDir = GetRightQ();
+		float waveIntensity = std::min(currentSpeed / 50.0f, 2.0f); //速度に応じて強度調整
 
-	//急激な操舵や衝突時の波紋を生成
-	//if (std::abs(m_steering) > 0.7f && speed > 5.0f) {
-	//	Vector3 right = GetRightQ();
-	//	Vector3 wakePos = m_position + right * (m_scale.x * 0.5f * (m_steering > 0 ? 1.0f : -1.0f));
-	//	m_water->AddRipple(wakePos, 0.8f, 1.5f, 6.0f);
-	//}
+		//左右に波紋を追加
+		Vector3 leftPos = m_position - rightDir * (m_width * 0.8f);
+		Vector3 rightPos = m_position + rightDir * (m_width * 0.8f);
 
-	previousPosition = m_position;
+		static float waveTimer = 0.0f;
+		waveTimer += deltaTime;
+
+		if (waveTimer > 0.2f) {
+			m_water->AddRipple(leftPos, waveIntensity * 0.4f, 1.5f, 6.0f);
+			m_water->AddRipple(rightPos, waveIntensity * 0.4f, 1.5f, 6.0f);
+			waveTimer = 0.0f;
+		}
+	}
 }
 
+void Boat::UpdateRotation(float deltaTime) {
+	//ステアリングによる旋回
+	if (std::abs(m_steeringInput) > 0.01f) {
+		float currentSpeed = m_velocity.Length();
+		float speedFactor = std::min(currentSpeed / 10.0f, 1.0f); //速度に応じて旋回率を減少
+
+		//前進・後退の判定
+		Vector3 forwardDir = GetForwardQ();
+		bool movingForward = m_velocity.Dot(forwardDir) > 0.0f;
+
+		//後退時は旋回方向を逆にする
+		float steeringMultiplier = movingForward ? 1.0f : -1.0f;
+
+		//旋回速度(速度に応じて調整)
+		float turnRate = m_steeringInput * steeringMultiplier * m_maxTurnRate * speedFactor * deltaTime;
+
+		//y軸回転のクォータニオンを作成
+		Vector4 yawQuat = Vector4::FromAxisAngle(Vector3::UP, turnRate);
+
+		//現在のクォータニオンに回転を適用
+		m_quaternion = yawQuat * m_quaternion;
+		m_quaternion.Normalize();
+
+		//角速度の更新
+		m_angularVelocity.y = turnRate / deltaTime;
+
+		//ロール角の目標値設定
+		m_targetRoll = -m_steeringInput * MAX_ROLL_ANGLE * speedFactor;
+	} else {
+		//ステアリングがない場合、角速度を減衰
+		m_angularVelocity.y *= 0.95f;
+		//ロール角の目標値をゼロに戻す
+		m_targetRoll = 0.0f;
+	}
+}
+
+void Boat::ApplyForces(float deltaTime) {
+	//この関数は将来的に外部からの力を適用する際に使用予定
+	//現在は物理計算が完結しているため未使用
+}
+
+void Boat::UpdateRoll(float deltaTime) {
+	//現在のロール角を取得
+	Vector3 currentEuler = m_quaternion.ToEuler();
+
+	//ロール角を目標値に近づける
+	float rolldifference = m_targetRoll - currentEuler.z;
+	float rollChangeRate = 3.0f; //ロール変化速度
+
+	float newRoll = currentEuler.z + rolldifference * rollChangeRate * deltaTime;
+	newRoll = std::clamp(newRoll, -MAX_ROLL_ANGLE, MAX_ROLL_ANGLE);
+
+	//新しいロール角でクォータニオンを更新
+	m_quaternion = Vector4::FromEuler(currentEuler.y, currentEuler.x, newRoll);
+}
+
+void Boat::UpdatePitch(float deltaTime) {
+	//加速度に基づいてピッチ角を調整
+	Vector3 forwardDir = GetForwardQ();
+	float forwardAccel = m_acceleration.Dot(forwardDir);
+
+	//目標ピッチ角を計算(加速時に上向き、減速時に下向き)
+	m_targetPitch = -forwardAccel * 0.02f; //調整係数
+	m_targetPitch = std::clamp(m_targetPitch, -MAX_PITCH_ANGLE, MAX_PITCH_ANGLE);
+
+	//現在のピッチ角を取得
+	Vector3 currentEuler = m_quaternion.ToEuler();
+
+	//ピッチ角を目標値に近づける
+	float pitchDifference = m_targetPitch - currentEuler.x;
+	float pitchChangeRate = 2.0f; //ピッチ変化速度
+
+	float newPitch = currentEuler.x + pitchDifference * pitchChangeRate * deltaTime;
+	newPitch = std::clamp(newPitch, -MAX_PITCH_ANGLE, MAX_PITCH_ANGLE);
+
+	//新しいピッチ角でクォータニオンを更新
+	m_quaternion = Vector4::FromEuler(currentEuler.y, newPitch, currentEuler.z);
+}
+
+void Boat::UpdateBobbing(float deltaTime) {
+	if (!m_water) return;
+
+	//波による上下動の計算
+	m_bobPhase += deltaTime * 2.0f; //ボビングの速度
+
+	//現在の水面の高さを取得
+	float waterHeight = m_water->GetWaterHeight(m_position);
+
+	//ボートの底部が水面に接触するように調整
+	float targetY = waterHeight + m_height * 0.3f; //ボートの高さの30%を水中に保つ
+
+	//y位置を滑らかに調整
+	float yDifference = targetY - m_position.y;
+	m_position.y += yDifference * 5.0f * deltaTime; //調整速度
+}

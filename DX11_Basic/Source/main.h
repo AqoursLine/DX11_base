@@ -1,9 +1,7 @@
-﻿#pragma once
-//#define _WINSOCKAPI_ 
+#pragma once
 
 #define NOMINMAX
 
-//#include <ixwebsocket/IXWebSocket.h>
 #include <windows.h>
 #include <iostream>
 #include <string>
@@ -15,7 +13,6 @@
 
 #include <wrl/client.h>
 using Microsoft::WRL::ComPtr;
-
 #include <DirectXMath.h>
 using namespace DirectX;
 
@@ -27,12 +24,9 @@ using namespace DirectX;
 #pragma comment (lib, "DirectXTex_Release.lib")
 #endif // _DEBUG
 
-
 #include "gwVector.h"
 
-
-void ErrorMessage(std::wstring msg, HRESULT hr);
+void ErrorMessage(const std::wstring& msg, HRESULT hr);
 
 constexpr int SCREEN_WIDTH = 1920;
 constexpr int SCREEN_HEIGHT = 1080;
-

@@ -4,7 +4,7 @@
 #include "texture.h"
 
 bool Scene::Initialize() {
-	// GameObject‚Ì‰Šú‰»
+	// GameObjectã®åˆæœŸåŒ–
 	for (auto& objects : m_gameObjects) {
 		for (auto& gameObject : objects) {
 			if (!gameObject->InitializeBase()) {
@@ -25,7 +25,7 @@ void Scene::Finalize() {
 		objects.clear();
 	}
 
-	Texture::ReleaseAll(); // ƒeƒNƒXƒ`ƒƒ‚ÌƒLƒƒƒbƒVƒ…‚ð‰ð•ú
+	Texture::ReleaseAll(); // ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’è§£æ”¾
 }
 
 void Scene::Update(double deltaTime) {
@@ -45,7 +45,7 @@ void Scene::Draw() {
 }
 
 void Scene::CleanUp() {
-	//isDestroy‚ªtrue‚ÌGameObject‚ðíœ‚·‚é
+	//isDestroyãŒtrueã®GameObjectã‚’å‰Šé™¤ã™ã‚‹
 	for (auto& objects : m_gameObjects) {
 		objects.remove_if([](GameObject* gameObject) {
 			return gameObject->IsDestroy();
@@ -55,7 +55,6 @@ void Scene::CleanUp() {
 
 GameObject* Scene::AddGameObject(GameObject* gameObject, OBJECT_TYPE type) {
 	m_gameObjects[type].push_back(gameObject);
-
 	return gameObject;
 }
 

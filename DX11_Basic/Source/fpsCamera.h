@@ -11,5 +11,4 @@ public:
 
 protected:
 	void RotattionCamera(double deltaTime);
-
 };

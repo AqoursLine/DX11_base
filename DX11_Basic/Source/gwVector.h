@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 // 最小限のインクルード
 #ifdef __has_include
@@ -439,19 +439,21 @@ public:
 		);
 	}
 
-	//クォータニオンをオイラー角に変換（YXZ順）
+	//クォータニオンをオイラー角に変換（XYZ順）
 	Vector3 ToEuler() const noexcept {
-		//ヨー（Y軸回り）
-		const float yaw = std::atan2(2.0f * (w * y + x * z), 1.0f - 2.0f * (y * y + x * x));
+		//ピッチ（X軸回りの回転）
+		const float sinPitch = 2.0f * (w * x + y * z);
+		const float pitch = (std::abs(sinPitch) >= 1.0f) ?
+			std::copysign(1.57079632679f, sinPitch) : // 90度または-90度
+			std::asin(sinPitch);
 
-		//ピッチ（X軸回り）
-		const float sinp = 2.0f * (w * x - z * y);
-		const float pitch = (std::abs(sinp) >= 1.0f) ? std::copysign(1.57079632679f, sinp) : std::asin(sinp); // ±90度でクランプ
+		//ヨー（Y軸回りの回転）
+		const float yaw = std::atan2(2.0f * (w * y + x * z), 1.0f - 2.0f * (y * y + z * z));
 
-		//ロール（Z軸回り）
-		const float roll = std::atan2(2.0f * (w * z + y * x), 1.0f - 2.0f * (x * x + z * z));
+		//ロール（Z軸回りの回転）
+		const float roll = std::atan2(2.0f * (w * z + x * y), 1.0f - 2.0f * (x * x + z * z));
 
-		return Vector3(yaw, pitch, roll);
+		return Vector3(pitch, yaw, roll);
 	}
 
 	//2つのクォータニオン間の球面線形補間（Slerp）

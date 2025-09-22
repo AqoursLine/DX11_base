@@ -4,7 +4,7 @@
 bool Temp2D::Initialize() {
 	m_sprite = new Sprite();
 	if (!m_sprite->Initialize(L"Asset\\Texture\\yukino.png")) {
-		ErrorMessage(L"ƒXƒvƒ‰ƒCƒg‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½B", E_FAIL);
+		ErrorMessage(L"ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", E_FAIL);
 		return false;
 	}
 
@@ -21,6 +21,7 @@ void Temp2D::Finalize() {
 }
 
 void Temp2D::Update(double deltaTime) {
+
 }
 
 void Temp2D::Draw() const {

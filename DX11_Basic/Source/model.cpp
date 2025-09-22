@@ -3,273 +3,274 @@
 #include "model.h"
 #include <fstream>
 
-//static•Ï”‚Ì‰Šú‰»
-//ƒeƒNƒXƒ`ƒƒƒLƒƒƒbƒVƒ…
+//staticå¤‰æ•°ã®åˆæœŸåŒ–
+//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚­ãƒ£ãƒƒã‚·ãƒ¥
 std::unordered_map<std::string, TEXTURE_CACHE_ENTRY> Model::m_textureCache;
-//ƒ}ƒeƒŠƒAƒ‹ƒLƒƒƒbƒVƒ…
+//ãƒãƒ†ãƒªã‚¢ãƒ«ã‚­ãƒ£ãƒƒã‚·ãƒ¥
 std::unordered_map<std::string, MATERIAL_CACHE_ENTRY> Model::m_materialCache;
 
 
-//assimp‚ÅFBX‚ğ“Ç‚İ‚Ş‚½‚ß‚Ìİ’è
+//assimpã§FBXã‚’èª­ã¿è¾¼ã‚€ãŸã‚ã®è¨­å®š
 bool Model::LoadModelFBX(const std::string& fileName) {
-	//ƒtƒ@ƒCƒ‹ƒpƒX‚©‚çƒfƒBƒŒƒNƒgƒŠƒpƒX‚ğ’Šo
+	//ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹ã‹ã‚‰ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªãƒ‘ã‚¹ã‚’æŠ½å‡º
 	m_directory = fileName.substr(0, fileName.find_last_of("/\\"));
 
-	//ƒCƒ“ƒ|[ƒ^[
+	//ã‚¤ãƒ³ãƒãƒ¼ã‚¿ãƒ¼
 	Assimp::Importer importer;
 
-	//ƒ‚ƒfƒ‹‚Ì“Ç‚İ‚İƒIƒvƒVƒ‡ƒ“
+	//ãƒ¢ãƒ‡ãƒ«ã®èª­ã¿è¾¼ã¿ã‚ªãƒ—ã‚·ãƒ§ãƒ³
 	unsigned int flags;
-	flags = aiProcess_Triangulate |				//‘S‚Ä‚Ì}Œ`‚ğOŠpŒ`‰»
-			aiProcess_GenSmoothNormals |		//–@üƒxƒNƒgƒ‹‚ğ¶¬
-			aiProcess_FlipUVs |					//UV‚ğD3DŒü‚¯‚É”½“]
-			aiProcess_CalcTangentSpace |		//Úí‹óŠÔ‚ğŒvZ
-			aiProcess_JoinIdenticalVertices;	//’¸“_‚ğŒ‹‡
+	flags = aiProcess_Triangulate |				//å…¨ã¦ã®å›³å½¢ã‚’ä¸‰è§’å½¢åŒ–
+			aiProcess_GenSmoothNormals |		//æ³•ç·šãƒ™ã‚¯ãƒˆãƒ«ã‚’ç”Ÿæˆ
+			aiProcess_FlipUVs |					//UVã‚’D3Då‘ã‘ã«åè»¢
+			aiProcess_CalcTangentSpace |		//æ¥æˆ¦ç©ºé–“ã‚’è¨ˆç®—
+			aiProcess_JoinIdenticalVertices;	//é ‚ç‚¹ã‚’çµåˆ
 
-	//ƒ‚ƒfƒ‹‚ğ“Ç‚İ‚Ş
+	//ãƒ¢ãƒ‡ãƒ«ã‚’èª­ã¿è¾¼ã‚€
 	const aiScene* scene = importer.ReadFile(fileName, flags);
 
-	//“Ç‚İ‚İ¸”s
+	//èª­ã¿è¾¼ã¿å¤±æ•—
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode){
 		return false;
 	}
 
-	//ƒ‹[ƒgƒm[ƒh‚©‚çˆ—‚ğŠJn
+	//ãƒ«ãƒ¼ãƒˆãƒãƒ¼ãƒ‰ã‹ã‚‰å‡¦ç†ã‚’é–‹å§‹
 	ProcessNode(scene->mRootNode, scene, m_directory);
 
-	//ƒVƒF[ƒ_[‚Ìì¬
+	//ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®ä½œæˆ
 	RENDERER.CreateVertexShader(m_vertexShader.GetAddressOf(), m_inputLayout.GetAddressOf(), L"Shader\\pixelLightingVS.cso");
 	RENDERER.CreatePixelShader(m_pixelShader.GetAddressOf(), L"Shader\\pixelLightingPS.cso");
 
 	return true;
 }
 
-//ƒƒbƒVƒ…‚Ìƒƒ‚ƒŠ‚ğ‰ğ•ú‚·‚éŠÖ”
+//ãƒ¡ãƒƒã‚·ãƒ¥ã®ãƒ¡ãƒ¢ãƒªã‚’è§£æ”¾ã™ã‚‹é–¢æ•°
 void Model::ReleaseModel() {
-	//g—p‚µ‚½ƒ}ƒeƒŠƒAƒ‹‚ÌQÆƒJƒEƒ“ƒg‚ğŒ¸‚ç‚·
+	//ä½¿ç”¨ã—ãŸãƒãƒ†ãƒªã‚¢ãƒ«ã®å‚ç…§ã‚«ã‚¦ãƒ³ãƒˆã‚’æ¸›ã‚‰ã™
 	for (const auto& key : m_usedMaterialKeys) {
 		auto it = m_materialCache.find(key);
 		if (it != m_materialCache.end()) {
 			it->second.referenceCount--;
 
-			//QÆƒJƒEƒ“ƒg‚ª0‚É‚È‚Á‚½‚çƒLƒƒƒbƒVƒ…‚©‚çíœ
+			//å‚ç…§ã‚«ã‚¦ãƒ³ãƒˆãŒ0ã«ãªã£ãŸã‚‰ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‹ã‚‰å‰Šé™¤
 			if (it->second.referenceCount <= 0) {
-				m_materialCache.erase(it);	//ƒLƒƒƒbƒVƒ…‚©‚çíœ
+				m_materialCache.erase(it);	//ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‹ã‚‰å‰Šé™¤
 			}
 		}
 	}
 
-	//g—p‚µ‚½ƒeƒNƒXƒ`ƒƒ‚ÌQÆƒJƒEƒ“ƒg‚ğŒ¸‚ç‚·
+	//ä½¿ç”¨ã—ãŸãƒ†ã‚¯ã‚¹ãƒãƒ£ã®å‚ç…§ã‚«ã‚¦ãƒ³ãƒˆã‚’æ¸›ã‚‰ã™
 	for (const auto& key : m_usedTexturePaths) {
 		auto it = m_textureCache.find(key);
 		if (it != m_textureCache.end()) {
 			it->second.referenceCount--;
 
-			//QÆƒJƒEƒ“ƒg‚ª0‚É‚È‚Á‚½‚çƒLƒƒƒbƒVƒ…‚©‚çíœ
+			//å‚ç…§ã‚«ã‚¦ãƒ³ãƒˆãŒ0ã«ãªã£ãŸã‚‰ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‹ã‚‰å‰Šé™¤
 			if (it->second.referenceCount <= 0) {
 				if (it->second.srv) {
 					it->second.srv->Release();
 				}
-				m_textureCache.erase(it);	//ƒLƒƒƒbƒVƒ…‚©‚çíœ
+				m_textureCache.erase(it);	//ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‹ã‚‰å‰Šé™¤
 			}
 		}
 	}
 
-	//ƒŠƒ\[ƒX‚Ì‰ğ•ú
+	//ãƒªã‚½ãƒ¼ã‚¹ã®è§£æ”¾
 	for (auto& mesh : m_meshes) {
 		if (mesh.vertexBuffer) {
-			mesh.vertexBuffer->Release();	//’¸“_ƒoƒbƒtƒ@‚Ì‰ğ•ú
+			mesh.vertexBuffer->Release();	//é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã®è§£æ”¾
 		}
 		if (mesh.indexBuffer) {
-			mesh.indexBuffer->Release();	//ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@‚Ì‰ğ•ú
+			mesh.indexBuffer->Release();	//ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡ã®è§£æ”¾
 		}
 	}
 }
 
 void Model::Draw(const Vector3& position, const Vector3& rotation, const Vector3& scale) const {
-	//ƒvƒŠƒ~ƒeƒBƒuƒgƒ|ƒƒW[‚ğİ’è
+	//ãƒ—ãƒªãƒŸãƒ†ã‚£ãƒ–ãƒˆãƒãƒ­ã‚¸ãƒ¼ã‚’è¨­å®š
 	RENDERER.GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	//ƒ[ƒ‹ƒhs—ñ‚ğİ’è
-	XMMATRIX worldMatrix, scaleMatrix, rotMatrix, posMatrix;	//’PˆÊs—ñ
-	scaleMatrix = XMMatrixScaling(scale.x, scale.y, scale.z);	//ƒXƒP[ƒŠƒ“ƒO
-	rotMatrix = XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z);	//‰ñ“]
-	posMatrix = XMMatrixTranslation(position.x, position.y, position.z);	//•½sˆÚ“®
-	worldMatrix = scaleMatrix * rotMatrix * posMatrix;	//ƒ[ƒ‹ƒhs—ñ‚ğŒvZ
-	RENDERER.SetWorldMatrix(worldMatrix);	//ƒ[ƒ‹ƒhs—ñ‚ğƒZƒbƒg
+	//ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’è¨­å®š
+	XMMATRIX worldMatrix, scaleMatrix, rotMatrix, posMatrix;	//å˜ä½è¡Œåˆ—
+	scaleMatrix = XMMatrixScaling(scale.x, scale.y, scale.z);	//ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°
+	rotMatrix = XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z);	//å›è»¢
+	posMatrix = XMMatrixTranslation(position.x, position.y, position.z);	//å¹³è¡Œç§»å‹•
+	worldMatrix = scaleMatrix * rotMatrix * posMatrix;	//ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’è¨ˆç®—
+	RENDERER.SetWorldMatrix(worldMatrix);	//ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’ã‚»ãƒƒãƒˆ
 
-	//ƒTƒ“ƒvƒ‰[ƒXƒe[ƒg‚ğƒZƒbƒg
+	//ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆã‚’ã‚»ãƒƒãƒˆ
 	D3D11_SAMPLER_DESC samplerDesc = {};
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;	//üŒ`ƒtƒBƒ‹ƒ^ƒŠƒ“ƒO
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;	//ƒeƒNƒXƒ`ƒƒÀ•W‚Ìƒ‰ƒbƒsƒ“ƒO
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;	//ƒeƒNƒXƒ`ƒƒÀ•W‚Ìƒ‰ƒbƒsƒ“ƒO
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;	//ƒeƒNƒXƒ`ƒƒÀ•W‚Ìƒ‰ƒbƒsƒ“ƒO
-	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;	//Å‘åLOD
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;	//”äŠrŠÖ”
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;	//ç·šå½¢ãƒ•ã‚£ãƒ«ã‚¿ãƒªãƒ³ã‚°
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;	//ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ã®ãƒ©ãƒƒãƒ”ãƒ³ã‚°
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;	//ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ã®ãƒ©ãƒƒãƒ”ãƒ³ã‚°
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;	//ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ã®ãƒ©ãƒƒãƒ”ãƒ³ã‚°
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;	//æœ€å¤§LOD
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;	//æ¯”è¼ƒé–¢æ•°
 
 	ID3D11SamplerState* samplerState = nullptr;
 	HRESULT hr = RENDERER.GetDevice()->CreateSamplerState(&samplerDesc, &samplerState);
 	if (FAILED(hr)) {
-		ErrorMessage(L"ƒTƒ“ƒvƒ‰[ƒXƒe[ƒg‚Ìì¬‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆã®ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return;
 	}
-	RENDERER.GetDeviceContext()->PSSetSamplers(0, 1, &samplerState);	//ƒTƒ“ƒvƒ‰[ƒXƒe[ƒg‚ğƒZƒbƒg
+	RENDERER.GetDeviceContext()->PSSetSamplers(0, 1, &samplerState);	//ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆã‚’ã‚»ãƒƒãƒˆ
 
-	//“ü—ÍƒŒƒCƒAƒEƒg‚ğƒZƒbƒg
-	RENDERER.GetDeviceContext()->IASetInputLayout(m_inputLayout.Get());	//“ü—ÍƒŒƒCƒAƒEƒg‚ğƒZƒbƒg
-	//’¸“_ƒVƒF[ƒ_[‚ğƒZƒbƒg
-	RENDERER.GetDeviceContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0);	//’¸“_ƒVƒF[ƒ_[‚ğƒZƒbƒg
-	//ƒsƒNƒZƒ‹ƒVƒF[ƒ_[‚ğƒZƒbƒg
-	RENDERER.GetDeviceContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0);	//ƒsƒNƒZƒ‹ƒVƒF[ƒ_[‚ğƒZƒbƒg
+	//å…¥åŠ›ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã‚’ã‚»ãƒƒãƒˆ
+	RENDERER.GetDeviceContext()->IASetInputLayout(m_inputLayout.Get());	//å…¥åŠ›ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã‚’ã‚»ãƒƒãƒˆ
+	//é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ã‚»ãƒƒãƒˆ
+	RENDERER.GetDeviceContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0);	//é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ã‚»ãƒƒãƒˆ
+	//ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ã‚»ãƒƒãƒˆ
+	RENDERER.GetDeviceContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0);	//ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ã‚»ãƒƒãƒˆ
 
-	//ƒƒbƒVƒ…‚ğ•`‰æ
+
+	//ãƒ¡ãƒƒã‚·ãƒ¥ã‚’æç”»
 	for (const auto& mesh : m_meshes) {
-		//’¸“_ƒoƒbƒtƒ@‚ğƒZƒbƒg
+		//é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã‚’ã‚»ãƒƒãƒˆ
 		UINT stride = sizeof(VERTEX_3D);
 		UINT offset = 0;
 		RENDERER.GetDeviceContext()->IASetVertexBuffers(0, 1, &mesh.vertexBuffer, &stride, &offset);
-		//ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@‚ğƒZƒbƒg
+		//ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡ã‚’ã‚»ãƒƒãƒˆ
 		RENDERER.GetDeviceContext()->IASetIndexBuffer(mesh.indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
-		//ƒ}ƒeƒŠƒAƒ‹‚ğD3D—p‚É•ÏŠ·‚µ‚ÄƒZƒbƒg
+		//ãƒãƒ†ãƒªã‚¢ãƒ«ã‚’D3Dç”¨ã«å¤‰æ›ã—ã¦ã‚»ãƒƒãƒˆ
 		MATERIAL mat = {};
 		mat.diffuse = mesh.material.diffuse;
 		mat.specular = mesh.material.specular;
 		mat.ambient = mesh.material.ambient;
 		mat.shininess = mesh.material.shininess;
 		mat.textureEnable = (mesh.material.texture != nullptr);
-		RENDERER.SetMaterial(mat);	//ƒ}ƒeƒŠƒAƒ‹‚ğƒZƒbƒg
+		RENDERER.SetMaterial(mat);	//ãƒãƒ†ãƒªã‚¢ãƒ«ã‚’ã‚»ãƒƒãƒˆ
 
-		//ƒeƒNƒXƒ`ƒƒ‚ğƒZƒbƒg
+		//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ã‚»ãƒƒãƒˆ
 		if (mesh.material.texture) {
-			RENDERER.GetDeviceContext()->PSSetShaderResources(0, 1, &mesh.material.texture);	//ƒeƒNƒXƒ`ƒƒ‚ğƒZƒbƒg
+			RENDERER.GetDeviceContext()->PSSetShaderResources(0, 1, &mesh.material.texture);	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ã‚»ãƒƒãƒˆ
 		}
 
-		//•`‰æ
+		//æç”»
 		RENDERER.GetDeviceContext()->DrawIndexed(mesh.numIndices, 0, 0);
 	}
 
-	//ƒTƒ“ƒvƒ‰[ƒXƒe[ƒg‚ğ‰ğ•ú
+	//ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆã‚’è§£æ”¾
 	if (samplerState) {
-		samplerState->Release();	//ƒTƒ“ƒvƒ‰[ƒXƒe[ƒg‚ğ‰ğ•ú
+		samplerState->Release();	//ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆã‚’è§£æ”¾
 	}
 }
 
 void Model::Draw(const Vector3& position, const Vector4& rotation, const Vector3& scale) const {
-	//ƒNƒH[ƒ^ƒjƒIƒ“‚ğ‰ñ“]s—ñ‚É•ÏŠ·
+	//ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã‚’å›è»¢è¡Œåˆ—ã«å¤‰æ›
 	XMMATRIX rotMatrix = XMMatrixRotationQuaternion(XMVectorSet(rotation.x, rotation.y, rotation.z, rotation.w));
-	//ƒvƒŠƒ~ƒeƒBƒuƒgƒ|ƒƒW[‚ğİ’è
+	//ãƒ—ãƒªãƒŸãƒ†ã‚£ãƒ–ãƒˆãƒãƒ­ã‚¸ãƒ¼ã‚’è¨­å®š
 	RENDERER.GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	//ƒ[ƒ‹ƒhs—ñ‚ğİ’è
-	XMMATRIX worldMatrix, scaleMatrix, posMatrix;	//’PˆÊs—ñ
-	scaleMatrix = XMMatrixScaling(scale.x, scale.y, scale.z);	//ƒXƒP[ƒŠƒ“ƒO
-	posMatrix = XMMatrixTranslation(position.x, position.y, position.z);	//•½sˆÚ“®
-	worldMatrix = scaleMatrix * rotMatrix * posMatrix;	//ƒ[ƒ‹ƒhs—ñ‚ğŒvZ
-	RENDERER.SetWorldMatrix(worldMatrix);	//ƒ[ƒ‹ƒhs—ñ‚ğƒZƒbƒg
+	//ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’è¨­å®š
+	XMMATRIX worldMatrix, scaleMatrix, posMatrix;	//å˜ä½è¡Œåˆ—
+	scaleMatrix = XMMatrixScaling(scale.x, scale.y, scale.z);	//ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°
+	posMatrix = XMMatrixTranslation(position.x, position.y, position.z);	//å¹³è¡Œç§»å‹•
+	worldMatrix = scaleMatrix * rotMatrix * posMatrix;	//ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’è¨ˆç®—
+	RENDERER.SetWorldMatrix(worldMatrix);	//ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’ã‚»ãƒƒãƒˆ
 
-	//ƒTƒ“ƒvƒ‰[ƒXƒe[ƒg‚ğƒZƒbƒg
+	//ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆã‚’ã‚»ãƒƒãƒˆ
 	D3D11_SAMPLER_DESC samplerDesc = {};
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;	//üŒ`ƒtƒBƒ‹ƒ^ƒŠƒ“ƒO
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;	//ƒeƒNƒXƒ`ƒƒÀ•W‚Ìƒ‰ƒbƒsƒ“ƒO
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;	//ƒeƒNƒXƒ`ƒƒÀ•W‚Ìƒ‰ƒbƒsƒ“ƒO
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;	//ƒeƒNƒXƒ`ƒƒÀ•W‚Ìƒ‰ƒbƒsƒ“ƒO
-	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;	//Å‘åLOD
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;	//”äŠrŠÖ”
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;	//ç·šå½¢ãƒ•ã‚£ãƒ«ã‚¿ãƒªãƒ³ã‚°
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;	//ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ã®ãƒ©ãƒƒãƒ”ãƒ³ã‚°
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;	//ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ã®ãƒ©ãƒƒãƒ”ãƒ³ã‚°
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;	//ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ã®ãƒ©ãƒƒãƒ”ãƒ³ã‚°
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;	//æœ€å¤§LOD
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;	//æ¯”è¼ƒé–¢æ•°
 
 	ID3D11SamplerState* samplerState = nullptr;
 	HRESULT hr = RENDERER.GetDevice()->CreateSamplerState(&samplerDesc, &samplerState);
 	if (FAILED(hr)) {
-		ErrorMessage(L"ƒTƒ“ƒvƒ‰[ƒXƒe[ƒg‚Ìì¬‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆã®ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return;
 	}
-	RENDERER.GetDeviceContext()->PSSetSamplers(0, 1, &samplerState);	//ƒTƒ“ƒvƒ‰[ƒXƒe[ƒg‚ğƒZƒbƒg
+	RENDERER.GetDeviceContext()->PSSetSamplers(0, 1, &samplerState);	//ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆã‚’ã‚»ãƒƒãƒˆ
 
-	//“ü—ÍƒŒƒCƒAƒEƒg‚ğƒZƒbƒg
-	RENDERER.GetDeviceContext()->IASetInputLayout(m_inputLayout.Get());	//“ü—ÍƒŒƒCƒAƒEƒg‚ğƒZƒbƒg
-	//’¸“_ƒVƒF[ƒ_[‚ğƒZƒbƒg
-	RENDERER.GetDeviceContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0);	//’¸“_ƒVƒF[ƒ_[‚ğƒZƒbƒg
-	//ƒsƒNƒZƒ‹ƒVƒF[ƒ_[‚ğƒZƒbƒg
-	RENDERER.GetDeviceContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0);	//ƒsƒNƒZƒ‹ƒVƒF[ƒ_[‚ğƒZƒbƒg
+	//å…¥åŠ›ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã‚’ã‚»ãƒƒãƒˆ
+	RENDERER.GetDeviceContext()->IASetInputLayout(m_inputLayout.Get());	//å…¥åŠ›ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã‚’ã‚»ãƒƒãƒˆ
+	//é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ã‚»ãƒƒãƒˆ
+	RENDERER.GetDeviceContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0);	//é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ã‚»ãƒƒãƒˆ
+	//ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ã‚»ãƒƒãƒˆ
+	RENDERER.GetDeviceContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0);	//ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ã‚»ãƒƒãƒˆ
 
-	//ƒƒbƒVƒ…‚ğ•`‰æ
+	//ãƒ¡ãƒƒã‚·ãƒ¥ã‚’æç”»
 	for (const auto& mesh : m_meshes) {
-		//’¸“_ƒoƒbƒtƒ@‚ğƒZƒbƒg
+		//é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã‚’ã‚»ãƒƒãƒˆ
 		UINT stride = sizeof(VERTEX_3D);
 		UINT offset = 0;
 		RENDERER.GetDeviceContext()->IASetVertexBuffers(0, 1, &mesh.vertexBuffer, &stride, &offset);
-		//ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@‚ğƒZƒbƒg
+		//ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡ã‚’ã‚»ãƒƒãƒˆ
 		RENDERER.GetDeviceContext()->IASetIndexBuffer(mesh.indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-		//ƒ}ƒeƒŠƒAƒ‹‚ğD3D—p‚É•ÏŠ·‚µ‚ÄƒZƒbƒg
+		//ãƒãƒ†ãƒªã‚¢ãƒ«ã‚’D3Dç”¨ã«å¤‰æ›ã—ã¦ã‚»ãƒƒãƒˆ
 		MATERIAL mat = {};
 		mat.diffuse = mesh.material.diffuse;
 		mat.specular = mesh.material.specular;
 		mat.ambient = mesh.material.ambient;
 		mat.shininess = mesh.material.shininess;
 		mat.textureEnable = (mesh.material.texture != nullptr);
-		RENDERER.SetMaterial(mat);	//ƒ}ƒeƒŠƒAƒ‹‚ğƒZƒbƒg
-		//ƒeƒNƒXƒ`ƒƒ‚ğƒZƒbƒg
+		RENDERER.SetMaterial(mat);	//ãƒãƒ†ãƒªã‚¢ãƒ«ã‚’ã‚»ãƒƒãƒˆ
+		//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ã‚»ãƒƒãƒˆ
 		if (mesh.material.texture) {
-			RENDERER.GetDeviceContext()->PSSetShaderResources(0, 1, &mesh.material.texture);	//ƒeƒNƒXƒ`ƒƒ‚ğƒZƒbƒg
+			RENDERER.GetDeviceContext()->PSSetShaderResources(0, 1, &mesh.material.texture);	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ã‚»ãƒƒãƒˆ
 		}
-		//•`‰æ
+		//æç”»
 		RENDERER.GetDeviceContext()->DrawIndexed(mesh.numIndices, 0, 0);
 	}
 
-	//ƒTƒ“ƒvƒ‰[ƒXƒe[ƒg‚ğ‰ğ•ú
+	//ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆã‚’è§£æ”¾
 	if (samplerState) {
-		samplerState->Release();	//ƒTƒ“ƒvƒ‰[ƒXƒe[ƒg‚ğ‰ğ•ú
+		samplerState->Release();	//ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆã‚’è§£æ”¾
 	}
 }
 
 void Model::ClearCache() {
-	//ƒeƒNƒXƒ`ƒƒƒLƒƒƒbƒVƒ…‚ğƒNƒŠƒA
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’ã‚¯ãƒªã‚¢
 	for (auto& it : m_textureCache) {
 		if (it.second.srv) {
-			it.second.srv->Release();	//ƒeƒNƒXƒ`ƒƒ‚ğ‰ğ•ú
+			it.second.srv->Release();	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’è§£æ”¾
 		}
 	}
-	m_textureCache.clear();	//ƒLƒƒƒbƒVƒ…‚ğƒNƒŠƒA
+	m_textureCache.clear();	//ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’ã‚¯ãƒªã‚¢
 
-	//ƒ}ƒeƒŠƒAƒ‹ƒLƒƒƒbƒVƒ…‚ğƒNƒŠƒA
-	m_materialCache.clear();	//ƒLƒƒƒbƒVƒ…‚ğƒNƒŠƒA
+	//ãƒãƒ†ãƒªã‚¢ãƒ«ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’ã‚¯ãƒªã‚¢
+	m_materialCache.clear();	//ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’ã‚¯ãƒªã‚¢
 }
 
-///ƒm[ƒh‚ğˆ—‚·‚éŠÖ”
+///ãƒãƒ¼ãƒ‰ã‚’å‡¦ç†ã™ã‚‹é–¢æ•°
 void Model::ProcessNode(aiNode* node, const aiScene* scene, const std::string& modelDirectory) {
-	//ƒm[ƒh‚ÌƒƒbƒVƒ…‚ğˆ—‚·‚é
+	//ãƒãƒ¼ãƒ‰ã®ãƒ¡ãƒƒã‚·ãƒ¥ã‚’å‡¦ç†ã™ã‚‹
 	for (UINT i = 0; i < node->mNumMeshes; i++) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 		ProcessMesh(mesh, scene, modelDirectory);
 	}
 
-	//ƒm[ƒh‚Ìqƒm[ƒh‚ğˆ—‚·‚é
+	//ãƒãƒ¼ãƒ‰ã®å­ãƒãƒ¼ãƒ‰ã‚’å‡¦ç†ã™ã‚‹
 	for (UINT i = 0; i < node->mNumChildren; i++) {
 		ProcessNode(node->mChildren[i], scene, modelDirectory);
 	}
 }
 
-//ƒƒbƒVƒ…‚ğˆ—‚·‚éŠÖ”
+//ãƒ¡ãƒƒã‚·ãƒ¥ã‚’å‡¦ç†ã™ã‚‹é–¢æ•°
 void Model::ProcessMesh(aiMesh* mesh, const aiScene* scene, const std::string& modelDirectory) {
 	std::vector<VERTEX_3D> vertices;
 	std::vector<UINT> indices;
 
-	//’¸“_ƒf[ƒ^‚ğˆ—
+	//é ‚ç‚¹ãƒ‡ãƒ¼ã‚¿ã‚’å‡¦ç†
 	for (UINT i = 0; i < mesh->mNumVertices; i++) {
 		VERTEX_3D vertex;
 
-		//’¸“_À•W
+		//é ‚ç‚¹åº§æ¨™
 		vertex.position.x = mesh->mVertices[i].x;
 		vertex.position.y = mesh->mVertices[i].y;
 		vertex.position.z = mesh->mVertices[i].z;
 
-		//–@üƒxƒNƒgƒ‹
+		//æ³•ç·šãƒ™ã‚¯ãƒˆãƒ«
 		if (mesh->HasNormals()) {
 			vertex.normal.x = mesh->mNormals[i].x;
 			vertex.normal.y = mesh->mNormals[i].y;
 			vertex.normal.z = mesh->mNormals[i].z;
 		}
 
-		//ƒeƒNƒXƒ`ƒƒÀ•W
+		//ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™
 		if (mesh->mTextureCoords[0]) {
 			vertex.texcoord.x = mesh->mTextureCoords[0][i].x;
 			vertex.texcoord.y = mesh->mTextureCoords[0][i].y;
@@ -278,7 +279,7 @@ void Model::ProcessMesh(aiMesh* mesh, const aiScene* scene, const std::string& m
 			vertex.texcoord.y = 0.0f;
 		}
 
-		//’¸“_ƒJƒ‰[
+		//é ‚ç‚¹ã‚«ãƒ©ãƒ¼
 		if (mesh->HasVertexColors(0)) {
 			vertex.diffuse.x = mesh->mColors[0][i].r;
 			vertex.diffuse.y = mesh->mColors[0][i].g;
@@ -294,7 +295,7 @@ void Model::ProcessMesh(aiMesh* mesh, const aiScene* scene, const std::string& m
 		vertices.push_back(vertex);
 	}
 
-	//ƒCƒ“ƒfƒbƒNƒXƒf[ƒ^‚ğˆ—
+	//ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒ‡ãƒ¼ã‚¿ã‚’å‡¦ç†
 	for (UINT i = 0; i < mesh->mNumFaces; i++) {
 		aiFace face = mesh->mFaces[i];
 		for (UINT j = 0; j < face.mNumIndices; j++) {
@@ -302,67 +303,67 @@ void Model::ProcessMesh(aiMesh* mesh, const aiScene* scene, const std::string& m
 		}
 	}
 
-	//’¸“_ƒoƒbƒtƒ@‚ğì¬
+	//é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã‚’ä½œæˆ
 	D3D11_BUFFER_DESC vertexBufferDesc = {};
-	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;	//g—p–@
-	vertexBufferDesc.ByteWidth = sizeof(VERTEX_3D) * static_cast<UINT>(vertices.size());	//ƒoƒbƒtƒ@ƒTƒCƒY
-	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;	//ƒoƒCƒ“ƒhƒtƒ‰ƒO
-	vertexBufferDesc.CPUAccessFlags = 0;	//CPUƒAƒNƒZƒXƒtƒ‰ƒO
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;	//ä½¿ç”¨æ³•
+	vertexBufferDesc.ByteWidth = sizeof(VERTEX_3D) * static_cast<UINT>(vertices.size());	//ãƒãƒƒãƒ•ã‚¡ã‚µã‚¤ã‚º
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;	//ãƒã‚¤ãƒ³ãƒ‰ãƒ•ãƒ©ã‚°
+	vertexBufferDesc.CPUAccessFlags = 0;	//CPUã‚¢ã‚¯ã‚»ã‚¹ãƒ•ãƒ©ã‚°
 
 	D3D11_SUBRESOURCE_DATA vertexData = {};
-	vertexData.pSysMem = vertices.data();	//ƒf[ƒ^ƒ|ƒCƒ“ƒ^
+	vertexData.pSysMem = vertices.data();	//ãƒ‡ãƒ¼ã‚¿ãƒã‚¤ãƒ³ã‚¿
 
 	ID3D11Buffer* vertexBuffer = nullptr;
 	HRESULT hr = RENDERER.GetDevice()->CreateBuffer(&vertexBufferDesc, &vertexData, &vertexBuffer);
 	if (FAILED(hr)) {
-		ErrorMessage(L"’¸“_ƒoƒbƒtƒ@‚Ìì¬‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã®ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return;
 	}
 
-	//ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@‚ğì¬
+	//ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡ã‚’ä½œæˆ
 	D3D11_BUFFER_DESC indexBufferDesc = {};
-	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;	//g—p–@
-	indexBufferDesc.ByteWidth = sizeof(UINT) * static_cast<UINT>(indices.size());	//ƒoƒbƒtƒ@ƒTƒCƒY
-	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;	//ƒoƒCƒ“ƒhƒtƒ‰ƒO
-	indexBufferDesc.CPUAccessFlags = 0;	//CPUƒAƒNƒZƒXƒtƒ‰ƒO
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;	//ä½¿ç”¨æ³•
+	indexBufferDesc.ByteWidth = sizeof(UINT) * static_cast<UINT>(indices.size());	//ãƒãƒƒãƒ•ã‚¡ã‚µã‚¤ã‚º
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;	//ãƒã‚¤ãƒ³ãƒ‰ãƒ•ãƒ©ã‚°
+	indexBufferDesc.CPUAccessFlags = 0;	//CPUã‚¢ã‚¯ã‚»ã‚¹ãƒ•ãƒ©ã‚°
 
 	D3D11_SUBRESOURCE_DATA indexData = {};
-	indexData.pSysMem = indices.data();	//ƒf[ƒ^ƒ|ƒCƒ“ƒ^
+	indexData.pSysMem = indices.data();	//ãƒ‡ãƒ¼ã‚¿ãƒã‚¤ãƒ³ã‚¿
 
 	ID3D11Buffer* indexBuffer = nullptr;
 	hr = RENDERER.GetDevice()->CreateBuffer(&indexBufferDesc, &indexData, &indexBuffer);
 	if (FAILED(hr)) {
-		ErrorMessage(L"ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@‚Ìì¬‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡ã®ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return;
 	}
 
-	//ƒ}ƒeƒŠƒAƒ‹‚ğˆ—
+	//ãƒãƒ†ãƒªã‚¢ãƒ«ã‚’å‡¦ç†
 	MODEL_MATERIAL material{};
 	if (mesh->mMaterialIndex < scene->mNumMaterials) {
 		material = LoadMaterial(scene->mMaterials[mesh->mMaterialIndex], scene, modelDirectory);
 	}
 
-	//ƒƒbƒVƒ…‚ğ•Û‘¶
+	//ãƒ¡ãƒƒã‚·ãƒ¥ã‚’ä¿å­˜
 	MESH newMesh;
-	newMesh.vertexBuffer = vertexBuffer;	//’¸“_ƒoƒbƒtƒ@
-	newMesh.indexBuffer = indexBuffer;	//ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@
-	newMesh.numIndices = static_cast<UINT>(indices.size());	//ƒCƒ“ƒfƒbƒNƒX”
-	newMesh.material = material;	//ƒ}ƒeƒŠƒAƒ‹
-	m_meshes.push_back(newMesh);	//ƒƒbƒVƒ…‚ğ•Û‘¶
+	newMesh.vertexBuffer = vertexBuffer;	//é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡
+	newMesh.indexBuffer = indexBuffer;	//ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡
+	newMesh.numIndices = static_cast<UINT>(indices.size());	//ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹æ•°
+	newMesh.material = material;	//ãƒãƒ†ãƒªã‚¢ãƒ«
+	m_meshes.push_back(newMesh);	//ãƒ¡ãƒƒã‚·ãƒ¥ã‚’ä¿å­˜
 }
 
 MODEL_MATERIAL Model::LoadMaterial(aiMaterial* aiMat, const aiScene* scene, const std::string& modeDirectory) {
-	//ˆê“I‚Èƒ}ƒeƒŠƒAƒ‹‚ğì¬‚µ‚ÄƒL[‚ğì¬
+	//ä¸€æ™‚çš„ãªãƒãƒ†ãƒªã‚¢ãƒ«ã‚’ä½œæˆã—ã¦ã‚­ãƒ¼ã‚’ä½œæˆ
 	MODEL_MATERIAL tmpMaterial{};
 
-	tmpMaterial.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);	//ƒfƒtƒHƒ‹ƒg‚ÌF
-	tmpMaterial.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);	//ƒfƒtƒHƒ‹ƒg‚ÌF
-	tmpMaterial.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);	//ƒfƒtƒHƒ‹ƒg‚ÌF
-	tmpMaterial.shininess = 32.0f;	//ƒfƒtƒHƒ‹ƒg‚Ì’l
-	tmpMaterial.texture = nullptr;	//ƒfƒtƒHƒ‹ƒg‚ÌƒeƒNƒXƒ`ƒƒ
-	tmpMaterial.texturePath = "";	//ƒfƒtƒHƒ‹ƒg‚ÌƒpƒX
+	tmpMaterial.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);	//ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®è‰²
+	tmpMaterial.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);	//ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®è‰²
+	tmpMaterial.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);	//ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®è‰²
+	tmpMaterial.shininess = 32.0f;	//ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®å€¤
+	tmpMaterial.texture = nullptr;	//ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®ãƒ†ã‚¯ã‚¹ãƒãƒ£
+	tmpMaterial.texturePath = "";	//ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®ãƒ‘ã‚¹
 
-	//ƒ}ƒeƒŠƒAƒ‹ƒvƒƒpƒeƒB‚ğ“Ç‚İ‚Ş
+	//ãƒãƒ†ãƒªã‚¢ãƒ«ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã‚’èª­ã¿è¾¼ã‚€
 	aiColor4D color(0.0f, 0.0f, 0.0f, 0.0f);
 	float shininess = 0.0f;
 
@@ -382,30 +383,30 @@ MODEL_MATERIAL Model::LoadMaterial(aiMaterial* aiMat, const aiScene* scene, cons
 		tmpMaterial.shininess = shininess;
 	}
 
-	//ƒeƒNƒXƒ`ƒƒƒpƒX‚ğæ“¾
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ‘ã‚¹ã‚’å–å¾—
 	aiString texturePath;
 	if (aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS) {
-		tmpMaterial.texturePath = texturePath.C_Str();	//ƒeƒNƒXƒ`ƒƒƒpƒX‚ğ•Û‘¶
+		tmpMaterial.texturePath = texturePath.C_Str();	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ‘ã‚¹ã‚’ä¿å­˜
 	}
 
-	//ƒ}ƒeƒŠƒAƒ‹‚ÌƒnƒbƒVƒ…ƒL[‚ğ¶¬
+	//ãƒãƒ†ãƒªã‚¢ãƒ«ã®ãƒãƒƒã‚·ãƒ¥ã‚­ãƒ¼ã‚’ç”Ÿæˆ
 	std::string materialKey = tmpMaterial.GenerateHashKey();
 
-	//ƒ}ƒeƒŠƒAƒ‹‚ª‚·‚Å‚É‘¶İ‚·‚é‚©Šm”F
+	//ãƒãƒ†ãƒªã‚¢ãƒ«ãŒã™ã§ã«å­˜åœ¨ã™ã‚‹ã‹ç¢ºèª
 	auto it = m_materialCache.find(materialKey);
 	if (it != m_materialCache.end()) {
-		//‘¶İ‚·‚éê‡‚ÍƒLƒƒƒbƒVƒ…‚©‚çæ“¾
+		//å­˜åœ¨ã™ã‚‹å ´åˆã¯ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‹ã‚‰å–å¾—
 		it->second.referenceCount++;
-		m_usedMaterialKeys.push_back(materialKey);	//g—p’†‚Ìƒ}ƒeƒŠƒAƒ‹ƒL[‚ğ•Û‘¶
+		m_usedMaterialKeys.push_back(materialKey);	//ä½¿ç”¨ä¸­ã®ãƒãƒ†ãƒªã‚¢ãƒ«ã‚­ãƒ¼ã‚’ä¿å­˜
 		return it->second.material;
 	}
 
-	//‘¶İ‚µ‚È‚¢ê‡‚ÍV‚µ‚¢ƒ}ƒeƒŠƒAƒ‹‚ğì¬
+	//å­˜åœ¨ã—ãªã„å ´åˆã¯æ–°ã—ã„ãƒãƒ†ãƒªã‚¢ãƒ«ã‚’ä½œæˆ
 	MODEL_MATERIAL newMaterial = tmpMaterial;
 
-	//ƒeƒNƒXƒ`ƒƒ‚ğƒ[ƒh
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ãƒ­ãƒ¼ãƒ‰
 	if (!tmpMaterial.texturePath.empty()) {
-		//‘g‚İ‚İƒeƒNƒXƒ`ƒƒ‚©‚Ç‚¤‚©‚ğŠm”F
+		//çµ„ã¿è¾¼ã¿ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‹ã©ã†ã‹ã‚’ç¢ºèª
 		UINT texnum = scene->mNumTextures;
 		if (texnum > 0) {
 			unsigned int textureIndex = 0;
@@ -414,15 +415,15 @@ MODEL_MATERIAL Model::LoadMaterial(aiMaterial* aiMat, const aiScene* scene, cons
 					break;
 				}
 			}
-			aiMat->GetTextureCount(aiTextureType_DIFFUSE);	//ƒeƒNƒXƒ`ƒƒ‚Ì”‚ğæ“¾
-			//‘g‚İ‚İƒeƒNƒXƒ`ƒƒ‚ğƒ[ƒh
+			aiMat->GetTextureCount(aiTextureType_DIFFUSE);	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®æ•°ã‚’å–å¾—
+			//çµ„ã¿è¾¼ã¿ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ãƒ­ãƒ¼ãƒ‰
 			newMaterial.texture = LoadEmbeddedTexture(scene->mTextures[textureIndex], textureIndex);
-			//¸”s
+			//å¤±æ•—
 			if (!newMaterial.texture) {
-				ErrorMessage(L"‘g‚İ‚İƒeƒNƒXƒ`ƒƒ‚Ìƒ[ƒh‚É¸”s‚µ‚Ü‚µ‚½B", E_FAIL);
+				ErrorMessage(L"çµ„ã¿è¾¼ã¿ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ãƒ­ãƒ¼ãƒ‰ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", E_FAIL);
 			}
 		} else {
-			//ŠO•”ƒeƒNƒXƒ`ƒƒ‚ğƒ[ƒh
+			//å¤–éƒ¨ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ãƒ­ãƒ¼ãƒ‰
 			std::string fullPath;
 			if (m_directory.empty()) {
 				fullPath = tmpMaterial.texturePath;
@@ -430,162 +431,162 @@ MODEL_MATERIAL Model::LoadMaterial(aiMaterial* aiMat, const aiScene* scene, cons
 				fullPath = m_directory + "\\" + tmpMaterial.texturePath;
 			}
 
-			//ƒtƒ@ƒCƒ‹‚ª‘¶İ‚·‚é‚©Šm”F
+			//ãƒ•ã‚¡ã‚¤ãƒ«ãŒå­˜åœ¨ã™ã‚‹ã‹ç¢ºèª
 			std::ifstream file(fullPath);
 
 			if (file.good()) {
 				file.close();
 
-				//ŠO•”ƒeƒNƒXƒ`ƒƒ‚ğƒ[ƒh
+				//å¤–éƒ¨ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ãƒ­ãƒ¼ãƒ‰
 				newMaterial.texture = LoadTexture(fullPath);
-				//¸”s
+				//å¤±æ•—
 				if (!newMaterial.texture) {
-					ErrorMessage(L"ŠO•”ƒeƒNƒXƒ`ƒƒ‚Ìƒ[ƒh‚É¸”s‚µ‚Ü‚µ‚½B", E_FAIL);
+					ErrorMessage(L"å¤–éƒ¨ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ãƒ­ãƒ¼ãƒ‰ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", E_FAIL);
 				}
 			} else {
-				//ƒtƒ@ƒCƒ‹‚ª‘¶İ‚µ‚È‚¢
-				ErrorMessage(L"ŠO•”ƒeƒNƒXƒ`ƒƒ‚ª‘¶İ‚µ‚Ü‚¹‚ñB", E_FAIL);
+				//ãƒ•ã‚¡ã‚¤ãƒ«ãŒå­˜åœ¨ã—ãªã„
+				ErrorMessage(L"å¤–éƒ¨ãƒ†ã‚¯ã‚¹ãƒãƒ£ãŒå­˜åœ¨ã—ã¾ã›ã‚“ã€‚", E_FAIL);
 			}
 		}
 	}
 
-	//ƒ}ƒeƒŠƒAƒ‹‚ğƒLƒƒƒbƒVƒ…‚É’Ç‰Á
+	//ãƒãƒ†ãƒªã‚¢ãƒ«ã‚’ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã«è¿½åŠ 
 	m_materialCache[materialKey] = MATERIAL_CACHE_ENTRY(newMaterial);
-	m_usedMaterialKeys.push_back(materialKey);	//g—p’†‚Ìƒ}ƒeƒŠƒAƒ‹ƒL[‚ğ•Û‘¶
+	m_usedMaterialKeys.push_back(materialKey);	//ä½¿ç”¨ä¸­ã®ãƒãƒ†ãƒªã‚¢ãƒ«ã‚­ãƒ¼ã‚’ä¿å­˜
 
 	return newMaterial;
 }
 
 ID3D11ShaderResourceView* Model::LoadEmbeddedTexture(const aiTexture* embeddedTexture, int textureIndex) {
-	//‘g‚İ‚İƒeƒNƒXƒ`ƒƒ‚Ì¯•Êq‚ğì¬
+	//çµ„ã¿è¾¼ã¿ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®è­˜åˆ¥å­ã‚’ä½œæˆ
 	std::string embeddedKey = "EmbeddedTexture_" + std::to_string(textureIndex);
 
-	//ƒLƒƒƒbƒVƒ…‚É‘¶İ‚·‚é‚©Šm”F
+	//ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã«å­˜åœ¨ã™ã‚‹ã‹ç¢ºèª
 	auto it = m_textureCache.find(embeddedKey);
 	if (it != m_textureCache.end()) {
-		//‘¶İ‚·‚éê‡‚ÍƒLƒƒƒbƒVƒ…‚©‚çæ“¾
+		//å­˜åœ¨ã™ã‚‹å ´åˆã¯ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‹ã‚‰å–å¾—
 		it->second.referenceCount++;
-		m_usedTexturePaths.push_back(embeddedKey);	//g—p’†‚ÌƒeƒNƒXƒ`ƒƒƒL[‚ğ•Û‘¶
+		m_usedTexturePaths.push_back(embeddedKey);	//ä½¿ç”¨ä¸­ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚­ãƒ¼ã‚’ä¿å­˜
 		return it->second.srv;
 	}
 
-	//‘¶İ‚µ‚È‚¢ê‡‚ÍV‚µ‚¢ƒeƒNƒXƒ`ƒƒ‚ğì¬
+	//å­˜åœ¨ã—ãªã„å ´åˆã¯æ–°ã—ã„ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ä½œæˆ
 	ScratchImage image;
 	ID3D11ShaderResourceView* textureView = nullptr;
 	HRESULT hr;
 
 	if (embeddedTexture->mHeight == 0) {
-		//ˆ³k‚³‚ê‚½ƒeƒNƒXƒ`ƒƒŒ`®
-		//ƒtƒH[ƒ}ƒbƒg‚ğ”»•Ê
+		//åœ§ç¸®ã•ã‚ŒãŸãƒ†ã‚¯ã‚¹ãƒãƒ£å½¢å¼
+		//ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆã‚’åˆ¤åˆ¥
 		if (strncmp(reinterpret_cast<const char*>(embeddedTexture->achFormatHint), "DDS", 4) == 0) {
-			//DDSŒ`®
+			//DDSå½¢å¼
 			hr = LoadFromDDSMemory((uint8_t*)embeddedTexture->pcData, embeddedTexture->mWidth, DDS_FLAGS_NONE, nullptr, image);
 		}else if (strncmp(reinterpret_cast<const char*>(embeddedTexture->achFormatHint), "TGA", 4) == 0) {
-			//TGAŒ`®
+			//TGAå½¢å¼
 			hr = LoadFromTGAMemory((uint8_t*)embeddedTexture->pcData, embeddedTexture->mWidth, TGA_FLAGS_NONE, nullptr, image);
 		} else {
-			//WICŒ`®
+			//WICå½¢å¼
 			hr = LoadFromWICMemory((uint8_t*)embeddedTexture->pcData, embeddedTexture->mWidth, WIC_FLAGS_NONE, nullptr, image);
 		}
 
-		//¸”s
+		//å¤±æ•—
 		if (FAILED(hr)) {
-			ErrorMessage(L"‘g‚İ‚İƒeƒNƒXƒ`ƒƒ‚Ìƒ[ƒh‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+			ErrorMessage(L"çµ„ã¿è¾¼ã¿ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ãƒ­ãƒ¼ãƒ‰ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 			return nullptr;
 		}
 	} else {
-		//”ñˆ³k‚³‚ê‚½ƒeƒNƒXƒ`ƒƒŒ`®
+		//éåœ§ç¸®ã•ã‚ŒãŸãƒ†ã‚¯ã‚¹ãƒãƒ£å½¢å¼
 		Image img;
 		img.width = embeddedTexture->mWidth;
 		img.height = embeddedTexture->mHeight;
 		img.format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		img.rowPitch = embeddedTexture->mWidth * 4;	//1s‚ÌƒoƒCƒg”
-		img.slicePitch = img.rowPitch * embeddedTexture->mHeight;	//1ƒXƒ‰ƒCƒX‚ÌƒoƒCƒg”
-		img.pixels = reinterpret_cast<uint8_t*>(embeddedTexture->pcData);	//ƒsƒNƒZƒ‹ƒf[ƒ^
+		img.rowPitch = embeddedTexture->mWidth * 4;	//1è¡Œã®ãƒã‚¤ãƒˆæ•°
+		img.slicePitch = img.rowPitch * embeddedTexture->mHeight;	//1ã‚¹ãƒ©ã‚¤ã‚¹ã®ãƒã‚¤ãƒˆæ•°
+		img.pixels = reinterpret_cast<uint8_t*>(embeddedTexture->pcData);	//ãƒ”ã‚¯ã‚»ãƒ«ãƒ‡ãƒ¼ã‚¿
 
-		//‰æ‘œ‚ğì¬
+		//ç”»åƒã‚’ä½œæˆ
 		hr = image.InitializeFromImage(img);
 		if (FAILED(hr)) {
-			ErrorMessage(L"‘g‚İ‚İƒeƒNƒXƒ`ƒƒ‚Ìƒ[ƒh‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+			ErrorMessage(L"çµ„ã¿è¾¼ã¿ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ãƒ­ãƒ¼ãƒ‰ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 			return nullptr;
 		}
 	}
 
-	//ƒVƒF[ƒ_[ƒŠƒ\[ƒXƒrƒ…[‚ğì¬
+	//ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒªã‚½ãƒ¼ã‚¹ãƒ“ãƒ¥ãƒ¼ã‚’ä½œæˆ
 	hr = CreateShaderResourceView(RENDERER.GetDevice(), image.GetImages(), image.GetImageCount(), image.GetMetadata(), &textureView);
 	if (FAILED(hr)) {
-		ErrorMessage(L"‘g‚İ‚İƒeƒNƒXƒ`ƒƒ‚ÌƒVƒF[ƒ_[ƒŠƒ\[ƒXƒrƒ…[‚Ìì¬‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"çµ„ã¿è¾¼ã¿ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒªã‚½ãƒ¼ã‚¹ãƒ“ãƒ¥ãƒ¼ã®ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return nullptr;
 	}
 
-	//ƒeƒNƒXƒ`ƒƒ‚ğƒLƒƒƒbƒVƒ…‚É’Ç‰Á
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã«è¿½åŠ 
 	if (textureView) {
 		m_textureCache[embeddedKey] = TEXTURE_CACHE_ENTRY(textureView);
-		m_usedTexturePaths.push_back(embeddedKey);	//g—p’†‚ÌƒeƒNƒXƒ`ƒƒƒL[‚ğ•Û‘¶
+		m_usedTexturePaths.push_back(embeddedKey);	//ä½¿ç”¨ä¸­ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚­ãƒ¼ã‚’ä¿å­˜
 	}
 
 	return textureView;
 }
 
 ID3D11ShaderResourceView* Model::LoadTexture(const std::string& texturePath) {
-	//ƒLƒƒƒbƒVƒ…‚ğŠm”F
+	//ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’ç¢ºèª
 	auto it = m_textureCache.find(texturePath);
 
 	if (it != m_textureCache.end()) {
-		//‘¶İ‚·‚éê‡‚ÍƒLƒƒƒbƒVƒ…‚©‚çæ“¾
+		//å­˜åœ¨ã™ã‚‹å ´åˆã¯ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‹ã‚‰å–å¾—
 		it->second.referenceCount++;
-		m_usedTexturePaths.push_back(texturePath);	//g—p’†‚ÌƒeƒNƒXƒ`ƒƒƒL[‚ğ•Û‘¶
+		m_usedTexturePaths.push_back(texturePath);	//ä½¿ç”¨ä¸­ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚­ãƒ¼ã‚’ä¿å­˜
 		return it->second.srv;
 	}
 
-	//‘¶İ‚µ‚È‚¢ê‡‚ÍV‚µ‚¢ƒeƒNƒXƒ`ƒƒ‚ğì¬
+	//å­˜åœ¨ã—ãªã„å ´åˆã¯æ–°ã—ã„ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ä½œæˆ
 	ID3D11ShaderResourceView* textureView = LoadTextureFromFile(texturePath);
 	if (textureView) {
-		//ƒLƒƒƒbƒVƒ…‚É’Ç‰Á
+		//ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã«è¿½åŠ 
 		m_textureCache[texturePath] = TEXTURE_CACHE_ENTRY(textureView);
-		m_usedTexturePaths.push_back(texturePath);	//g—p’†‚ÌƒeƒNƒXƒ`ƒƒƒL[‚ğ•Û‘¶
+		m_usedTexturePaths.push_back(texturePath);	//ä½¿ç”¨ä¸­ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚­ãƒ¼ã‚’ä¿å­˜
 	}
 
 	return textureView;
 }
 
 ID3D11ShaderResourceView* Model::LoadTextureFromFile(const std::string& texturePath) {
-	//ƒeƒNƒXƒ`ƒƒƒtƒ@ƒCƒ‹‚ğƒƒCƒh•¶š—ñ‚É•ÏŠ·
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ãƒ¯ã‚¤ãƒ‰æ–‡å­—åˆ—ã«å¤‰æ›
 	std::wstring wTexturePath(texturePath.begin(), texturePath.end());
 
-	//ƒeƒNƒXƒ`ƒƒ‚ğ“Ç‚İ‚Ş
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’èª­ã¿è¾¼ã‚€
 	ScratchImage image;
 	HRESULT hr;
 
-	//Šg’£q‚É‚æ‚Á‚Ä“Ç‚İ‚İ•û–@‚ğ•ÏX
+	//æ‹¡å¼µå­ã«ã‚ˆã£ã¦èª­ã¿è¾¼ã¿æ–¹æ³•ã‚’å¤‰æ›´
 	std::string extension = texturePath.substr(texturePath.find_last_of('.'));
 	std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
 
 	if (extension == ".dds") {
-		//DDSŒ`®
+		//DDSå½¢å¼
 		hr = LoadFromDDSFile(wTexturePath.c_str(), DDS_FLAGS_NONE, nullptr, image);
 	} else if (extension == ".tga") {
-		//TGAŒ`®
+		//TGAå½¢å¼
 		hr = LoadFromTGAFile(wTexturePath.c_str(), nullptr, image);
 	} else if (extension == ".hdr") {
-		//HDRŒ`®
+		//HDRå½¢å¼
 		hr = LoadFromHDRFile(wTexturePath.c_str(), nullptr, image);
 	} else {
-		//WICŒ`®
+		//WICå½¢å¼
 		hr = LoadFromWICFile(wTexturePath.c_str(), WIC_FLAGS_NONE, nullptr, image);
 	}
 
-	//¸”s
+	//å¤±æ•—
 	if (FAILED(hr)) {
-		ErrorMessage(L"ƒeƒNƒXƒ`ƒƒ‚Ìƒ[ƒh‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ãƒ­ãƒ¼ãƒ‰ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return nullptr;
 	}
 
-	//ƒVƒF[ƒ_[ƒŠƒ\[ƒXƒrƒ…[‚ğì¬
+	//ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒªã‚½ãƒ¼ã‚¹ãƒ“ãƒ¥ãƒ¼ã‚’ä½œæˆ
 	ID3D11ShaderResourceView* textureView = nullptr;
 	hr = CreateShaderResourceView(RENDERER.GetDevice(), image.GetImages(), image.GetImageCount(), image.GetMetadata(), &textureView);
 	if (FAILED(hr)) {
-		ErrorMessage(L"ƒeƒNƒXƒ`ƒƒ‚ÌƒVƒF[ƒ_[ƒŠƒ\[ƒXƒrƒ…[‚Ìì¬‚É¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒªã‚½ãƒ¼ã‚¹ãƒ“ãƒ¥ãƒ¼ã®ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return nullptr;
 	}
 

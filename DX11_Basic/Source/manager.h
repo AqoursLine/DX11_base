@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 class Scene;
 
@@ -12,7 +12,6 @@ public:
 
 	void Update(double dt);
 	void Draw();
-
 	bool CleanUp();
 
 	static void SetFinish(bool isFinish) { m_isFinished = isFinish; }

@@ -5,41 +5,41 @@
 
 
 bool Box::Initialize() {
-	//1•Ó‚ª1‚Ì—§•û‘Ì‚Ì’¸“_ƒf[ƒ^
+	//1è¾ºãŒ1ã®ç«‹æ–¹ä½“ã®é ‚ç‚¹ãƒ‡ãƒ¼ã‚¿
 	VERTEX_3D vertices[] = {
-		//‘O
+		//å‰
 		{{-0.5f, 0.5f, -0.5f},	{0.0f, 0.0f, -1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
 		{{0.5f, 0.5f, -0.5f},	{0.0f, 0.0f, -1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
 		{{-0.5f, -0.5f, -0.5f},	{0.0f, 0.0f, -1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
 		{{0.5f, -0.5f, -0.5f},	{0.0f, 0.0f, -1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-		//Œã
+		//å¾Œ
 		{{-0.5f, 0.5f, 0.5f},	{0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
 		{{0.5f, 0.5f, 0.5f},	{0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
 		{{-0.5f, -0.5f, 0.5f},	{0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
 		{{0.5f, -0.5f, 0.5f},	{0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-		//¶
+		//å·¦
 		{{-0.5f, 0.5f, 0.5f},	{-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
 		{{-0.5f, 0.5f, -0.5f},	{-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
 		{{-0.5f, -0.5f, 0.5f},	{-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
 		{{-0.5f, -0.5f, -0.5f},	{-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
-		//‰E
+		//å³
 		{{0.5f, 0.5f, 0.5f},	{1.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
 		{{0.5f, 0.5f, -0.5f},	{1.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
 		{{0.5f, -0.5f, 0.5f},	{1.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
 		{{0.5f, -0.5f, -0.5f},	{1.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-		//ã
+		//ä¸Š
 		{{-0.5f, 0.5f, 0.5f},	{0.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
 		{{0.5f, 0.5f, 0.5f},	{0.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
 		{{-0.5f, 0.5f, -0.5f},	{0.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
 		{{0.5f, 0.5f, -0.5f},	{0.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
-		//‰º
+		//ä¸‹
 		{{-0.5f, -0.5f, 0.5f},	{0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
 		{{0.5f, -0.5f, 0.5f},	{0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
 		{{-0.5f, -0.5f, -0.5f},	{0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
 		{{0.5f, -0.5f, -0.5f},	{0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
 	};
 
-	//’¸“_ƒoƒbƒtƒ@‚ÌÝ’è
+	//é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã®è¨­å®š
 	D3D11_BUFFER_DESC bufferDesc = {};
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	bufferDesc.ByteWidth = sizeof(vertices);
@@ -49,33 +49,33 @@ bool Box::Initialize() {
 	initData.pSysMem = vertices;
 	HRESULT hr = RENDERER.GetDevice()->CreateBuffer(&bufferDesc, &initData, m_vertexBuffer.GetAddressOf());
 	if (FAILED(hr)) {
-		ErrorMessage(L"’¸“_ƒoƒbƒtƒ@‚Ì‰Šú‰»‚ÉŽ¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage(L"é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hr);
 		return false;
 	}
 
-	//ƒCƒ“ƒfƒbƒNƒXƒf[ƒ^(ŽžŒvŽü‚è)
+	//ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒ‡ãƒ¼ã‚¿(æ™‚è¨ˆå‘¨ã‚Š)
 	UINT indices[] = {
-		//‘O
+		//å‰
 		0, 1, 2,
 		1, 3, 2,
-		//Œã
+		//å¾Œ
 		4, 6, 5,
 		5, 6, 7,
-		//¶
+		//å·¦
 		8, 9, 10,
 		9, 11, 10,
-		//‰E
+		//å³
 		12, 14, 13,
 		13, 14, 15,
-		//ã
+		//ä¸Š
 		16, 17, 18,
 		17, 19, 18,
-		//‰º
+		//ä¸‹
 		20, 22, 21,
 		21, 22, 23
 	};
 
-	//ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@‚ÌÝ’è
+	//ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡ã®è¨­å®š
 	D3D11_BUFFER_DESC indexBufferDesc = {};
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	indexBufferDesc.ByteWidth = sizeof(indices);
@@ -85,14 +85,14 @@ bool Box::Initialize() {
 	indexInitData.pSysMem = indices;
 	hr = RENDERER.GetDevice()->CreateBuffer(&indexBufferDesc, &indexInitData, m_indexBuffer.GetAddressOf());
 	if (FAILED(hr)) {
-		ErrorMessage(L"ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@‚Ì‰Šú‰»‚ÉŽ¸”s‚µ‚Ü‚µ‚½B", hr);
+		ErrorMessage((L"ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡ã®åˆæœŸåŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚"), hr);
 		return false;
 	}
 
-	//ƒCƒ“ƒfƒbƒNƒXƒJƒEƒ“ƒg‚ð•Û‘¶
+	//ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚«ã‚¦ãƒ³ãƒˆã‚’ä¿å­˜
 	m_numIndices = _countof(indices);
 
-	//ƒVƒF[ƒ_[‚Ìì¬
+	//ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®ä½œæˆ
 	RENDERER.CreateVertexShader(&m_vertexShader, &m_inputLayout, L"Shader\\unlitTextureVS.cso");
 	RENDERER.CreatePixelShader(&m_pixelShader, L"Shader\\unlitTexturePS.cso");
 
@@ -103,84 +103,85 @@ void Box::Finalize() {
 }
 
 void Box::Draw(const Vector3& pos, const Vector3& rot, const Vector3& scale) const {
-	// “ü—ÍƒŒƒCƒAƒEƒg‚ðƒZƒbƒg
+	// å…¥åŠ›ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã‚’ã‚»ãƒƒãƒˆ
 	RENDERER.GetDeviceContext()->IASetInputLayout(m_inputLayout.Get());
-	// ’¸“_ƒVƒF[ƒ_[‚ðƒZƒbƒg
+	// é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ã‚»ãƒƒãƒˆ
 	RENDERER.GetDeviceContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0);
-	// ƒsƒNƒZƒ‹ƒVƒF[ƒ_[‚ðƒZƒbƒg
+	// ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ã‚»ãƒƒãƒˆ
 	RENDERER.GetDeviceContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0);
 
-	//ƒfƒtƒHƒ‹ƒgƒTƒ“ƒvƒ‰[ƒXƒe[ƒgƒZƒbƒg
+	//ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆã‚»ãƒƒãƒˆ
 	RENDERER.SetSamplerState();
 
-	//ƒ}ƒeƒŠƒAƒ‹ƒZƒbƒg
+	//ãƒžãƒ†ãƒªã‚¢ãƒ«ã‚»ãƒƒãƒˆ
 	MATERIAL material = {};
 	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	material.textureEnable = false;
 	RENDERER.SetMaterial(material);
 
-	// •`‰æ‚Ì‚½‚ß‚Ìs—ñ‚ðÝ’è
+	// æç”»ã®ãŸã‚ã®è¡Œåˆ—ã‚’è¨­å®š
 	XMMATRIX worldMatrix = XMMatrixScaling(scale.x, scale.y, scale.z) *
 		XMMatrixRotationRollPitchYaw(rot.x, rot.y, rot.z) *
 		XMMatrixTranslation(pos.x, pos.y, pos.z);
-	// ƒ[ƒ‹ƒhs—ñ‚ðƒZƒbƒg
+	// ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’ã‚»ãƒƒãƒˆ
 	RENDERER.SetWorldMatrix(worldMatrix);
 
-	// ƒvƒŠƒ~ƒeƒBƒuƒgƒ|ƒƒW‚ðƒZƒbƒg
+	// ãƒ—ãƒªãƒŸãƒ†ã‚£ãƒ–ãƒˆãƒãƒ­ã‚¸ã‚’ã‚»ãƒƒãƒˆ
 	RENDERER.GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	// ’¸“_ƒoƒbƒtƒ@‚ðƒZƒbƒg
+	// é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã‚’ã‚»ãƒƒãƒˆ
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
 	RENDERER.GetDeviceContext()->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
 
-	// ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@‚ðƒZƒbƒg
+	// ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡ã‚’ã‚»ãƒƒãƒˆ
 	RENDERER.GetDeviceContext()->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
-	// ƒCƒ“ƒfƒbƒNƒX‚ðŽg‚Á‚Ä•`‰æ
+	// ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’ä½¿ã£ã¦æç”»
 	RENDERER.GetDeviceContext()->DrawIndexed(m_numIndices, 0, 0);
 
 }
 
-// ƒNƒH[ƒ^ƒjƒIƒ“”Å
+// ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ç‰ˆ
 void Box::Draw(const Vector3& pos, const Vector4& rot, const Vector3& scale) const {
-	// “ü—ÍƒŒƒCƒAƒEƒg‚ðƒZƒbƒg
+	// å…¥åŠ›ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã‚’ã‚»ãƒƒãƒˆ
 	RENDERER.GetDeviceContext()->IASetInputLayout(m_inputLayout.Get());
-	// ’¸“_ƒVƒF[ƒ_[‚ðƒZƒbƒg
+	// é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ã‚»ãƒƒãƒˆ
 	RENDERER.GetDeviceContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0);
-	// ƒsƒNƒZƒ‹ƒVƒF[ƒ_[‚ðƒZƒbƒg
+	// ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ã‚»ãƒƒãƒˆ
 	RENDERER.GetDeviceContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0);
 
-	//ƒfƒtƒHƒ‹ƒgƒTƒ“ƒvƒ‰[ƒXƒe[ƒgƒZƒbƒg
+	//ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆã‚»ãƒƒãƒˆ
 	RENDERER.SetSamplerState();
 
-	//ƒ}ƒeƒŠƒAƒ‹ƒZƒbƒg
+	//ãƒžãƒ†ãƒªã‚¢ãƒ«ã‚»ãƒƒãƒˆ
 	MATERIAL material = {};
 	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	material.textureEnable = false;
 	RENDERER.SetMaterial(material);
 
-	// ƒNƒH[ƒ^ƒjƒIƒ“‚ð‰ñ“]s—ñ‚É•ÏŠ·
+	// ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã‚’å›žè»¢è¡Œåˆ—ã«å¤‰æ›
 	XMMATRIX rotMatrix = XMMatrixRotationQuaternion(XMVectorSet(rot.x, rot.y, rot.z, rot.w));
-	// ƒ[ƒ‹ƒhs—ñ‚ðÝ’è
-	XMMATRIX worldMatrix, scaleMatrix, posMatrix;	//’PˆÊs—ñ
-	scaleMatrix = XMMatrixScaling(scale.x, scale.y, scale.z);	//ƒXƒP[ƒŠƒ“ƒO
-	posMatrix = XMMatrixTranslation(pos.x, pos.y, pos.z);	//•½sˆÚ“®
-	worldMatrix = scaleMatrix * rotMatrix * posMatrix;	//ƒ[ƒ‹ƒhs—ñ‚ðŒvŽZ
-	RENDERER.SetWorldMatrix(worldMatrix);	//ƒ[ƒ‹ƒhs—ñ‚ðƒZƒbƒg
+	// ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’è¨­å®š
+	XMMATRIX worldMatrix, scaleMatrix, posMatrix;	//å˜ä½è¡Œåˆ—
+	scaleMatrix = XMMatrixScaling(scale.x, scale.y, scale.z);	//ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°
+	posMatrix = XMMatrixTranslation(pos.x, pos.y, pos.z);	//å¹³è¡Œç§»å‹•
+	worldMatrix = scaleMatrix * rotMatrix * posMatrix;	//ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’è¨ˆç®—
+	RENDERER.SetWorldMatrix(worldMatrix);	//ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’ã‚»ãƒƒãƒˆ
 
-	// ƒvƒŠƒ~ƒeƒBƒuƒgƒ|ƒƒW‚ðƒZƒbƒg
+	// ãƒ—ãƒªãƒŸãƒ†ã‚£ãƒ–ãƒˆãƒãƒ­ã‚¸ã‚’ã‚»ãƒƒãƒˆ
 	RENDERER.GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	// ’¸“_ƒoƒbƒtƒ@‚ðƒZƒbƒg
+	// é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã‚’ã‚»ãƒƒãƒˆ
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
 	RENDERER.GetDeviceContext()->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
 
-	// ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@‚ðƒZƒbƒg
+	// ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡ã‚’ã‚»ãƒƒãƒˆ
 	RENDERER.GetDeviceContext()->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
-	// ƒCƒ“ƒfƒbƒNƒX‚ðŽg‚Á‚Ä•`‰æ
+	// ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’ä½¿ã£ã¦æç”»
 	RENDERER.GetDeviceContext()->DrawIndexed(m_numIndices, 0, 0);
+
 }
 

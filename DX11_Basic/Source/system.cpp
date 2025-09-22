@@ -1,9 +1,8 @@
-﻿#include "main.h"
+#include "main.h"
 #include "system.h"
 #include "manager.h"
 #include "timer.h"
 #include "model.h"
-//#include "webtest.h"
 
 #ifdef _DEBUG
 #include "input.h"
@@ -28,14 +27,6 @@ bool System::Initialize() {
 	m_timer->Reset();
 	m_timer->Start();
 
-//	m_webSocketClient = new GameWebSocketClient();
-	//WebSocketクライアントの接続
-	//if (!m_webSocketClient->Connect("ws://localhost:9002")) {
-	//	std::cerr << "WebSocket client connection failed." << std::endl;
-	//} else {
-	//	std::cout << "WebSocket client connected successfully." << std::endl;
-	//}
-
 	return true;
 }
 
@@ -58,13 +49,6 @@ void System::Finalize() {
 		delete m_timer;
 		m_timer = nullptr;
 	}
-
-	//WebSocketクライアントの終了
-	if (m_webSocketClient) {
-		//m_webSocketClient->Disconnect();
-		//delete m_webSocketClient;
-		//m_webSocketClient = nullptr;
-	}
 }
 
 bool System::Excute() {
@@ -77,14 +61,5 @@ bool System::Excute() {
 		return true;
 	}
 
-#ifdef _DEBUG
-	if (Input::GetKeyTrigger(KK_LEFTCONTROL)) {
-		//if (m_webSocketClient->IsConnected()) {
-		//	std::string message = "Hello from the client!";
-		//	m_webSocketClient->SendMessage(message);
-		//	std::cout << "Message sent: " << message << std::endl;
-		//}
-	}
-#endif
 	return false;
 }

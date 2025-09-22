@@ -1,80 +1,111 @@
-﻿#pragma once
+#pragma once
 
 #include "gameObject.h"
+#include "engine.h"
+
+class Water;
 
 class Boat : public GameObject {
 public:
-	//コンストラクタ
 	Boat();
-	//デストラクタ
 	virtual ~Boat() = default;
 
-	//パラメータ取得
-	Vector3 GetVelocity() const { return m_velocity; }					//速度取得
-	Vector3 GetAngularVelocity() const { return m_angularVelocity; }	//角速度取得
-	float GetSpeed() const { return m_velocity.Length(); }				//速度の大きさ取得
+	//ボート制御
+	void SetThrottle(float throttle);	//スロットル設定 (0.0f ~ 1.0f)
+	void SetSteering(float steering);	//ステアリング設定 (-1.0f ~ 1.0f)
+	void SetBrake(float brake);			//ブレーキ設定 (0.0f ~ 1.0f)
+	void SetReverse(bool isReverse);	//リバースギア設定
 
-	//物理パラメータ調整用
-	void SetMass(float mass) { m_mass = mass; }						//質量設定
-	void SetDrag(float drag) { m_drag = drag; }						//抗力係数設定
-	void SetWaterDrag(float waterDrag) { m_waterDrag = waterDrag; }	//水の抵抗係数設定
-	void SetThrustPower(float thrustPower) { m_thrustPower = thrustPower; }			//推進力設定
-	void SetSteeringPower(float steeringPower) { m_steeringPower = steeringPower; }	//旋回力設定
+	//ギア状態
+	bool IsReversing() const { return m_isReverse; } //リバースギア状態取得
 
-	//コース境界設定
-	void SetCourseBounds(const Vector3& minBounds, const Vector3& maxBounds);
-	bool IsInCourse() const;
+	//物理パラメータ設定
+	void SetMass(float mass) { m_mass = mass; }
+	void SetDrag(float drag) { m_waterDrag = drag; }
+	void SetTurnRate(float turnRate) { m_maxTurnRate = turnRate; }
+	void SetMaxSpeed(float maxSpeed) { m_maxSpeed = maxSpeed; }
+	void SetMaxReverseSpeed(float maxReverseSpeed) { m_maxReverseSpeed = maxReverseSpeed; }
+	void SetRollAmount(float rollAmount) { m_rollAmount = rollAmount; }
+
+	//ボートの状態取得
+	Vector3 GetVelocity() const { return m_velocity; }			//速度ベクトル取得
+	float GetSpeed() const { return m_velocity.Length(); }	//速度取得
+	float GetSpeedKmh() const { return GetSpeed() * 3.6f; } //速度(km/h)取得
+	Engine& GetEngine() { return m_engine; }			//エンジン参照取得
+	const Engine& GetEngine() const { return m_engine; } //エンジン参照取得(定数版)
+
+	//水面設定
+	void SetWater(Water* water) { m_water = water; }
+
+	//ボートの寸法設定
+	void SetDimensions(float length, float width, float height) {
+		m_length = length;
+		m_width = width;
+		m_height = height;
+	}
+
+	float GetLength() const { return m_length; }
+	float GetWidth() const { return m_width; }
+	float GetHeight() const { return m_height; }
 
 protected:
-	bool Initialize() override;
-	void Update(double deltaTime) override;
-
-	//入力設定
-	void SetThrottle(float throttle) { m_throttle = throttle; } //推進入力 (-1.0f ~ 1.0f)
-	void SetSteering(float steering) { m_steering = steering; } //旋回入力 (-1.0f ~ 1.0f)
-
-private:
-	//物理パラメータ
-	Vector3 m_velocity; //速度
-	Vector3 m_angularVelocity; //角速度
-
-	//ボート固有パラメータ
-	float m_mass;			//質量
-	float m_drag;			//抗力係数
-	float m_waterDrag;		//水の抵抗係数
-	float m_thrustPower;	//推進力
-	float m_steeringPower;	//旋回力
-	float m_buoyancy;		//浮力
-
-	//入力パラメータ
-	float m_throttle;	//推進入力 (-1.0f ~ 1.0f)
-	float m_steering;	//旋回入力 (-1.0f ~ 1.0f)
-
-	//コース境界
-	Vector3 m_minBounds; //コースの最小座標
-	Vector3 m_maxBounds; //コースの最大座標
-	bool m_hasBounds; //境界設定フラグ
-
-	//時間管理
-	float m_currentTime; //経過時間
-
-	//デバッグ用
-	bool m_enableWaves; //波の有効化フラグ
-	bool m_enableBuoyancy; //浮力の有効化フラグ
-
-	//水
-	class Water* m_water; //水オブジェクトへの参照
+	virtual bool Initialize() override;
+	virtual void Update(double deltaTime) override;
 
 private:
 	//物理計算
 	void UpdatePhysics(float deltaTime);
-	void ApplyThrust(float deltaTime);
-	void UpdateSteering(float deltaTime);
-	void UpdateSteeringRealistic(float deltaTime);
-	void ApplyWaterResistance(float deltaTime);
-	void ApplyWaveEffect(float deltaTime);
-	void ApplyWaveEffectAlt(float deltaTime);
-	void ApplyBuoyancy(float deltaTime);
-	void CheckCourseBounds();
 	void UpdateWaterInteraction(float deltaTime);
+	void UpdateRotation(float deltaTime);
+	void ApplyForces(float deltaTime);
+
+	//姿勢制御
+	void UpdateRoll(float deltaTime);
+	void UpdatePitch(float deltaTime);
+	void UpdateBobbing(float deltaTime);
+
+	//エンジン
+	Engine m_engine;
+
+	//制御入力
+	float m_throttleInput;	// スロットル入力 (0.0f ~ 1.0f)
+	float m_steeringInput;	// ステアリング入力 (-1.0f ~ 1.0f)
+	float m_brakeInput;		// ブレーキ入力 (0.0f ~ 1.0f)
+	bool m_isReverse;		// リバースギアフラグ
+
+	//物理パラメータ
+	float m_mass;				// 質量
+	float m_waterDrag;			// 水の抵抗係数
+	float m_maxTurnRate;		// 最大旋回速度(rad/s)
+	float m_maxSpeed;			// 最大前進速度(m/s)
+	float m_maxReverseSpeed;	// 最大後退速度(m/s)
+	float m_rollAmount;			// ロール量
+
+	//物理状態
+	Vector3 m_velocity;			// 速度ベクトル
+	Vector3 m_acceleration;		// 加速度ベクトル
+	Vector3 m_angularVelocity;	// 角速度
+
+	//前フレームの位置
+	Vector3 m_prevPosition;
+
+	//水面への参照
+	Water* m_water;
+
+	//ボートの寸法
+	float m_length;	// ボートの長さ
+	float m_width;	// ボートの幅
+	float m_height;	// ボートの高さ
+
+	//姿勢制御パラメータ
+	float m_targetRoll;		// 目標ロール角
+	float m_targetPitch;	// 目標ピッチ角
+	float m_bobPhase;		// ボビングの位相
+
+	//物理定数
+	static constexpr float GRAVITY = 9.81f; // 重力加速度 (m/s^2)
+	static constexpr float WATER_DENSITY = 1000.0f; // 水の密度 (kg/m^3)
+	static constexpr float MAX_ROLL_ANGLE = 0.3f; // 最大ロール角 (ラジアン)
+	static constexpr float MAX_PITCH_ANGLE = 0.2f; // 最大ピッチ角 (ラジアン)
+
 };

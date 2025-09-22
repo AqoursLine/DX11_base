@@ -47,7 +47,6 @@ public:
 		}
 		return objects;
 	}
-
 private:
 	std::list<GameObject*> m_gameObjects[TYPE_MAX];
 };

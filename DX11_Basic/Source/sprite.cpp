@@ -1,4 +1,4 @@
-﻿#include "main.h"
+#include "main.h"
 #include "renderer.h"
 #include "sprite.h"
 
@@ -115,6 +115,7 @@ bool Sprite::Initialize(std::wstring fileName) {
 }
 
 void Sprite::Finalize() {
+
 }
 
 void Sprite::Draw(const Vector3& pos, const Vector3& rot, const Vector3& scale) const {

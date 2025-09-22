@@ -1,5 +1,4 @@
-﻿#pragma once
-
+#pragma once
 
 //頂点構造体
 struct VERTEX_3D {

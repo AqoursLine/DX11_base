@@ -27,6 +27,7 @@ Water::Water()
 
 Water::~Water() {
 	Finalize();
+
 }
 
 void Water::AddRipple(const Vector3& position, float amplitude, float frequency, float speed) {

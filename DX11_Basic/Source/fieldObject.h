@@ -13,5 +13,4 @@ public:
 	void Draw() const override;
 private:
 	class Field* m_field = nullptr;
-
 };

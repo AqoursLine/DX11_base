@@ -1,14 +1,14 @@
-﻿#include "fieldObject.h"
+#include "fieldObject.h"
 #include "field.h"
 
 bool FieldObject::Initialize() {
 	m_field = new Field();
-	if (!m_field->Initialize(L"Asset\\Texture\\race.jpg")) {
+	if (!m_field->Initialize(L"Asset\\Texture\\sura.jpg")) {
 		return false;
 	}
 
 	m_scale = {256.0, 1.0f, 160.0};
-	m_position = { 0.0f, -2.0f, 0.0f };
+	m_position = { 0.0f, -10.0f, 0.0f };
 
 	return true;
 }

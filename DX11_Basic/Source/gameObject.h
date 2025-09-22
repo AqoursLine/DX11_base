@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "main.h"
 
@@ -66,6 +66,7 @@ public:
 
 	Vector3 GetPosition() const { return m_position; }
 	Vector3 GetRotation() const { return m_rotation; }
+	Vector4 GetQuaternion() const { return m_quaternion; }
 	Vector3 GetScale() const { return m_scale; }
 
 	// 前方ベクトルを取得

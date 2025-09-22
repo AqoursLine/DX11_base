@@ -14,4 +14,5 @@ public:
 
 private:
 	class Sprite* m_sprite = nullptr;
+
 };

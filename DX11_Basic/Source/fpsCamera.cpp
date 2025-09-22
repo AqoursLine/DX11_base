@@ -21,7 +21,7 @@ void FpsCamera::Update(double deltaTime) {
 		MoveUpDown(false, deltaTime);
 	}
 
-	//‰ñ“]
+	//å›è»¢
 	if (Input::GetKeyPress(KK_RIGHT)) {
 		m_rotation.y += m_rotateSpeed * static_cast<float>(deltaTime);
 	}
@@ -41,19 +41,18 @@ void FpsCamera::Update(double deltaTime) {
 		}
 	}
 
-	//ƒ^[ƒQƒbƒg‚ÌˆÊ’u‚ğ‰ñ“]
+	//ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®ä½ç½®ã‚’å›è»¢
 	RotattionCamera(deltaTime);
-
 }
 
 void FpsCamera::RotattionCamera(double deltaTime) {
-	// ƒJƒƒ‰‚ÌƒIƒtƒZƒbƒgˆÊ’u‚ğŒvZ
+	// ã‚«ãƒ¡ãƒ©ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆä½ç½®ã‚’è¨ˆç®—
 	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(m_rotation.x, m_rotation.y, m_rotation.z);
-	//ƒIƒtƒZƒbƒgƒxƒNƒgƒ‹(’PˆÊƒxƒNƒgƒ‹)
+	//ã‚ªãƒ•ã‚»ãƒƒãƒˆãƒ™ã‚¯ãƒˆãƒ«(å˜ä½ãƒ™ã‚¯ãƒˆãƒ«)
 	XMVECTOR offsetVector = XMVECTOR { 0.0f, 0.0f, 1.0f, 0.0f };
 
 	offsetVector = XMVector3Transform(offsetVector, rotationMatrix);
-	//ƒ^[ƒQƒbƒgˆÊ’u‚ğƒJƒƒ‰‚ÌˆÊ’u‚©‚çƒIƒtƒZƒbƒg‚ğ‘«‚µ‚½ˆÊ’u‚Éİ’è
+	//ã‚¿ãƒ¼ã‚²ãƒƒãƒˆä½ç½®ã‚’ã‚«ãƒ¡ãƒ©ã®ä½ç½®ã‹ã‚‰ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚’è¶³ã—ãŸä½ç½®ã«è¨­å®š
 	m_targetPosition = m_position + Vector3(
 		XMVectorGetX(offsetVector),
 		XMVectorGetY(offsetVector),

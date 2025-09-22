@@ -1,4 +1,4 @@
-﻿#include "main.h"
+#include "main.h"
 #include "timer.h"
 #include "renderer.h"
 #include "system.h"
@@ -19,7 +19,7 @@ void MoveConsoleCursorToTopLeft() {
 #endif // _DEBUG
 
 
-void ErrorMessage(std::wstring msg, HRESULT hr) {
+void ErrorMessage(const std::wstring& msg, HRESULT hr) {
 	//エラーメッセージを表示
 
 	//HRESULTを文字列に変換
@@ -119,6 +119,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return -1;
 	}
 
+	//タイマークラス
 	Timer timer;
 
 	timer.Reset();

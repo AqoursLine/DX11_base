@@ -1,4 +1,4 @@
-﻿#include "main.h"
+#include "main.h"
 #include "timer.h"
 
 
@@ -19,6 +19,7 @@ void Timer::Reset() {
 	m_stopTime = 0;
 	m_stoped = false;
 	m_pausedTime = 0;
+
 }
 
 void Timer::Start() {

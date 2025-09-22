@@ -2,29 +2,30 @@
 #include "renderer.h"
 #include "texture.h"
 
-//ƒXƒ^ƒeƒBƒbƒNƒƒ“ƒo[‚Ì‰Šú‰»
+//ã‚¹ã‚¿ãƒ†ã‚£ãƒƒã‚¯ãƒ¡ãƒ³ãƒãƒ¼ã®åˆæœŸåŒ–
 std::unordered_map<std::wstring, ID3D11ShaderResourceView*> Texture::m_textureCache;
 
 bool Texture::Load(std::wstring fileName) {
-	// ƒeƒNƒXƒ`ƒƒ‚ÌƒLƒƒƒbƒVƒ…‚ğŠm”F
+	// ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’ç¢ºèª
 	if (m_textureCache.count(fileName)) {
 		m_texture = m_textureCache[fileName];
-		return true; // ƒLƒƒƒbƒVƒ…‚©‚çæ“¾¬Œ÷
+		return true; // ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‹ã‚‰å–å¾—æˆåŠŸ
 	}
 
 	TexMetadata metadata;
 	ScratchImage scratchImg;
 	HRESULT hrTex = LoadFromWICFile(fileName.c_str(), WIC_FLAGS_NONE, &metadata, scratchImg);
 	if (FAILED(hrTex)) {
-		ErrorMessage(L"ƒeƒNƒXƒ`ƒƒ‚Ì“Ç‚İ‚İ‚É¸”s‚µ‚Ü‚µ‚½B", hrTex);
+		ErrorMessage(L"ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®èª­ã¿è¾¼ã¿ã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hrTex);
 		return false;
 	}
 	CreateShaderResourceView(RENDERER.GetInstance().GetDevice(), scratchImg.GetImages(), scratchImg.GetImageCount(), metadata, &m_texture);
 	if (FAILED(hrTex)) {
-		ErrorMessage(L"ƒeƒNƒXƒ`ƒƒ‚ÌƒVƒF[ƒ_[ƒŠƒ\[ƒXƒrƒ…[‚Ìì¬‚É¸”s‚µ‚Ü‚µ‚½B", hrTex);
+		ErrorMessage(L"ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒªã‚½ãƒ¼ã‚¹ãƒ“ãƒ¥ãƒ¼ã®ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚", hrTex);
 		return false;
 	}
-	m_textureCache[fileName] = m_texture; // ƒLƒƒƒbƒVƒ…‚É’Ç‰Á
+	m_textureCache[fileName] = m_texture; // ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã«è¿½åŠ 
+
 	return true;
 }
 

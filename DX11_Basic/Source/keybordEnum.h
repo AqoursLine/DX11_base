@@ -1,6 +1,6 @@
 #pragma once
 
-// ƒL[—ñ‹“
+// ã‚­ãƒ¼åˆ—æŒ™
 typedef enum Keyboard_Keys_tag {
     KK_NONE = 0x0,
 
@@ -179,3 +179,4 @@ typedef enum Keyboard_Keys_tag {
     KK_PA1 = 0xfd,
     KK_OEMCLEAR = 0xfe,
 } Keyboard_Keys;
+

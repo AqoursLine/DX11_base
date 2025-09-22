@@ -14,24 +14,30 @@ public:
 	virtual void CleanUp() override;
 
 protected:
-	//¶‰EˆÚ“®ŠÖ”
+	//å·¦å³ç§»å‹•é–¢æ•°
 	void MoveSide(bool isRight, double deltaTime);
 
-	//‘OŒãˆÚ“®ŠÖ”
+	//å‰å¾Œç§»å‹•é–¢æ•°
 	void MoveForward(bool isForward, double deltaTime);
 
-	//ã‰ºˆÚ“®ŠÖ”
+	//ä¸Šä¸‹ç§»å‹•é–¢æ•°
 	void MoveUpDown(bool isUp, double deltaTime);
 
-	//ƒ^[ƒQƒbƒg‚ğ’†S‚É‚µ‚Äm_rotation‚©‚çƒJƒƒ‰‚ğ‰ñ“]‚³‚¹‚éŠÖ”
+	//ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚’ä¸­å¿ƒã«ã—ã¦m_rotationã‹ã‚‰ã‚«ãƒ¡ãƒ©ã‚’å›è»¢ã•ã›ã‚‹é–¢æ•°
 	void RotateAroundTarget(double deltaTime);
+	void RotateAroundTargetQuaternion(double deltaTime);
 
-
-	//ˆÚ“®—Ê
+	//ç§»å‹•é‡
 	float m_moveSpeed = 0.0f;
-	//‰ñ“]—Ê
+	//å›è»¢é‡
 	float m_rotateSpeed = 0.0f;
 
 	Vector3 m_targetPosition { 0.0f, 0.0f, 0.0f };
-	Vector3 m_offset { 0.0f, 0.0f, 0.0f }; // ƒJƒƒ‰‚ÌƒIƒtƒZƒbƒgˆÊ’u
+	Vector3 m_offset { 0.0f, 0.0f, 0.0f }; // ã‚«ãƒ¡ãƒ©ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆä½ç½®
+	Vector3 m_rotationOffset { 0.0f, 0.0f, 0.0f };
+
+	//ãƒ¬ãƒ¼ãƒˆ
+	float m_rate = 0.0f;
+
+private:
 };
