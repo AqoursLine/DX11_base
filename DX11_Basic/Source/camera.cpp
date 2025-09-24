@@ -15,6 +15,8 @@ bool Camera::Initialize() {
 	m_moveSpeed = 20.0f; // カメラの移動速度
 	m_rotateSpeed = 3.0f; // カメラの回転速度
 
+	m_rotationOffset = { 0.0f, 0.0f, 0.0f };
+
 	//プレイヤーの回転への追従レート
 	m_rate = 3.0f;
 
@@ -34,31 +36,16 @@ void Camera::Update(double deltaTime) {
 
 	//ターゲット位置をプレイヤーの位置に設定
 	m_targetPosition = player->GetPosition();
+	m_targetPosition.y += 1.5f; //少し上にオフセット
 
 	//ターゲットの回転を取得
-	Vector4 targetQuat = player->GetQuaternion();
-	Vector3 playerEuler = targetQuat.ToEuler();
-	float targetYaw = playerEuler.y;
-
-	//現在のカメラの回転を取得
-	Vector3 currentEuler = m_quaternion.ToEuler();
-	float currentYaw = currentEuler.y;
-
-	//y軸回転のみのクォータニオンを作成
-	Vector4 targetYawQuat = Vector4::FromEuler(targetYaw, 0.0f, 0.0f);
-	Vector4 currentYawQuat = Vector4::FromEuler(currentYaw, 0.0f, 0.0f);
-
-	//y軸回転のみを補間
-	float lerpRate = m_rate * static_cast<float>(deltaTime);
-	lerpRate = std::min(lerpRate, 1.0f); // 最大値を1.0fに制限
-
-	m_quaternion = Vector4::Slerp(currentYawQuat, targetYawQuat, lerpRate);
-
-	//オイラー角も同期
-	m_rotation = m_quaternion.ToEuler();
+	Vector3 targetRotation = player->GetRotation();
+	//ターゲットの回転に追従
+	m_rotationOffset.y += (targetRotation.y - m_rotationOffset.y) * m_rate * static_cast<float>(deltaTime);
+	m_rotation = m_rotationOffset;
 
 	//回転
-	RotateAroundTargetQuaternion(deltaTime);
+	RotateAroundTarget(deltaTime);
 }
 
 //カメラクラス描画処理

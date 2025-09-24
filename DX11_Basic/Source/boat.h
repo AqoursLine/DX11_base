@@ -29,6 +29,7 @@ public:
 
 	//ボートの状態取得
 	Vector3 GetVelocity() const { return m_velocity; }			//速度ベクトル取得
+	Vector3 GetAcceleration() const { return m_acceleration; } //加速度ベクトル取得
 	float GetSpeed() const { return m_velocity.Length(); }	//速度取得
 	float GetSpeedKmh() const { return GetSpeed() * 3.6f; } //速度(km/h)取得
 	Engine& GetEngine() { return m_engine; }			//エンジン参照取得
@@ -55,6 +56,9 @@ protected:
 private:
 	//物理計算
 	void UpdatePhysics(float deltaTime);
+	Vector3 CalculateThrustForce() const;
+	Vector3 CalculateDragForce() const;
+	Vector3 CalculateBuoyancyForce() const;
 	void UpdateWaterInteraction(float deltaTime);
 	void UpdateRotation(float deltaTime);
 	void ApplyForces(float deltaTime);

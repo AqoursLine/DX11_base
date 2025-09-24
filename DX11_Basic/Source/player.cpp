@@ -19,9 +19,9 @@ bool Player::Initialize() {
 	if (!m_field->Initialize(L"Asset\\Texture\\arrow.png")) {
 		return false;
 	}
-	m_scale = {2.0, 1.5f, 8.0f};
+	m_scale = { 2.5f, 1.0f, 4.0f };
 	m_rotation = {0.0f, 0.0f, 0.0f};
-	m_position = { 0.0f, 1.0f, 0.0f };
+	m_position = { 0.0f, 0.0f, 0.0f };
 	m_quaternion = Vector4::IDENTITY;
 
 	if(!Boat::Initialize()) {
@@ -81,6 +81,8 @@ void Player::Draw() const {
 	std::cout << "Position: (" << m_position.x << ", " << m_position.y << ", " << m_position.z << ")" << std::endl;
 	Vector3 vel = GetVelocity();
 	std::cout << "Velocity: (" << vel.x << ", " << vel.y << ", " << vel.z << ")" << std::endl;
+	Vector3 acc = GetAcceleration();
+	std::cout << "Acceleration: (" << acc.x << ", " << acc.y << ", " << acc.z << ")" << std::endl;
 	std::cout << "Rotation: (" << m_rotation.x << ", " << m_rotation.y << ", " << m_rotation.z << ")" << std::endl;
 	std::cout << "Quaternion: (" << m_quaternion.x << ", " << m_quaternion.y << ", " << m_quaternion.z << ", " << m_quaternion.w << ")" << std::endl;
 	std::cout << "Throttle Input: " << m_smoothedInput.throttle << std::endl;

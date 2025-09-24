@@ -39,5 +39,8 @@ protected:
 	//レート
 	float m_rate = 0.0f;
 
+	//オフセット減衰スタートタイマー
+	float m_offsetDampingTimer = 0.0f;
+
 private:
 };
