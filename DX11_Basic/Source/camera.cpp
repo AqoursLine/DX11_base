@@ -15,8 +15,6 @@ bool Camera::Initialize() {
 	m_moveSpeed = 20.0f; // カメラの移動速度
 	m_rotateSpeed = 3.0f; // カメラの回転速度
 
-	m_rotationOffset = { 0.0f, 0.0f, 0.0f };
-
 	//プレイヤーの回転への追従レート
 	m_rate = 3.0f;
 
@@ -39,13 +37,45 @@ void Camera::Update(double deltaTime) {
 	m_targetPosition.y += 1.5f; //少し上にオフセット
 
 	//ターゲットの回転を取得
-	Vector3 targetRotation = player->GetRotation();
-	//ターゲットの回転に追従
-	m_rotationOffset.y += (targetRotation.y - m_rotationOffset.y) * m_rate * static_cast<float>(deltaTime);
-	m_rotation = m_rotationOffset;
+	Vector4 targetQuat = player->GetQuaternion();
+
+	//ロールを除去
+	targetQuat.x = 0.0f;
+	targetQuat.z = 0.0f;
+
+	//オフセットを回転
+	float yaw = 0.0f;
+	if (Input::GetKeyPress(KK_RIGHT)) {
+		yaw = -m_rotateSpeed * static_cast<float>(deltaTime);
+	}
+	if (Input::GetKeyPress(KK_LEFT)) {
+		yaw = m_rotateSpeed * static_cast<float>(deltaTime);
+	}
+
+	//オフセットタイマー更新
+	if (std::abs(yaw) < 0.001f) {
+		m_offsetDampingTimer += static_cast<float>(deltaTime);
+
+		if (m_offsetDampingTimer > 2.0f) {
+			m_rotationOffset = Vector4::IDENTITY;
+		}
+	} else {
+		m_offsetDampingTimer = 0.0f;
+		//ヨー軸回転クォータニオンを作成
+		m_rotationOffset = m_rotationOffset * Vector4::FromAxisAngle(Vector3::UP, yaw);
+	}
+
+	//オフセット回転を適用
+	targetQuat = targetQuat * m_rotationOffset;
+
+	targetQuat.Normalize();
+
+
+	//ターゲットの回転を徐々に追従
+	m_quaternion = Vector4::Slerp(m_quaternion, targetQuat, m_rate * static_cast<float>(deltaTime));
 
 	//回転
-	RotateAroundTarget(deltaTime);
+	RotateAroundTargetQuaternion(deltaTime);
 }
 
 //カメラクラス描画処理

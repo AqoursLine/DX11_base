@@ -29,11 +29,11 @@ public:
 
 	//ボートの状態取得
 	Vector3 GetVelocity() const { return m_velocity; }			//速度ベクトル取得
-	Vector3 GetAcceleration() const { return m_acceleration; } //加速度ベクトル取得
-	float GetSpeed() const { return m_velocity.Length(); }	//速度取得
-	float GetSpeedKmh() const { return GetSpeed() * 3.6f; } //速度(km/h)取得
-	Engine& GetEngine() { return m_engine; }			//エンジン参照取得
-	const Engine& GetEngine() const { return m_engine; } //エンジン参照取得(定数版)
+	Vector3 GetAcceleration() const { return m_acceleration; }	//加速度ベクトル取得
+	float GetSpeed() const { return m_velocity.Length(); }		//速度取得
+	float GetSpeedKmh() const { return GetSpeed() * 3.6f; }		//速度(km/h)取得
+	Engine& GetEngine() { return m_engine; }					//エンジン参照取得
+	const Engine& GetEngine() const { return m_engine; }		//エンジン参照取得(定数版)
 
 	//水面設定
 	void SetWater(Water* water) { m_water = water; }
@@ -57,15 +57,18 @@ private:
 	//物理計算
 	void UpdatePhysics(float deltaTime);
 	Vector3 CalculateThrustForce() const;
+	Vector3 CalculateLateralForce() const;
 	Vector3 CalculateDragForce() const;
 	Vector3 CalculateBuoyancyForce() const;
+	Vector3 CalculateWaveForce();
 	void UpdateWaterInteraction(float deltaTime);
-	void UpdateRotation(float deltaTime);
 	void ApplyForces(float deltaTime);
 
 	//姿勢制御
-	void UpdateRoll(float deltaTime);
-	void UpdatePitch(float deltaTime);
+	void UpdateRotation(float deltaTime);
+	void UpdateYaw(float deltaTime);
+	Vector4 UpdateRoll(float deltaTime);
+	Vector4 UpdatePitch(float deltaTime);
 	void UpdateBobbing(float deltaTime);
 
 	//エンジン
@@ -83,7 +86,11 @@ private:
 	float m_maxTurnRate;		// 最大旋回速度(rad/s)
 	float m_maxSpeed;			// 最大前進速度(m/s)
 	float m_maxReverseSpeed;	// 最大後退速度(m/s)
-	float m_rollAmount;			// ロール量
+	float m_verticalDamping;	// 垂直方向の減衰係数
+	float m_buoyancyStiffness;	// 浮力の剛性係数
+	float m_restingWaterLevel;	// 静止水面の高さ
+	float m_waveFolllowStrength;// 波の追従距離
+	Vector3 m_lastWaveForce;	// 最後に受けた波の力
 
 	//物理状態
 	Vector3 m_velocity;			// 速度ベクトル
@@ -102,9 +109,9 @@ private:
 	float m_height;	// ボートの高さ
 
 	//姿勢制御パラメータ
-	float m_targetRoll;		// 目標ロール角
-	float m_targetPitch;	// 目標ピッチ角
-	float m_bobPhase;		// ボビングの位相
+	float m_rollAmount;			// ロール量
+	float m_pitchAmount;		// ピッチ量
+	Vector4 m_yawRotation;		// 現在のヨー角クォータニオン
 
 	//物理定数
 	static constexpr float GRAVITY = 9.81f; // 重力加速度 (m/s^2)

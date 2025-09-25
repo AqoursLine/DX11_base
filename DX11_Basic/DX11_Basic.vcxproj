@@ -102,12 +102,13 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>Library\cri\include;Library\webrtc\include;Source;Library\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -126,19 +127,20 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>Library\cri\include;Library\webrtc\include;Source;Library\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VcpkgRoot)installed\x64-windows\include;Library\cri\include;Library\webrtc\include;Source;Library\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>Library\cri\libs\x64;Library\webrtc\lib;Library;Library/assimp/build/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VcpkgRoot)installed\x64-windows\lib;Library\cri\libs\x64;Library\webrtc\lib;Library;Library/assimp/build/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <DelayLoadDLLs>assimp-vc143-mt.dll</DelayLoadDLLs>
     </Link>
     <FxCompile>
@@ -217,6 +219,7 @@
     <ClCompile Include="Source\field.cpp" />
     <ClCompile Include="Source\fieldObject.cpp" />
     <ClCompile Include="Source\fpsCamera.cpp" />
+    <ClCompile Include="Source\gameScene.cpp" />
     <ClCompile Include="Source\input.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\manager.cpp" />
@@ -225,12 +228,16 @@
     <ClCompile Include="Source\raceCourseManager.cpp" />
     <ClCompile Include="Source\renderer.cpp" />
     <ClCompile Include="Source\scene.cpp" />
+    <ClCompile Include="Source\skyDome.cpp" />
     <ClCompile Include="Source\sprite.cpp" />
     <ClCompile Include="Source\system.cpp" />
     <ClCompile Include="Source\texture.cpp" />
     <ClCompile Include="Source\timer.cpp" />
+    <ClCompile Include="Source\titleScene.cpp" />
+    <ClCompile Include="Source\titleText.cpp" />
     <ClCompile Include="Source\tmp2D.cpp" />
     <ClCompile Include="Source\water.cpp" />
+    <ClCompile Include="Source\webClient.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\boat.h" />
@@ -243,6 +250,7 @@
     <ClInclude Include="Source\bobber.h" />
     <ClInclude Include="Source\fpsCamera.h" />
     <ClInclude Include="Source\gameObject.h" />
+    <ClInclude Include="Source\gameScene.h" />
     <ClInclude Include="Source\input.h" />
     <ClInclude Include="Source\keybordEnum.h" />
     <ClInclude Include="Source\main.h" />
@@ -252,13 +260,17 @@
     <ClInclude Include="Source\raceCourseManager.h" />
     <ClInclude Include="Source\renderer.h" />
     <ClInclude Include="Source\scene.h" />
+    <ClInclude Include="Source\skyDome.h" />
     <ClInclude Include="Source\sprite.h" />
     <ClInclude Include="Source\system.h" />
     <ClInclude Include="Source\texture.h" />
     <ClInclude Include="Source\timer.h" />
+    <ClInclude Include="Source\titleScene.h" />
+    <ClInclude Include="Source\titleText.h" />
     <ClInclude Include="Source\tmp2D.h" />
     <ClInclude Include="Source\gwVector.h" />
     <ClInclude Include="Source\water.h" />
+    <ClInclude Include="Source\webClient.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\DirectXTex.inl" />

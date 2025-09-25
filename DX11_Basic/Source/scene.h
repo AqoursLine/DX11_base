@@ -1,5 +1,8 @@
 #pragma once
 
+#include <list>
+#include <vector>
+
 enum OBJECT_TYPE {
 	TYPE_NONE = 0,
 	TYPE_CAMERA,
@@ -13,11 +16,11 @@ class GameObject;
 class Scene {
 public:
 
-	bool Initialize();
-	void Finalize();
-	void Update(double deltaTime);
-	void Draw();
-	void CleanUp();
+	virtual bool Initialize();
+	virtual void Finalize();
+	virtual void Update(double deltaTime);
+	virtual void Draw();
+	virtual void CleanUp();
 
 	GameObject* AddGameObject(GameObject* gameObject, OBJECT_TYPE type);
 

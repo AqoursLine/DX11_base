@@ -34,7 +34,7 @@ protected:
 
 	Vector3 m_targetPosition { 0.0f, 0.0f, 0.0f };
 	Vector3 m_offset { 0.0f, 0.0f, 0.0f }; // カメラのオフセット位置
-	Vector3 m_rotationOffset { 0.0f, 0.0f, 0.0f };
+	Vector4 m_rotationOffset { 0.0f, 0.0f, 0.0f, 1.0f };
 
 	//レート
 	float m_rate = 0.0f;

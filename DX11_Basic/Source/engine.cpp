@@ -10,7 +10,7 @@ Engine::Engine()
 	, m_minRPM(800.0f)		//アイドリング回転数
 	, m_maxRPM(8000.0f)		//最大回転数
 	, m_acceleration(2.0f)	//加速度
-	, m_deceleration(3.0f)	//減速度
+	, m_deceleration(9.0f)	//減速度
 	, m_isRunning(true)	//エンジン稼働フラグ
 {
 }

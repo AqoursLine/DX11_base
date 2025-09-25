@@ -2,6 +2,7 @@
 
 class Timer;
 class Manager;
+class WebClient;
 
 class System {
 public:
@@ -12,6 +13,8 @@ public:
 	bool Excute();
 
 	Manager* GetManager() const { return m_manager; }
+	Timer* GetTimer() const { return m_timer; }
+	WebClient* GetWebClient() const { return m_webClient; }
 
 private:
 	static System* s_instance;
@@ -20,6 +23,7 @@ private:
 
 	Timer* m_timer = nullptr;
 	Manager* m_manager = nullptr;
+	WebClient* m_webClient = nullptr;
 
 public:
 	static System* CreateInstance() {

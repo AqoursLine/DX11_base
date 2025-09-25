@@ -1,16 +1,8 @@
 #include "main.h"
 #include "manager.h"
 #include "renderer.h"
-#include "camera.h"
 #include "input.h"
-#include "scene.h"
-#include "tmp2D.h"
-#include "fieldObject.h"
-#include "player.h"
-#include "fpsCamera.h"
-#include "raceCourseManager.h"
-#include "water.h"
-#include "bobber.h"
+#include "titleScene.h"
 
 bool Manager::m_isFinished = false;
 
@@ -24,29 +16,10 @@ bool Manager::Initialize() {
 	m_isFinished = false;
 
 	//ワールド作成
-	m_scene = new Scene();
-
-	//ゆきのん初期化
-	m_scene->AddGameObject(new Temp2D(), TYPE_2D);
-
-	//フィールドオブジェクト
-	m_scene->AddGameObject(new FieldObject(), TYPE_3D);
-
-	//水
-	m_scene->AddGameObject(new Water(), TYPE_3D);
-
-	//プレイヤー
-	m_scene->AddGameObject(new Player(), TYPE_3D);
-
-	//浮き
-	m_scene->AddGameObject(new Bobber(), TYPE_3D);
-
-	//コースマネージャー
-	m_scene->AddGameObject(new RaceCourseManager(), TYPE_3D);
-
-	//カメラの初期化
-	m_scene->AddGameObject(new Camera(), TYPE_CAMERA);
-//	m_scene->AddGameObject(new FpsCamera(), TYPE_CAMERA);
+	m_scene = new TitleScene();
+	if (!m_scene->Initialize()) {
+		return false;
+	}
 
 	//inputの初期化
 	Input::Init();
@@ -92,7 +65,20 @@ bool Manager::CleanUp() {
 	//ワールドのクリーン
 	m_scene->CleanUp();
 
+	//シーン切り替え
+	if (m_nextScene != nullptr) {
+		m_scene->Finalize();
+		delete m_scene;
+		m_scene = m_nextScene;
+		m_nextScene = nullptr;
+		m_scene->Initialize();
+	}
+
 	return false;
+}
+
+void Manager::SetScene(Scene* scene) {
+	m_nextScene = scene;
 }
 
 
