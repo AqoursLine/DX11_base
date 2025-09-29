@@ -252,6 +252,9 @@ bool Renderer::Initialize(HWND hWnd) {
 	return true;
 }
 void Renderer::Finalize() {
+	//レンダーターゲットの解放
+	m_renderTargetSRV.clear();
+	m_renderTargetRTV.clear();
 }
 
 void Renderer::BeginDraw() {
@@ -388,4 +391,66 @@ void Renderer::CreatePixelShader(ID3D11PixelShader** pixelShader, std::wstring f
 	}
 
 	shaderBlob->Release();
+}
+
+int Renderer::AddRenderTarget(UINT width, UINT height) {
+	HRESULT hr = S_OK;
+	//テクスチャ作成
+	D3D11_TEXTURE2D_DESC textureDesc = {};
+	textureDesc.Width = width;
+	textureDesc.Height = height;
+	textureDesc.MipLevels = 1;
+	textureDesc.ArraySize = 1;
+	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.MiscFlags = 0;
+	ComPtr<ID3D11Texture2D> texture;
+	hr = m_device->CreateTexture2D(&textureDesc, nullptr, texture.GetAddressOf());
+	if (FAILED(hr)) {
+		ErrorMessage(L"レンダーターゲット用テクスチャの作成に失敗しました。", hr);
+		return 0;
+	}
+	//レンダーターゲットビュー作成
+	ComPtr<ID3D11RenderTargetView> rtv;
+	hr = m_device->CreateRenderTargetView(texture.Get(), nullptr, rtv.GetAddressOf());
+	if (FAILED(hr)) {
+		ErrorMessage(L"レンダーターゲットビューの作成に失敗しました。", hr);
+		return 0;
+	}
+	m_renderTargetRTV.push_back(rtv);
+	//シェーダーリソースビュー作成
+	ComPtr<ID3D11ShaderResourceView> srv;
+	hr = m_device->CreateShaderResourceView(texture.Get(), nullptr, srv.GetAddressOf());
+	if (FAILED(hr)) {
+		ErrorMessage(L"シェーダーリソースビューの作成に失敗しました。", hr);
+		return 0;
+	}
+	m_renderTargetSRV.push_back(srv);
+
+	return static_cast<int>(m_renderTargetRTV.size() - 1);
+}
+
+void Renderer::SetRenderTarget(int index) {
+	if (index < 0) {
+		m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
+	} else {
+		if (index >= static_cast<int>(m_renderTargetRTV.size())) {
+			return;
+		}
+		m_deviceContext->OMSetRenderTargets(1, m_renderTargetRTV[index].GetAddressOf(), nullptr);
+	}
+}
+
+void Renderer::SetDefaultRenderTarget() {
+	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
+}
+
+ID3D11ShaderResourceView* Renderer::GetRenderTargetSRV(int index) {
+	if (index < 0 || index >= static_cast<int>(m_renderTargetSRV.size())) {
+		return nullptr;
+	}
+	return m_renderTargetSRV[index].Get();
 }

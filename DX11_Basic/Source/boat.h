@@ -30,7 +30,10 @@ public:
 	//ボートの状態取得
 	Vector3 GetVelocity() const { return m_velocity; }			//速度ベクトル取得
 	Vector3 GetAcceleration() const { return m_acceleration; }	//加速度ベクトル取得
-	float GetSpeed() const { return m_velocity.Length(); }		//速度取得
+	float GetSpeed() const { 
+		Vector3 horizontalVelocity = Vector3(m_velocity.x, 0.0f, m_velocity.z);
+		return horizontalVelocity.Length();
+	}		//速度取得
 	float GetSpeedKmh() const { return GetSpeed() * 3.6f; }		//速度(km/h)取得
 	Engine& GetEngine() { return m_engine; }					//エンジン参照取得
 	const Engine& GetEngine() const { return m_engine; }		//エンジン参照取得(定数版)

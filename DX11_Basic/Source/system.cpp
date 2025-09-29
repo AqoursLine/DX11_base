@@ -28,6 +28,7 @@ bool System::Initialize() {
 	m_timer->Reset();
 	m_timer->Start();
 
+
 	//WebClient初期化
 	m_webClient = new WebClient();
 
@@ -53,8 +54,6 @@ bool System::Initialize() {
 
 	//サーバーに接続
 	if (!m_webClient->Connect("ws://localhost:9002")) {
-		ErrorMessage(L"WebSocketサーバーへの接続に失敗しました", E_FAIL);
-		return false;
 	}
 
 

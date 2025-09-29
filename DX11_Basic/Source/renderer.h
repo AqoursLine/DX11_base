@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 
 //頂点構造体
 struct VERTEX_3D {
@@ -99,11 +100,21 @@ public:
 	//ピクセルシェーダー作成
 	void CreatePixelShader(ID3D11PixelShader** pixelShader, std::wstring fileName);
 
+	//レンダーターゲット追加
+	int AddRenderTarget(UINT width, UINT height);
+
+	//レンダーターゲット設定
+	void SetRenderTarget(int index);
+	//デフォルトレンダーターゲット設定
+	void SetDefaultRenderTarget();
+	//srv取得
+	ID3D11ShaderResourceView* GetRenderTargetSRV(int index);
+
 private:
 	ComPtr<IDXGISwapChain> m_swapChain;
 	ComPtr<ID3D11Device> m_device;
 	ComPtr<ID3D11DeviceContext> m_deviceContext;
-	D3D_FEATURE_LEVEL m_featureLevel;
+	D3D_FEATURE_LEVEL m_featureLevel = D3D_FEATURE_LEVEL_11_0;
 
 	ComPtr<ID3D11RenderTargetView> m_renderTargetView;
 	ComPtr<ID3D11DepthStencilView> m_depthStencilView;
@@ -127,6 +138,10 @@ private:
 	ComPtr<ID3D11Buffer> m_lightBuffer;
 	ComPtr<ID3D11Buffer> m_materialBuffer;
 	ComPtr<ID3D11Buffer> m_cameraBuffer;
+
+	//レンダーターゲット
+	std::vector<ComPtr<ID3D11ShaderResourceView>> m_renderTargetSRV;
+	std::vector<ComPtr<ID3D11RenderTargetView>> m_renderTargetRTV;
 
 };
 

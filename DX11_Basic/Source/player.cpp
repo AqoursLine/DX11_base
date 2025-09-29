@@ -4,6 +4,9 @@
 #include "box.h"
 #include "field.h"
 
+#include "system.h"
+#include "webClient.h"
+
 bool Player::Initialize() {
 	m_model = new Model();
 	if (!m_model->LoadModelFBX("Asset\\Model\\tire.fbx")) {
@@ -56,6 +59,28 @@ void Player::Update(double deltaTime) {
 	SetSteering(m_smoothedInput.steering);
 
 	Boat::Update(deltaTime);
+
+	//ウェブにデータを送信
+	auto webClient = SYSTEM.GetWebClient();
+	if (webClient && webClient->IsConnected()) {
+		json message;
+		message["type"] = "position";
+		message["x"] = m_position.x;
+		message["y"] = m_position.y;
+		message["z"] = m_position.z;
+		webClient->SendMessageClient(message);
+
+		message["type"] = "rotation";
+		message["x"] = m_quaternion.x;
+		message["y"] = m_quaternion.y;
+		message["z"] = m_quaternion.z;
+		message["w"] = m_quaternion.w;
+		webClient->SendMessageClient(message);
+
+		message["type"] = "speed";
+		message["speed"] = GetSpeedKmh(); // km/h
+		webClient->SendMessageClient(message);
+	}
 }
 
 void Player::Draw() const {

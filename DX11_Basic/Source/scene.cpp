@@ -2,8 +2,12 @@
 #include "scene.h"
 #include "gameObject.h"
 #include "texture.h"
+#include "renderer.h"
 
 bool Scene::Initialize() {
+	//レンダーターゲットの追加
+	RENDERER.AddRenderTarget(SCREEN_WIDTH, SCREEN_HEIGHT);
+
 	// GameObjectの初期化
 	for (auto& objects : m_gameObjects) {
 		for (auto& gameObject : objects) {
@@ -37,6 +41,9 @@ void Scene::Update(double deltaTime) {
 }
 
 void Scene::Draw() {
+	//レンダーターゲット0に描画
+	RENDERER.SetRenderTarget(0);
+
 	for (auto& objects : m_gameObjects) {
 		for (auto& gameObject : objects) {
 			gameObject->DrawBase();

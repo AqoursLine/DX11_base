@@ -3,11 +3,12 @@
 #include <list>
 #include <vector>
 
-enum OBJECT_TYPE {
+enum class OBJECT_TYPE {
 	TYPE_NONE = 0,
 	TYPE_CAMERA,
 	TYPE_3D,
 	TYPE_2D,
+	
 	TYPE_MAX,
 };
 

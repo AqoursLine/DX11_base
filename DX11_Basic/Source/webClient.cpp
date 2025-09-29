@@ -1,6 +1,8 @@
 #include "webClient.h"
 #include <iostream>
 
+#include <WinSock2.h>
+#include <WS2tcpip.h>
 
 #ifndef _MSC_VER
 #error "This project requires visual studio compiler."
@@ -23,7 +25,22 @@
 #endif // _DEBUG
 #endif
 
+// 静的メンバ変数の定義
+bool WebClient::s_wsaInitialized = false;
+std::mutex WebClient::s_wsaMutex;
+
 WebClient::WebClient() : m_isConnected(false) {
+	//WSAStartupの呼び出し
+	std::lock_guard<std::mutex> lock(s_wsaMutex);
+	if (!s_wsaInitialized) {
+		WSADATA wsaData;
+		int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
+		if (result != 0) {
+			throw std::runtime_error("WSAStartup failed with error: " + std::to_string(result));
+		}
+		s_wsaInitialized = true;
+	}
+
 	//コールバック関数の初期化
 	SetupWebSocketCallbacks();
 }
@@ -59,7 +76,7 @@ bool WebClient::IsConnected() const {
 	return m_isConnected.load();
 }
 
-bool WebClient::SendMessage(const json& message) {
+bool WebClient::SendMessageClient(const json& message) {
 	//接続状態を確認
 	if (!IsConnected()) {
 		return false;
@@ -79,7 +96,7 @@ bool WebClient::SendMessage(const json& message) {
 	}
 }
 
-bool WebClient::SendMessage(const std::string& message) {
+bool WebClient::SendMessageClient(const std::string& message) {
 	//接続状態を確認
 	if (!IsConnected()) {
 		return false;
@@ -163,6 +180,15 @@ void WebClient::HandleMessage(const ix::WebSocketMessagePtr& msg) {
 			if (m_onConnected) {
 				m_onConnected();
 			}
+
+			//ゲームクライアントとしてサーバーに接続したことを通知
+			{
+				json connectMessage;
+				connectMessage["type"] = "identify";
+				connectMessage["role"] = "game";
+				SendMessageClient(connectMessage);
+			}
+
 			break;
 		case ix::WebSocketMessageType::Close:
 			//切断処理

@@ -28,8 +28,8 @@ public:
 	bool IsConnected() const;				//接続状態の取得
 
 	//JSONメッセージの送信
-	bool SendMessage(const json& message);	//JSONオブジェクトを送信
-	bool SendMessage(const std::string& message); //文字列を送信
+	bool SendMessageClient(const json& message);	//JSONオブジェクトを送信
+	bool SendMessageClient(const std::string& message); //文字列を送信
 
 	//コールバック関数の登録
 	void SetOnConnected(OnConnectedCallBack callback);			//接続成功時のコールバック関数
@@ -46,6 +46,9 @@ public:
 	void SetExtraHeaders(const std::map<std::string, std::string>& headers);	//追加HTTPヘッダーの設定
 
 private:
+	static bool s_wsaInitialized; //WSA初期化フラグ
+	static std::mutex s_wsaMutex; //WSA初期化の排他制御
+
 	ix::WebSocket m_webSocket; //WebSocketクライアント
 	std::atomic<bool> m_isConnected; //接続状態
 
