@@ -1,6 +1,5 @@
 #pragma once
 
-
 class Texture {
 public:
 	Texture() = default;
