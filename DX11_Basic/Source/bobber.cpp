@@ -71,6 +71,7 @@ float Bobber::CalculateSubmergedVolume() const {
 
 	//水面の高さ
 	float waterHeight = m_water->GetWaterHeight(m_position);
+//	float waterHeight = 0.0f; //静止水面をy=0と仮定
 
 	//浮きの底面のy座標
 	float bobberBottomY = m_position.y - (m_scale.y * 0.5f);

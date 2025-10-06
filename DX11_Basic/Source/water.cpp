@@ -9,7 +9,7 @@ Water::Water()
 	, m_pixelShader(nullptr)
 	, m_inputLayout(nullptr)
 	, m_waterSize(1000.0f)		//水面のサイズ
-	, m_waveHeight(10.0f)		//波の高さスケール
+	, m_waveHeight(2.0f)		//波の高さスケール
 	, m_time(0.0f)			//経過時間
 	, m_gridResolution(200)	//グリッドの解像度
 	, m_baseWaveFrequency1(0.02f)	//基本波1の周波数
@@ -205,8 +205,8 @@ void Water::Draw() const {
 	//シェーダセット
 	context->VSSetShader(m_vertexShader, nullptr, 0);
 	context->PSSetShader(m_pixelShader, nullptr, 0);
-	context->VSSetConstantBuffers(6, 1, &m_constantBuffer);
-	context->PSSetConstantBuffers(6, 1, &m_constantBuffer);
+	context->VSSetConstantBuffers(7, 1, &m_constantBuffer);
+	context->PSSetConstantBuffers(7, 1, &m_constantBuffer);
 
 	//入力レイアウトセット
 	context->IASetInputLayout(m_inputLayout);

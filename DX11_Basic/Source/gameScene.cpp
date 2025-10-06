@@ -9,6 +9,8 @@
 #include "water.h"
 #include "bobber.h"
 #include "skyDome.h"
+#include "raceManager.h"
+#include "countDownText.h"
 
 bool GameScene::Initialize() {
 
@@ -29,6 +31,12 @@ bool GameScene::Initialize() {
 
 	//コースマネージャー
 	AddGameObject(new RaceCourseManager(), TYPE_3D);
+
+	//レースマネージャー
+	AddGameObject(new RaceManager(), TYPE_3D);
+
+	//カウントダウン
+	AddGameObject(new RaceCountDownText(), TYPE_2D);
 
 	//カメラの初期化
 	AddGameObject(new Camera(), TYPE_CAMERA);

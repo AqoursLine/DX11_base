@@ -16,6 +16,25 @@ void MoveConsoleCursorToTopLeft() {
 	COORD coord = { 0, 0 };
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
+
+//コンソールの内容をクリア
+void ClearConsole() {
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	DWORD count;
+	DWORD cellCount;
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (hConsole == INVALID_HANDLE_VALUE) return;
+	//コンソールのバッファ情報を取得
+	if (!GetConsoleScreenBufferInfo(hConsole, &csbi)) return;
+	cellCount = csbi.dwSize.X * csbi.dwSize.Y;
+	//コンソールの内容を空白で塗りつぶし
+	if (!FillConsoleOutputCharacter(hConsole, (TCHAR)' ', cellCount, { 0, 0 }, &count)) return;
+	//属性情報もリセット
+	if (!FillConsoleOutputAttribute(hConsole, csbi.wAttributes, cellCount, { 0, 0 }, &count)) return;
+	//カーソルを左上に移動
+	SetConsoleCursorPosition(hConsole, { 0, 0 });
+}
+
 #endif // _DEBUG
 
 
@@ -173,6 +192,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			frameCount++;
 			if (frameCount > 1) {
 				MoveConsoleCursorToTopLeft();
+//				ClearConsole();
 				frameCount = 0;
 			}
 #endif // _DEBUG

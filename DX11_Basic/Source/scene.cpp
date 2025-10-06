@@ -3,6 +3,7 @@
 #include "gameObject.h"
 #include "texture.h"
 #include "renderer.h"
+#include "shaders.h"
 
 bool Scene::Initialize() {
 	//レンダーターゲットの追加
@@ -30,6 +31,9 @@ void Scene::Finalize() {
 	}
 
 	Texture::ReleaseAll(); // テクスチャのキャッシュを解放
+
+	VertexShader::ReleaseAll(); // 頂点シェーダーのキャッシュを解放
+	PixelShader::ReleaseAll(); // ピクセルシェーダーのキャッシュを解放
 }
 
 void Scene::Update(double deltaTime) {

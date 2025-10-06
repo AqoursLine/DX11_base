@@ -232,8 +232,18 @@ bool Renderer::Initialize(HWND hWnd) {
 		ErrorMessage(L"カメラバッファの初期化に失敗しました。", hr);
 		return false;
 	}
+	m_deviceContext->VSSetConstantBuffers(5, 1, m_cameraBuffer.GetAddressOf());
 	m_deviceContext->PSSetConstantBuffers(5, 1, m_cameraBuffer.GetAddressOf());
-	//m_deviceContext->PSSetConstantBuffers(5, 1, m_cameraBuffer.GetAddressOf());
+
+	//シェーダー用汎用プロパティバッファの作成
+	bufferDesc.ByteWidth = sizeof(SHADER_PROPERTIES);
+	hr = m_device->CreateBuffer(&bufferDesc, nullptr, m_shaderPropertiesBuffer.GetAddressOf());
+	if (FAILED(hr)) {
+		ErrorMessage(L"シェーダープロパティバッファの初期化に失敗しました。", hr);
+		return false;
+	}
+	m_deviceContext->VSSetConstantBuffers(6, 1, m_shaderPropertiesBuffer.GetAddressOf());
+	m_deviceContext->PSSetConstantBuffers(6, 1, m_shaderPropertiesBuffer.GetAddressOf());
 
 	//ライト初期化
 	LIGHT light = {};
@@ -329,6 +339,12 @@ void Renderer::SetCameraPosition(const Vector3& position) {
 	m_deviceContext->UpdateSubresource(m_cameraBuffer.Get(), 0, nullptr, &cameraPos, 0, 0);
 	m_deviceContext->PSSetConstantBuffers(5, 1, m_cameraBuffer.GetAddressOf());
 	m_deviceContext->VSSetConstantBuffers(5, 1, m_cameraBuffer.GetAddressOf());
+}
+
+void Renderer::SetShaderProperties(const SHADER_PROPERTIES& properties) {
+	m_deviceContext->UpdateSubresource(m_shaderPropertiesBuffer.Get(), 0, nullptr, &properties, 0, 0);
+	m_deviceContext->PSSetConstantBuffers(6, 1, m_shaderPropertiesBuffer.GetAddressOf());
+	m_deviceContext->VSSetConstantBuffers(6, 1, m_shaderPropertiesBuffer.GetAddressOf());
 }
 
 void Renderer::CreateVertexShader(ID3D11VertexShader** vertexShader, ID3D11InputLayout** inputLayout, std::wstring fileName) {

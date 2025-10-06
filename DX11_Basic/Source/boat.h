@@ -23,8 +23,6 @@ public:
 	void SetMass(float mass) { m_mass = mass; }
 	void SetDrag(float drag) { m_waterDrag = drag; }
 	void SetTurnRate(float turnRate) { m_maxTurnRate = turnRate; }
-	void SetMaxSpeed(float maxSpeed) { m_maxSpeed = maxSpeed; }
-	void SetMaxReverseSpeed(float maxReverseSpeed) { m_maxReverseSpeed = maxReverseSpeed; }
 	void SetRollAmount(float rollAmount) { m_rollAmount = rollAmount; }
 
 	//ボートの状態取得
@@ -59,6 +57,7 @@ protected:
 private:
 	//物理計算
 	void UpdatePhysics(float deltaTime);
+	void UpdateDragScalar();
 	Vector3 CalculateThrustForce() const;
 	Vector3 CalculateLateralForce() const;
 	Vector3 CalculateDragForce() const;
@@ -86,9 +85,9 @@ private:
 	//物理パラメータ
 	float m_mass;				// 質量
 	float m_waterDrag;			// 水の抵抗係数
+	float m_propellerEfficiency;	// プロペラ効率
 	float m_maxTurnRate;		// 最大旋回速度(rad/s)
-	float m_maxSpeed;			// 最大前進速度(m/s)
-	float m_maxReverseSpeed;	// 最大後退速度(m/s)
+
 	float m_verticalDamping;	// 垂直方向の減衰係数
 	float m_buoyancyStiffness;	// 浮力の剛性係数
 	float m_restingWaterLevel;	// 静止水面の高さ
@@ -99,6 +98,7 @@ private:
 	Vector3 m_velocity;			// 速度ベクトル
 	Vector3 m_acceleration;		// 加速度ベクトル
 	Vector3 m_angularVelocity;	// 角速度
+	float m_dragScalar;		// 抵抗スカラー
 
 	//前フレームの位置
 	Vector3 m_prevPosition;

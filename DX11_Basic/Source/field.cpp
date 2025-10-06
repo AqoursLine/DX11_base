@@ -3,13 +3,16 @@
 #include "renderer.h"
 #include "texture.h"
 
+//スタティックメンバーの初期化
+ComPtr<ID3D11Buffer> Field::m_vertexBuffer = nullptr;
+int Field::m_refCount = 0;
 
-bool Field::Initialize(std::wstring fileName) {
-	//テクスチャ読み込み
-	m_texture = new Texture();
-	if (!m_texture->Load(fileName)) {
-		ErrorMessage(L"フィールドのテクスチャ読み込みに失敗しました。", E_FAIL);
-		return false;
+bool Field::Initialize() {
+	//参照カウントを増やす
+	m_refCount++;
+	//参照カウントが1より大きければ初期化済み
+	if (m_refCount > 1) {
+		return true;
 	}
 
 	//頂点データの作成
@@ -52,30 +55,19 @@ bool Field::Initialize(std::wstring fileName) {
 		return false;
 	}
 
-	//シェーダーの作成
-	RENDERER.CreateVertexShader(&m_vertexShader, &m_inputLayout, L"Shader\\unlitTextureVS.cso");
-	RENDERER.CreatePixelShader(&m_pixelShader, L"Shader\\unlitTexturePS.cso");
-
 	return true;
 }
 
 void Field::Finalize() {
-	// テクスチャの解放
-	if (m_texture) {
-		delete m_texture;
-		m_texture = nullptr;
+	//参照カウントを減らす
+	m_refCount--;
+	//参照カウントが0になったら解放
+	if (m_refCount <= 0) {
+		m_vertexBuffer.Reset();
 	}
-
 }
 
 void Field::Draw(const Vector3& pos, const Vector3& rot, const Vector3& scale) const {
-	// 入力レイアウトをセット
-	RENDERER.GetDeviceContext()->IASetInputLayout(m_inputLayout.Get());
-	// 頂点シェーダーをセット
-	RENDERER.GetDeviceContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0);
-	// ピクセルシェーダーをセット
-	RENDERER.GetDeviceContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0);
-
 	//デフォルトサンプラーステートセット
 	RENDERER.SetSamplerState();
 
@@ -96,9 +88,6 @@ void Field::Draw(const Vector3& pos, const Vector3& rot, const Vector3& scale) c
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
 	RENDERER.GetDeviceContext()->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
-
-	//テクスチャセット
-	RENDERER.GetDeviceContext()->PSSetShaderResources(0, 1, m_texture->GetTextureAddress());
 
 	// プリミティブトポロジをセット
 	RENDERER.GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);

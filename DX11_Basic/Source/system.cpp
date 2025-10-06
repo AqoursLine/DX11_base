@@ -52,6 +52,10 @@ bool System::Initialize() {
 
 	//=======================
 
+	//===オプション設定====
+	m_webClient->EnableAutomaticReconnection(false); //自動再接続無効
+	//=======================
+
 	//サーバーに接続
 	if (!m_webClient->Connect("ws://localhost:9002")) {
 	}
@@ -89,6 +93,12 @@ void System::Finalize() {
 }
 
 bool System::Excute() {
+#ifdef _DEBUG
+	//デバッグ表示用仕切り
+	std::cout << "------------------------" << std::endl;
+#endif
+
+	//タイマー更新
 	m_timer->Tick();
 
 	//WebClientのメッセージ処理

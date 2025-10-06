@@ -29,6 +29,12 @@ struct LIGHT {
 	float dummy[3];
 };
 
+///シェーダープロパティ構造体
+struct SHADER_PROPERTIES {
+	Vector4 params1; // 汎用パラメータ1
+	Vector4 params2; // 汎用パラメータ2
+};
+
 class Renderer {
 private:
 	Renderer() = default;
@@ -89,6 +95,8 @@ public:
 	void SetLight(const LIGHT& light);
 	//カメラ位置設定
 	void SetCameraPosition(const Vector3& position);
+	//シェーダープロパティ設定
+	void SetShaderProperties(const SHADER_PROPERTIES& properties);
 
 	//デバイス取得
 	ID3D11Device* GetDevice() { return m_device.Get(); }
@@ -138,6 +146,7 @@ private:
 	ComPtr<ID3D11Buffer> m_lightBuffer;
 	ComPtr<ID3D11Buffer> m_materialBuffer;
 	ComPtr<ID3D11Buffer> m_cameraBuffer;
+	ComPtr<ID3D11Buffer> m_shaderPropertiesBuffer;
 
 	//レンダーターゲット
 	std::vector<ComPtr<ID3D11ShaderResourceView>> m_renderTargetSRV;

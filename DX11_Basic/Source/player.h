@@ -7,6 +7,10 @@ struct VehicleInput {
 	float steering = 0.0f; //ハンドル入力	(-1.0f ~ 1.0f)
 };
 
+class Texture;
+class VertexShader;
+class PixelShader;
+
 class Player : public Boat {
 public:
 	Player() = default;
@@ -20,9 +24,20 @@ public:
 private:
 	class Model* m_model = nullptr;
 
+	//ボックス表示用
 	class Box* m_box = nullptr;
-
+	//shader
+	VertexShader* m_boxVS = nullptr;
+	PixelShader* m_boxPS = nullptr;
+	
+	//矢印表示用
 	class Field* m_field = nullptr;
+	//テクスチャ
+	Texture* m_arrowTexture = nullptr;
+	// Shader
+	VertexShader* m_arrowVS = nullptr;
+	PixelShader* m_arrowPS = nullptr;
+	
 
 	VehicleInput m_currentInput;
 	VehicleInput m_smoothedInput;

@@ -13,7 +13,7 @@ struct WakeTrailData
 };
 
 
-cbuffer WaterConstantBuffer : register(b6)
+cbuffer WaterConstantBuffer : register(b7)
 {
 	float Time;
 	float WaveHeight;

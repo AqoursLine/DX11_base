@@ -7,22 +7,36 @@
 #include "system.h"
 #include "webClient.h"
 
+#include "texture.h"
+#include "Shaders.h"
+
 bool Player::Initialize() {
-	m_model = new Model();
-	if (!m_model->LoadModelFBX("Asset\\Model\\tire.fbx")) {
-		return false;
-	}
 
 	m_box = new Box();
 	if (!m_box->Initialize()) {
 		return false;
 	}
+	//ボックスのシェーダーロード
+	m_boxVS = new VertexShader();
+	m_boxVS->Load(L"Shader\\unlitColorVS.cso");
+	m_boxPS = new PixelShader();
+	m_boxPS->Load(L"Shader\\unlitColorPS.cso");
 
 	m_field = new Field();
-	if (!m_field->Initialize(L"Asset\\Texture\\arrow.png")) {
+	if (!m_field->Initialize()) {
 		return false;
 	}
-	m_scale = { 2.5f, 1.0f, 4.0f };
+	//矢印テクスチャロード
+	m_arrowTexture = new Texture();
+	m_arrowTexture->Load(L"Asset\\Texture\\arrow.png");
+	//矢印のシェーダーロード
+	m_arrowVS = new VertexShader();
+	m_arrowVS->Load(L"Shader\\unlitTextureVS.cso");
+	m_arrowPS = new PixelShader();
+	m_arrowPS->Load(L"Shader\\unlitTexturePS.cso");
+
+
+	m_scale = { 2.0f, 1.0f, 3.0f };
 	m_rotation = {0.0f, 0.0f, 0.0f};
 	m_position = { 0.0f, 0.0f, 0.0f };
 	m_quaternion = Vector4::IDENTITY;
@@ -47,6 +61,17 @@ void Player::Finalize() {
 		m_field->Finalize();
 		delete m_field;
 	}
+	delete m_boxVS;
+	m_boxVS = nullptr;
+	delete m_boxPS;
+	m_boxPS = nullptr;
+	delete m_arrowTexture;
+	m_arrowTexture = nullptr;
+	delete m_arrowVS;
+	m_arrowVS = nullptr;
+	delete m_arrowPS;
+	m_arrowPS = nullptr;
+
 
 	Boat::Finalize();
 }
@@ -85,6 +110,12 @@ void Player::Update(double deltaTime) {
 
 void Player::Draw() const {
 //	m_model->Draw(m_position, m_rotation, m_scale);
+
+	//シェーダー設定
+	m_boxVS->Set();
+	m_boxPS->Set();
+
+	//ボックス描画
 	m_box->Draw(m_position, m_quaternion, m_scale);
 
 	DrawWheels();
@@ -99,6 +130,11 @@ void Player::Draw() const {
 
 	arrowRot.y = std::atan2f(velNorm.x, velNorm.z);
 
+	//シェーダー設定
+	m_arrowVS->Set();
+	m_arrowPS->Set();
+	//矢印テクスチャ設定
+	m_arrowTexture->Set(0);
 	m_field->Draw(arrowPos, arrowRot, Vector3 { 1.0f, 1.0f, 1.0f });
 
 	//デバッグ情報表示

@@ -29,6 +29,11 @@ bool Texture::Load(std::wstring fileName) {
 	return true;
 }
 
+void Texture::Set(int slot) {
+	auto context = RENDERER.GetDeviceContext();
+	context->PSSetShaderResources(slot, 1, &m_texture);
+}
+
 void Texture::ReleaseAll() {
 	for (auto& pair : m_textureCache) {
 		if (pair.second) {

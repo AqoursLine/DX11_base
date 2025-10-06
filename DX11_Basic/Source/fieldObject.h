@@ -13,4 +13,9 @@ public:
 	void Draw() const override;
 private:
 	class Field* m_field = nullptr;
+	//テクスチャ
+	class Texture* m_texture = nullptr;
+	// Shader
+	class VertexShader* m_vertexShader = nullptr;
+	class PixelShader* m_pixelShader = nullptr;
 };

@@ -14,5 +14,8 @@ public:
 
 private:
 	class Sprite* m_sprite = nullptr;
-
+	class Texture* m_texture = nullptr;
+	// Shader
+	class VertexShader* m_vertexShader = nullptr;
+	class PixelShader* m_pixelShader = nullptr;
 };

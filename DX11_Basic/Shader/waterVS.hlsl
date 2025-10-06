@@ -1,28 +1,28 @@
 #include "common.hlsl"
 
-//”g–äƒf[ƒ^
+//æ³¢ç´‹ãƒ‡ãƒ¼ã‚¿
 struct RippleData
 {
-	float4 PositionAndTime;	// xyz:ˆÊ’u w:ŠJnŠÔ
-	float4 Params;			// x:U• y:”g’· z:‘¬“x w:g—pƒtƒ‰ƒO
+	float4 PositionAndTime;	// xyz:ä½ç½® w:é–‹å§‹æ™‚é–“
+	float4 Params;			// x:æŒ¯å¹… y:æ³¢é•· z:é€Ÿåº¦ w:ä½¿ç”¨ãƒ•ãƒ©ã‚°
 };
 
-//qÕ”gƒf[ƒ^
+//èˆªè·¡æ³¢ãƒ‡ãƒ¼ã‚¿
 struct WakeTrailData
 {
-	float4 StartPos;	// xyz:ŠJnˆÊ’u w:ŠÔ
-	float4 EndPos;		// xyz:I—¹ˆÊ’u w:‹­‚³
-	float4 Params;		// x:•, y:’·‚³, z:õ–½, w:g—pƒtƒ‰ƒO
+	float4 StartPos;	// xyz:é–‹å§‹ä½ç½® w:æ™‚é–“
+	float4 EndPos;		// xyz:çµ‚äº†ä½ç½® w:å¼·ã•
+	float4 Params;		// x:å¹…, y:é•·ã•, z:å¯¿å‘½, w:ä½¿ç”¨ãƒ•ãƒ©ã‚°
 };
 
-cbuffer WaterConstantBuffer : register(b6)
+cbuffer WaterConstantBuffer : register(b7)
 {
 	float Time;
 	float WaveHeight;
 	float WaterSize;
 	float padding1;
 
-	//Šî–{”gƒpƒ‰ƒ[ƒ^
+	//åŸºæœ¬æ³¢ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
 	float BaseWaveFreq1;
 	float BaseWaveFreq2;
 	float BaseWaveFreq3;
@@ -31,12 +31,12 @@ cbuffer WaterConstantBuffer : register(b6)
 	float BaseWaveSpeed3;
 	float padding2[2];
 
-	//”g–äƒf[ƒ^
+	//æ³¢ç´‹ãƒ‡ãƒ¼ã‚¿
 	RippleData Ripples[10];
 	WakeTrailData WakeTrails[20];
 }
 
-//qÕ”g‚Ì‚‚³‚ğŒvZ‚·‚éŠÖ”
+//èˆªè·¡æ³¢ã®é«˜ã•ã‚’è¨ˆç®—ã™ã‚‹é–¢æ•°
 float CalculateWakeHeight(float3 worldPos, float time)
 {
 	float wakeHeight = 0.0f;
@@ -44,7 +44,7 @@ float CalculateWakeHeight(float3 worldPos, float time)
 	[unroll]
 	for (int i = 0; i < 20; i++)
 	{
-		if (WakeTrails[i].Params.w <= 0.0f) continue; // g—pƒtƒ‰ƒO‚ª—§‚Á‚Ä‚¢‚È‚¢ê‡‚ÍƒXƒLƒbƒv
+		if (WakeTrails[i].Params.w <= 0.0f) continue; // ä½¿ç”¨ãƒ•ãƒ©ã‚°ãŒç«‹ã£ã¦ã„ãªã„å ´åˆã¯ã‚¹ã‚­ãƒƒãƒ—
 		
 		float3 startPos = WakeTrails[i].StartPos.xyz;
 		float3 endPos = WakeTrails[i].EndPos.xyz;
@@ -54,44 +54,44 @@ float CalculateWakeHeight(float3 worldPos, float time)
 		float length = WakeTrails[i].Params.y;
 		float lifeTime = WakeTrails[i].Params.z;
 		
-		//qÕü•ª‚É‘Î‚·‚éÅÚ‹ß“_‚ğŒvZ
+		//èˆªè·¡ç·šåˆ†ã«å¯¾ã™ã‚‹æœ€æ¥è¿‘ç‚¹ã‚’è¨ˆç®—
 		float3 wakeVec = endPos - startPos;
 		float3 pointVec = worldPos - startPos;
 		
 		float wakeLength = sqrt(dot(wakeVec, wakeVec));
-		if (wakeLength < 0.1f) continue; // ’·‚³‚ª‚Ù‚Ú0‚Ìê‡‚ÍƒXƒLƒbƒv
+		if (wakeLength < 0.1f) continue; // é•·ã•ãŒã»ã¼0ã®å ´åˆã¯ã‚¹ã‚­ãƒƒãƒ—
 		
 		float3 wakeDir = wakeVec / wakeLength;
 		float projLength = dot(pointVec, wakeDir);
 		
-		//qÕ‚Ì”ÍˆÍŠO‚È‚çƒXƒLƒbƒv
+		//èˆªè·¡ã®ç¯„å›²å¤–ãªã‚‰ã‚¹ã‚­ãƒƒãƒ—
 		if (projLength < 0.0f || projLength > wakeLength) continue;
 		
-		//ÅÚ‹ß“_‚ğŒvZ
+		//æœ€æ¥è¿‘ç‚¹ã‚’è¨ˆç®—
 		float3 closestPoint = startPos + wakeDir * projLength;
 		
-		//ÅÚ‹ß“_‚©‚ç‚Ì‹——£
+		//æœ€æ¥è¿‘ç‚¹ã‹ã‚‰ã®è·é›¢
 		float3 offsetVec = worldPos - closestPoint;
 		float lateralDistance = sqrt(dot(offsetVec, offsetVec));
 		
-		//qÕ‚Ì•“à‚©ƒ`ƒFƒbƒN
+		//èˆªè·¡ã®å¹…å†…ã‹ãƒã‚§ãƒƒã‚¯
 		if (lateralDistance > width) continue;
 		
-		//VšŒ^‚ÌqÕƒpƒ^[ƒ“‚ğì¬
-		float normalizedPos = projLength / wakeLength; // 0‚©‚ç1‚Ì”ÍˆÍ
-		float normalizedLateral = lateralDistance / width; // 0‚©‚ç1‚Ì”ÍˆÍ
+		//Vå­—å‹ã®èˆªè·¡ãƒ‘ã‚¿ãƒ¼ãƒ³ã‚’ä½œæˆ
+		float normalizedPos = projLength / wakeLength; // 0ã‹ã‚‰1ã®ç¯„å›²
+		float normalizedLateral = lateralDistance / width; // 0ã‹ã‚‰1ã®ç¯„å›²
 		
-		//ŠÔŒ¸Š
+		//æ™‚é–“æ¸›è¡°
 		float timeAttenuation = exp(-wakeTime * 0.1f);
 		
-		//‹——£Œ¸Š
+		//è·é›¢æ¸›è¡°
 		float lateralAttenuation = cos(normalizedLateral * 3.14159f * 0.5f);
 		
-		//’·‚³•ûŒü‚ÌŒ¸Š
-		float lengthAttenuation = 1.0f - normalizedPos * 0.3f; // ™X‚ÉŒ¸Š
+		//é•·ã•æ–¹å‘ã®æ¸›è¡°
+		float lengthAttenuation = 1.0f - normalizedPos * 0.3f; // å¾ã€…ã«æ¸›è¡°
 		
-		//Všƒpƒ^[ƒ“
-		float kelvinAngle = 19.47f * (3.14159f / 180.0f); // ƒPƒ‹ƒrƒ“Šp“x
+		//Vå­—ãƒ‘ã‚¿ãƒ¼ãƒ³
+		float kelvinAngle = 19.47f * (3.14159f / 180.0f); // ã‚±ãƒ«ãƒ“ãƒ³è§’åº¦
 		float expectedLateral = normalizedPos * wakeLength * tan(kelvinAngle);
 		
 		float kelvinFactor = 1.0f;
@@ -100,13 +100,13 @@ float CalculateWakeHeight(float3 worldPos, float time)
 			kelvinFactor = exp(-(lateralDistance - expectedLateral * 0.5f) / width);
 		}
 		
-		//”g‚Ì‚‚³‚ğŒvZ
+		//æ³¢ã®é«˜ã•ã‚’è¨ˆç®—
 		float wavePhase = (projLength * 0.5f + lateralDistance * 2.0f - time * 3.0f);
 		float amplitude = intensity * timeAttenuation * lateralAttenuation * lengthAttenuation * kelvinFactor;
 		
 		wakeHeight += sin(wavePhase) * amplitude * 0.3f;
 		
-		//’Ç‰Á‚Ì×‚©‚¢”g
+		//è¿½åŠ ã®ç´°ã‹ã„æ³¢
 		float smallWavePhase = (projLength * 2.0f + lateralDistance * 5.0f - time * 8.0f);
 		wakeHeight += sin(smallWavePhase) * amplitude * 0.15f;
 		
@@ -115,19 +115,19 @@ float CalculateWakeHeight(float3 worldPos, float time)
 	return wakeHeight;
 }
 
-//”g‚Ì‚‚³‚ğŒvZ‚·‚éŠÖ”
+//æ³¢ã®é«˜ã•ã‚’è¨ˆç®—ã™ã‚‹é–¢æ•°
 float CalculateWaveHeight(float3 worldPos, float time)
 {
 	float height = 0.0f;
 	float x = worldPos.x;
 	float z = worldPos.z;
 	
-	//Šî–{“I‚È”g
+	//åŸºæœ¬çš„ãªæ³¢
 	height += sin(x * BaseWaveFreq1 + time * BaseWaveSpeed1) * WaveHeight * 0.3f;
 	height += sin(z * BaseWaveFreq2 + time * BaseWaveSpeed2) * WaveHeight * 0.2f;
 	height += sin((x + z) * BaseWaveFreq3 + time * BaseWaveSpeed3) * WaveHeight * 0.5f;
 	
-	//”g–äŒø‰Ê
+	//æ³¢ç´‹åŠ¹æœ
 	[unroll]
 	for (int i = 0; i < 10; i++)
 	{
@@ -161,7 +161,7 @@ float CalculateWaveHeight(float3 worldPos, float time)
 
 }
 
-//–@ü‚ğŒvZ‚·‚éŠÖ”
+//æ³•ç·šã‚’è¨ˆç®—ã™ã‚‹é–¢æ•°
 float3 CalculateNormal(float3 worldPos, float time)
 {
 	float delta = 0.1f;
@@ -181,22 +181,22 @@ float3 CalculateNormal(float3 worldPos, float time)
 
 void main(in VS_INPUT input, out PS_INPUT output)
 {
-	//ƒ[ƒ‹ƒhˆÊ’u‚ğŒvZ
+	//ãƒ¯ãƒ¼ãƒ«ãƒ‰ä½ç½®ã‚’è¨ˆç®—
 	float4 worldPos = mul(input.Position, WorldMatrix);
 	
-	//”g‚Ì‚‚³‚ğŒvZ
+	//æ³¢ã®é«˜ã•ã‚’è¨ˆç®—
 	float waveHeight = CalculateWaveHeight(worldPos.xyz, Time);
 	worldPos.y += waveHeight;
 	
-	//–@ü‚ğŒvZ
+	//æ³•ç·šã‚’è¨ˆç®—
 	float3 worldNormal = CalculateNormal(worldPos.xyz, Time);
 	worldNormal = normalize(mul(worldNormal, (float3x3) WorldMatrix));
 	
-	//ƒrƒ…[À•W‚ÆƒvƒƒWƒFƒNƒVƒ‡ƒ“À•W‚ğŒvZ
+	//ãƒ“ãƒ¥ãƒ¼åº§æ¨™ã¨ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³åº§æ¨™ã‚’è¨ˆç®—
 	float4 viewPos = mul(worldPos, ViewMatrix);
 	output.Position = mul(viewPos, ProjectionMatrix);
 	
-	//‚»‚Ì‘¼‚Ìƒf[ƒ^‚ğo—Í
+	//ãã®ä»–ã®ãƒ‡ãƒ¼ã‚¿ã‚’å‡ºåŠ›
 	output.WorldPosition = worldPos;
 	output.TexCoord = input.TexCoord;
 	output.Normal = float4(worldNormal, 0.0f);

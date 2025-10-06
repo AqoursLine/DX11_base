@@ -3,8 +3,20 @@
 #include "renderer.h"
 #include "texture.h"
 
+//スタティックメンバーの初期化
+ComPtr<ID3D11Buffer> Box::m_vertexBuffer = nullptr;
+ComPtr<ID3D11Buffer> Box::m_indexBuffer = nullptr;
+UINT Box::m_numIndices = 0;
+int Box::m_refCount = 0;
 
 bool Box::Initialize() {
+	//参照カウントを増やす
+	m_refCount++;
+	//参照カウントが1より大きければ初期化済み
+	if (m_refCount > 1) {
+		return true;
+	}
+
 	//1辺が1の立方体の頂点データ
 	VERTEX_3D vertices[] = {
 		//前
@@ -92,24 +104,20 @@ bool Box::Initialize() {
 	//インデックスカウントを保存
 	m_numIndices = _countof(indices);
 
-	//シェーダーの作成
-	RENDERER.CreateVertexShader(&m_vertexShader, &m_inputLayout, L"Shader\\unlitTextureVS.cso");
-	RENDERER.CreatePixelShader(&m_pixelShader, L"Shader\\unlitTexturePS.cso");
-
 	return true;
 }
 
 void Box::Finalize() {
+	//参照カウントを減らす
+	m_refCount--;
+	//参照カウントが0になったら解放
+	if (m_refCount <= 0) {
+		m_vertexBuffer.Reset();
+		m_indexBuffer.Reset();
+	}
 }
 
 void Box::Draw(const Vector3& pos, const Vector3& rot, const Vector3& scale) const {
-	// 入力レイアウトをセット
-	RENDERER.GetDeviceContext()->IASetInputLayout(m_inputLayout.Get());
-	// 頂点シェーダーをセット
-	RENDERER.GetDeviceContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0);
-	// ピクセルシェーダーをセット
-	RENDERER.GetDeviceContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0);
-
 	//デフォルトサンプラーステートセット
 	RENDERER.SetSamplerState();
 
@@ -144,13 +152,6 @@ void Box::Draw(const Vector3& pos, const Vector3& rot, const Vector3& scale) con
 
 // クォータニオン版
 void Box::Draw(const Vector3& pos, const Vector4& rot, const Vector3& scale) const {
-	// 入力レイアウトをセット
-	RENDERER.GetDeviceContext()->IASetInputLayout(m_inputLayout.Get());
-	// 頂点シェーダーをセット
-	RENDERER.GetDeviceContext()->VSSetShader(m_vertexShader.Get(), nullptr, 0);
-	// ピクセルシェーダーをセット
-	RENDERER.GetDeviceContext()->PSSetShader(m_pixelShader.Get(), nullptr, 0);
-
 	//デフォルトサンプラーステートセット
 	RENDERER.SetSamplerState();
 

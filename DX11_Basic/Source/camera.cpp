@@ -46,10 +46,10 @@ void Camera::Update(double deltaTime) {
 	//オフセットを回転
 	float yaw = 0.0f;
 	if (Input::GetKeyPress(KK_RIGHT)) {
-		yaw = -m_rotateSpeed * static_cast<float>(deltaTime);
+		yaw = m_rotateSpeed * static_cast<float>(deltaTime);
 	}
 	if (Input::GetKeyPress(KK_LEFT)) {
-		yaw = m_rotateSpeed * static_cast<float>(deltaTime);
+		yaw = -m_rotateSpeed * static_cast<float>(deltaTime);
 	}
 
 	//オフセットタイマー更新

@@ -1,22 +1,22 @@
-//ƒ[ƒ‹ƒhs—ñƒoƒbƒtƒ@
+//ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ãƒãƒƒãƒ•ã‚¡
 cbuffer WorldMatrixBuffer : register(b0)
 {
 	matrix WorldMatrix;
 };
 
-//ƒrƒ…[s—ñƒoƒbƒtƒ@
+//ãƒ“ãƒ¥ãƒ¼è¡Œåˆ—ãƒãƒƒãƒ•ã‚¡
 cbuffer ViewMatrixBuffer : register(b1)
 {
 	matrix ViewMatrix;
 };
 
-//ƒvƒƒWƒFƒNƒVƒ‡ƒ“s—ñƒoƒbƒtƒ@
+//ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³è¡Œåˆ—ãƒãƒƒãƒ•ã‚¡
 cbuffer ProjectionMatrixBuffer : register(b2)
 {
 	matrix ProjectionMatrix;
 };
 
-//ƒ}ƒeƒŠƒAƒ‹\‘¢‘Ì
+//ãƒãƒ†ãƒªã‚¢ãƒ«æ§‹é€ ä½“
 struct MATERIAL
 {
 	float4 Ambient;
@@ -27,13 +27,13 @@ struct MATERIAL
 	bool TextureEnable;
 	float2 Dummy;
 };
-//ƒ}ƒeƒŠƒAƒ‹ƒoƒbƒtƒ@
+//ãƒãƒ†ãƒªã‚¢ãƒ«ãƒãƒƒãƒ•ã‚¡
 cbuffer MaterialBuffer : register(b3)
 {
 	MATERIAL Material;
 };
 
-//ƒ‰ƒCƒg\‘¢‘Ì
+//ãƒ©ã‚¤ãƒˆæ§‹é€ ä½“
 struct LIGHT
 {
 	float4 Direction;
@@ -42,19 +42,26 @@ struct LIGHT
 	bool Enable;
 	bool3 Dummy;
 };
-//ƒ‰ƒCƒgƒoƒbƒtƒ@
+//ãƒ©ã‚¤ãƒˆãƒãƒƒãƒ•ã‚¡
 cbuffer LightBuffer : register(b4)
 {
 	LIGHT Light;
 };
 
-//ƒJƒƒ‰ˆÊ’uƒoƒbƒtƒ@
+//ã‚«ãƒ¡ãƒ©ä½ç½®ãƒãƒƒãƒ•ã‚¡
 cbuffer CameraPositionBuffer : register(b5)
 {
-	float4 CameraPosition; // ƒJƒƒ‰‚ÌˆÊ’u
+	float4 CameraPosition; // ã‚«ãƒ¡ãƒ©ã®ä½ç½®
 };
 
-//’¸“_ƒVƒF[ƒ_[“ü—Í\‘¢‘Ì
+//ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡(æ±ç”¨)
+cbuffer ShaderProperties : register(b6)
+{
+	float4 params1;
+	float4 params2;
+};
+
+//é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼å…¥åŠ›æ§‹é€ ä½“
 struct VS_INPUT
 {
 	float4 Position : POSITION0;
@@ -63,7 +70,7 @@ struct VS_INPUT
 	float2 TexCoord : TEXCOORD0;
 };
 
-//ƒsƒNƒZƒ‹ƒVƒF[ƒ_[“ü—Í\‘¢‘Ì
+//ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼å…¥åŠ›æ§‹é€ ä½“
 struct PS_INPUT
 {
 	float4 Position : SV_POSITION;

@@ -165,6 +165,18 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Shader\%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Shader\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
+    <FxCompile Include="Shader\spriteAnimationPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\spriteAnimationVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="Shader\unlitColorPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -215,6 +227,7 @@
     <ClCompile Include="Source\bobber.cpp" />
     <ClCompile Include="Source\box.cpp" />
     <ClCompile Include="Source\camera.cpp" />
+    <ClCompile Include="Source\countDownText.cpp" />
     <ClCompile Include="Source\engine.cpp" />
     <ClCompile Include="Source\field.cpp" />
     <ClCompile Include="Source\fieldObject.cpp" />
@@ -226,9 +239,10 @@
     <ClCompile Include="Source\model.cpp" />
     <ClCompile Include="Source\player.cpp" />
     <ClCompile Include="Source\raceCourseManager.cpp" />
+    <ClCompile Include="Source\raceManager.cpp" />
     <ClCompile Include="Source\renderer.cpp" />
     <ClCompile Include="Source\scene.cpp" />
-    <ClCompile Include="Source\shader.cpp" />
+    <ClCompile Include="Source\shaders.cpp" />
     <ClCompile Include="Source\skyDome.cpp" />
     <ClCompile Include="Source\sprite.cpp" />
     <ClCompile Include="Source\system.cpp" />
@@ -244,6 +258,7 @@
     <ClInclude Include="Source\boat.h" />
     <ClInclude Include="Source\box.h" />
     <ClInclude Include="Source\camera.h" />
+    <ClInclude Include="Source\countDownText.h" />
     <ClInclude Include="Source\DirectXTex.h" />
     <ClInclude Include="Source\engine.h" />
     <ClInclude Include="Source\field.h" />
@@ -259,9 +274,10 @@
     <ClInclude Include="Source\model.h" />
     <ClInclude Include="Source\player.h" />
     <ClInclude Include="Source\raceCourseManager.h" />
+    <ClInclude Include="Source\raceManager.h" />
     <ClInclude Include="Source\renderer.h" />
     <ClInclude Include="Source\scene.h" />
-    <ClInclude Include="Source\shader.h" />
+    <ClInclude Include="Source\shaders.h" />
     <ClInclude Include="Source\skyDome.h" />
     <ClInclude Include="Source\sprite.h" />
     <ClInclude Include="Source\system.h" />
