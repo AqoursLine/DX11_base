@@ -15,4 +15,5 @@ private:
 
 	//参照カウント
 	static int m_refCount;
+
 };

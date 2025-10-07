@@ -92,12 +92,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//ウィンドウクラス登録
 	RegisterClassEx(&wc);
 
-	//サイズ徴性
-	RECT rc = { 0,0,(LONG)SCREEN_WIDTH, (LONG)SCREEN_HEIGHT };
-	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
+	//ディスプレイサイズ取得
+	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
 	//ウィンドウ作成
-	g_hWnd = CreateWindowEx(0, WNDOW_CLASS_NAME, L"とりあえず", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance, nullptr);
+	g_hWnd = CreateWindowEx(0, WNDOW_CLASS_NAME, L"とりあえず", WS_POPUP | WS_VISIBLE, 0, 0, screenWidth, screenHeight, nullptr, nullptr, hInstance, nullptr);
 
 	//COMライブラリ初期化
 	CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);

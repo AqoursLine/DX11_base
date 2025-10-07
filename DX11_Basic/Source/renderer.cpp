@@ -147,12 +147,14 @@ bool Renderer::Initialize(HWND hWnd) {
 	depthStencilDesc2.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 	depthStencilDesc2.StencilEnable = FALSE;
 
+	//有効
 	hr = m_device->CreateDepthStencilState(&depthStencilDesc2, m_depthStencilStateEnable.GetAddressOf());
 	if (FAILED(hr)) {
 		ErrorMessage(L"デプスステンシルステートの初期化に失敗しました。", hr);
 		return false;
 	}
 
+	//無効
 	depthStencilDesc2.DepthEnable = FALSE;
 	depthStencilDesc2.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 	hr = m_device->CreateDepthStencilState(&depthStencilDesc2, m_depthStencilStateDisable.GetAddressOf());
@@ -160,6 +162,16 @@ bool Renderer::Initialize(HWND hWnd) {
 		ErrorMessage(L"デプスステンシルステートの初期化に失敗しました。", hr);
 		return false;
 	}
+
+	//深度読み取り専用
+	depthStencilDesc2.DepthEnable = TRUE;
+	depthStencilDesc2.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	hr = m_device->CreateDepthStencilState(&depthStencilDesc2, m_depthStencilStateReadOnly.GetAddressOf());
+	if (FAILED(hr)) {
+		ErrorMessage(L"デプスステンシルステートの初期化に失敗しました。", hr);
+		return false;
+	}
+
 
 	m_deviceContext->OMSetDepthStencilState(m_depthStencilStateEnable.Get(), NULL);
 
@@ -278,11 +290,19 @@ void Renderer::EndDraw() {
 	m_swapChain->Present(1, 0);
 }
 
-void Renderer::SetDepthStencilState(bool enable) {
-	if (enable) {
-		m_deviceContext->OMSetDepthStencilState(m_depthStencilStateEnable.Get(), NULL);
-	} else {
-		m_deviceContext->OMSetDepthStencilState(m_depthStencilStateDisable.Get(), NULL);
+void Renderer::SetDepthStencilState(DEPTH_MODE mode) {
+	switch (mode) {
+		case DEPTH_MODE::ENABLE:
+			m_deviceContext->OMSetDepthStencilState(m_depthStencilStateEnable.Get(), NULL);
+			break;
+		case DEPTH_MODE::READ_ONLY:
+			m_deviceContext->OMSetDepthStencilState(m_depthStencilStateReadOnly.Get(), NULL);
+			break;
+		case DEPTH_MODE::DISABLE:
+			m_deviceContext->OMSetDepthStencilState(m_depthStencilStateDisable.Get(), NULL);
+			break;
+		default:
+			break;
 	}
 }
 
@@ -456,7 +476,7 @@ void Renderer::SetRenderTarget(int index) {
 		if (index >= static_cast<int>(m_renderTargetRTV.size())) {
 			return;
 		}
-		m_deviceContext->OMSetRenderTargets(1, m_renderTargetRTV[index].GetAddressOf(), nullptr);
+		m_deviceContext->OMSetRenderTargets(1, m_renderTargetRTV[index].GetAddressOf(), m_depthStencilView.Get());
 	}
 }
 

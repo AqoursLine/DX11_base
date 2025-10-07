@@ -72,7 +72,7 @@ void RaceCountDownText::Update(double deltaTime) {
 	}
 
 	//表示時間内なら表示
-	m_time = startDelay + 1.0f;
+	m_time = startDelay + 0.5f;
 
 }
 
@@ -92,6 +92,12 @@ void RaceCountDownText::Draw() const {
 	m_pixelShader->Set();
 	//テクスチャセット
 	m_texture->Set(0);
+	//マテリアルセット
+	MATERIAL material = {};
+	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.textureEnable = true;
+	RENDERER.SetMaterial(material);
+
 	//スプライト描画
 	m_sprite->Draw(m_position, m_rotation, m_scale);
 }

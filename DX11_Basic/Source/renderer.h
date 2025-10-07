@@ -35,6 +35,13 @@ struct SHADER_PROPERTIES {
 	Vector4 params2; // 汎用パラメータ2
 };
 
+//深度モード
+enum class DEPTH_MODE {
+	ENABLE, // 深度有効
+	READ_ONLY, // 深度読み取り専用
+	DISABLE // 深度無効
+};
+
 class Renderer {
 private:
 	Renderer() = default;
@@ -74,7 +81,7 @@ public:
 	void EndDraw();
 
 	//深度バッファ設定
-	void SetDepthStencilState(bool enable);
+	void SetDepthStencilState(DEPTH_MODE mode);
 	//ブレンドステート設定
 	void SetATCEnable(bool enable);
 	//デフォルトサンプラーステート設定
@@ -134,6 +141,7 @@ private:
 
 	//深度ステンシルステート
 	ComPtr<ID3D11DepthStencilState> m_depthStencilStateEnable;
+	ComPtr<ID3D11DepthStencilState> m_depthStencilStateReadOnly;
 	ComPtr<ID3D11DepthStencilState> m_depthStencilStateDisable;
 
 	//サンプラーステート

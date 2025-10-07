@@ -11,10 +11,10 @@ public:
 	virtual ~Boat() = default;
 
 	//ボート制御
-	void SetThrottle(float throttle);	//スロットル設定 (0.0f ~ 1.0f)
-	void SetSteering(float steering);	//ステアリング設定 (-1.0f ~ 1.0f)
-	void SetBrake(float brake);			//ブレーキ設定 (0.0f ~ 1.0f)
-	void SetReverse(bool isReverse);	//リバースギア設定
+	virtual void SetThrottle(float throttle);	//スロットル設定 (0.0f ~ 1.0f)
+	virtual void SetSteering(float steering);	//ステアリング設定 (-1.0f ~ 1.0f)
+	virtual void SetBrake(float brake);			//ブレーキ設定 (0.0f ~ 1.0f)
+	virtual void SetReverse(bool isReverse);	//リバースギア設定
 
 	//ギア状態
 	bool IsReversing() const { return m_isReverse; } //リバースギア状態取得
@@ -46,9 +46,17 @@ public:
 		m_height = height;
 	}
 
+	//ボートの寸法取得
 	float GetLength() const { return m_length; }
 	float GetWidth() const { return m_width; }
 	float GetHeight() const { return m_height; }
+
+	//ボートのスタート方向設定
+	float SetStartYaw(float yaw) {
+		m_rotation.y = yaw;
+		m_yawRotation = Vector4::FromAxisAngle(Vector3::UP, yaw);
+		return yaw;
+	}
 
 protected:
 	virtual bool Initialize() override;
@@ -60,6 +68,7 @@ private:
 	void UpdateDragScalar();
 	Vector3 CalculateThrustForce() const;
 	Vector3 CalculateLateralForce() const;
+	Vector3 CalculateBrakeForce() const;
 	Vector3 CalculateDragForce() const;
 	Vector3 CalculateBuoyancyForce() const;
 	Vector3 CalculateWaveForce();

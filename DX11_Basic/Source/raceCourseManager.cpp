@@ -90,7 +90,7 @@ Vector3 RaceCourseManager::GetPositionFromProgress(float progress) const {
 	const float targetDistance = progress * m_totalLength;
 
 	float accumulatedDistance = 0.0f;
-	const int segmentCount = m_isClosed ? m_controlPoints.size() : m_controlPoints.size() - 1;
+	const size_t segmentCount = m_isClosed ? m_controlPoints.size() : m_controlPoints.size() - 1;
 
 	//目標距離がどのセグメントにあるかを特定
 	for (int i = 0; i < segmentCount; i++) {
@@ -120,7 +120,7 @@ Vector3 RaceCourseManager::GetDirectionFromProgress(float progress) const {
 	const float targetDistance = progress * m_totalLength;
 
 	float accumulatedDistance = 0.0f;
-	const int segmentCount = m_isClosed ? m_controlPoints.size() : m_controlPoints.size() - 1;
+	const size_t segmentCount = m_isClosed ? m_controlPoints.size() : m_controlPoints.size() - 1;
 
 	//目標距離がどのセグメントにあるかを特定
 	for (int i = 0; i < segmentCount; i++) {
@@ -152,6 +152,8 @@ bool RaceCourseManager::Initialize() {
 
 	//コースを閉じる
 	CloseCourse();
+
+	SetVisible(false);
 
 	return true;
 }
@@ -225,7 +227,7 @@ void RaceCourseManager::RecalculateLengths() {
 	}
 
 	//セグメント数を決定(閉じたコースの場合はポイント数、開いたコースの場合はポイント数-1)
-	const int segmentCount = m_isClosed ? m_controlPoints.size() : m_controlPoints.size() - 1;
+	const size_t segmentCount = m_isClosed ? m_controlPoints.size() : m_controlPoints.size() - 1;
 	m_segmentLengths.resize(segmentCount);
 	m_totalLength = 0.0f;
 
@@ -244,7 +246,7 @@ std::pair<int, float> RaceCourseManager::FindClosestPointOnCourse(const Vector3&
 	int closestSegment = 0;
 	float closestT = 0.0f;
 
-	const int segmentCount = m_isClosed ? m_controlPoints.size() : m_controlPoints.size() - 1;
+	const size_t segmentCount = m_isClosed ? m_controlPoints.size() : m_controlPoints.size() - 1;
 
 	//全セグメントを走査して最近接点を特定
 	for (int i = 0; i < segmentCount; i++) {

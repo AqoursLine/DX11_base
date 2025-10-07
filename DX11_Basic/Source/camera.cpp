@@ -9,7 +9,7 @@
 
 //カメラクラス初期化
 bool Camera::Initialize() {
-	m_offset = { 0.0f, 3.0f, -10.0f }; // カメラのオフセット位置
+	m_offset = { 0.0f, 1.0f, -5.0f }; // カメラのオフセット位置
 	m_position = m_offset; // 初期位置をオフセット位置に設定
 
 	m_moveSpeed = 20.0f; // カメラの移動速度
@@ -17,6 +17,8 @@ bool Camera::Initialize() {
 
 	//プレイヤーの回転への追従レート
 	m_rate = 3.0f;
+
+	m_isMainCamera = true;
 
 	return true;
 }

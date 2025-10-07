@@ -13,6 +13,8 @@ public:
 	virtual void Draw() const override;
 	virtual void CleanUp() override;
 
+	//メインカメラ
+	bool IsMainCamera() const { return m_isMainCamera; }
 protected:
 	//左右移動関数
 	void MoveSide(bool isRight, double deltaTime);
@@ -42,5 +44,6 @@ protected:
 	//オフセット減衰スタートタイマー
 	float m_offsetDampingTimer = 0.0f;
 
+	bool m_isMainCamera = false; //メインカメラかどうか
 private:
 };

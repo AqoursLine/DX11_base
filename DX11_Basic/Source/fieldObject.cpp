@@ -1,5 +1,6 @@
 #include "fieldObject.h"
 #include "field.h"
+#include "renderer.h"
 #include "texture.h"
 #include "shaders.h"
 
@@ -49,6 +50,13 @@ void FieldObject::Draw() const {
 	m_pixelShader->Set();
 	//テクスチャの設定
 	m_texture->Set(0);
+
+	//マテリアルセット
+	MATERIAL material = {};
+	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.textureEnable = true;
+	RENDERER.SetMaterial(material);
+
 	//フィールドの描画
 	m_field->Draw(m_position, m_rotation, m_scale);
 

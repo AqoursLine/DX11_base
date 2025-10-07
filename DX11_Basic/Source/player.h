@@ -1,17 +1,18 @@
 #pragma once
 
-#include "boat.h"
+#include "racingBoat.h"
 
 struct VehicleInput {
 	float throttle = 0.0f; //推進入力		(-1.0f ~ 1.0f)
 	float steering = 0.0f; //ハンドル入力	(-1.0f ~ 1.0f)
+	float brake = 0.0f;    //ブレーキ入力	(0.0f ~ 1.0f)
 };
 
 class Texture;
 class VertexShader;
 class PixelShader;
 
-class Player : public Boat {
+class Player : public RacingBoat {
 public:
 	Player() = default;
 	~Player() = default;

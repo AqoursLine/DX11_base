@@ -7,7 +7,7 @@
 
 bool TitleScene::Initialize() {
 	//タイトルテキスト初期化
-	AddGameObject(new TitleText(), TYPE_2D);
+	AddGameObject(new TitleText(), TYPE_BEFORE_PROCESS_UI);
     return true;
 }
 

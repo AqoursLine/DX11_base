@@ -1,11 +1,11 @@
-#include "bobber.h"
+#include "buoy.h"
 #include "box.h"
 #include "system.h"
 #include "manager.h"
 #include "scene.h"
 #include "water.h"
 
-bool Bobber::Initialize() {
+bool Buoy::Initialize() {
 	m_model = new Box();
 	if (!m_model->Initialize()) {
 		return false;
@@ -13,21 +13,20 @@ bool Bobber::Initialize() {
 
 	m_rotation = { 0.0f, 0.0f, 0.0f };
 	m_scale = { 1.0f, 1.0f, 1.0f };
-	m_position = { 0.0f, 0.0f, 0.0f };
 
 	m_water = SYSTEM.GetManager()->GetScene()->GetGameObject<Water>();
 
 	return true;
 }
 
-void Bobber::Finalize() {
+void Buoy::Finalize() {
 	if (m_model) {
 		m_model->Finalize();
 		delete m_model;
 	}
 }
 
-void Bobber::Update(double deltaTime) {
+void Buoy::Update(double deltaTime) {
 	//重力
 	float gravity = 9.81f * m_mass;
 
@@ -47,13 +46,13 @@ void Bobber::Update(double deltaTime) {
 	m_position.y += m_velocity * dt;
 }
 
-void Bobber::Draw() const {
+void Buoy::Draw() const {
 	if (m_model) {
 		m_model->Draw(m_position, m_rotation, m_scale);
 	}
 }
 
-float Bobber::CalculateBuoyancy() const {
+float Buoy::CalculateBuoyancy() const {
 	//水の密度(kg/m^3)
 	float waterDensity = 1000.0f;
 	float g = 9.81f; //重力加速度(m/s^2)
@@ -65,7 +64,7 @@ float Bobber::CalculateBuoyancy() const {
 	return waterDensity * g * submergedVolume;
 }
 
-float Bobber::CalculateSubmergedVolume() const {
+float Buoy::CalculateSubmergedVolume() const {
 	//体積
 	float volume = m_scale.x * m_scale.y * m_scale.z; //立方体として計算
 
@@ -90,7 +89,7 @@ float Bobber::CalculateSubmergedVolume() const {
 	}
 }
 
-float Bobber::CalculateDrag() const {
+float Buoy::CalculateDrag() const {
 	//水の抵抗(簡略化)
 	float dragCoefficient = 0.5f; //抵抗係数
 	return dragCoefficient * m_velocity;

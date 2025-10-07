@@ -1,20 +1,20 @@
 #include "common.hlsl"
-//ƒeƒNƒXƒ`ƒƒİ’è
+//ãƒ†ã‚¯ã‚¹ãƒãƒ£è¨­å®š
 Texture2D g_Texture : register(t0);
 
-//ƒTƒ“ƒvƒ‰[ƒXƒe[ƒg
+//ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆ
 SamplerState g_SamplerState : register(s0);
 
 void main(in PS_INPUT In, out float4 outDiffuse : SV_TARGET)
 {
-	//ƒsƒNƒZƒ‹–@ü‚ğ³‹K‰»
+	//ãƒ”ã‚¯ã‚»ãƒ«æ³•ç·šã‚’æ­£è¦åŒ–
 	float4 normal = normalize(In.Normal);
 
-	//ŒõŒ¹ˆ—
+	//å…‰æºå‡¦ç†
 	float light = -dot(normal.xyz, Light.Direction.xyz);
 	light = saturate(light);
 
-	//ƒeƒNƒXƒ`ƒƒ‚ÌƒsƒNƒZƒ‹F‚ğæ“¾
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ãƒ”ã‚¯ã‚»ãƒ«è‰²ã‚’å–å¾—
 	if (Material.TextureEnable)
 	{
 		outDiffuse = g_Texture.Sample(g_SamplerState, In.TexCoord);		
@@ -25,21 +25,21 @@ void main(in PS_INPUT In, out float4 outDiffuse : SV_TARGET)
 	outDiffuse.rgb *= light;
 	outDiffuse.a = In.Diffuse.a;
 	
-	//‹üƒxƒNƒgƒ‹ì¬
-	float3 eyev = In.WorldPosition - CameraPosition;
+	//è¦–ç·šãƒ™ã‚¯ãƒˆãƒ«ä½œæˆ
+	float3 eyev = In.WorldPosition.xyz - CameraPosition.xyz;
 	eyev = normalize(eyev);
 	
-	//Œõ‚Ì”½ËƒxƒNƒgƒ‹
+	//å…‰ã®åå°„ãƒ™ã‚¯ãƒˆãƒ«
 	float3 refv = reflect(Light.Direction.xyz, normal.xyz);
 	refv = normalize(refv);
 	
-	//”½ËƒxƒNƒgƒ‹‚Æ‹üƒxƒNƒgƒ‹‚ÌŠp“xŒvZ
+	//åå°„ãƒ™ã‚¯ãƒˆãƒ«ã¨è¦–ç·šãƒ™ã‚¯ãƒˆãƒ«ã®è§’åº¦è¨ˆç®—
 	float specular = -dot(refv, eyev);
 	specular = saturate(specular);
 	specular = pow(specular, 30);
 
 	outDiffuse.rgb += specular;
 	
-	//ŠÂ‹«Œõ‚ğ‰ÁZ
+	//ç’°å¢ƒå…‰ã‚’åŠ ç®—
 	outDiffuse.rgb += Light.Ambient.rgb;
 }

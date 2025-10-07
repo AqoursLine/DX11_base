@@ -35,7 +35,7 @@ bool Sprite::Initialize() {
 
 	vertices[0].diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	vertices[1].diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	vertices[2].diffuse = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	vertices[2].diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	vertices[3].diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	//頂点バッファの設定
@@ -69,12 +69,6 @@ void Sprite::Finalize() {
 void Sprite::Draw(const Vector3& pos, const Vector3& rot, const Vector3& scale) const {
 	//デフォルトのサンプラーステートセット
 	RENDERER.SetSamplerState();
-
-	//マテリアルセット
-	MATERIAL material = {};
-	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	material.textureEnable = true;
-	RENDERER.SetMaterial(material);
 
 	//2D行列設定
 	RENDERER.Set2DMatrix();

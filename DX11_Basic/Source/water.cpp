@@ -219,10 +219,6 @@ void Water::Draw() const {
 	//プリミティブトポロジー設定
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	//ブレンドを有効
-	RENDERER.SetATCEnable(false);
-	RENDERER.SetDepthStencilState(true);
-
 	//描画
 	UINT indexCount = (m_gridResolution - 1) * (m_gridResolution - 1) * 6;
 	context->DrawIndexed(indexCount, 0, 0);

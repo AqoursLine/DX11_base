@@ -6,13 +6,17 @@
 enum OBJECT_TYPE {
 	TYPE_NONE = 0,
 	TYPE_CAMERA,
-	TYPE_3D,
-	TYPE_2D,
+	TYPE_OPAQUE,
+	TYPE_TRANSPARENT,
+	TYPE_BEFORE_PROCESS_UI,
+	TYPE_POST_PROCESS,
+	TYPE_AFTER_PROCESS_UI,
 	
 	TYPE_MAX,
 };
 
 class GameObject;
+class Camera;
 
 class Scene {
 public:
@@ -53,5 +57,15 @@ public:
 	}
 private:
 	std::list<GameObject*> m_gameObjects[TYPE_MAX];
+
+	void DrawOpaque(Camera* camera) const;
+	void DrawTransparent(Camera* camera) const;
+	void DrawBeforeEffect() const;
+	void DrawPostProcess();
+	void DrawAfterEffect() const;
+
+	//ポストプロセス用
+	int m_renderTargetIndex = 0;
+
 };
 

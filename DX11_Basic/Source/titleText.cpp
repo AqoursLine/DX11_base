@@ -1,4 +1,5 @@
 #include "titleText.h"
+#include "renderer.h"
 #include "sprite.h"
 #include "texture.h"
 #include "shaders.h"
@@ -48,6 +49,12 @@ void TitleText::Draw() const {
 	m_pixelShader->Set();
 	//テクスチャの設定
 	m_texture->Set(0);
+	//マテリアルセット
+	MATERIAL material = {};
+	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.textureEnable = true;
+	RENDERER.SetMaterial(material);
+
 	//スプライトの描画
 	m_sprite->Draw(m_position, m_rotation, m_scale);
 }

@@ -3,7 +3,7 @@
 #include <iostream>
 
 Engine::Engine()
-	: m_maxPower(1000.0f)	//最大出力
+	: m_maxPower(100.0f)	//最大出力(kw)
 	, m_currentPower(0.0f)	//現在出力
 	, m_currentTorque(0.0f)	//現在トルク(Nm)
 	, m_throttle(0.0f)		//スロットル入力 (0.0f ~ 1.0f)

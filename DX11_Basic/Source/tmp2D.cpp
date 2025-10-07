@@ -1,4 +1,5 @@
 #include "tmp2D.h"
+#include "renderer.h"
 #include "sprite.h"
 #include "shaders.h"
 #include "texture.h"
@@ -23,9 +24,9 @@ bool Temp2D::Initialize() {
 	m_pixelShader = new PixelShader();
 	m_pixelShader->Load(L"Shader\\unlitTexturePS.cso");
 
-	m_position = {200.0f, 200.0f, 0.0f};
-	m_rotation.z = XMConvertToRadians(45.0f);
-	m_scale = { 459.0f, 600.0f, 1.0f };
+	m_scale = { 450.0f, 600.0f, 1.0f };
+	m_scale *= 0.2f; //縮小
+	m_position = {m_scale.x * 0.5f, SCREEN_HEIGHT - m_scale.y * 0.5f, 0.0f};
 
 	return true;
 }
@@ -53,6 +54,11 @@ void Temp2D::Draw() const {
 	m_pixelShader->Set();
 	//テクスチャの設定
 	m_texture->Set(0);
+	//マテリアルセット
+	MATERIAL material = {};
+	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.textureEnable = true;
+	RENDERER.SetMaterial(material);
 	//スプライトの描画
 	m_sprite->Draw(m_position, m_rotation, m_scale);
 }

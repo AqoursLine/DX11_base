@@ -7,6 +7,7 @@
 #include "system.h"
 #include "webClient.h"
 
+#include "renderer.h"
 #include "texture.h"
 #include "Shaders.h"
 
@@ -36,10 +37,12 @@ bool Player::Initialize() {
 	m_arrowPS->Load(L"Shader\\unlitTexturePS.cso");
 
 
-	m_scale = { 2.0f, 1.0f, 3.0f };
-	m_rotation = {0.0f, 0.0f, 0.0f};
-	m_position = { 0.0f, 0.0f, 0.0f };
-	m_quaternion = Vector4::IDENTITY;
+	m_scale = { 1.3f, 0.5f, 2.9f };
+	m_rotation = {0.0f, XM_PIDIV2, 0.0f};
+	m_position = { 0.0f, 0.0f, -30.0f };
+
+	//ボートの初期方向をセット
+	SetStartYaw(m_rotation.y);
 
 	if(!Boat::Initialize()) {
 		return false;
@@ -82,6 +85,7 @@ void Player::Update(double deltaTime) {
 	//入力を車両制御に反映
 	SetThrottle(m_smoothedInput.throttle);
 	SetSteering(m_smoothedInput.steering);
+	SetBrake(m_smoothedInput.brake);
 
 	Boat::Update(deltaTime);
 
@@ -135,7 +139,21 @@ void Player::Draw() const {
 	m_arrowPS->Set();
 	//矢印テクスチャ設定
 	m_arrowTexture->Set(0);
+
+	//マテリアルセット
+	MATERIAL material = {};
+	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.textureEnable = true;
+	RENDERER.SetMaterial(material);
+
+	//ブレンドモード設定
+	RENDERER.SetATCEnable(true);
+
+	//矢印描画
 	m_field->Draw(arrowPos, arrowRot, Vector3 { 1.0f, 1.0f, 1.0f });
+
+	//ブレンドモード解除
+	RENDERER.SetATCEnable(false);
 
 	//デバッグ情報表示
 	std::cout << "Speed: " << GetSpeed() * 3.6f << " km/h" << std::endl;
@@ -169,6 +187,13 @@ void Player::UpdateInput(double deltaTime) {
 		m_currentInput.steering = 0.0f;
 	}
 
+	//ブレーキ
+	if (Input::GetKeyPress(KK_SPACE)) {
+		m_currentInput.brake = 1.0f;
+	} else {
+		m_currentInput.brake = 0.0f;
+	}
+
 	SmoothInput(deltaTime);
 }
 
@@ -191,6 +216,9 @@ void Player::SmoothInput(double deltaTime) {
 	float throttleRate;
 	throttleRate = std::min(1.0f, m_throttlSmoothRate * dt);
 	m_smoothedInput.throttle = std::lerp(m_smoothedInput.throttle, m_currentInput.throttle, throttleRate);
+
+	//ブレーキはそのまま
+	m_smoothedInput.brake = m_currentInput.brake;
 }
 
 void Player::DrawWheels() const {

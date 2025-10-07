@@ -2,10 +2,10 @@
 
 #include "gameObject.h"
 
-class Bobber : public GameObject {
+class Buoy : public GameObject {
 public:
-	Bobber() = default;
-	virtual ~Bobber() = default;
+	Buoy() = default;
+	virtual ~Buoy() = default;
 
 protected:
 	bool Initialize() override;
