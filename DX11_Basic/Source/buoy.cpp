@@ -27,23 +27,25 @@ void Buoy::Finalize() {
 }
 
 void Buoy::Update(double deltaTime) {
-	//重力
-	float gravity = 9.81f * m_mass;
+	////重力
+	//float gravity = 9.81f * m_mass;
 
-	//浮力
-	float buoyancy = CalculateBuoyancy();
+	////浮力
+	//float buoyancy = CalculateBuoyancy();
 
-	//抵抗
-	float drag = CalculateDrag();
+	////抵抗
+	//float drag = CalculateDrag();
 
-	//合力から加速度を計算
-	float totalForce = buoyancy - gravity - drag;
-	m_acceleration = totalForce / m_mass;
+	////合力から加速度を計算
+	//float totalForce = buoyancy - gravity - drag;
+	//m_acceleration = totalForce / m_mass;
 
-	//速度と位置を更新
-	float dt = static_cast<float>(deltaTime);
-	m_velocity += m_acceleration * dt;
-	m_position.y += m_velocity * dt;
+	////速度と位置を更新
+	//float dt = static_cast<float>(deltaTime);
+	//m_velocity += m_acceleration * dt;
+
+	//位置更新
+	m_position.y = m_water->GetWaterHeight(m_position);
 }
 
 void Buoy::Draw() const {

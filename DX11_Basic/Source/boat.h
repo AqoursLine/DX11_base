@@ -35,6 +35,7 @@ public:
 	float GetSpeedKmh() const { return GetSpeed() * 3.6f; }		//速度(km/h)取得
 	Engine& GetEngine() { return m_engine; }					//エンジン参照取得
 	const Engine& GetEngine() const { return m_engine; }		//エンジン参照取得(定数版)
+	Vector4 GetYawRotation() const { return m_yawRotation; } //現在のヨー角クォータニオン取得
 
 	//水面設定
 	void SetWater(Water* water) { m_water = water; }
@@ -62,6 +63,9 @@ protected:
 	virtual bool Initialize() override;
 	virtual void Update(double deltaTime) override;
 
+	virtual Vector2 GetSceneBoundsMin();
+	virtual Vector2 GetSceneBoundsMax();
+
 private:
 	//物理計算
 	void UpdatePhysics(float deltaTime);
@@ -72,6 +76,7 @@ private:
 	Vector3 CalculateDragForce() const;
 	Vector3 CalculateBuoyancyForce() const;
 	Vector3 CalculateWaveForce();
+	Vector3 CalculateWallCollisionForce();
 	void UpdateWaterInteraction(float deltaTime);
 	void ApplyForces(float deltaTime);
 

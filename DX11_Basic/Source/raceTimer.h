@@ -1,11 +1,12 @@
 #pragma once
 
+
 #include "gameObject.h"
 
-class SpeedMeter : public GameObject {
+class RaceTimer : public GameObject {
 public:
-	SpeedMeter() = default;
-	~SpeedMeter() = default;
+	RaceTimer() = default;
+	~RaceTimer() = default;
 
 protected:
 	bool Initialize() override;
@@ -14,16 +15,13 @@ protected:
 	void Draw() const override;
 
 private:
+	class RaceManager* m_raceManager = nullptr;
+
 	class Sprite* m_sprite = nullptr;
-	class Texture* m_texture = nullptr;
 	class Texture* m_numberTexture = nullptr;
-	class Texture* m_needleTexture = nullptr;
+	class Texture* m_colonTexture = nullptr;
 	class VertexShader* m_animationVertexShader = nullptr;
-	class VertexShader* m_vertexShader = nullptr;
 	class PixelShader* m_animationPixelShader = nullptr;
-	class PixelShader* m_pixelShader = nullptr;
-	class Player* m_player = nullptr;
 
-	float m_speed = 0.0f; //現在の速度(km/h)
+	float m_raceTime = 0.0f; //レースタイム(秒)
 };
-

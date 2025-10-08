@@ -18,18 +18,36 @@ bool SpeedMeter::Initialize() {
 	}
 	//テクスチャの読み込み
 	m_texture = new Texture();
-	if (!m_texture->Load(L"Asset\\Texture\\num.png")) {
+	if (!m_texture->Load(L"Asset\\Texture\\meterBackground.png")) {
 		ErrorMessage(L"スピードメーターのテクスチャの読み込みに失敗しました。", E_FAIL);
 		return false;
 	}
-	//シェーダーの読み込み
-	m_vertexShader = new VertexShader();
-	m_vertexShader->Load(L"Shader\\spriteAnimationVS.cso");
-	m_pixelShader = new PixelShader();
-	m_pixelShader->Load(L"Shader\\spriteAnimationPS.cso");
+	m_numberTexture = new Texture();
+	if (!m_numberTexture->Load(L"Asset\\Texture\\dotNum.png")) {
+		ErrorMessage(L"スピードメーターの数字テクスチャの読み込みに失敗しました。", E_FAIL);
+		return false;
+	}
+	m_needleTexture = new Texture();
+	if (!m_needleTexture->Load(L"Asset\\Texture\\needle.png")) {
+		ErrorMessage(L"スピードメーターの針テクスチャの読み込みに失敗しました。", E_FAIL);
+		return false;
+	}
 
-	m_scale = { 100.0f, 50.0f, 1.0f };
-	m_position = { SCREEN_WIDTH - (m_scale.x * 3.0f), SCREEN_HEIGHT - (m_scale.y * 0.5f), 0.0f };
+	//アニメーションシェーダーの読み込み
+	m_animationVertexShader = new VertexShader();
+	m_animationVertexShader->Load(L"Shader\\spriteAnimationVS.cso");
+	m_animationPixelShader = new PixelShader();
+	m_animationPixelShader->Load(L"Shader\\spriteAnimationPS.cso");
+
+	//通常シェーダーの読み込み
+	m_vertexShader = new VertexShader();
+	m_vertexShader->Load(L"Shader\\unlitTextureVS.cso");
+	m_pixelShader = new PixelShader();
+	m_pixelShader->Load(L"Shader\\unlitTexturePS.cso");
+
+	//位置、回転、拡大縮小の設定
+	m_scale = { 500.0f, 400.0f, 1.0f };
+	m_position = { SCREEN_WIDTH - m_scale.x * 0.5f - 20.0f, SCREEN_HEIGHT - m_scale.y * 0.5f - 20.0f, 0.0f };
 	m_rotation = { 0.0f, 0.0f, 0.0f };
 
 	m_player = SYSTEM.GetManager()->GetScene()->GetGameObject<Player>();
@@ -37,14 +55,27 @@ bool SpeedMeter::Initialize() {
 }
 
 void SpeedMeter::Finalize() {
+	//スプライトの解放
 	m_sprite->Finalize();
 	delete m_sprite;
+
+	//テクスチャの解放
 	delete m_texture;
 	m_texture = nullptr;
-	delete m_pixelShader;
-	m_pixelShader = nullptr;
+	delete m_numberTexture;
+	m_numberTexture = nullptr;
+	delete m_needleTexture;
+	m_needleTexture = nullptr;
+
+	//シェーダーの解放
+	delete m_animationPixelShader;
+	m_animationPixelShader = nullptr;
 	delete m_vertexShader;
 	m_vertexShader = nullptr;
+	delete m_animationVertexShader;
+	m_animationVertexShader = nullptr;
+	delete m_pixelShader;
+	m_pixelShader = nullptr;
 }
 
 void SpeedMeter::Update(double deltaTime) {
@@ -66,21 +97,60 @@ void SpeedMeter::Draw() const {
 	material.textureEnable = true;
 	RENDERER.SetMaterial(material);
 
+	//背景描画
+	m_sprite->Draw(m_position, m_rotation, m_scale);
 
-	//スプライトの描画
-	for (int i = 0; i < 3; i++) {
-		Vector3 pos = m_position;
-		pos.x += m_scale.x * i; // 各桁の位置を調整
-		
-		// 100の位、10の位、1の位を計算
-		int digit = static_cast<int>(m_speed) / static_cast<int>(std::pow(10, 2 - i)) % 10;
-		// スプライトのUVオフセットを設定
-		SHADER_PROPERTIES prop = {};
-		prop.params1 = { 10.0f, 1.0f, static_cast<float>(digit), 0.0f };
-		RENDERER.SetShaderProperties(prop);
+	//針描画
+	m_needleTexture->Set(0);
+	RENDERER.SetMaterial(material);
 
-		m_sprite->Draw(pos, m_rotation, m_scale);
+	//速度から針の角度を計算(0km/h = 0度, 100km/h = 180度)
+	float angle = (m_speed / 100.0f) * 180.0f;
+	if (angle > 180.0f) angle = 180.0f; //最大値制限
+	Vector3 needleRot = { 0.0f, 0.0f, XMConvertToRadians(angle) };
+	Vector3 needleScale = { m_scale.x * 0.8f, m_scale.y * 0.05f, 1.0f };
+	Vector3 needlePos = m_position + Vector3(250.0f, 300.0f, 0.0f) - (m_scale * 0.5f);
+	needlePos.z = 0.0f;
+	m_sprite->Draw(needlePos, needleRot, needleScale);
+
+	//数字描画(小数第2位まで)
+	m_numberTexture->Set(0);
+	RENDERER.SetMaterial(material);
+	//シェーダーの設定
+	m_animationVertexShader->Set();
+	m_animationPixelShader->Set();
+
+	//速度を整数に変換して表示
+	int speedInt = static_cast<int>(m_speed * 100); 
+
+	Vector3 numScale = { m_scale.x * 0.06f, m_scale.y * 0.14f, 1.0f };
+	//小数第2位の位置
+	Vector3 numPos = m_position + Vector3(265.0f, 352.0f, 0.0f) - (m_scale * 0.5f);
+	numPos.z = 0.0f;
+
+	//アニメーション用プロパティ
+	SHADER_PROPERTIES properties = {};
+	properties.params1.x = 11.0f; //フレーム数(0~9,小数点)
+	properties.params1.y = 1.0f; //横フレーム数
+
+	//小数点含めて6桁表示
+	for (int i = 0; i < 6; i++) {
+		int digit;
+		if (i == 2) {
+			//小数点
+			digit = 10; //小数点のインデックス
+		} else {
+			digit = speedInt % 10; //一番右の桁を取得
+			speedInt /= 10; //右にシフト
+		}
+		Vector3 digitPos = numPos - Vector3(numScale.x * i, 0.0f, 0.0f);
+
+		//シェーダープロパティ設定
+		properties.params1.z = static_cast<float>(digit); //表示する数字
+		RENDERER.SetShaderProperties(properties);
+
+		//数字描画
+		m_sprite->Draw(digitPos, Vector3::ZERO, numScale);
 	}
-
 
 }

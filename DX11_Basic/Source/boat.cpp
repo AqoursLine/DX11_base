@@ -6,6 +6,7 @@
 #include "manager.h"
 #include "scene.h"
 #include "water.h"
+#include "raceManager.h"
 
 Boat::Boat()
 	: m_throttleInput(0.0f)
@@ -50,8 +51,8 @@ Boat::Boat()
 	m_engine.SetTorqueCurve(torqueCurve);
 
 	//エンジンパラメータ設定
-	m_engine.SetMaxPower(30.0f);		//最大出力(kw)
-	m_engine.SetLoadSensitivity(0.9f);	//負荷感度
+	m_engine.SetMaxPower(35.0f);		//最大出力(kw)
+	m_engine.SetLoadSensitivity(1.0f);	//負荷感度
 
 }
 
@@ -117,6 +118,17 @@ void Boat::Update(double deltaTime) {
 	UpdateWaterInteraction(dt);
 }
 
+Vector2 Boat::GetSceneBoundsMin() {
+	//シーンの最小座標を取得
+	return SYSTEM.GetManager()->GetScene()->GetBoundsMin();
+}
+
+Vector2 Boat::GetSceneBoundsMax() {
+	//シーンの最大座標を取得
+	return SYSTEM.GetManager()->GetScene()->GetBoundsMax();
+}
+
+
 void Boat::UpdatePhysics(float deltaTime) {
 	//合計
 	Vector3 totalForce(0.0f, 0.0f, 0.0f);
@@ -142,6 +154,9 @@ void Boat::UpdatePhysics(float deltaTime) {
 	//波による追加の力
 	Vector3 waveForce = CalculateWaveForce();
 
+	//壁との衝突力
+	Vector3 wallCollisionForce = CalculateWallCollisionForce();
+
 	//合計力の計算
 	totalForce += thrustForce;
 	totalForce += lateralForce;
@@ -150,6 +165,7 @@ void Boat::UpdatePhysics(float deltaTime) {
 //	totalForce += gravityForce;
 //	totalForce += buoyancyForce;
 //	totalForce += waveForce;
+	totalForce += wallCollisionForce;
 
 	//デバッグ表示
 	std::cout << "ThrustForce: (" << thrustForce.x << ", " << thrustForce.y << ", " << thrustForce.z << ")" << std::endl;
@@ -168,6 +184,8 @@ void Boat::UpdatePhysics(float deltaTime) {
 
 	//位置更新
 	m_position += m_velocity * deltaTime;
+
+
 }
 
 void Boat::UpdateDragScalar() {
@@ -327,6 +345,54 @@ Vector3 Boat::CalculateWaveForce() {
 	}
 
 	return Vector3(0.0f, 0.0f, 0.0f);
+}
+
+Vector3 Boat::CalculateWallCollisionForce() {
+	//回転を考慮したボートの4隅の位置を計算
+	if (!SYSTEM.GetManager()->GetScene()) return Vector3(0.0f, 0.0f, 0.0f);
+
+	//前方と右方向のベクトルを取得
+	Vector3 forward = m_yawRotation.RotateVector(Vector3::FORWARD);
+	Vector3 right = m_yawRotation.RotateVector(Vector3::RIGHT);
+
+	//ボートの4隅の位置を計算
+	Vector3 corners[4] = {
+		m_position + forward * (m_length * 0.5f) + right * (m_width * 0.5f),  // 前右
+		m_position + forward * (m_length * 0.5f) - right * (m_width * 0.5f),  // 前左
+		m_position - forward * (m_length * 0.5f) + right * (m_width * 0.5f),  // 後右
+		m_position - forward * (m_length * 0.5f) - right * (m_width * 0.5f)   // 後左
+	};
+
+	//シーンの境界を取得
+	Vector2 sceneMin = GetSceneBoundsMin();
+	Vector2 sceneMax = GetSceneBoundsMax();
+
+	//衝突力
+	Vector3 collisionForce(0.0f, 0.0f, 0.0f);
+
+	//X軸方向の衝突
+	for (int i = 0; i < 4; i++) {
+		if (corners[i].x < sceneMin.x) {
+			float penetration = sceneMin.x - corners[i].x;
+			collisionForce.x += penetration * m_mass * 10.0f; //壁の反発力
+		} else if (corners[i].x > sceneMax.x) {
+			float penetration = corners[i].x - sceneMax.x;
+			collisionForce.x -= penetration * m_mass * 10.0f; //壁の反発力
+		}
+	}
+
+	//Z軸方向の衝突
+	for (int i = 0; i < 4; i++) {
+		if (corners[i].z < sceneMin.y) {
+			float penetration = sceneMin.y - corners[i].z;
+			collisionForce.z += penetration * m_mass * 10.0f; //壁の反発力
+		} else if (corners[i].z > sceneMax.y) {
+			float penetration = corners[i].z - sceneMax.y;
+			collisionForce.z -= penetration * m_mass * 10.0f; //壁の反発力
+		}
+	}
+
+	return collisionForce;
 }
 
 void Boat::UpdateWaterInteraction(float deltaTime) {

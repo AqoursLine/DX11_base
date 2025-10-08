@@ -9,7 +9,7 @@
 
 //カメラクラス初期化
 bool Camera::Initialize() {
-	m_offset = { 0.0f, 1.0f, -5.0f }; // カメラのオフセット位置
+	m_offset = { 0.0f, 1.0f, -7.0f }; // カメラのオフセット位置
 	m_position = m_offset; // 初期位置をオフセット位置に設定
 
 	m_moveSpeed = 20.0f; // カメラの移動速度
@@ -39,11 +39,7 @@ void Camera::Update(double deltaTime) {
 	m_targetPosition.y += 1.5f; //少し上にオフセット
 
 	//ターゲットの回転を取得
-	Vector4 targetQuat = player->GetQuaternion();
-
-	//ロールを除去
-	targetQuat.x = 0.0f;
-	targetQuat.z = 0.0f;
+	Vector4 targetQuat = player->GetYawRotation();
 
 	//オフセットを回転
 	float yaw = 0.0f;

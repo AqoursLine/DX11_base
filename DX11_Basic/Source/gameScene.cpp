@@ -1,3 +1,4 @@
+#include "main.h"
 #include "gameScene.h"
 
 #include "tmp2D.h"
@@ -14,12 +15,18 @@
 #include "minimap.h"
 #include "speedMeter.h"
 #include "wall.h"
+#include "startGate.h"
+#include "raceTimer.h"
 
 bool GameScene::Initialize() {
 	//とりあえずの壁
+	//右壁
 	AddGameObject(new Wall(), TYPE_OPAQUE)->SetPosition({ 220.0f, 5.0f, 0.0f })->SetScale({ 10.0f, 20.0f, 130.0f })->SetRotation({ 0.0f, XM_PI, 0.0f });
+	//左壁
 	AddGameObject(new Wall(), TYPE_OPAQUE)->SetPosition({ -220.0f, 5.0f, 0.0f })->SetScale({ 10.0f, 20.0f, 130.0f })->SetRotation({ 0.0f, XM_PI, 0.0f });
+	//前壁
 	AddGameObject(new Wall(), TYPE_OPAQUE)->SetPosition({ 0.0f, 5.0f, 65.0f })->SetScale({ 400.0f, 20.0f, 10.0f })->SetRotation({ 0.0f, XM_PI, 0.0f });
+	//後壁
 	AddGameObject(new Wall(), TYPE_OPAQUE)->SetPosition({ 0.0f, 5.0f, -65.0f })->SetScale({ 400.0f, 20.0f, 10.0f })->SetRotation({ 0.0f, XM_PI, 0.0f });
 
 	//ゆきのん初期化
@@ -55,11 +62,18 @@ bool GameScene::Initialize() {
 	//スピードメーター
 	AddGameObject(new SpeedMeter(), TYPE_BEFORE_PROCESS_UI);
 
+	//スタートゲート
+	AddGameObject(new StartGate(), TYPE_CUTOUT);
+
+	//レースタイマー
+	AddGameObject(new RaceTimer(), TYPE_BEFORE_PROCESS_UI);
+
 	//カメラの初期化
 	AddGameObject(new Camera(), TYPE_CAMERA);
 	//	AddGameObject(new FpsCamera(), TYPE_CAMERA);
 
 		//スカイドーム
 	//	AddGameObject(new SkyDome(), TYPE_3D);
+
 	return true;
 }

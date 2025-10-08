@@ -11,8 +11,8 @@ Engine::Engine()
 	, m_targetRPM(800.0f)	//目標回転数
 	, m_minRPM(800.0f)		//アイドリング回転数
 	, m_maxRPM(8000.0f)		//最大回転数
-	, m_rpmAcceleration(3000.0f)	//RPM加速度(RPM/s)
-	, m_rpmDeceleration(2000.0f)	//RPM減速度(RPM/s)
+	, m_rpmAcceleration(2000.0f)	//RPM加速度(RPM/s)
+	, m_rpmDeceleration(1000.0f)	//RPM減速度(RPM/s)
 	, m_engineLoad(0.0f)			//エンジン負荷
 	, m_loadSensitivity(0.7f)		//負荷感度
 	, m_isRunning(true)	//エンジン稼働フラグ

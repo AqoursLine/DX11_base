@@ -38,13 +38,8 @@ bool Player::Initialize() {
 
 
 	m_scale = { 1.3f, 0.5f, 2.9f };
-	m_rotation = {0.0f, XM_PIDIV2, 0.0f};
-	m_position = { 0.0f, 0.0f, -30.0f };
 
-	//ボートの初期方向をセット
-	SetStartYaw(m_rotation.y);
-
-	if(!Boat::Initialize()) {
+	if(!RacingBoat::Initialize()) {
 		return false;
 	}
 

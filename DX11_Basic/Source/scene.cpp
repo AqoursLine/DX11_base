@@ -68,6 +68,9 @@ void Scene::Draw() {
 				case TYPE_OPAQUE:
 					DrawOpaque(camera);
 					break;
+				case TYPE_CUTOUT:
+					DrawCutout(camera);
+					break;
 				case TYPE_TRANSPARENT:
 					DrawTransparent(camera);
 					break;
@@ -89,6 +92,9 @@ void Scene::Draw() {
 				case TYPE_OPAQUE:
 					DrawOpaque(mainCamera);
 					break;
+				case TYPE_CUTOUT:
+					DrawCutout(mainCamera);
+					break;
 				case TYPE_TRANSPARENT:
 					DrawTransparent(mainCamera);
 					break;
@@ -98,6 +104,9 @@ void Scene::Draw() {
 			}
 		}
 	}
+
+	//2D行列設定
+	RENDERER.Set2DMatrix();
 
 	// エフェクト前のUI描画
 	DrawBeforeEffect();
@@ -129,25 +138,23 @@ void Scene::DrawOpaque(Camera* camera) const {
 	//深度バッファ有効
 	RENDERER.SetDepthStencilState(DEPTH_MODE::ENABLE);
 
-	//カメラの位置
-	Vector3 camPos = camera->GetPosition();
-
-	//リストをソートするためのベクター
-	std::vector<GameObject*> opaqueObjects(m_gameObjects[TYPE_OPAQUE].begin(), m_gameObjects[TYPE_OPAQUE].end());
-
-	//カメラからの距離でソート（近い順）
-	std::sort(opaqueObjects.begin(), opaqueObjects.end(),
-		[&](GameObject* a, GameObject* b) {
-			float distA = (a->GetPosition() - camPos).LengthSquared();
-			float distB = (b->GetPosition() - camPos).LengthSquared();
-			return distA < distB; // 近い順にソート
-		});
-
 	//不透明オブジェクトの描画
-	for (auto& gameObject : opaqueObjects) {
+	for (auto& gameObject : m_gameObjects[TYPE_OPAQUE]) {
 		gameObject->DrawBase();
 	}
 
+}
+
+void Scene::DrawCutout(Camera* camera) const {
+	//アルファブレンドをカットアウト用に設定
+	RENDERER.SetATCEnable(true);
+	//カットアウトオブジェクトの描画
+	for (auto& gameObject : m_gameObjects[TYPE_CUTOUT]) {
+		gameObject->DrawBase();
+	}
+
+	//アルファブレンドを元に戻す
+	RENDERER.SetATCEnable(false);
 }
 
 void Scene::DrawTransparent(Camera* camera) const {

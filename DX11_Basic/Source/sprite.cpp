@@ -70,9 +70,6 @@ void Sprite::Draw(const Vector3& pos, const Vector3& rot, const Vector3& scale) 
 	//デフォルトのサンプラーステートセット
 	RENDERER.SetSamplerState();
 
-	//2D行列設定
-	RENDERER.Set2DMatrix();
-
 	// 2D描画のための行列を設定
 	XMMATRIX worldMatrix = XMMatrixScaling(scale.x, scale.y, scale.z) *
 		XMMatrixRotationRollPitchYaw(rot.x, rot.y, rot.z) *

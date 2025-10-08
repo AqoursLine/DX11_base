@@ -241,6 +241,7 @@
     <ClCompile Include="Source\player.cpp" />
     <ClCompile Include="Source\raceCourseManager.cpp" />
     <ClCompile Include="Source\raceManager.cpp" />
+    <ClCompile Include="Source\raceTimer.cpp" />
     <ClCompile Include="Source\racingBoat.cpp" />
     <ClCompile Include="Source\renderer.cpp" />
     <ClCompile Include="Source\scene.cpp" />
@@ -248,6 +249,7 @@
     <ClCompile Include="Source\skyDome.cpp" />
     <ClCompile Include="Source\speedMeter.cpp" />
     <ClCompile Include="Source\sprite.cpp" />
+    <ClCompile Include="Source\startGate.cpp" />
     <ClCompile Include="Source\system.cpp" />
     <ClCompile Include="Source\texture.cpp" />
     <ClCompile Include="Source\timer.cpp" />
@@ -280,6 +282,7 @@
     <ClInclude Include="Source\player.h" />
     <ClInclude Include="Source\raceCourseManager.h" />
     <ClInclude Include="Source\raceManager.h" />
+    <ClInclude Include="Source\raceTimer.h" />
     <ClInclude Include="Source\racingBoat.h" />
     <ClInclude Include="Source\renderer.h" />
     <ClInclude Include="Source\scene.h" />
@@ -287,6 +290,7 @@
     <ClInclude Include="Source\skyDome.h" />
     <ClInclude Include="Source\speedMeter.h" />
     <ClInclude Include="Source\sprite.h" />
+    <ClInclude Include="Source\startGate.h" />
     <ClInclude Include="Source\system.h" />
     <ClInclude Include="Source\texture.h" />
     <ClInclude Include="Source\timer.h" />

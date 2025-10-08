@@ -1,3 +1,4 @@
+#include "main.h"
 #include "titleScene.h"
 #include "titleText.h"
 #include "input.h"
