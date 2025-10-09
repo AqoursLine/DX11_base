@@ -10,4 +10,7 @@ void main(in PS_INPUT In, out float4 outDiffuse : SV_TARGET)
 	float4 texColor = g_texture.Sample(g_sampler, In.TexCoord);
 	
 	outDiffuse = lerp(In.Diffuse, texColor * In.Diffuse, flag);
+	
+	//マテリアルのベースカラーを乗算
+	outDiffuse *= Material.Diffuse;
 }

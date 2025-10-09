@@ -23,12 +23,6 @@ bool RaceTimer::Initialize() {
 		ErrorMessage(L"レースタイマーの数字テクスチャの読み込みに失敗しました。", E_FAIL);
 		return false;
 	}
-	//コロンテクスチャの読み込み
-	m_colonTexture = new Texture();
-	if (!m_colonTexture->Load(L"Asset\\Texture\\colon.png")) {
-		ErrorMessage(L"レースタイマーのコロンテクスチャの読み込みに失敗しました。", E_FAIL);
-		return false;
-	}
 
 	//アニメーションシェーダーの読み込み
 	m_animationVertexShader = new VertexShader();
@@ -55,8 +49,6 @@ void RaceTimer::Finalize() {
 	//テクスチャの解放
 	delete m_numberTexture;
 	m_numberTexture = nullptr;
-	delete m_colonTexture;
-	m_colonTexture = nullptr;
 	//シェーダーの解放
 	delete m_animationPixelShader;
 	m_animationPixelShader = nullptr;
@@ -78,12 +70,6 @@ void RaceTimer::Draw() const {
 	material.textureEnable = true;
 	RENDERER.SetMaterial(material);
 
-	//レースタイムを分秒ミリ秒に分解(例: 1分23秒45)
-	int totalMilliseconds = static_cast<int>(m_raceTime * 1000.0f);
-	int minutes = (totalMilliseconds / 60000) % 60;
-	int seconds = (totalMilliseconds / 1000) % 60;
-	int milliseconds = (totalMilliseconds / 10) % 100;
-
 	//ポジション
 	Vector3 pos = m_position;
 
@@ -92,46 +78,33 @@ void RaceTimer::Draw() const {
 
 	//アニメーション用プロパティ
 	SHADER_PROPERTIES properties = {};
-	properties.params1.x = 11.0f; //横フレーム数
-	properties.params1.y = 1.0f;  //縦フレーム数
 
-	//分
-	properties.params1.z = static_cast<float>(minutes); //フレーム番号
-	RENDERER.SetShaderProperties(properties);
-	m_sprite->Draw(pos, m_rotation, m_scale);
+	properties.params1.z = 1.0f / 10.0f; //1フレームの幅(10フレーム)
+	properties.params1.w = 1.0f / 2.0f; //1フレームの高さ(2行)
 
-	//コロン
-	pos.x += m_scale.x; //右に移動
-	m_colonTexture->Set(0);
-	properties.params1.x = 1.0f; //フレーム数1
-	properties.params1.z = 0.0f; //フレーム番号0
-	RENDERER.SetShaderProperties(properties);
-	m_sprite->Draw(pos, m_rotation, m_scale);
+	//ミリ秒を整数に変換して表示
+	int timeInt = static_cast<int>(m_raceTime * 100); // 小数第2位まで表示
 
-	//秒
-	m_numberTexture->Set(0);
-	properties.params1.x = 11.0f; //横フレーム数
-	pos.x += m_scale.x; //右に移動
-	for (int i = 0; i < 2; i++) {
-		int digit = (seconds / static_cast<int>(std::pow(10, 1 - i))) % 10;
-		properties.params1.z = static_cast<float>(digit); //フレーム番号
+	//1桁ずつ表示(1:00.00形式)
+	for (int i = 0; i < 6; i++) {
+		int digit;
+		if (i == 1) {
+			//コロン
+			digit = 10; //コロンのインデックス
+		} else if (i == 4) {
+			//小数点
+			digit = 11; //小数点のインデックス
+		} else {
+			digit = timeInt % 10; //一番右の桁を取得
+			timeInt /= 10; //右にシフト
+		}
+		Vector3 digitPos = pos + Vector3(m_scale.x * i, 0.0f, 0.0f);
+		//シェーダープロパティ設定
+		properties.params1.x = (digit % 10) * properties.params1.z; //u座標
+		properties.params1.y = (digit / 10) * properties.params1.w; //v座標
 		RENDERER.SetShaderProperties(properties);
-		m_sprite->Draw(pos, m_rotation, m_scale);
-		pos.x += m_scale.x; //右に移動
+		//数字描画
+		m_sprite->Draw(digitPos, Vector3::ZERO, m_scale);
 	}
 
-	//ドット
-	properties.params1.z = 10.0f; //フレーム番号(ドット)
-	RENDERER.SetShaderProperties(properties);
-	m_sprite->Draw(pos, m_rotation, m_scale);
-	pos.x += m_scale.x; //右に移動
-
-	//ミリ秒
-	for (int i = 0; i < 2; i++) {
-		int digit = (milliseconds / static_cast<int>(std::pow(10, 1 - i))) % 10;
-		properties.params1.z = static_cast<float>(digit); //フレーム番号
-		RENDERER.SetShaderProperties(properties);
-		m_sprite->Draw(pos, m_rotation, m_scale);
-		pos.x += m_scale.x; //右に移動
-	}
 }

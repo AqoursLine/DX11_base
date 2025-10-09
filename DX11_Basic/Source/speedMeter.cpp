@@ -115,7 +115,6 @@ void SpeedMeter::Draw() const {
 
 	//数字描画(小数第2位まで)
 	m_numberTexture->Set(0);
-	RENDERER.SetMaterial(material);
 	//シェーダーの設定
 	m_animationVertexShader->Set();
 	m_animationPixelShader->Set();
@@ -128,10 +127,15 @@ void SpeedMeter::Draw() const {
 	Vector3 numPos = m_position + Vector3(265.0f, 352.0f, 0.0f) - (m_scale * 0.5f);
 	numPos.z = 0.0f;
 
+	//マテリアル
+	//#77FE7E
+	material.diffuse = XMFLOAT4(0.467f, 0.996f, 0.494f, 1.0f);
+	RENDERER.SetMaterial(material);
+
 	//アニメーション用プロパティ
 	SHADER_PROPERTIES properties = {};
-	properties.params1.x = 11.0f; //フレーム数(0~9,小数点)
-	properties.params1.y = 1.0f; //横フレーム数
+	properties.params1.z = 1.0f / 10.0f; //1フレームの幅(10フレーム)
+	properties.params1.w = 1.0f / 2.0f; //1フレームの高さ(2行)
 
 	//小数点含めて6桁表示
 	for (int i = 0; i < 6; i++) {
@@ -146,7 +150,8 @@ void SpeedMeter::Draw() const {
 		Vector3 digitPos = numPos - Vector3(numScale.x * i, 0.0f, 0.0f);
 
 		//シェーダープロパティ設定
-		properties.params1.z = static_cast<float>(digit); //表示する数字
+		properties.params1.x = (digit % 10) * properties.params1.z; //u座標
+		properties.params1.y = (digit / 10) * properties.params1.w; //v座標
 		RENDERER.SetShaderProperties(properties);
 
 		//数字描画

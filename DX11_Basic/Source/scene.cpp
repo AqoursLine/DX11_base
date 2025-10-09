@@ -108,12 +108,16 @@ void Scene::Draw() {
 	//2D行列設定
 	RENDERER.Set2DMatrix();
 
+	//深度バッファ無効
+	RENDERER.SetDepthStencilState(DEPTH_MODE::DISABLE);
+
+
 	// エフェクト前のUI描画
 	DrawBeforeEffect();
 	// ポストプロセス描画
-	DrawPostProcess();
+//	DrawPostProcess();
 	// エフェクト後のUI描画
-	DrawAfterEffect();
+//	DrawAfterEffect();
 
 	// レンダーターゲットをデフォルトに戻す
 //	RENDERER.SetDefaultRenderTarget();
@@ -165,26 +169,28 @@ void Scene::DrawTransparent(Camera* camera) const {
 	Vector3 camPos = camera->GetPosition();
 
 	//リストをソートするためのベクター
-	std::vector<GameObject*> transparentObjects(m_gameObjects[TYPE_TRANSPARENT].begin(), m_gameObjects[TYPE_TRANSPARENT].end());
+//	std::vector<GameObject*> transparentObjects(m_gameObjects[TYPE_TRANSPARENT].begin(), m_gameObjects[TYPE_TRANSPARENT].end());
 
 	//カメラからの距離でソート（遠い順）
-	std::sort(transparentObjects.begin(), transparentObjects.end(),
-		[&](GameObject* a, GameObject* b) {
-			float distA = (a->GetPosition() - camPos).LengthSquared();
-			float distB = (b->GetPosition() - camPos).LengthSquared();
-			return distA > distB; // 遠い順にソート
-		});
+	//std::sort(transparentObjects.begin(), transparentObjects.end(),
+	//	[&](GameObject* a, GameObject* b) {
+	//		float distA = (a->GetPosition() - camPos).LengthSquared();
+	//		float distB = (b->GetPosition() - camPos).LengthSquared();
+	//		return distA > distB; // 遠い順にソート
+	//	});
 
 	//透明オブジェクトの描画
-	for (auto& gameObject : transparentObjects) {
+	//for (auto& gameObject : transparentObjects) {
+	//	gameObject->DrawBase();
+	//}
+
+	for (auto& gameObject : m_gameObjects[TYPE_TRANSPARENT]) {
 		gameObject->DrawBase();
 	}
 
 }
 
 void Scene::DrawBeforeEffect() const {
-	//深度バッファ無効
-	RENDERER.SetDepthStencilState(DEPTH_MODE::DISABLE);
 	//エフェクト前オブジェクトの描画
 	for (auto& gameObject : m_gameObjects[TYPE_BEFORE_PROCESS_UI]) {
 		gameObject->DrawBase();
@@ -192,8 +198,6 @@ void Scene::DrawBeforeEffect() const {
 }
 
 void Scene::DrawPostProcess() {
-	//深度バッファ無効
-	RENDERER.SetDepthStencilState(DEPTH_MODE::DISABLE);
 	//ポストプロセスオブジェクトの描画
 	for (auto& gameObject : m_gameObjects[TYPE_POST_PROCESS]) {
 		m_renderTargetIndex = 1 - m_renderTargetIndex;
@@ -204,8 +208,6 @@ void Scene::DrawPostProcess() {
 
 
 void Scene::DrawAfterEffect() const {
-	//深度バッファ無効
-	RENDERER.SetDepthStencilState(DEPTH_MODE::DISABLE);
 	//エフェクト後オブジェクトの描画
 	for (auto& gameObject : m_gameObjects[TYPE_AFTER_PROCESS_UI]) {
 		gameObject->DrawBase();

@@ -93,13 +93,17 @@ void System::Finalize() {
 }
 
 bool System::Excute() {
-#ifdef _DEBUG
-	//デバッグ表示用仕切り
-	std::cout << "------------------------" << std::endl;
-#endif
 
 	//タイマー更新
 	m_timer->Tick();
+
+#ifdef _DEBUG
+	//デバッグ表示用仕切り
+	std::cout << "------------------------" << std::endl;
+
+	//deltaTime表示
+	std::cout << "Delta Time: " << m_timer->GetDeltaTime() << " seconds" << std::endl;
+#endif
 
 	//WebClientのメッセージ処理
 	m_webClient->ProcessMessages();

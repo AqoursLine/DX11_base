@@ -2,22 +2,22 @@
 
 void main( in VS_INPUT In, out PS_INPUT Out )
 {
-	//ƒ[ƒ‹ƒhƒrƒ…[ƒvƒƒWƒFƒNƒVƒ‡ƒ“s—ñ‚ðŒvŽZ
+	//ãƒ¯ãƒ¼ãƒ«ãƒ‰ãƒ“ãƒ¥ãƒ¼ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³è¡Œåˆ—ã‚’è¨ˆç®—
 	matrix wvp = mul(WorldMatrix, ViewMatrix);
 	wvp = mul(wvp, ProjectionMatrix);
 	
-	//’¸“_À•W‚ðƒNƒŠƒbƒv‹óŠÔ‚É•ÏŠ·
+	//é ‚ç‚¹åº§æ¨™ã‚’ã‚¯ãƒªãƒƒãƒ—ç©ºé–“ã«å¤‰æ›
 	Out.Position = mul(In.Position, wvp);
 	
-	//’¸“_‚ðƒ[ƒ‹ƒh‹óŠÔ‚É•ÏŠ·
+	//é ‚ç‚¹ã‚’ãƒ¯ãƒ¼ãƒ«ãƒ‰ç©ºé–“ã«å¤‰æ›
 	Out.WorldPosition = mul(In.Position, WorldMatrix);
 	
-	//–@ü‚ð‚»‚Ì‚Ü‚Ü“n‚·
+	//æ³•ç·šã‚’ãã®ã¾ã¾æ¸¡ã™
 	Out.Normal = In.Normal;
 	
-	//UVÀ•W‚ð‚»‚Ì‚Ü‚Ü“n‚·
+	//UVåº§æ¨™ã‚’ãã®ã¾ã¾æ¸¡ã™
 	Out.TexCoord = In.TexCoord;
 	
-	//’¸“_ƒJƒ‰[‚ð‚»‚Ì‚Ü‚Ü“n‚·
-	Out.Diffuse = In.Diffuse * Material.Diffuse;
+	//é ‚ç‚¹ã‚«ãƒ©ãƒ¼ã‚’ãã®ã¾ã¾æ¸¡ã™
+	Out.Diffuse = In.Diffuse;
 }

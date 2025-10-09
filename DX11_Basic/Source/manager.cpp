@@ -3,6 +3,8 @@
 #include "renderer.h"
 #include "input.h"
 #include "titleScene.h"
+#include "system.h"
+#include "timer.h"
 
 bool Manager::m_isFinished = false;
 
@@ -72,6 +74,11 @@ bool Manager::CleanUp() {
 		m_scene = m_nextScene;
 		m_nextScene = nullptr;
 		m_scene->Initialize();
+		// 新しいシーンの初期化に時間がかかると次フレームの deltaTime が大きくなるため、
+		// タイマーをリセットして次の Tick から安定した deltaTime を得る
+		if (SYSTEM.GetTimer()) {
+			SYSTEM.GetTimer()->Reset();
+		}
 	}
 
 	return false;

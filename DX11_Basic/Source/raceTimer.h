@@ -19,7 +19,6 @@ private:
 
 	class Sprite* m_sprite = nullptr;
 	class Texture* m_numberTexture = nullptr;
-	class Texture* m_colonTexture = nullptr;
 	class VertexShader* m_animationVertexShader = nullptr;
 	class PixelShader* m_animationPixelShader = nullptr;
 
