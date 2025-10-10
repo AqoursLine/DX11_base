@@ -72,7 +72,7 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-//	_CrtSetBreakAlloc(458);
+	_CrtSetBreakAlloc(65974);
 
 	//ウィンドウクラス作成
 	WNDCLASSEX wc = {};
@@ -194,7 +194,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #ifdef _DEBUG
 			frameCount++;
 			if (frameCount > 1) {
-				MoveConsoleCursorToTopLeft();
+//				MoveConsoleCursorToTopLeft();
 //				ClearConsole();
 				frameCount = 0;
 			}

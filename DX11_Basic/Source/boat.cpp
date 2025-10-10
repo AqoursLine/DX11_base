@@ -29,6 +29,7 @@ Boat::Boat()
 	, m_length(2.9f)			//ボートの長さ(m)
 	, m_width(1.4f)				//ボートの幅(m)
 	, m_height(0.5f)			//ボートの高さ(m)
+	, m_wallPenetrationDepth(0.0f, 0.0f)	//壁へのめり込み深さ
 	, m_verticalDamping(2.0f)	//垂直方向の減衰係数
 	, m_buoyancyStiffness(1.2f) //浮力の剛性係数
 	, m_restingWaterLevel(0.0f) //静止水面の高さ
@@ -108,14 +109,17 @@ void Boat::Update(double deltaTime) {
 	//deltaTimeをfloatに変換
 	float dt = static_cast<float>(deltaTime);
 
-	//姿勢制御
-	UpdateRotation(dt);
-
 	//物理計算
 	UpdatePhysics(dt);
 
+	//姿勢制御
+	UpdateRotation(dt);
+
 	//水面との相互作用更新
 	UpdateWaterInteraction(dt);
+
+	//4隅の座標更新
+	UpdateCorners();
 }
 
 Vector2 Boat::GetSceneBoundsMin() {
@@ -167,14 +171,11 @@ void Boat::UpdatePhysics(float deltaTime) {
 //	totalForce += waveForce;
 	totalForce += wallCollisionForce;
 
-	//デバッグ表示
-	std::cout << "ThrustForce: (" << thrustForce.x << ", " << thrustForce.y << ", " << thrustForce.z << ")" << std::endl;
-	std::cout << "LateralForce: (" << lateralForce.x << ", " << lateralForce.y << ", " << lateralForce.z << ")" << std::endl;
-	std::cout << "BrakeForce: (" << brakeForce.x << ", " << brakeForce.y << ", " << brakeForce.z << ")" << std::endl;
-	std::cout << "DragForce: (" << dragForce.x << ", " << dragForce.y << ", " << dragForce.z << ")" << std::endl;
-	std::cout << "GravityForce: (" << gravityForce.x << ", " << gravityForce.y << ", " << gravityForce.z << ")" << std::endl;
-	std::cout << "BuoyancyForce: (" << buoyancyForce.x << ", " << buoyancyForce.y << ", " << buoyancyForce.z << ")" << std::endl;
-	std::cout << "WaveForce: (" << waveForce.x << ", " << waveForce.y << ", " << waveForce.z << ")" << std::endl;
+	//壁めり込み補正
+	if (wallCollisionForce.Length() > 0.01f) {
+		m_position.x += m_wallPenetrationDepth.x;
+		m_position.z += m_wallPenetrationDepth.y;
+	}
 
 	//加速度の計算
 	m_acceleration = totalForce / m_mass;
@@ -279,23 +280,11 @@ Vector3 Boat::CalculateBuoyancyForce() const {
 	//浮力の計算
 	if (!m_water) return Vector3(0.0f, 0.0f, 0.0f);
 
-	//ボートの向きを取得
-	Vector3 forward = GetForwardQ();
-	Vector3 right = GetRightQ();
-
-	//ボートの4隅の位置を計算
-	Vector3 corners[4] = {
-		m_position + forward * (m_length * 0.4f) + right * (m_width * 0.4f),  // 前右
-		m_position + forward * (m_length * 0.4f) - right * (m_width * 0.4f),  // 前左
-		m_position - forward * (m_length * 0.4f) + right * (m_width * 0.4f),  // 後右
-		m_position - forward * (m_length * 0.4f) - right * (m_width * 0.4f)   // 後左
-	};
-
 	float totalBuoyancy = 0.0f;
 
 	for (int i = 0; i < 4; i++) {
-		float cornerBottomY = corners[i].y - (m_height * 0.5f);
-		float waterHeight = m_water->GetWaterHeight(corners[i]);
+		float cornerBottomY = m_corners[i].y - (m_height * 0.5f);
+		float waterHeight = m_water->GetWaterHeight(m_corners[i]);
 
 		if (cornerBottomY < waterHeight) {
 			float submergedDepth = waterHeight - cornerBottomY;
@@ -351,18 +340,6 @@ Vector3 Boat::CalculateWallCollisionForce() {
 	//回転を考慮したボートの4隅の位置を計算
 	if (!SYSTEM.GetManager()->GetScene()) return Vector3(0.0f, 0.0f, 0.0f);
 
-	//前方と右方向のベクトルを取得
-	Vector3 forward = m_yawRotation.RotateVector(Vector3::FORWARD);
-	Vector3 right = m_yawRotation.RotateVector(Vector3::RIGHT);
-
-	//ボートの4隅の位置を計算
-	Vector3 corners[4] = {
-		m_position + forward * (m_length * 0.5f) + right * (m_width * 0.5f),  // 前右
-		m_position + forward * (m_length * 0.5f) - right * (m_width * 0.5f),  // 前左
-		m_position - forward * (m_length * 0.5f) + right * (m_width * 0.5f),  // 後右
-		m_position - forward * (m_length * 0.5f) - right * (m_width * 0.5f)   // 後左
-	};
-
 	//シーンの境界を取得
 	Vector2 sceneMin = GetSceneBoundsMin();
 	Vector2 sceneMax = GetSceneBoundsMax();
@@ -370,28 +347,44 @@ Vector3 Boat::CalculateWallCollisionForce() {
 	//衝突力
 	Vector3 collisionForce(0.0f, 0.0f, 0.0f);
 
+	//めり込み深さリセット
+	m_wallPenetrationDepth = Vector2(0.0f, 0.0f);
+
 	//X軸方向の衝突
 	for (int i = 0; i < 4; i++) {
-		if (corners[i].x < sceneMin.x) {
-			float penetration = sceneMin.x - corners[i].x;
-			collisionForce.x += penetration * m_mass * 10.0f; //壁の反発力
-		} else if (corners[i].x > sceneMax.x) {
-			float penetration = corners[i].x - sceneMax.x;
-			collisionForce.x -= penetration * m_mass * 10.0f; //壁の反発力
+		if (m_corners[i].x < sceneMin.x) {
+			m_wallPenetrationDepth.x += sceneMin.x - m_corners[i].x;
+		} else if (m_corners[i].x > sceneMax.x) {
+			m_wallPenetrationDepth.x -= m_corners[i].x - sceneMax.x;
 		}
 	}
 
 	//Z軸方向の衝突
 	for (int i = 0; i < 4; i++) {
-		if (corners[i].z < sceneMin.y) {
-			float penetration = sceneMin.y - corners[i].z;
-			collisionForce.z += penetration * m_mass * 10.0f; //壁の反発力
-		} else if (corners[i].z > sceneMax.y) {
-			float penetration = corners[i].z - sceneMax.y;
-			collisionForce.z -= penetration * m_mass * 10.0f; //壁の反発力
+		if (m_corners[i].z < sceneMin.y) {
+			m_wallPenetrationDepth.y += sceneMin.y - m_corners[i].z;
+		} else if (m_corners[i].z > sceneMax.y) {
+			m_wallPenetrationDepth.y -= m_corners[i].z - sceneMax.y;
 		}
 	}
 
+	//衝突力を計算
+	if (std::abs(m_wallPenetrationDepth.x) > 0.01f) {
+		collisionForce.x = m_wallPenetrationDepth.x * m_mass * 10.0f; //めり込み深さに比例した力
+	}
+	if (std::abs(m_wallPenetrationDepth.y) > 0.01f) {
+		collisionForce.z = m_wallPenetrationDepth.y * m_mass * 10.0f; //めり込み深さに比例した力
+	}
+
+	//摩擦力を追加
+	if (collisionForce.Length() > 0.01f) {
+		Vector3 horizontalVelocity = Vector3(m_velocity.x, 0.0f, m_velocity.z);
+		if (horizontalVelocity.Length() > 0.01f) {
+			horizontalVelocity.Normalize();
+			Vector3 frictionForce = -horizontalVelocity * m_mass * 5.0f; //摩擦力
+			collisionForce += frictionForce;
+		}
+	}
 	return collisionForce;
 }
 
@@ -498,4 +491,17 @@ Vector4 Boat::UpdatePitch(float deltaTime) {
 
 void Boat::UpdateBobbing(float deltaTime) {
 	if (!m_water) return;
+}
+
+void Boat::UpdateCorners() {
+	//回転を考慮したボートの4隅の位置を計算
+	if (!SYSTEM.GetManager()->GetScene()) return;
+	//前方と右方向のベクトルを取得
+	Vector3 forward = m_yawRotation.RotateVector(Vector3::FORWARD);
+	Vector3 right = m_yawRotation.RotateVector(Vector3::RIGHT);
+	//ボートの4隅の位置を計算
+	m_corners[0] = m_position + forward * (m_length * 0.5f) + right * (m_width * 0.5f);  // 前右
+	m_corners[1] = m_position + forward * (m_length * 0.5f) - right * (m_width * 0.5f);  // 前左
+	m_corners[2] = m_position - forward * (m_length * 0.5f) + right * (m_width * 0.5f);  // 後右
+	m_corners[3] = m_position - forward * (m_length * 0.5f) - right * (m_width * 0.5f);   // 後左
 }

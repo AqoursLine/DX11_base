@@ -57,18 +57,6 @@ void Engine::Update(double deltaTime) {
 
 	//出力更新
 	UpdatePowerFromRPM();
-
-#ifdef _DEBUG
-	//デバッグ用出力
-	std::cout << "Engine RPM: " << m_rpm << " Target RPM: " << m_targetRPM
-		<< " Throttle: " << m_throttle
-		<< " Load: " << m_engineLoad
-		<< " Torque: " << m_currentTorque
-		<< " Power: " << m_currentPower << " kW"
-		<< std::endl;
-
-#endif // _DEBUG
-
 }
 
 
@@ -99,11 +87,6 @@ void Engine::UpdateRPM(float deltaTime) {
 		m_rpm -= m_rpmDeceleration * deltaTime;
 		m_rpm = std::max(m_rpm, actualTargetRPM);
 	}
-
-	//デバッグ
-#ifdef _DEBUG
-	std::cout << "Load Multiplier: " << loadMultiplier << std::endl;
-#endif // _DEBUG
 
 	//RPM制限
 	m_rpm = std::clamp(m_rpm, m_minRPM, m_maxRPM);

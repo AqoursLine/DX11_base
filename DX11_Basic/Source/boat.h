@@ -17,7 +17,7 @@ public:
 	virtual void SetReverse(bool isReverse);	//リバースギア設定
 
 	//ギア状態
-	bool IsReversing() const { return m_isReverse; } //リバースギア状態取得
+	bool IsReversing() const { return m_isReverse; }	//リバースギア状態取得
 
 	//物理パラメータ設定
 	void SetMass(float mass) { m_mass = mass; }
@@ -35,7 +35,8 @@ public:
 	float GetSpeedKmh() const { return GetSpeed() * 3.6f; }		//速度(km/h)取得
 	Engine& GetEngine() { return m_engine; }					//エンジン参照取得
 	const Engine& GetEngine() const { return m_engine; }		//エンジン参照取得(定数版)
-	Vector4 GetYawRotation() const { return m_yawRotation; } //現在のヨー角クォータニオン取得
+	Vector4 GetYawRotation() const { return m_yawRotation; }	//現在のヨー角クォータニオン取得
+	const Vector3* GetCorners() const { return m_corners; }		//ボートの4隅のワールド座標取得
 
 	//水面設定
 	void SetWater(Water* water) { m_water = water; }
@@ -86,6 +87,8 @@ private:
 	Vector4 UpdateRoll(float deltaTime);
 	Vector4 UpdatePitch(float deltaTime);
 	void UpdateBobbing(float deltaTime);
+	void UpdateCorners();
+
 
 	//エンジン
 	Engine m_engine;
@@ -124,6 +127,10 @@ private:
 	float m_length;	// ボートの長さ
 	float m_width;	// ボートの幅
 	float m_height;	// ボートの高さ
+	//ボートの4隅のワールド座標
+	Vector3 m_corners[4];
+	//壁にめり込んだ深さ
+	Vector2 m_wallPenetrationDepth;
 
 	//姿勢制御パラメータ
 	float m_rollAmount;			// ロール量

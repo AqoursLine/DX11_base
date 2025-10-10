@@ -16,7 +16,10 @@
 #include "speedMeter.h"
 #include "wall.h"
 #include "startGate.h"
+#include "goalGate.h"
+#include "lapReadyGate.h"
 #include "raceTimer.h"
+#include "lapDisplay.h"
 
 bool GameScene::Initialize() {
 	//とりあえずの壁
@@ -51,7 +54,7 @@ bool GameScene::Initialize() {
 	AddGameObject(new RaceCourseManager(), TYPE_OPAQUE);
 
 	//レースマネージャー
-	AddGameObject(new RaceManager(), TYPE_OPAQUE);
+	AddGameObject(new RaceManager(), TYPE_CUTOUT);
 
 	//カウントダウン
 	AddGameObject(new RaceCountDownText(), TYPE_BEFORE_PROCESS_UI);
@@ -65,8 +68,17 @@ bool GameScene::Initialize() {
 	//スタートゲート
 	AddGameObject(new StartGate(), TYPE_CUTOUT);
 
+	//ゴールゲート
+	AddGameObject(new GoalGate(), TYPE_CUTOUT);
+
+	//ラップゲート
+	AddGameObject(new LapReadyGate(), TYPE_CUTOUT);
+
 	//レースタイマー
 	AddGameObject(new RaceTimer(), TYPE_BEFORE_PROCESS_UI);
+
+	//ラップ表示
+	AddGameObject(new LapDisplay(), TYPE_BEFORE_PROCESS_UI);
 
 	//カメラの初期化
 	AddGameObject(new Camera(), TYPE_CAMERA);

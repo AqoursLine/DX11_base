@@ -7,6 +7,10 @@ public:
 
 	bool Load(std::wstring fileName);
 
+	void SetSRV(std::wstring name, ID3D11ShaderResourceView* srv) {
+		m_textureCache[name] = srv;
+	}
+
 	static void ReleaseAll();
 
 	void Set(int slot = 0);

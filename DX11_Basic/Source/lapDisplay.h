@@ -2,10 +2,10 @@
 
 #include "gameObject.h"
 
-class StartGate : public GameObject {
+class LapDisplay : public GameObject {
 public:
-	StartGate() = default;
-	~StartGate() = default;
+	LapDisplay() = default;
+	~LapDisplay() = default;
 
 protected:
 	bool Initialize() override;
@@ -19,11 +19,10 @@ private:
 	class VertexShader* m_vertexShader = nullptr;
 	class PixelShader* m_pixelShader = nullptr;
 
-	float m_animationTime = 0.0f;
-	float m_animationSpeed = 1.0f;
+	int m_lapCount = 0;
+	int m_maxLapCount = 3;
 
 	class RaceManager* m_raceManager = nullptr;
-
-	bool m_isPassed = false;
-	float m_passCheckTime = 0.0f;
+	class Player* m_player = nullptr;
 };
+

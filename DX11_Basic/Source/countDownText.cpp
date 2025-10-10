@@ -9,6 +9,8 @@
 #include "scene.h"
 #include "raceManager.h"
 
+#include <algorithm>
+
 bool RaceCountDownText::Initialize() {
 	//スプライト生成
 	m_sprite = new Sprite();
@@ -17,7 +19,7 @@ bool RaceCountDownText::Initialize() {
 	}
 	//テクスチャロード
 	m_texture = new Texture();
-	if (!m_texture->Load(L"Asset\\Texture\\num.png")) {
+	if (!m_texture->Load(L"Asset\\Texture\\dotNum.png")) {
 		return false;
 	}
 	//シェーダーロード
@@ -82,11 +84,6 @@ void RaceCountDownText::Draw() const {
 		return;
 	}
 
-	//定数バッファ更新
-	SHADER_PROPERTIES props = {};
-	props.params1 = Vector4(10.0f, 1.0f, m_time, 0.0f);
-	RENDERER.SetShaderProperties(props);
-
 	//シェーダーセット
 	m_vertexShader->Set();
 	m_pixelShader->Set();
@@ -97,6 +94,21 @@ void RaceCountDownText::Draw() const {
 	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	material.textureEnable = true;
 	RENDERER.SetMaterial(material);
+
+	//定数バッファ更新
+	SHADER_PROPERTIES props = {};
+
+	props.params1.z = 1.0f / 10.0f; //1フレームの幅(10フレーム)
+	props.params1.w = 1.0f / 2.0f; //1フレームの高さ(2行)
+
+	//uv座標
+	int frame = static_cast<int>(m_time);
+	frame = std::clamp(frame, 0, 9); //0～9に制限
+
+	props.params1.x = (frame % 10) * props.params1.z; //フレーム番号から左上のU座標を計算
+	props.params1.y = (frame / 10) * props.params1.w; //フレーム番号から左上のV座標を計算
+
+	RENDERER.SetShaderProperties(props);
 
 	//スプライト描画
 	m_sprite->Draw(m_position, m_rotation, m_scale);

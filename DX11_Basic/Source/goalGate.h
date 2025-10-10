@@ -2,10 +2,10 @@
 
 #include "gameObject.h"
 
-class StartGate : public GameObject {
+class GoalGate : public GameObject {
 public:
-	StartGate() = default;
-	~StartGate() = default;
+	GoalGate() = default;
+	~GoalGate() = default;
 
 protected:
 	bool Initialize() override;
@@ -19,11 +19,17 @@ private:
 	class VertexShader* m_vertexShader = nullptr;
 	class PixelShader* m_pixelShader = nullptr;
 
+	class Texture* m_lapGateTexture = nullptr;
+	class Texture* m_lapNumberTexture = nullptr;
+	class PixelShader* m_lapGatePS = nullptr;
+
 	float m_animationTime = 0.0f;
 	float m_animationSpeed = 1.0f;
 
 	class RaceManager* m_raceManager = nullptr;
 
-	bool m_isPassed = false;
-	float m_passCheckTime = 0.0f;
+	bool m_isPassed = false;	//ゴール通過フラグ
+
+	int m_topLapCount = 0;	//トップの周回数
+	int m_lastLapCount = 0; //最下位の周回数
 };

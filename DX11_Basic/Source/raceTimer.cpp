@@ -32,7 +32,7 @@ bool RaceTimer::Initialize() {
 
 	//位置、回転、拡大縮小の設定
 	m_scale = { 60.0f, 112.0f, 1.0f };
-	m_position = { SCREEN_WIDTH * 0.5f - m_scale.x * 3.0f + m_scale.x * 0.5f, 100.0f, 0.0f };
+	m_position = { SCREEN_WIDTH * 0.5f + m_scale.x * 3.5f, 100.0f, 0.0f };
 	m_rotation = { 0.0f, 0.0f, 0.0f };
 
 	//レースマネージャーの取得
@@ -66,7 +66,7 @@ void RaceTimer::Draw() const {
 	m_animationPixelShader->Set();
 	//マテリアルセット
 	MATERIAL material = {};
-	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.diffuse = XMFLOAT4(1.0f, 0.3f, 0.3f, 1.0f);
 	material.textureEnable = true;
 	RENDERER.SetMaterial(material);
 
@@ -85,26 +85,32 @@ void RaceTimer::Draw() const {
 	//ミリ秒を整数に変換して表示
 	int timeInt = static_cast<int>(m_raceTime * 100); // 小数第2位まで表示
 
-	//1桁ずつ表示(1:00.00形式)
-	for (int i = 0; i < 6; i++) {
-		int digit;
-		if (i == 1) {
-			//コロン
-			digit = 10; //コロンのインデックス
-		} else if (i == 4) {
-			//小数点
-			digit = 11; //小数点のインデックス
-		} else {
-			digit = timeInt % 10; //一番右の桁を取得
-			timeInt /= 10; //右にシフト
-		}
-		Vector3 digitPos = pos + Vector3(m_scale.x * i, 0.0f, 0.0f);
+	//各桁の数字を取得
+	int digits[7];
+	digits[0] = (timeInt) % 10; // ミリ秒1の位
+	digits[1] = (timeInt / 10) % 10; // ミリ秒10の位
+	digits[2] = 10; // ドット
+	digits[3] = (timeInt / 100) % 10; // 秒1の位
+	digits[4] = (timeInt / 1000) % 6; // 秒10の位
+	digits[5] = 11; // コロン
+	digits[6] = (timeInt / 6000); // 分1の位
+	
+
+	//右から表示(1:00.00(分秒ミリ秒)形式)
+	for (int i = 0; i < 7; i++) {
+		//位置調整
+		pos.x -= m_scale.x;
+
+		//アニメーションプロパティ設定
+		//左上のUV座標
+		properties.params1.x = (digits[i] % 10) * properties.params1.z; //フレーム番号から左上のU座標を計算
+		properties.params1.y = (digits[i] / 10) * properties.params1.w; //フレーム番号から左上のV座標を計算
+
 		//シェーダープロパティ設定
-		properties.params1.x = (digit % 10) * properties.params1.z; //u座標
-		properties.params1.y = (digit / 10) * properties.params1.w; //v座標
 		RENDERER.SetShaderProperties(properties);
-		//数字描画
-		m_sprite->Draw(digitPos, Vector3::ZERO, m_scale);
+
+		//スプライト描画
+		m_sprite->Draw(pos, Vector3::ZERO, m_scale);
 	}
 
 }

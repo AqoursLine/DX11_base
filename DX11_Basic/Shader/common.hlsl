@@ -59,6 +59,7 @@ cbuffer ShaderProperties : register(b6)
 {
 	float4 params1;
 	float4 params2;
+	float4 params3;
 };
 
 //頂点シェーダー入力構造体

@@ -117,8 +117,6 @@ void Player::Draw() const {
 	//ボックス描画
 	m_box->Draw(m_position, m_quaternion, m_scale);
 
-	DrawWheels();
-
 	//進行方向描画
 	Vector3 arrowPos = m_position + Vector3 { 0.0f, 1.0f, 0.0f };
 
@@ -149,18 +147,6 @@ void Player::Draw() const {
 
 	//ブレンドモード解除
 	RENDERER.SetATCEnable(false);
-
-	//デバッグ情報表示
-	std::cout << "Speed: " << GetSpeed() * 3.6f << " km/h" << std::endl;
-	std::cout << "Position: (" << m_position.x << ", " << m_position.y << ", " << m_position.z << ")" << std::endl;
-	Vector3 vel = GetVelocity();
-	std::cout << "Velocity: (" << vel.x << ", " << vel.y << ", " << vel.z << ")" << std::endl;
-	Vector3 acc = GetAcceleration();
-	std::cout << "Acceleration: (" << acc.x << ", " << acc.y << ", " << acc.z << ")" << std::endl;
-	std::cout << "Rotation: (" << m_rotation.x << ", " << m_rotation.y << ", " << m_rotation.z << ")" << std::endl;
-	std::cout << "Quaternion: (" << m_quaternion.x << ", " << m_quaternion.y << ", " << m_quaternion.z << ", " << m_quaternion.w << ")" << std::endl;
-	std::cout << "Throttle Input: " << m_smoothedInput.throttle << std::endl;
-
 }
 
 void Player::UpdateInput(double deltaTime) {
@@ -216,16 +202,3 @@ void Player::SmoothInput(double deltaTime) {
 	m_smoothedInput.brake = m_currentInput.brake;
 }
 
-void Player::DrawWheels() const {
-	//ホイール描画
-	//for (int i = 0; i < 4; i++) {
-	//	Vector3 wheelPos = GetWheelPosition(i);
-	//	float steerAngle = GetWheelSteerAngle(i);
-	//	Vector3 wheelRot = Vector3::ZERO;
-	//	wheelRot.x = m_wheelRotations[i];
-	//	wheelRot.y = m_rotation.y + steerAngle;
-
-	//	m_model->Draw(wheelPos, wheelRot, Vector3 { 0.5f, 1.0f, 1.0f });
-
-	//}
-}

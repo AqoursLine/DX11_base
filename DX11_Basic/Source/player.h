@@ -51,7 +51,4 @@ private:
 	void UpdateInput(double deltaTime);
 	//入力平滑化
 	void SmoothInput(double deltaTime);
-
-	//タイヤ描画
-	void DrawWheels() const;
 };

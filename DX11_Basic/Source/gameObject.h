@@ -28,7 +28,7 @@ public:
 		}
 	}
 	void DrawBase() {
-		if (m_isVisible) {
+		if (m_isVisible && m_isActive) {
 			Draw();
 		}
 	}

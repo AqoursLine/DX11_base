@@ -2,10 +2,10 @@
 
 #include "gameObject.h"
 
-class StartGate : public GameObject {
+class ResultText : public GameObject {
 public:
-	StartGate() = default;
-	~StartGate() = default;
+	ResultText() = default;
+	~ResultText() = default;
 
 protected:
 	bool Initialize() override;
@@ -16,14 +16,7 @@ protected:
 private:
 	class Sprite* m_sprite = nullptr;
 	class Texture* m_texture = nullptr;
+	// Shader
 	class VertexShader* m_vertexShader = nullptr;
 	class PixelShader* m_pixelShader = nullptr;
-
-	float m_animationTime = 0.0f;
-	float m_animationSpeed = 1.0f;
-
-	class RaceManager* m_raceManager = nullptr;
-
-	bool m_isPassed = false;
-	float m_passCheckTime = 0.0f;
 };

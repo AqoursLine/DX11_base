@@ -33,6 +33,7 @@ struct LIGHT {
 struct SHADER_PROPERTIES {
 	Vector4 params1; // 汎用パラメータ1
 	Vector4 params2; // 汎用パラメータ2
+	Vector4 params3; // 汎用パラメータ3
 };
 
 //深度モード

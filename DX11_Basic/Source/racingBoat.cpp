@@ -8,7 +8,7 @@
 void RacingBoat::SetThrottle(float throttle) {
 	float adjustedThrottle = throttle;
 
-	if (m_isStarted) {
+	if (m_isStarted && !m_isPassedGoalGate) {
 		//スタート開始後
 		if (throttle < 0) {
 			//リバースギア
@@ -23,6 +23,11 @@ void RacingBoat::SetThrottle(float throttle) {
 	}
 
 	Boat::SetThrottle(throttle);
+}
+
+void RacingBoat::FinishRace() {
+	//レース終了処理
+	m_raceManager->SetLaneTime(m_laneIndex);
 }
 
 bool RacingBoat::Initialize() {

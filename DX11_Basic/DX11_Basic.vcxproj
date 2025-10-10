@@ -149,6 +149,12 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <FxCompile Include="Shader\addvancedSpriteAnimationPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="Shader\common.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -233,7 +239,10 @@
     <ClCompile Include="Source\fieldObject.cpp" />
     <ClCompile Include="Source\fpsCamera.cpp" />
     <ClCompile Include="Source\gameScene.cpp" />
+    <ClCompile Include="Source\goalGate.cpp" />
     <ClCompile Include="Source\input.cpp" />
+    <ClCompile Include="Source\lapDisplay.cpp" />
+    <ClCompile Include="Source\lapReadyGate.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\manager.cpp" />
     <ClCompile Include="Source\minimap.cpp" />
@@ -244,6 +253,9 @@
     <ClCompile Include="Source\raceTimer.cpp" />
     <ClCompile Include="Source\racingBoat.cpp" />
     <ClCompile Include="Source\renderer.cpp" />
+    <ClCompile Include="Source\resultScene.cpp" />
+    <ClCompile Include="Source\resultText.cpp" />
+    <ClCompile Include="Source\resultTime.cpp" />
     <ClCompile Include="Source\scene.cpp" />
     <ClCompile Include="Source\shaders.cpp" />
     <ClCompile Include="Source\skyDome.cpp" />
@@ -273,8 +285,11 @@
     <ClInclude Include="Source\fpsCamera.h" />
     <ClInclude Include="Source\gameObject.h" />
     <ClInclude Include="Source\gameScene.h" />
+    <ClInclude Include="Source\goalGate.h" />
     <ClInclude Include="Source\input.h" />
     <ClInclude Include="Source\keybordEnum.h" />
+    <ClInclude Include="Source\lapDisplay.h" />
+    <ClInclude Include="Source\lapReadyGate.h" />
     <ClInclude Include="Source\main.h" />
     <ClInclude Include="Source\manager.h" />
     <ClInclude Include="Source\minimap.h" />
@@ -285,6 +300,9 @@
     <ClInclude Include="Source\raceTimer.h" />
     <ClInclude Include="Source\racingBoat.h" />
     <ClInclude Include="Source\renderer.h" />
+    <ClInclude Include="Source\resultScene.h" />
+    <ClInclude Include="Source\resultText.h" />
+    <ClInclude Include="Source\resultTime.h" />
     <ClInclude Include="Source\scene.h" />
     <ClInclude Include="Source\shaders.h" />
     <ClInclude Include="Source\skyDome.h" />
