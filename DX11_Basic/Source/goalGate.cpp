@@ -41,6 +41,8 @@ bool GoalGate::Initialize() {
 	m_pixelShader = new PixelShader();
 	m_pixelShader->Load(L"Shader\\spriteAnimationPS.cso");
 
+	m_lapGateVS = new VertexShader();
+	m_lapGateVS->Load(L"Shader\\unlitTextureVS.cso");
 	m_lapGatePS = new PixelShader();
 	m_lapGatePS->Load(L"Shader\\addvancedSpriteAnimationPS.cso");
 
@@ -71,6 +73,7 @@ void GoalGate::Finalize() {
 	//シェーダーの解放
 	delete m_vertexShader;
 	delete m_pixelShader;
+	delete m_lapGateVS;
 	delete m_lapGatePS;
 }
 
@@ -137,9 +140,6 @@ void GoalGate::Update(double deltaTime) {
 }
 
 void GoalGate::Draw() const {
-	//シェーダーの設定
-	m_vertexShader->Set();
-	m_pixelShader->Set();
 
 	//マテリアルセット
 	MATERIAL material = {};
@@ -148,19 +148,33 @@ void GoalGate::Draw() const {
 	//テクスチャの設定
 	if (m_topLapCount >= m_raceManager->GetLapCountToFinish()) {
 		//ゴールテープ
+		//シェーダーの設定
+		m_vertexShader->Set();
+		m_pixelShader->Set();
+
+		//テクスチャセット
 		m_texture->Set(0);
 
 		material.diffuse = XMFLOAT4(1.0f, 0.1f, 0.1f, 1.0f);
 	} else {
 		//周回ゲート
+		//シェーダーの設定
+		//m_lapGateVS->Set();
+		//m_lapGatePS->Set();
+
+		m_vertexShader->Set();
+		m_pixelShader->Set();
+
+		//テクスチャセット
 		m_lapGateTexture->Set(0);
+		m_lapNumberTexture->Set(1);
 
 		material.diffuse = XMFLOAT4(0.85f, 1.0f, 0.0f, 1.0f);
 	}
 
 	RENDERER.SetMaterial(material);
 
-	//シェーダーに時間を渡す
+	//シェーダープロパティ
 	SHADER_PROPERTIES properties = {};
 	//params1 ゲートのUVアニメーション用
 	properties.params1.z = 2.0f; //幅
@@ -174,8 +188,10 @@ void GoalGate::Draw() const {
 	properties.params2.y = static_cast<float>(m_lastLapCount / 10) * properties.params2.w; //Yオフセット
 
 	//params3 ゲート上の番号位置用
-	properties.params3.x = 0.066f; //Xオフセット
-	properties.params3.y = 0.22f; //Yオフセット
+	properties.params3.x = 0.1f; //uv上の最小X位置
+	properties.params3.y = 0.22f; //uv上の最小Y位置
+	properties.params3.z = 0.3f; //uv上の最大X位置
+	properties.params3.w = 0.78f; //uv上の最大Y位置
 
 
 	RENDERER.SetShaderProperties(properties);

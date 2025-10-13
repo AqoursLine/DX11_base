@@ -54,6 +54,9 @@
     <FxCompile Include="Shader\addvancedSpriteAnimationPS.hlsl">
       <Filter>シェーダー</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\gridPS.hlsl">
+      <Filter>シェーダー</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\camera.cpp">

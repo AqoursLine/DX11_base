@@ -11,9 +11,13 @@ void main( in VS_INPUT In, out PS_INPUT Out )
 	
 	//頂点をワールド空間に変換
 	Out.WorldPosition = mul(In.Position, WorldMatrix);
-	
-	//法線をそのまま渡す
-	Out.Normal = In.Normal;
+
+	//法線の向きを回転
+	float4 worldNormal, normal;
+	normal = float4(In.Normal.xyz, 0);
+	worldNormal = mul(normal, WorldMatrix);
+	worldNormal = normalize(worldNormal);
+	Out.Normal = worldNormal;
 	
 	//UV座標をそのまま渡す
 	Out.TexCoord = In.TexCoord;

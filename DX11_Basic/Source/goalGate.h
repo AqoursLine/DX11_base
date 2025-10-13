@@ -18,10 +18,11 @@ private:
 	class Texture* m_texture = nullptr;
 	class VertexShader* m_vertexShader = nullptr;
 	class PixelShader* m_pixelShader = nullptr;
+	class VertexShader* m_lapGateVS = nullptr;
+	class PixelShader* m_lapGatePS = nullptr;
 
 	class Texture* m_lapGateTexture = nullptr;
 	class Texture* m_lapNumberTexture = nullptr;
-	class PixelShader* m_lapGatePS = nullptr;
 
 	float m_animationTime = 0.0f;
 	float m_animationSpeed = 1.0f;

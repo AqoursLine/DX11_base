@@ -2,6 +2,8 @@
 #include "box.h"
 #include "shaders.h"
 
+#include "renderer.h"
+
 bool Wall::Initialize() {
 	m_model = new Box();
 	if (!m_model->Initialize()) {
@@ -9,9 +11,9 @@ bool Wall::Initialize() {
 	}
 	//シェーダーロード
 	m_vs = new VertexShader();
-	m_vs->Load(L"Shader\\unlitColorVS.cso");
+	m_vs->Load(L"Shader\\unlitTextureVS.cso");
 	m_ps = new PixelShader();
-	m_ps->Load(L"Shader\\unlitColorPS.cso");
+	m_ps->Load(L"Shader\\gridPS.cso");
 	return true;
 }
 
@@ -38,6 +40,8 @@ void Wall::Draw() const {
 		//シェーダーの設定
 		m_vs->Set();
 		m_ps->Set();
+
+		//モデルの描画
 		m_model->Draw(m_position, m_rotation, m_scale);
 	}
 }
