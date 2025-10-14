@@ -67,8 +67,9 @@ struct VS_INPUT
 {
 	float4 Position : POSITION0;
 	float4 Normal : NORMAL0;
-	float4 Diffuse : COLOR0;
 	float2 TexCoord : TEXCOORD0;
+	float4 Tangent : TANGENT0;
+	float4 Diffuse : COLOR0;
 };
 
 //ピクセルシェーダー入力構造体

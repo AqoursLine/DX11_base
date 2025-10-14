@@ -1,5 +1,4 @@
 #include "player.h"
-#include "model.h"
 #include "input.h"
 #include "box.h"
 #include "field.h"
@@ -47,10 +46,6 @@ bool Player::Initialize() {
 }
 
 void Player::Finalize() {
-	if (m_model) {
-		m_model->ReleaseModel();
-		delete m_model;
-	}
 	if (m_box) {
 		m_box->Finalize();
 		delete m_box;

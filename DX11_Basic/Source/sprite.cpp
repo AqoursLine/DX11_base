@@ -18,15 +18,15 @@ bool Sprite::Initialize() {
 	VERTEX_3D vertices[4] = {};
 
 	//二次元ポリゴン設定
-	vertices[0].position = XMFLOAT3(-0.5f, -0.5f, 0.0f);
-	vertices[1].position = XMFLOAT3(0.5f, -0.5f, 0.0f);
-	vertices[2].position = XMFLOAT3(-0.5f, 0.5f, 0.0f);
-	vertices[3].position = XMFLOAT3(0.5f, 0.5f, 0.0f);
+	vertices[0].position = XMFLOAT4(-0.5f, -0.5f, 0.0f, 1.0f);
+	vertices[1].position = XMFLOAT4(0.5f, -0.5f, 0.0f, 1.0f);
+	vertices[2].position = XMFLOAT4(-0.5f, 0.5f, 0.0f, 1.0f);
+	vertices[3].position = XMFLOAT4(0.5f, 0.5f, 0.0f, 1.0f);
 
-	vertices[0].normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	vertices[1].normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	vertices[2].normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	vertices[3].normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	vertices[0].normal = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	vertices[1].normal = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	vertices[2].normal = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	vertices[3].normal = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 
 	vertices[0].texcoord = XMFLOAT2(0.0f, 0.0f);
 	vertices[1].texcoord = XMFLOAT2(1.0f, 0.0f);

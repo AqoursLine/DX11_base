@@ -5,6 +5,12 @@
 #include "scene.h"
 #include "water.h"
 
+#ifdef _DEBUG
+#include <iostream>
+
+#endif // _DEBUG
+
+
 bool Buoy::Initialize() {
 	m_model = new Box();
 	if (!m_model->Initialize()) {
@@ -12,7 +18,7 @@ bool Buoy::Initialize() {
 	}
 
 	m_rotation = { 0.0f, 0.0f, 0.0f };
-	m_scale = { 1.0f, 1.0f, 1.0f };
+	m_scale = { 1.1f, 0.95f, 1.1f };
 
 	m_water = SYSTEM.GetManager()->GetScene()->GetGameObject<Water>();
 
@@ -27,25 +33,28 @@ void Buoy::Finalize() {
 }
 
 void Buoy::Update(double deltaTime) {
-	////重力
-	//float gravity = 9.81f * m_mass;
+	//重力
+	float gravity = 9.81f * m_mass;
 
-	////浮力
-	//float buoyancy = CalculateBuoyancy();
+	//浮力
+	float buoyancy = CalculateBuoyancy();
 
-	////抵抗
-	//float drag = CalculateDrag();
+	//抵抗
+	float drag = CalculateDrag();
 
-	////合力から加速度を計算
-	//float totalForce = buoyancy - gravity - drag;
-	//m_acceleration = totalForce / m_mass;
+	//合力から加速度を計算
+	float totalForce = buoyancy - gravity - drag;
+	m_acceleration = totalForce / m_mass;
 
-	////速度と位置を更新
-	//float dt = static_cast<float>(deltaTime);
-	//m_velocity += m_acceleration * dt;
+	//速度と位置を更新
+	float dt = static_cast<float>(deltaTime);
+	m_velocity += m_acceleration * dt;
 
 	//位置更新
-	m_position.y = m_water->GetWaterHeight(m_position);
+//	m_position.y = m_water->GetWaterHeight(m_position);
+	m_position.y += m_velocity * dt;
+
+	//デバッグ表示
 }
 
 void Buoy::Draw() const {
@@ -55,44 +64,22 @@ void Buoy::Draw() const {
 }
 
 float Buoy::CalculateBuoyancy() const {
-	//水の密度(kg/m^3)
-	float waterDensity = 1000.0f;
-	float g = 9.81f; //重力加速度(m/s^2)
-
-	//水中に沈んだ体積(m^3)
-	float submergedVolume = CalculateSubmergedVolume();
-
-	//浮力(F = ρ * g * V)
-	return waterDensity * g * submergedVolume;
-}
-
-float Buoy::CalculateSubmergedVolume() const {
-	//体積
-	float volume = m_scale.x * m_scale.y * m_scale.z; //立方体として計算
-
-	//水面の高さ
+	//沈んだ高さを計算
 	float waterHeight = m_water->GetWaterHeight(m_position);
-//	float waterHeight = 0.0f; //静止水面をy=0と仮定
+	float submergedHeight = waterHeight - (m_position.y - m_scale.y);
 
-	//浮きの底面のy座標
-	float bobberBottomY = m_position.y - (m_scale.y * 0.5f);
-
-	if (bobberBottomY >= waterHeight) {
-		//完全に水面より上
+	if (submergedHeight <= 0.0f) {
+		//浮いている場合、浮力はゼロ
 		return 0.0f;
-	} else if (m_position.y + (m_scale.y * 0.5f) <= waterHeight) {
-		//完全に水面より下
-		return volume;
-	} else {
-		//一部が水中に沈んでいる場合
-		float submergedHeight = waterHeight - bobberBottomY;
-		float submergedRatio = submergedHeight / m_scale.y;
-		return submergedRatio * volume;
 	}
+
+	//沈んだ分だけ浮力を計算
+	return submergedHeight * m_mass * 9.81f * 1.8f; //簡略化した浮力計算
 }
+
 
 float Buoy::CalculateDrag() const {
 	//水の抵抗(簡略化)
 	float dragCoefficient = 0.5f; //抵抗係数
-	return dragCoefficient * m_velocity;
+	return dragCoefficient * m_velocity; //抵抗力 = 0.5 * v^2
 }

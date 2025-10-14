@@ -2,6 +2,7 @@
 #include "manager.h"
 #include "renderer.h"
 #include "input.h"
+#include "testScene.h"
 #include "titleScene.h"
 #include "system.h"
 #include "timer.h"
@@ -18,7 +19,12 @@ bool Manager::Initialize() {
 	m_isFinished = false;
 
 	//ワールド作成
+#ifdef _DEBUG
+	m_scene = new TestScene();
+#else
 	m_scene = new TitleScene();
+#endif // _DEBUG
+
 	if (!m_scene->Initialize()) {
 		return false;
 	}

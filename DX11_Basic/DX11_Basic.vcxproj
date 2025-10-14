@@ -252,7 +252,8 @@
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\manager.cpp" />
     <ClCompile Include="Source\minimap.cpp" />
-    <ClCompile Include="Source\model.cpp" />
+    <ClCompile Include="Source\modelLoader.cpp" />
+    <ClCompile Include="Source\modelRenderer.cpp" />
     <ClCompile Include="Source\player.cpp" />
     <ClCompile Include="Source\raceCourseManager.cpp" />
     <ClCompile Include="Source\raceManager.cpp" />
@@ -269,6 +270,8 @@
     <ClCompile Include="Source\sprite.cpp" />
     <ClCompile Include="Source\startGate.cpp" />
     <ClCompile Include="Source\system.cpp" />
+    <ClCompile Include="Source\test.cpp" />
+    <ClCompile Include="Source\testScene.cpp" />
     <ClCompile Include="Source\texture.cpp" />
     <ClCompile Include="Source\timer.cpp" />
     <ClCompile Include="Source\titleScene.cpp" />
@@ -299,7 +302,7 @@
     <ClInclude Include="Source\main.h" />
     <ClInclude Include="Source\manager.h" />
     <ClInclude Include="Source\minimap.h" />
-    <ClInclude Include="Source\model.h" />
+    <ClInclude Include="Source\modelRenderer.h" />
     <ClInclude Include="Source\player.h" />
     <ClInclude Include="Source\raceCourseManager.h" />
     <ClInclude Include="Source\raceManager.h" />
@@ -316,6 +319,8 @@
     <ClInclude Include="Source\sprite.h" />
     <ClInclude Include="Source\startGate.h" />
     <ClInclude Include="Source\system.h" />
+    <ClInclude Include="Source\test.h" />
+    <ClInclude Include="Source\testScene.h" />
     <ClInclude Include="Source\texture.h" />
     <ClInclude Include="Source\timer.h" />
     <ClInclude Include="Source\titleScene.h" />

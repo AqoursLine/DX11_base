@@ -22,32 +22,6 @@ struct Ripple {
 	}
 };
 
-//航軌構造体
-struct WakeTrail {
-	Vector3 startPosition;	//航軌の開始位置
-	Vector3 endPosition;	//航軌の終了位置
-	Vector3 direction;		//航軌の方向
-	float width;			//航軌の幅
-	float length;			//航軌の長さ
-	float intensity;		//航軌の強度
-	float time;				//経過時間
-	float lifetime;			//寿命
-	bool active;			//航軌が有効かどうか
-
-	WakeTrail()
-		: startPosition(0.0f, 0.0f, 0.0f)
-		, endPosition(0.0f, 0.0f, 0.0f)
-		, direction(0.0f, 0.0f, 0.0f)
-		, width(5.0f)
-		, length(20.0f)
-		, intensity(1.0f)
-		, time(0.0f)
-		, lifetime(15.0f)
-		, active(false)
-	{
-	}
-};
-
 class Water : public GameObject {
 public:
 	Water();
@@ -55,11 +29,6 @@ public:
 
 	//波紋を追加
 	void AddRipple(const Vector3& position, float amplitude = 1.0f, float frequency = 2.0f, float speed = 5.0f);
-
-	//航跡機能
-	void AddWakeTrail(const Vector3& startPos, const Vector3& endPos, float width = 8.0f, float intensity = 1.5f);
-	void UpdateBoatWake(const Vector3& currentPos, const Vector3& previousPos, float boatSpeed, float boatWidth = 3.0f);
-	void ClearWakeTrails();
 
 	float GetWaterHeight(const Vector3& position) const;
 	Vector3 GetWaterNormal(const Vector3& position) const;
@@ -119,16 +88,12 @@ private:
 	//水面の法線計算(CPU版)
 	Vector3 CalculateWaveNormal(const Vector3& position, float time) const;
 
-	//航跡波計算
-	float CalculateWakeHeight(const Vector3& position, float time) const;
-
 	//DirectX 11リソース
 	ID3D11Buffer* m_vertexBuffer = nullptr;
 	ID3D11Buffer* m_indexBuffer = nullptr;
 	ID3D11Buffer* m_constantBuffer = nullptr;
-	ID3D11VertexShader* m_vertexShader = nullptr;
-	ID3D11PixelShader* m_pixelShader = nullptr;
-	ID3D11InputLayout* m_inputLayout = nullptr;
+	class VertexShader* m_vertexShader = nullptr;
+	class PixelShader* m_pixelShader = nullptr;
 
 	//水のパラメータ
 	float m_waterSize;		//水面のサイズ
@@ -148,11 +113,6 @@ private:
 	std::vector<Ripple> m_ripples;
 	static const int MAX_RIPPLES = 10;
 	int m_rippleIndex;	//次に使用する波紋インデックス
-
-	//航跡管理
-	std::vector<WakeTrail> m_wakeTrails;
-	static const int MAX_WAKE_TRAILS = 20;
-	int m_wakeTrailIndex;	//次に使用する航跡インデックス
 
 	//定数バッファ用構造体
 	struct WaterConstantBuffer {
@@ -175,13 +135,6 @@ private:
 			XMFLOAT4 positionAndTime;	// xyz:位置, w:時間
 			XMFLOAT4 params;			// x:振幅, y:周波数, z:速度, w:使用フラグ
 		} ripples[MAX_RIPPLES];
-
-		//航跡データ
-		struct {
-			XMFLOAT4 startPos;	// xyz:開始位置. w:時間
-			XMFLOAT4 endPos;	// xyz:終了位置, w:強度
-			XMFLOAT4 params;	// x:幅, y:長さ, z:寿命, w:使用フラグ
-		} wakeTrails[MAX_WAKE_TRAILS];
 	};
 
 };

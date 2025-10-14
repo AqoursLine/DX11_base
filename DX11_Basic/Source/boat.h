@@ -75,7 +75,7 @@ private:
 	Vector3 CalculateLateralForce() const;
 	Vector3 CalculateBrakeForce() const;
 	Vector3 CalculateDragForce() const;
-	Vector3 CalculateBuoyancyForce() const;
+	Vector3 CalculateBuoyancyForce();
 	Vector3 CalculateWaveForce();
 	Vector3 CalculateWallCollisionForce();
 	void UpdateWaterInteraction(float deltaTime);
@@ -85,8 +85,7 @@ private:
 	void UpdateRotation(float deltaTime);
 	void UpdateYaw(float deltaTime);
 	Vector4 UpdateRoll(float deltaTime);
-	Vector4 UpdatePitch(float deltaTime);
-	void UpdateBobbing(float deltaTime);
+	void UpdatePitch(float deltaTime);
 	void UpdateCorners();
 
 
@@ -106,22 +105,23 @@ private:
 	float m_maxTurnRate;		// 最大旋回速度(rad/s)
 
 	float m_verticalDamping;	// 垂直方向の減衰係数
-	float m_buoyancyStiffness;	// 浮力の剛性係数
 	float m_restingWaterLevel;	// 静止水面の高さ
-	float m_waveFolllowStrength;// 波の追従距離
-	Vector3 m_lastWaveForce;	// 最後に受けた波の力
+	float m_waveForceScale;		// 波の力スケール
+	bool m_isInWater;			// 水中フラグ
 
 	//物理状態
 	Vector3 m_velocity;			// 速度ベクトル
 	Vector3 m_acceleration;		// 加速度ベクトル
 	Vector3 m_angularVelocity;	// 角速度
-	float m_dragScalar;		// 抵抗スカラー
+	float m_dragScalar;			// 抵抗スカラー
 
 	//前フレームの位置
 	Vector3 m_prevPosition;
 
 	//水面への参照
 	Water* m_water;
+	//水滴用タイマー
+	float m_splashTimer;
 
 	//ボートの寸法
 	float m_length;	// ボートの長さ
@@ -136,6 +136,7 @@ private:
 	float m_rollAmount;			// ロール量
 	float m_pitchAmount;		// ピッチ量
 	Vector4 m_yawRotation;		// 現在のヨー角クォータニオン
+	Vector4 m_pitchRotation;	// 現在のピッチ角クォータニオン
 
 	//物理定数
 	static constexpr float GRAVITY = 9.81f; // 重力加速度 (m/s^2)

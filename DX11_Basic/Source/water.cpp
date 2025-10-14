@@ -1,14 +1,15 @@
 #include "water.h"
 #include "renderer.h"
 
+#include "shaders.h"
+
 Water::Water()
 	: m_vertexBuffer(nullptr)
 	, m_indexBuffer(nullptr)
 	, m_constantBuffer(nullptr)
 	, m_vertexShader(nullptr)
 	, m_pixelShader(nullptr)
-	, m_inputLayout(nullptr)
-	, m_waterSize(1000.0f)		//水面のサイズ
+	, m_waterSize(500)		//水面のサイズ
 	, m_waveHeight(2.0f)		//波の高さスケール
 	, m_time(0.0f)			//経過時間
 	, m_gridResolution(200)	//グリッドの解像度
@@ -19,15 +20,11 @@ Water::Water()
 	, m_baseWaveSpeed2(1.5f)		//基本波2の速度
 	, m_baseWaveSpeed3(1.0f)		//基本波3の速度
 	, m_rippleIndex(0)
-	, m_wakeTrailIndex(0)
 {
 	m_ripples.resize(MAX_RIPPLES);
-	m_wakeTrails.resize(MAX_WAKE_TRAILS);
 }
 
 Water::~Water() {
-	Finalize();
-
 }
 
 void Water::AddRipple(const Vector3& position, float amplitude, float frequency, float speed) {
@@ -41,58 +38,6 @@ void Water::AddRipple(const Vector3& position, float amplitude, float frequency,
 	ripple.active = true;
 
 	m_rippleIndex = (m_rippleIndex + 1) % MAX_RIPPLES;
-}
-
-void Water::AddWakeTrail(const Vector3& startPos, const Vector3& endPos, float width, float intensity) {
-	//次のインデックスに航跡を追加
-	WakeTrail& wake = m_wakeTrails[m_wakeTrailIndex];
-	wake.startPosition = startPos;
-	wake.endPosition = endPos;
-	wake.direction = (endPos - startPos);
-	wake.direction.Normalize();
-	wake.width = width;
-	wake.length = (endPos - startPos).Length();
-	wake.intensity = intensity;
-	wake.time = 0.0f;
-	wake.lifetime = 15.0f + wake.length * 0.1f; //長さに応じて寿命を調整
-	wake.active = true;
-
-	m_wakeTrailIndex = (m_wakeTrailIndex + 1) % MAX_WAKE_TRAILS;
-}
-
-void Water::UpdateBoatWake(const Vector3& currentPos, const Vector3& previousPos, float boatSpeed, float boatWidth) {
-	//ボートが十分移動した場合のみ航跡を追加
-	Vector3 movement = currentPos - previousPos;
-	float moveDistance = movement.Length();
-
-	if (moveDistance > 0.5f && boatSpeed > 0.5f) {
-		//速度に応じた航跡の強度と幅
-		float speedFactor = std::min(boatSpeed / 50.0f, 2.0f);
-		float wakeWidth = boatWidth * 2.0f * speedFactor * 3.0f;
-		float wakeIntensity = 0.8f + speedFactor * 1.2f;
-
-		//航跡を追加
-		AddWakeTrail(previousPos, currentPos, wakeWidth, wakeIntensity);
-
-		//高速時は追加の側面波も生成
-		if (boatSpeed > 20.0f) {
-			Vector3 right = movement.Cross(Vector3::UP);
-			right.Normalize();
-
-			//左右に小さな波紋を追加
-			Vector3 leftWavePos = currentPos - right * (boatWidth * 1.5f);
-			Vector3 rightWavePos = currentPos + right * (boatWidth * 1.5f);
-
-			AddRipple(leftWavePos, wakeIntensity * 0.6f, 1.2f, 4.0f);
-			AddRipple(rightWavePos, wakeIntensity * 0.6f, 1.2f, 4.0f);
-		}
-	}
-}
-
-void Water::ClearWakeTrails() {
-	for (auto& wake : m_wakeTrails) {
-		wake.active = false;
-	}
 }
 
 float Water::GetWaterHeight(const Vector3& position) const {
@@ -143,16 +88,12 @@ void Water::Finalize() {
 		m_constantBuffer = nullptr;
 	}
 	if (m_vertexShader) {
-		m_vertexShader->Release();
+		delete m_vertexShader;
 		m_vertexShader = nullptr;
 	}
 	if (m_pixelShader) {
-		m_pixelShader->Release();
+		delete m_pixelShader;
 		m_pixelShader = nullptr;
-	}
-	if (m_inputLayout) {
-		m_inputLayout->Release();
-		m_inputLayout = nullptr;
 	}
 }
 
@@ -168,17 +109,6 @@ void Water::Update(double deltaTime) {
 			//一定時間経過したら非アクティブにする
 			if (ripple.time > 5.0f) {
 				ripple.active = false;
-			}
-		}
-	}
-
-	//航跡更新
-	for (auto& wake : m_wakeTrails) {
-		if (wake.active) {
-			wake.time += dt;
-			//一定時間経過したら非アクティブにする
-			if (wake.time > wake.lifetime) {
-				wake.active = false;
 			}
 		}
 	}
@@ -203,13 +133,10 @@ void Water::Draw() const {
 	RENDERER.SetWorldMatrix(world);
 
 	//シェーダセット
-	context->VSSetShader(m_vertexShader, nullptr, 0);
-	context->PSSetShader(m_pixelShader, nullptr, 0);
+	m_vertexShader->Set();
+	m_pixelShader->Set();
 	context->VSSetConstantBuffers(7, 1, &m_constantBuffer);
 	context->PSSetConstantBuffers(7, 1, &m_constantBuffer);
-
-	//入力レイアウトセット
-	context->IASetInputLayout(m_inputLayout);
 
 	//頂点バッファセット
 	UINT stride = sizeof(VERTEX_3D);
@@ -239,7 +166,8 @@ bool Water::CreateWaterMesh() {
 			vertex.position.x = -halfSize + x * step;
 			vertex.position.y = 0.0f;
 			vertex.position.z = -halfSize + z * step;
-			vertex.normal = { 0.0f, 1.0f, 0.0f };
+			vertex.position.w = 1.0f;
+			vertex.normal = { 0.0f, 1.0f, 0.0f, 1.0f };
 			vertex.diffuse = { 0.2f, 0.8f, 1.0f, 0.8f };
 			vertex.texcoord.x = static_cast<float>(x) / (m_gridResolution - 1);
 			vertex.texcoord.y = static_cast<float>(z) / (m_gridResolution - 1);
@@ -303,15 +231,12 @@ bool Water::CreateWaterMesh() {
 
 bool Water::CreateShaders() {
 	//頂点シェーダー作成
-	RENDERER.CreateVertexShader(&m_vertexShader, &m_inputLayout, L"Shader\\waterVS.cso");
-	if (!m_vertexShader || !m_inputLayout) {
-		return false;
-	}
+	m_vertexShader = new VertexShader();
+	m_vertexShader->Load(L"Shader\\waterVS.cso");
+
 	//ピクセルシェーダー作成
-	RENDERER.CreatePixelShader(&m_pixelShader, L"Shader\\waterPS.cso");
-	if (!m_pixelShader) {
-		return false;
-	}
+	m_pixelShader = new PixelShader();
+	m_pixelShader->Load(L"Shader\\waterPS.cso");
 	return true;
 }
 
@@ -340,14 +265,6 @@ void Water::UpdateConstantBuffer() {
 			const Ripple& ripple = m_ripples[i];
 			cb->ripples[i].positionAndTime = XMFLOAT4(ripple.position.x, ripple.position.y, ripple.position.z, ripple.time);
 			cb->ripples[i].params = XMFLOAT4(ripple.amplitude, ripple.frequency, ripple.speed, ripple.active ? 1.0f : 0.0f);
-		}
-
-		//航跡データ設定
-		for (int i = 0; i < MAX_WAKE_TRAILS; i++) {
-			const WakeTrail& wake = m_wakeTrails[i];
-			cb->wakeTrails[i].startPos = XMFLOAT4(wake.startPosition.x, wake.startPosition.y, wake.startPosition.z, wake.time);
-			cb->wakeTrails[i].endPos = XMFLOAT4(wake.endPosition.x, wake.endPosition.y, wake.endPosition.z, wake.intensity);
-			cb->wakeTrails[i].params = XMFLOAT4(wake.width, wake.length, wake.lifetime, wake.active ? 1.0f : 0.0f);
 		}
 
 		RENDERER.GetDeviceContext()->Unmap(m_constantBuffer, 0);
@@ -383,9 +300,6 @@ float Water::CalculateWaveHeight(const Vector3& position, float time) const {
 		}
 	}
 
-	//航跡効果
-	height += CalculateWakeHeight(position, time);
-
 	return height;
 }
 
@@ -406,77 +320,4 @@ Vector3 Water::CalculateWaveNormal(const Vector3& position, float time) const {
 
 	normal.Normalize();
 	return normal;
-}
-
-float Water::CalculateWakeHeight(const Vector3& position, float time) const {
-	float wakeHeight = 0.0f;
-
-	for (const auto& wake : m_wakeTrails) {
-		if (!wake.active) {
-			continue;
-		}
-
-		//航跡線分に対する最接近点を計算
-		Vector3 wakeVec = wake.endPosition - wake.startPosition;
-		Vector3 pointVec = position - wake.startPosition;
-
-		float wakeLength = wakeVec.Length();
-		if (wakeLength < 0.1f) {
-			continue;
-		}
-
-		Vector3 wakeDir = wakeVec / wakeLength;
-		float projLength = pointVec.Dot(wakeDir);
-
-		//航跡の範囲内かチェック
-		if (projLength < 0.0f || projLength > wakeLength) {
-			continue;
-		}
-
-		//航跡線分上の最接近点
-		Vector3 closestPoint = wake.startPosition + wakeDir * projLength;
-
-		//最接近点からの距離
-		Vector3 offsetVec = position - closestPoint;
-		float lateralDistance = offsetVec.Length();
-
-		//幅の範囲内かチェック
-		if (lateralDistance > wake.width) {
-			continue;
-		}
-
-		//V字型波の計算
-		float normalizedPos = projLength / wakeLength; //0から1の範囲
-		float normalizedLateral = lateralDistance / wake.width; //0から1の範囲
-
-		//時間減衰
-		float timeAttenuation = exp(-wake.time * 0.1f);
-
-		//距離減衰
-		float lateralAttenuation = cos(normalizedLateral * 3.14159f * 0.5f); //コサインで中央が高くなる
-
-		//長さ方向の減衰
-		float lengthAttenuation = 1.0f - normalizedPos * 0.3f;
-
-		//V字パターン
-		float kelvinAngle = 19.47f * (3.14159f / 180.0f); //ケルビン角度
-		float expectedLateral = normalizedPos * wakeLength * tan(kelvinAngle);
-
-		float kelvinFactor = 1.0f;
-		if (lateralDistance > expectedLateral * 0.5f) {
-			kelvinFactor = exp(-(lateralDistance - expectedLateral * 0.5f) / wake.width);
-		}
-
-		//波の高さ計算
-		float wavePhase = (projLength * 0.5f + lateralDistance * 2.0f - time * 3.0f);
-		float amplitude = wake.intensity * timeAttenuation * lateralAttenuation * lengthAttenuation * kelvinFactor;
-
-		wakeHeight += std::sin(wavePhase) * amplitude * 0.3f;
-
-		//追加の小さな波紋
-		float smallWavePhase = (projLength * 2.0f + lateralDistance * 5.0f - time * 8.0f);
-		wakeHeight += std::sin(smallWavePhase) * amplitude * 0.15f;
-	}
-
-	return wakeHeight;
 }

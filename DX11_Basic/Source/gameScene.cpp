@@ -20,6 +20,7 @@
 #include "lapReadyGate.h"
 #include "raceTimer.h"
 #include "lapDisplay.h"
+#include "test.h"
 
 bool GameScene::Initialize() {
 	//とりあえずの壁

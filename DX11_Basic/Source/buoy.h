@@ -24,8 +24,6 @@ private:
 
 	//浮力計算
 	float CalculateBuoyancy() const;
-	//沈んだ体積計算
-	float CalculateSubmergedVolume() const;
 	//抵抗
 	float CalculateDrag() const;
 };

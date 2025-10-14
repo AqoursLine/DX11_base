@@ -3,10 +3,11 @@
 
 //頂点構造体
 struct VERTEX_3D {
-	XMFLOAT3 position;
-	XMFLOAT3 normal;
-	XMFLOAT4 diffuse;
+	XMFLOAT4 position;
+	XMFLOAT4 normal;
 	XMFLOAT2 texcoord;
+	XMFLOAT4 tangent;
+	XMFLOAT4 diffuse;
 };
 
 //マテリアル構造体

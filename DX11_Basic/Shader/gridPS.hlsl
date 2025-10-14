@@ -13,7 +13,7 @@ void main(in PS_INPUT In, out float4 outDiffuse : SV_Target)
 	lines.y = step(0.1, grid.y);
 	lines.z = step(0.1, grid.z);
 	
-	float minLine = min(min(lines.x, lines.y), lines.z);
+	float minLine = lines.x * lines.y * lines.z;
 
 	float4 gridColor = float4(1, 1, 1, 1);
 	gridColor.rgb *= minLine;

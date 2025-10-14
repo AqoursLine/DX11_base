@@ -5,6 +5,7 @@
 #include "renderer.h"
 #include "shaders.h"
 #include "camera.h"
+#include "modelRenderer.h"
 #include <algorithm>
 
 bool Scene::Initialize() {
@@ -31,6 +32,8 @@ void Scene::Finalize() {
 		}
 		objects.clear();
 	}
+
+	ModelRenderer::ReleaseAll(); // モデルレンダラーのキャッシュを解放
 
 	Texture::ReleaseAll(); // テクスチャのキャッシュを解放
 

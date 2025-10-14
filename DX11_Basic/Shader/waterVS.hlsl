@@ -7,14 +7,6 @@ struct RippleData
 	float4 Params;			// x:振幅 y:波長 z:速度 w:使用フラグ
 };
 
-//航跡波データ
-struct WakeTrailData
-{
-	float4 StartPos;	// xyz:開始位置 w:時間
-	float4 EndPos;		// xyz:終了位置 w:強さ
-	float4 Params;		// x:幅, y:長さ, z:寿命, w:使用フラグ
-};
-
 cbuffer WaterConstantBuffer : register(b7)
 {
 	float Time;
@@ -33,87 +25,8 @@ cbuffer WaterConstantBuffer : register(b7)
 
 	//波紋データ
 	RippleData Ripples[10];
-	WakeTrailData WakeTrails[20];
 }
 
-//航跡波の高さを計算する関数
-float CalculateWakeHeight(float3 worldPos, float time)
-{
-	float wakeHeight = 0.0f;
-	
-	[unroll]
-	for (int i = 0; i < 20; i++)
-	{
-		if (WakeTrails[i].Params.w <= 0.0f) continue; // 使用フラグが立っていない場合はスキップ
-		
-		float3 startPos = WakeTrails[i].StartPos.xyz;
-		float3 endPos = WakeTrails[i].EndPos.xyz;
-		float wakeTime = WakeTrails[i].StartPos.w;
-		float intensity = WakeTrails[i].EndPos.w;
-		float width = WakeTrails[i].Params.x;
-		float length = WakeTrails[i].Params.y;
-		float lifeTime = WakeTrails[i].Params.z;
-		
-		//航跡線分に対する最接近点を計算
-		float3 wakeVec = endPos - startPos;
-		float3 pointVec = worldPos - startPos;
-		
-		float wakeLength = sqrt(dot(wakeVec, wakeVec));
-		if (wakeLength < 0.1f) continue; // 長さがほぼ0の場合はスキップ
-		
-		float3 wakeDir = wakeVec / wakeLength;
-		float projLength = dot(pointVec, wakeDir);
-		
-		//航跡の範囲外ならスキップ
-		if (projLength < 0.0f || projLength > wakeLength) continue;
-		
-		//最接近点を計算
-		float3 closestPoint = startPos + wakeDir * projLength;
-		
-		//最接近点からの距離
-		float3 offsetVec = worldPos - closestPoint;
-		float lateralDistance = sqrt(dot(offsetVec, offsetVec));
-		
-		//航跡の幅内かチェック
-		if (lateralDistance > width) continue;
-		
-		//V字型の航跡パターンを作成
-		float normalizedPos = projLength / wakeLength; // 0から1の範囲
-		float normalizedLateral = lateralDistance / width; // 0から1の範囲
-		
-		//時間減衰
-		float timeAttenuation = exp(-wakeTime * 0.1f);
-		
-		//距離減衰
-		float lateralAttenuation = cos(normalizedLateral * 3.14159f * 0.5f);
-		
-		//長さ方向の減衰
-		float lengthAttenuation = 1.0f - normalizedPos * 0.3f; // 徐々に減衰
-		
-		//V字パターン
-		float kelvinAngle = 19.47f * (3.14159f / 180.0f); // ケルビン角度
-		float expectedLateral = normalizedPos * wakeLength * tan(kelvinAngle);
-		
-		float kelvinFactor = 1.0f;
-		if (lateralDistance > expectedLateral * 0.5f)
-		{
-			kelvinFactor = exp(-(lateralDistance - expectedLateral * 0.5f) / width);
-		}
-		
-		//波の高さを計算
-		float wavePhase = (projLength * 0.5f + lateralDistance * 2.0f - time * 3.0f);
-		float amplitude = intensity * timeAttenuation * lateralAttenuation * lengthAttenuation * kelvinFactor;
-		
-		wakeHeight += sin(wavePhase) * amplitude * 0.3f;
-		
-		//追加の細かい波
-		float smallWavePhase = (projLength * 2.0f + lateralDistance * 5.0f - time * 8.0f);
-		wakeHeight += sin(smallWavePhase) * amplitude * 0.15f;
-		
-	}
-	
-	return wakeHeight;
-}
 
 //波の高さを計算する関数
 float CalculateWaveHeight(float3 worldPos, float time)
@@ -154,9 +67,7 @@ float CalculateWaveHeight(float3 worldPos, float time)
 		}
 
 	}
-	
-	height += CalculateWakeHeight(worldPos, time);
-	
+
 	return height;
 
 }

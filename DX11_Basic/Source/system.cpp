@@ -2,7 +2,6 @@
 #include "system.h"
 #include "manager.h"
 #include "timer.h"
-#include "model.h"
 #include "webClient.h"
 
 #ifdef _DEBUG
@@ -72,9 +71,6 @@ void System::Finalize() {
 		delete m_manager;
 		m_manager = nullptr;
 	}
-
-	//モデルのキャッシュをクリア
-	Model::ClearCache();
 
 	//タイマー終了
 	if (m_timer) {

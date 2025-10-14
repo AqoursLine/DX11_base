@@ -159,11 +159,11 @@ void GoalGate::Draw() const {
 	} else {
 		//周回ゲート
 		//シェーダーの設定
-		//m_lapGateVS->Set();
-		//m_lapGatePS->Set();
+		m_lapGateVS->Set();
+		m_lapGatePS->Set();
 
-		m_vertexShader->Set();
-		m_pixelShader->Set();
+		//m_vertexShader->Set();
+		//m_pixelShader->Set();
 
 		//テクスチャセット
 		m_lapGateTexture->Set(0);
