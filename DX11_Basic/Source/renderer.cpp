@@ -3,6 +3,7 @@
 
 #include <d3dcompiler.h>
 #pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "dxguid.lib")
 
 Renderer* Renderer::s_instance = nullptr;
 
@@ -387,24 +388,86 @@ void Renderer::CreateVertexShader(ID3D11VertexShader** vertexShader, ID3D11Input
 		return;
 	}
 
-	//入力レイアウトの作成
-	D3D11_INPUT_ELEMENT_DESC layout[] = {
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 40, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 56, D3D11_INPUT_PER_VERTEX_DATA, 0},
-	};
-	UINT numElements = ARRAYSIZE(layout);
+	//シェーダーリフレクションの取得
+	ComPtr<ID3D11ShaderReflection> shaderReflection;
+	hr = D3DReflect(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), IID_ID3D11ShaderReflection, &shaderReflection);
+	if (FAILED(hr)) {
+		ErrorMessage(L"シェーダーリフレクションの取得に失敗しました。", hr);
+		shaderBlob->Release();
+		return;
+	}
 
-	hr = m_device->CreateInputLayout(layout, numElements, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), inputLayout);
+	//入力レイアウトの作成
+	D3D11_SHADER_DESC shaderDesc = {};
+	shaderReflection->GetDesc(&shaderDesc);
+
+	//入力レイアウトの要素数を取得
+	std::vector<D3D11_INPUT_ELEMENT_DESC> inputElementDescs;
+	inputElementDescs.reserve(shaderDesc.InputParameters);
+
+	for (UINT i = 0; i < shaderDesc.InputParameters; i++) {
+		D3D11_SIGNATURE_PARAMETER_DESC paramDesc = {};
+		shaderReflection->GetInputParameterDesc(i, &paramDesc);
+
+		D3D11_INPUT_ELEMENT_DESC elementDesc = {};
+		elementDesc.SemanticName = paramDesc.SemanticName;
+		elementDesc.SemanticIndex = paramDesc.SemanticIndex;
+		elementDesc.InputSlot = 0;
+		elementDesc.AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+		elementDesc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+		elementDesc.InstanceDataStepRate = 0;
+
+		//データ形式の決定
+		if (paramDesc.Mask == 1) {
+			if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_FLOAT32) {
+				elementDesc.Format = DXGI_FORMAT_R32_FLOAT;
+			} else if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_UINT32) {
+				elementDesc.Format = DXGI_FORMAT_R32_UINT;
+			} else if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_SINT32) {
+				elementDesc.Format = DXGI_FORMAT_R32_SINT;
+			}
+		} else if (paramDesc.Mask <= 3) {
+			if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_FLOAT32) {
+				elementDesc.Format = DXGI_FORMAT_R32G32_FLOAT;
+			} else if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_UINT32) {
+				elementDesc.Format = DXGI_FORMAT_R32G32_UINT;
+			} else if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_SINT32) {
+				elementDesc.Format = DXGI_FORMAT_R32G32_SINT;
+			}
+		} else if (paramDesc.Mask <= 7) {
+			if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_FLOAT32) {
+				elementDesc.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+			} else if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_UINT32) {
+				elementDesc.Format = DXGI_FORMAT_R32G32B32_UINT;
+			} else if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_SINT32) {
+				elementDesc.Format = DXGI_FORMAT_R32G32B32_SINT;
+			}
+		} else if (paramDesc.Mask <= 15) {
+			if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_FLOAT32) {
+				elementDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			} else if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_UINT32) {
+				elementDesc.Format = DXGI_FORMAT_R32G32B32A32_UINT;
+			} else if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_SINT32) {
+				elementDesc.Format = DXGI_FORMAT_R32G32B32A32_SINT;
+			}
+		}
+
+		inputElementDescs.push_back(elementDesc);
+	}
+
+	//入力レイアウトの作成
+	hr = m_device->CreateInputLayout(
+		inputElementDescs.data(),
+		static_cast<UINT>(inputElementDescs.size()),
+		shaderBlob->GetBufferPointer(),
+		shaderBlob->GetBufferSize(),
+		inputLayout
+	);
 	if (FAILED(hr)) {
 		ErrorMessage(L"入力レイアウトの作成に失敗しました。", hr);
 		shaderBlob->Release();
 		return;
 	}
-
-	shaderBlob->Release();
 }
 
 void Renderer::CreatePixelShader(ID3D11PixelShader** pixelShader, std::wstring fileName) {

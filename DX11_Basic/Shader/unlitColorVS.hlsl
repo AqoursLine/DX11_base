@@ -17,6 +17,6 @@ void main( in VS_INPUT In, out PS_INPUT Out )
 	//頂点カラーをそのまま渡す
 	Out.Diffuse = In.Diffuse;
 	
-	//UV座標をそのまま渡す
-	Out.TexCoord = In.TexCoord;
+	//UV座標のxy成分をそのまま渡す
+	Out.TexCoord = In.TexCoord.xy;
 }

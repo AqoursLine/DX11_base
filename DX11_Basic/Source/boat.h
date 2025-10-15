@@ -75,7 +75,7 @@ private:
 	Vector3 CalculateLateralForce() const;
 	Vector3 CalculateBrakeForce() const;
 	Vector3 CalculateDragForce() const;
-	Vector3 CalculateBuoyancyForce();
+	Vector3 CalculateBuoyancyForce(float deltaTime);
 	Vector3 CalculateWaveForce();
 	Vector3 CalculateWallCollisionForce();
 	void UpdateWaterInteraction(float deltaTime);

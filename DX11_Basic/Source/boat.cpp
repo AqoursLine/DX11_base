@@ -36,7 +36,7 @@ Boat::Boat()
 
 	, m_length(2.9f)			//ボートの長さ(m)
 	, m_width(1.4f)				//ボートの幅(m)
-	, m_height(0.5f)			//ボートの高さ(m)
+	, m_height(1.0f)			//ボートの高さ(m)
 	, m_wallPenetrationDepth(0.0f, 0.0f)	//壁へのめり込み深さ
 
 	, m_rollAmount(0.6f)		//ロール量
@@ -161,7 +161,7 @@ void Boat::UpdatePhysics(float deltaTime) {
 	Vector3 gravityForce(0.0f, -m_mass * GRAVITY, 0.0f);
 
 	//浮力
-	Vector3 buoyancyForce = CalculateBuoyancyForce();
+	Vector3 buoyancyForce = CalculateBuoyancyForce(deltaTime);
 
 	//波による追加の力
 	Vector3 waveForce = CalculateWaveForce();
@@ -292,12 +292,12 @@ Vector3 Boat::CalculateDragForce() const {
 	return dragForce;
 }
 
-Vector3 Boat::CalculateBuoyancyForce() {
+Vector3 Boat::CalculateBuoyancyForce(float deltaTime) {
 	//浮力の計算
 	if (!m_water) return Vector3(0.0f, 0.0f, 0.0f);
 
 	//現在の水面高度を取得
-	float currentWaterHeight = m_water->GetWaterHeight(m_position);
+	float currentWaterHeight = m_water->GetWaterHeight(m_position + m_velocity * deltaTime);
 
 	//ボートの底面のy座標
 	float boatBottomY = m_position.y - (m_height);
@@ -309,7 +309,7 @@ Vector3 Boat::CalculateBuoyancyForce() {
 		//浸かっている深さを計算
 		float submergedDepth = currentWaterHeight - boatBottomY;
 
-		float buoyancyMagnitude = submergedDepth * m_mass * GRAVITY * 3.0f; //浮力の大きさ（調整可能）
+		float buoyancyMagnitude = submergedDepth * m_mass * GRAVITY * 2.0f; //浮力の大きさ（調整可能）
 
 		return Vector3(0.0f, buoyancyMagnitude, 0.0f);
 	}
@@ -390,13 +390,14 @@ Vector3 Boat::CalculateWallCollisionForce() {
 void Boat::UpdateWaterInteraction(float deltaTime) {
 	if (!m_water) return;
 
-	m_splashTimer += deltaTime;
+	if (GetSpeed() > 0.1) {
+		m_splashTimer += deltaTime;
 
-	if (m_splashTimer >= 0.5f) {
-		m_water->AddRipple(m_position);
-		m_splashTimer = 0.0f;
+		if (m_splashTimer >= 0.5f) {
+			m_water->AddRipple(m_position);
+			m_splashTimer = 0.0f;
+		}
 	}
-
 }
 
 void Boat::ApplyForces(float deltaTime) {
@@ -479,7 +480,7 @@ void Boat::UpdatePitch(float deltaTime) {
 	float targetPitch = 0.0f;
 	if (m_velocity.Length() > 0.1f) {
 		//速度が早いほど前方のピッチを上げる
-		float speedFactor = std::min(GetSpeed() / 60.0f, 1.0f);
+		float speedFactor = std::min(GetSpeed() / 30.0f, 1.0f);
 		targetPitch = m_pitchAmount * -speedFactor; //上に傾ける
 	}
 

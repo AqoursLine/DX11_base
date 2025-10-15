@@ -12,7 +12,7 @@ struct aiMaterial;
 struct MODEL_VERTEX {
 	Vector4 position;	//xyz座標
 	Vector4 normal;		//法線ベクトル
-	Vector2 texcoord;	//テクスチャ座標
+	Vector4 texcoord;	//テクスチャ座標
 	Vector4 tangent;	//接線ベクトル
 	Vector4 color;		//頂点カラー
 };
@@ -90,6 +90,7 @@ struct MODEL {
 	std::vector<MODEL_MESH> meshes;							//メッシュ配列
 	std::vector<MODEL_MATERIAL> materials;					//マテリアル配列
 	std::vector<ComPtr<ID3D11ShaderResourceView>> textures;	//テクスチャ配列
+	std::unordered_map<std::string, int> textureMap;		//テクスチャ名からテクスチャインデックスを検索するためのマップ
 	std::unique_ptr<MODEL_NODE> rootNode;					//ルートノード
 	std::unordered_map<std::string, MODEL_NODE*> nodeMap;	//ノード名からノードを検索するためのマップ
 };
@@ -141,6 +142,9 @@ private:
 
 	//テクスチャの読み込み
 	bool LoadEmbeddedTexture(const aiScene* scene, MODEL* model);
+
+	//テクスチャのインデックス取得(無ければ-1を返す)
+	int GetTextureIndex(const std::string& texturePath, MODEL* model);
 
 	//マテリアルの処理
 	bool ProcessMaterial(const aiScene* scene, MODEL* model);

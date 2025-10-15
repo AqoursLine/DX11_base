@@ -14,6 +14,7 @@
 #endif
 
 #include <cstdint>
+#include <type_traits>
 
 // 前方宣言
 class Vector2;
@@ -21,9 +22,9 @@ class Vector3;
 class Vector4;
 
 //=============================================================================
-// Vector2 - 軽量版
+// Vector2
 //=============================================================================
-class Vector2 {
+class alignas(8) Vector2 {
 public:
 	float x, y;
 
@@ -130,8 +131,12 @@ public:
 	constexpr const float* Data() const noexcept { return &x; }
 };
 
+//Vector2のサイズチェック
+static_assert(sizeof(Vector2) == 8, "Vector2 size is not 8 bytes");
+static_assert(alignof(Vector2) == 8, "Vector2 alignment is not 8 bytes");
+
 //=============================================================================
-// Vector3 - 軽量版
+// Vector3
 //=============================================================================
 class Vector3 {
 public:
@@ -251,10 +256,14 @@ public:
 	constexpr Vector2 XY() const noexcept { return Vector2(x, y); }
 };
 
+//Vector3のサイズチェック
+static_assert(sizeof(Vector3) == 12, "Vector3 size is not 12 bytes");
+static_assert(alignof(Vector3) == 4, "Vector3 alignment is not 4 bytes");
+
 //=============================================================================
-// Vector4 - 軽量版
+// Vector4
 //=============================================================================
-class Vector4 {
+class alignas(16) Vector4 {
 public:
 	float x, y, z, w;
 
@@ -557,6 +566,10 @@ public:
 		}
 	}
 };
+
+//Vector4のサイズチェック
+static_assert(sizeof(Vector4) == 16, "Vector4 size is not 16 bytes");
+static_assert(alignof(Vector4) == 16, "Vector4 alignment is not 16 bytes");
 
 //=============================================================================
 // 静的定数の定義（全クラス定義後）

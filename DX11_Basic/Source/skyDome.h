@@ -14,6 +14,9 @@ protected:
 	virtual void Draw() const override;
 
 private:
-	class Model* m_model = nullptr;
+	class ModelRenderer* m_model = nullptr;
+
+	class VertexShader* m_vertexShader = nullptr;
+	class PixelShader* m_pixelShader = nullptr;
 
 };

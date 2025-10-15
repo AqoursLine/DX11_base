@@ -1,6 +1,5 @@
 #include "player.h"
 #include "input.h"
-#include "box.h"
 #include "field.h"
 
 #include "system.h"
@@ -10,17 +9,22 @@
 #include "texture.h"
 #include "Shaders.h"
 
+#include "modelRenderer.h"
+
 bool Player::Initialize() {
 
-	m_box = new Box();
-	if (!m_box->Initialize()) {
+	//モデルロード
+	m_model = new ModelRenderer();
+	if (!m_model->Load("Asset\\Model\\boat.fbx")) {
+		ErrorMessage(L"モデルの読み込みに失敗しました。", E_FAIL);
 		return false;
 	}
-	//ボックスのシェーダーロード
-	m_boxVS = new VertexShader();
-	m_boxVS->Load(L"Shader\\unlitColorVS.cso");
-	m_boxPS = new PixelShader();
-	m_boxPS->Load(L"Shader\\unlitColorPS.cso");
+
+	//シェーダーロード
+	m_vertexShader = new VertexShader();
+	m_vertexShader->Load(L"Shader\\unlitColorVS.cso");
+	m_pixelShader = new PixelShader();
+	m_pixelShader->Load(L"Shader\\unlitColorPS.cso");
 
 	m_field = new Field();
 	if (!m_field->Initialize()) {
@@ -36,7 +40,7 @@ bool Player::Initialize() {
 	m_arrowPS->Load(L"Shader\\unlitTexturePS.cso");
 
 
-	m_scale = { 1.3f, 0.5f, 2.9f };
+	m_scale = { 100.0f, 100.0f, 100.0f };
 
 	if(!RacingBoat::Initialize()) {
 		return false;
@@ -46,18 +50,19 @@ bool Player::Initialize() {
 }
 
 void Player::Finalize() {
-	if (m_box) {
-		m_box->Finalize();
-		delete m_box;
+	if (m_model) {
+		delete m_model;
+		m_model = nullptr;
 	}
+
 	if (m_field) {
 		m_field->Finalize();
 		delete m_field;
 	}
-	delete m_boxVS;
-	m_boxVS = nullptr;
-	delete m_boxPS;
-	m_boxPS = nullptr;
+	delete m_vertexShader;
+	m_vertexShader = nullptr;
+	delete m_pixelShader;
+	m_pixelShader = nullptr;
 	delete m_arrowTexture;
 	m_arrowTexture = nullptr;
 	delete m_arrowVS;
@@ -103,14 +108,13 @@ void Player::Update(double deltaTime) {
 }
 
 void Player::Draw() const {
-//	m_model->Draw(m_position, m_rotation, m_scale);
 
 	//シェーダー設定
-	m_boxVS->Set();
-	m_boxPS->Set();
+	m_vertexShader->Set();
+	m_pixelShader->Set();
 
-	//ボックス描画
-	m_box->Draw(m_position, m_quaternion, m_scale);
+	//モデル描画
+	m_model->Draw(m_position, m_quaternion, m_scale);
 
 	//進行方向描画
 	Vector3 arrowPos = m_position + Vector3 { 0.0f, 1.0f, 0.0f };

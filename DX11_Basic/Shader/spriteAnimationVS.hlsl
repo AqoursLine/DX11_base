@@ -23,5 +23,5 @@ void main(in VS_INPUT In, out PS_INPUT Out)
 	Out.Diffuse = In.Diffuse;
 
 	//テクスチャ座標(パラメータからuvを計算)
-	Out.TexCoord = params1.xy + In.TexCoord * params1.zw;
+	Out.TexCoord = params1.xy + In.TexCoord.xy * params1.zw;
 }

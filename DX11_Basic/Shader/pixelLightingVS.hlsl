@@ -2,21 +2,21 @@
 
 void main(in VS_INPUT In, out PS_INPUT Out)
 {
-	//ƒ[ƒ‹ƒhƒrƒ…[ƒvƒƒWƒFƒNƒVƒ‡ƒ“
+	//ãƒ¯ãƒ¼ãƒ«ãƒ‰ãƒ“ãƒ¥ãƒ¼ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³
 	matrix wvp;
 	
-	//’¸“_•ÏŠ·
+	//é ‚ç‚¹å¤‰æ›
 	wvp = mul(WorldMatrix, ViewMatrix);
 	//wvp * Projection
 	wvp = mul(wvp, ProjectionMatrix);
 
-	//’¸“_À•W‚ğs—ñ‚Å•ÏŠ·
+	//é ‚ç‚¹åº§æ¨™ã‚’è¡Œåˆ—ã§å¤‰æ›
 	Out.Position = mul(In.Position, wvp);
 
-	//ƒeƒNƒXƒ`ƒƒÀ•W
-	Out.TexCoord = In.TexCoord;
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™
+	Out.TexCoord = In.TexCoord.xy;
 
-	//–@ü‚ÌŒü‚«‚ğ‰ñ“]
+	//æ³•ç·šã®å‘ãã‚’å›è»¢
 	float4 worldNormal, normal;
 	normal = float4(In.Normal.xyz, 0);
 	worldNormal = mul(normal, WorldMatrix);
@@ -25,6 +25,6 @@ void main(in VS_INPUT In, out PS_INPUT Out)
 	
 	Out.Diffuse = In.Diffuse;
 	
-	//ƒ[ƒ‹ƒh•ÏŠ·‚µ‚½’¸“_À•W‚ğo—Í
+	//ãƒ¯ãƒ¼ãƒ«ãƒ‰å¤‰æ›ã—ãŸé ‚ç‚¹åº§æ¨™ã‚’å‡ºåŠ›
 	Out.WorldPosition = mul(In.Position, WorldMatrix);
 }

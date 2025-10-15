@@ -140,6 +140,7 @@ void GoalGate::Update(double deltaTime) {
 }
 
 void GoalGate::Draw() const {
+	m_vertexShader->Set();
 
 	//マテリアルセット
 	MATERIAL material = {};
@@ -149,7 +150,6 @@ void GoalGate::Draw() const {
 	if (m_topLapCount >= m_raceManager->GetLapCountToFinish()) {
 		//ゴールテープ
 		//シェーダーの設定
-		m_vertexShader->Set();
 		m_pixelShader->Set();
 
 		//テクスチャセット
@@ -159,7 +159,6 @@ void GoalGate::Draw() const {
 	} else {
 		//周回ゲート
 		//シェーダーの設定
-		m_lapGateVS->Set();
 		m_lapGatePS->Set();
 
 		//m_vertexShader->Set();

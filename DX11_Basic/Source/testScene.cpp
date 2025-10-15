@@ -8,8 +8,9 @@
 #include "titleScene.h"
 
 #include "test.h"
-
 #include "fpsCamera.h"
+
+#include "skyDome.h"
 
 bool TestScene::Initialize() {
 	//テストオブジェクト追加
@@ -17,6 +18,9 @@ bool TestScene::Initialize() {
 
 	//カメラ追加
 	AddGameObject(new FpsCamera(), TYPE_CAMERA)->SetPosition({ 0.0f, 5.0f, -20.0f });
+
+	//スカイドーム追加
+	AddGameObject(new SkyDome(), TYPE_OPAQUE);
 
 	return true;
 }

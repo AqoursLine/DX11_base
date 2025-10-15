@@ -19,8 +19,8 @@ void main( in VS_INPUT In, out PS_INPUT Out )
 	worldNormal = normalize(worldNormal);
 	Out.Normal = worldNormal;
 	
-	//UV座標をそのまま渡す
-	Out.TexCoord = In.TexCoord;
+	//UV座標のxy成分をそのまま渡す
+	Out.TexCoord = In.TexCoord.xy;
 	
 	//頂点カラーをそのまま渡す
 	Out.Diffuse = In.Diffuse;

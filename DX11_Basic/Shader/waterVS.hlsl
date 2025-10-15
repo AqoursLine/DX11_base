@@ -109,7 +109,7 @@ void main(in VS_INPUT input, out PS_INPUT output)
 	
 	//その他のデータを出力
 	output.WorldPosition = worldPos;
-	output.TexCoord = input.TexCoord;
+	output.TexCoord = input.TexCoord.xy;
 	output.Normal = float4(worldNormal, 0.0f);
 	output.Diffuse = input.Diffuse;
 }

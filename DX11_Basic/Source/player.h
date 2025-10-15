@@ -23,13 +23,11 @@ public:
 	void Draw() const override;
 
 private:
-	class Model* m_model = nullptr;
+	class ModelRenderer* m_model = nullptr;
 
-	//ボックス表示用
-	class Box* m_box = nullptr;
 	//shader
-	VertexShader* m_boxVS = nullptr;
-	PixelShader* m_boxPS = nullptr;
+	VertexShader* m_vertexShader = nullptr;
+	PixelShader* m_pixelShader = nullptr;
 	
 	//矢印表示用
 	class Field* m_field = nullptr;

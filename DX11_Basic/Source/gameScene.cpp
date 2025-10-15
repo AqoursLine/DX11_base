@@ -85,8 +85,8 @@ bool GameScene::Initialize() {
 	AddGameObject(new Camera(), TYPE_CAMERA);
 	//	AddGameObject(new FpsCamera(), TYPE_CAMERA);
 
-		//スカイドーム
-	//	AddGameObject(new SkyDome(), TYPE_3D);
+	//スカイドーム
+	AddGameObject(new SkyDome(), TYPE_OPAQUE);
 
 	return true;
 }

@@ -97,6 +97,12 @@ bool ModelRenderer::LoadEmbeddedTexture(const aiScene* scene, MODEL* model) {
 		aiTexture* texture = scene->mTextures[i];
 		ComPtr<ID3D11ShaderResourceView> srv;
 
+		//テクスチャファイル名を取得してマップに登録
+		std::string texName;
+		if (texture->mFilename.length > 0) {
+			texName = texture->mFilename.C_Str();
+		}
+
 		//圧縮テクスチャの場合
 		if (texture->mHeight == 0) {
 			//DirectXTexでロード
@@ -180,10 +186,25 @@ bool ModelRenderer::LoadEmbeddedTexture(const aiScene* scene, MODEL* model) {
 
 		//テクスチャ配列に追加
 		model->textures.push_back(srv);
+
+		//マップに登録
+		model->textureMap[texName] = static_cast<int>(i);
 	}
 
 	return true;
 }
+
+//========================================================
+// テクスチャのインデックス取得(無ければ-1を返す)
+//========================================================
+int ModelRenderer::GetTextureIndex(const std::string& texturePath, MODEL* model) {
+	auto it = model->textureMap.find(texturePath);
+	if (it != model->textureMap.end()) {
+		return it->second;
+	}
+	return -1;
+}
+
 
 //========================================================
 //マテリアルの処理
@@ -261,19 +282,18 @@ bool ModelRenderer::ProcessMaterial(const aiScene* scene, MODEL* model) {
 				if (aiMat->GetTexture(type, j, &path, nullptr, &uvIndex, nullptr, nullptr, nullptr) == AI_SUCCESS)  {
 					std::string texPath = path.C_Str();
 
-					//埋め込みテクスチャの場合はインデックスを取得
-					if (texPath[0] == '*') {
-						int embedIndex = std::stoi(texPath.c_str() + 1);
+					//埋め込みテクスチャの場合はインデックスを検索
+					int texIndex = GetTextureIndex(texPath, model);
 
-						//インデックスが範囲内かチェック
-						if (embedIndex >= 0 && embedIndex < (int)model->textures.size()) {
-							MODEL_MATERIAL_TEXTURE matTex;
-							matTex.textureIndex = embedIndex;
-							matTex.TextureType = type;
-							matTex.uvChannel = uvIndex;
-							material.textures.push_back(matTex);
-						}
+					if (texIndex >= 0) {
+						MODEL_MATERIAL_TEXTURE matTex;
+						matTex.textureIndex = texIndex;
+						matTex.TextureType = static_cast<int>(type);
+						matTex.uvChannel = uvIndex;
+
+						material.textures.push_back(matTex);
 					}
+					//外部ファイルの場合は無視(未対応)
 				}
 			}
 		}
