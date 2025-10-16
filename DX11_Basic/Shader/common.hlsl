@@ -36,16 +36,21 @@ cbuffer MaterialBuffer : register(b3)
 //ライト構造体
 struct LIGHT
 {
-	float4 Direction;
-	float4 Diffuse;
-	float4 Ambient;
-	bool Enable;
-	bool3 Dummy;
+	float4 PositionAndType; // w成分はライトの種類(0:平行光源、1:点光源、2:スポットライト)
+	float4 DirectionAndIntensity; // w成分は光の強さ
+	float4 DiffuseAndRange; // w成分は光の届く距離(点光源、スポットライト用)
+	
+	//スポットライト用
+	float4 spotParams; //x:innerCone, y:outerCone, z:falloff, w:enabled(0:disable, 1:enable)
+	float4 attenuation; //x:定数, y:線形, z:二次, w:ダミー
 };
+
+#define MAX_LIGHTS 16
+
 //ライトバッファ
 cbuffer LightBuffer : register(b4)
 {
-	LIGHT Light;
+	LIGHT Lights[MAX_LIGHTS];
 };
 
 //カメラ位置バッファ

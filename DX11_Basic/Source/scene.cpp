@@ -65,47 +65,27 @@ void Scene::Draw() {
 			continue;
 		}
 		object->DrawBase();
-		// GameObjectの描画
-		for (OBJECT_TYPE i = TYPE_NONE; i < TYPE_MAX; i = OBJECT_TYPE(i + 1)) {
-			switch (i) {
-				case TYPE_OPAQUE:
-					DrawOpaque(camera);
-					break;
-				case TYPE_CUTOUT:
-					DrawCutout(camera);
-					break;
-				case TYPE_TRANSPARENT:
-					DrawTransparent(camera);
-					break;
-				default:
-					// それ以外のタイプはここで処理しない
-					break;
-			}
-		}
 
+		// ライトの描画
+		DrawLights();
+
+		// GameObjectの描画
+		DrawOpaque(camera);
+		DrawCutout(camera);
+		DrawTransparent(camera);
 	}
 
 	// メインカメラで描画
 	if (mainCamera) {
 		mainCamera->DrawBase();
 
+		// ライトの描画
+		DrawLights();
+
 		// GameObjectの描画
-		for (OBJECT_TYPE i = TYPE_NONE; i < TYPE_MAX; i = OBJECT_TYPE(i + 1)) {
-			switch (i) {
-				case TYPE_OPAQUE:
-					DrawOpaque(mainCamera);
-					break;
-				case TYPE_CUTOUT:
-					DrawCutout(mainCamera);
-					break;
-				case TYPE_TRANSPARENT:
-					DrawTransparent(mainCamera);
-					break;
-				default:
-					// それ以外のタイプはここで処理しない
-					break;
-			}
-		}
+		DrawOpaque(mainCamera);
+		DrawCutout(mainCamera);
+		DrawTransparent(mainCamera);
 	}
 
 	//2D行列設定
@@ -139,6 +119,13 @@ void Scene::CleanUp() {
 GameObject* Scene::AddGameObject(GameObject* gameObject, OBJECT_TYPE type) {
 	m_gameObjects[type].push_back(gameObject);
 	return gameObject;
+}
+
+void Scene::DrawLights() const {
+	//ライトオブジェクトの描画
+	for (auto& gameObject : m_gameObjects[TYPE_LIGHT]) {
+		gameObject->DrawBase();
+	}
 }
 
 void Scene::DrawOpaque(Camera* camera) const {

@@ -6,6 +6,7 @@
 
 #ifdef _DEBUG
 #include "input.h"
+#include <iostream>
 #endif // _DEBUG
 
 // シングルトンインスタンスの初期化
@@ -103,7 +104,10 @@ bool System::Excute() {
 		return true;
 	}
 
-	//
+	//deltaTime表示
+#ifdef _DEBUG
+	std::cout << "Delta Time: " << m_timer->GetDeltaTime() << " seconds" << std::endl;
+#endif // _DEBUG
 
 	return false;
 }

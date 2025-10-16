@@ -20,25 +20,14 @@ bool Player::Initialize() {
 		return false;
 	}
 
+	//環境光設定
+	m_model->SetMaterialAmbientColor(0, Vector4 { 0.5f, 0.5f, 0.5f, 1.0f });
+
 	//シェーダーロード
 	m_vertexShader = new VertexShader();
-	m_vertexShader->Load(L"Shader\\unlitColorVS.cso");
+	m_vertexShader->Load(L"Shader\\pixelLightingVS.cso");
 	m_pixelShader = new PixelShader();
-	m_pixelShader->Load(L"Shader\\unlitColorPS.cso");
-
-	m_field = new Field();
-	if (!m_field->Initialize()) {
-		return false;
-	}
-	//矢印テクスチャロード
-	m_arrowTexture = new Texture();
-	m_arrowTexture->Load(L"Asset\\Texture\\arrow.png");
-	//矢印のシェーダーロード
-	m_arrowVS = new VertexShader();
-	m_arrowVS->Load(L"Shader\\unlitTextureVS.cso");
-	m_arrowPS = new PixelShader();
-	m_arrowPS->Load(L"Shader\\unlitTexturePS.cso");
-
+	m_pixelShader->Load(L"Shader\\pixelLightingPS.cso");
 
 	m_scale = { 100.0f, 100.0f, 100.0f };
 
@@ -55,21 +44,10 @@ void Player::Finalize() {
 		m_model = nullptr;
 	}
 
-	if (m_field) {
-		m_field->Finalize();
-		delete m_field;
-	}
 	delete m_vertexShader;
 	m_vertexShader = nullptr;
 	delete m_pixelShader;
 	m_pixelShader = nullptr;
-	delete m_arrowTexture;
-	m_arrowTexture = nullptr;
-	delete m_arrowVS;
-	m_arrowVS = nullptr;
-	delete m_arrowPS;
-	m_arrowPS = nullptr;
-
 
 	Boat::Finalize();
 }
@@ -113,39 +91,11 @@ void Player::Draw() const {
 	m_vertexShader->Set();
 	m_pixelShader->Set();
 
+	//マテリアルセット
+	m_model->SetMaterialDiffuseColor(1, Vector4 { 0.2f, 0.6f, 1.0f, 1.0f });
+
 	//モデル描画
 	m_model->Draw(m_position, m_quaternion, m_scale);
-
-	//進行方向描画
-	Vector3 arrowPos = m_position + Vector3 { 0.0f, 1.0f, 0.0f };
-
-	//velocityから進行方向を計算
-	Vector3 arrowRot = Vector3::ZERO;
-	Vector3 velNorm = GetVelocity();
-	velNorm.Normalize();
-
-	arrowRot.y = std::atan2f(velNorm.x, velNorm.z);
-
-	//シェーダー設定
-	m_arrowVS->Set();
-	m_arrowPS->Set();
-	//矢印テクスチャ設定
-	m_arrowTexture->Set(0);
-
-	//マテリアルセット
-	MATERIAL material = {};
-	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	material.textureEnable = true;
-	RENDERER.SetMaterial(material);
-
-	//ブレンドモード設定
-	RENDERER.SetATCEnable(true);
-
-	//矢印描画
-	m_field->Draw(arrowPos, arrowRot, Vector3 { 1.0f, 1.0f, 1.0f });
-
-	//ブレンドモード解除
-	RENDERER.SetATCEnable(false);
 }
 
 void Player::UpdateInput(double deltaTime) {

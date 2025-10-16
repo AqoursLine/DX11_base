@@ -21,6 +21,7 @@
 #include "raceTimer.h"
 #include "lapDisplay.h"
 #include "test.h"
+#include "gameDirectionalLight.h"
 
 bool GameScene::Initialize() {
 	//とりあえずの壁
@@ -87,6 +88,12 @@ bool GameScene::Initialize() {
 
 	//スカイドーム
 	AddGameObject(new SkyDome(), TYPE_OPAQUE);
+
+	//平行光源
+	Light* light = new GameDirectionalLight();
+	light->SetDirection({ -1.0f, -1.0f, -1.0f, 0.0f });
+	light->SetEnabled(true);
+	AddGameObject(light, TYPE_LIGHT);
 
 	return true;
 }

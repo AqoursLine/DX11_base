@@ -124,6 +124,9 @@ void Box::Draw(const Vector3& pos, const Vector3& rot, const Vector3& scale) con
 	//マテリアルセット
 	MATERIAL material = {};
 	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	material.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.shininess = 32.0f;
 	material.textureEnable = false;
 	RENDERER.SetMaterial(material);
 

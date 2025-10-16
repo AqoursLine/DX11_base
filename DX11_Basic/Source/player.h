@@ -28,15 +28,6 @@ private:
 	//shader
 	VertexShader* m_vertexShader = nullptr;
 	PixelShader* m_pixelShader = nullptr;
-	
-	//矢印表示用
-	class Field* m_field = nullptr;
-	//テクスチャ
-	Texture* m_arrowTexture = nullptr;
-	// Shader
-	VertexShader* m_arrowVS = nullptr;
-	PixelShader* m_arrowPS = nullptr;
-	
 
 	VehicleInput m_currentInput;
 	VehicleInput m_smoothedInput;

@@ -121,6 +121,10 @@ void Water::Draw() const {
 
 	ID3D11DeviceContext* context = RENDERER.GetDeviceContext();
 
+	//シェーダセット
+	m_vertexShader->Set();
+	m_pixelShader->Set();
+
 	//定数バッファ更新
 	const_cast<Water*>(this)->UpdateConstantBuffer();
 
@@ -132,11 +136,13 @@ void Water::Draw() const {
 	world = scale * rot * trans;
 	RENDERER.SetWorldMatrix(world);
 
-	//シェーダセット
-	m_vertexShader->Set();
-	m_pixelShader->Set();
 	context->VSSetConstantBuffers(7, 1, &m_constantBuffer);
 	context->PSSetConstantBuffers(7, 1, &m_constantBuffer);
+
+	//マテリアル
+	MATERIAL material = {};
+	material.ambient = { 0.2f, 0.2f, 0.2f, 1.0f };
+	RENDERER.SetMaterial(material);
 
 	//頂点バッファセット
 	UINT stride = sizeof(VERTEX_3D);
@@ -145,6 +151,7 @@ void Water::Draw() const {
 	context->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	//プリミティブトポロジー設定
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
 
 	//描画
 	UINT indexCount = (m_gridResolution - 1) * (m_gridResolution - 1) * 6;

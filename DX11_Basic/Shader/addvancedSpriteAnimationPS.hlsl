@@ -12,25 +12,18 @@ void main(in PS_INPUT In, out float4 outDiffuse : SV_Target)
 	
 	float2 tex1UV = frac(In.TexCoord);
 
-	//範囲内か
-	if (tex1UV.x >= params3.x && tex1UV.x <= params3.z &&
-		tex1UV.y >= params3.y && tex1UV.y <= params3.w)
-	{
-		//範囲内での相対座標を計算
-		float2 relativeUV = (tex1UV - params3.xy) / (params3.zw - params3.xy);
-		
-		//テクスチャ1のUVを計算
-		float2 uv1 = params2.xy + relativeUV * params2.zw;
-		float4 color1 = g_texture1.Sample(g_sampler, uv1);
-		
-		//合成
-		outDiffuse = lerp(color0, color1, color1.a);
-
-	}
-	else
-	{
-		outDiffuse = color0;
-	}
+	//範囲内かをstepで判定
+	float2 rangeMin = step(params3.xy, tex1UV);
+	float2 rangeMax = step(tex1UV, params3.zw);
+	float inRange = rangeMin.x * rangeMin.y * rangeMax.x * rangeMax.y;
+	
+	//相対座標を計算
+	float2 relativeUV = (tex1UV - params3.xy) / (params3.zw - params3.xy);
+	float2 uv1 = params2.xy + relativeUV * params2.zw;
+	float4 color1 = g_texture1.Sample(g_sampler, uv1);
+	
+	//inRangeをマスクとして使う
+	outDiffuse = lerp(color0, lerp(color0, color1, color1.a), inRange);
 
 	outDiffuse *= In.Diffuse * Material.Diffuse;
 

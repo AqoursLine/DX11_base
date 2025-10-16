@@ -6,6 +6,7 @@
 enum OBJECT_TYPE {
 	TYPE_NONE = 0,
 	TYPE_CAMERA,
+	TYPE_LIGHT,
 	TYPE_OPAQUE,
 	TYPE_CUTOUT,
 	TYPE_TRANSPARENT,
@@ -64,6 +65,8 @@ protected:
 private:
 	std::list<GameObject*> m_gameObjects[TYPE_MAX];
 
+	//描画関数
+	void DrawLights() const;
 	void DrawOpaque(Camera* camera) const;
 	void DrawCutout(Camera* camera) const;
 	void DrawTransparent(Camera* camera) const;

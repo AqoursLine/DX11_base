@@ -50,8 +50,16 @@ void Camera::Update(double deltaTime) {
 		yaw = -m_rotateSpeed * static_cast<float>(deltaTime);
 	}
 
+	float pitch = 0.0f;
+	if (Input::GetKeyPress(KK_UP)) {
+		pitch = m_rotateSpeed * static_cast<float>(deltaTime);
+	}
+	if (Input::GetKeyPress(KK_DOWN)) {
+		pitch = -m_rotateSpeed * static_cast<float>(deltaTime);
+	}
+
 	//オフセットタイマー更新
-	if (std::abs(yaw) < 0.001f) {
+	if (std::abs(yaw + pitch) < 0.001f) {
 		m_offsetDampingTimer += static_cast<float>(deltaTime);
 
 		if (m_offsetDampingTimer > 2.0f) {
@@ -61,6 +69,10 @@ void Camera::Update(double deltaTime) {
 		m_offsetDampingTimer = 0.0f;
 		//ヨー軸回転クォータニオンを作成
 		m_rotationOffset = m_rotationOffset * Vector4::FromAxisAngle(Vector3::UP, yaw);
+		m_rotationOffset.Normalize();
+		//ピッチ軸回転クォータニオンを作成
+		m_rotationOffset = m_rotationOffset * Vector4::FromAxisAngle(Vector3::RIGHT, pitch);
+		m_rotationOffset.Normalize();
 	}
 
 	//オフセット回転を適用

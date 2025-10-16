@@ -36,8 +36,8 @@ void main(in PS_INPUT input, out float4 outDiffuse : SV_TARGET)
 	float3 normal = normalize(input.Normal.xyz);
 	
 	//ライティング計算
-	float3 lightDir = normalize(Light.Direction.xyz);
-	float3 lightColor = Light.Diffuse.rgb;
+	float3 lightDir = normalize(Lights[0].DirectionAndIntensity.xyz);
+	float3 lightColor = Lights[0].DiffuseAndRange.rgb;
 	
 	//ランバート拡散反射
 	float NdotL = max(0.0f, dot(-lightDir, normal));
@@ -118,7 +118,7 @@ void main(in PS_INPUT input, out float4 outDiffuse : SV_TARGET)
 	foam = max(0.0f, foam) * 0.1f;
 	
 	//アンビエント光を加算
-	float3 ambient = Light.Ambient.rgb * waterColor;
+	float3 ambient = Material.Ambient.rgb * waterColor;
 	
 	//最終色を計算
 	float3 finalColor = ambient + waterColor * diffuse + specular * fresnel + foam;

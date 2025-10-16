@@ -193,3 +193,162 @@ void ModelRenderer::SetMaterial(const MODEL_MATERIAL& material) const {
 void ModelRenderer::ReleaseAll() {
 	m_modelCache.clear();
 }
+
+//========================================================
+//マテリアル数を取得
+//========================================================
+int ModelRenderer::GetMaterialCount() const {
+	if (!m_model) {
+		return 0;
+	}
+	return static_cast<int>(m_model->materials.size());
+}
+
+//========================================================
+//マテリアルを取得(インデックス)
+//========================================================
+MODEL_MATERIAL* ModelRenderer::GetMaterial(int index) {
+	if (!m_model) {
+		return nullptr;
+	}
+	if (index < 0 || index >= static_cast<int>(m_model->materials.size())) {
+		return nullptr;
+	}
+	return &m_model->materials[index];
+}
+
+const MODEL_MATERIAL* ModelRenderer::GetMaterial(int index) const {
+	if (!m_model) {
+		return nullptr;
+	}
+	if (index < 0 || index >= static_cast<int>(m_model->materials.size())) {
+		return nullptr;
+	}
+	return &m_model->materials[index];
+}
+
+//========================================================
+//マテリアルを取得(名前)
+//========================================================
+MODEL_MATERIAL* ModelRenderer::GetMaterial(const std::string& name) {
+	if (!m_model) {
+		return nullptr;
+	}
+	for (auto& material : m_model->materials) {
+		if (material.name == name) {
+			return &material;
+		}
+	}
+	return nullptr;
+}
+
+const MODEL_MATERIAL* ModelRenderer::GetMaterial(const std::string& name) const {
+	if (!m_model) {
+		return nullptr;
+	}
+	for (const auto& material : m_model->materials) {
+		if (material.name == name) {
+			return &material;
+		}
+	}
+	return nullptr;
+}
+
+//========================================================
+//マテリアルのインデックスを取得(名前)
+//========================================================
+int ModelRenderer::GetMaterialIndex(const std::string& name) const {
+	if (!m_model) {
+		return -1;
+	}
+	for (size_t i = 0; i < m_model->materials.size(); ++i) {
+		if (m_model->materials[i].name == name) {
+			return static_cast<int>(i);
+		}
+	}
+	return -1;
+}
+
+//========================================================
+//マテリアルのdiffuseColorを設定
+//========================================================
+bool ModelRenderer::SetMaterialDiffuseColor(int index, const Vector4& color) {
+	MODEL_MATERIAL* material = GetMaterial(index);
+	if (!material) {
+		return false;
+	}
+	material->diffuseColor = color;
+	return true;
+}
+
+bool ModelRenderer::SetMaterialDiffuseColor(const std::string& name, const Vector4& color) {
+	MODEL_MATERIAL* material = GetMaterial(name);
+	if (!material) {
+		return false;
+	}
+	material->diffuseColor = color;
+	return true;
+}
+
+//========================================================
+//マテリアルのspecularColorを設定
+//========================================================
+bool ModelRenderer::SetMaterialSpecularColor(int index, const Vector4& color) {
+	MODEL_MATERIAL* material = GetMaterial(index);
+	if (!material) {
+		return false;
+	}
+	material->specularColor = color;
+	return true;
+}
+
+bool ModelRenderer::SetMaterialSpecularColor(const std::string& name, const Vector4& color) {
+	MODEL_MATERIAL* material = GetMaterial(name);
+	if (!material) {
+		return false;
+	}
+	material->specularColor = color;
+	return true;
+}
+
+//========================================================
+//マテリアルのambientColorを設定
+//========================================================
+bool ModelRenderer::SetMaterialAmbientColor(int index, const Vector4& color) {
+	MODEL_MATERIAL* material = GetMaterial(index);
+	if (!material) {
+		return false;
+	}
+	material->ambientColor = color;
+	return true;
+}
+
+bool ModelRenderer::SetMaterialAmbientColor(const std::string& name, const Vector4& color) {
+	MODEL_MATERIAL* material = GetMaterial(name);
+	if (!material) {
+		return false;
+	}
+	material->ambientColor = color;
+	return true;
+}
+
+//========================================================
+//マテリアルのemissiveColorを設定
+//========================================================
+bool ModelRenderer::SetMaterialEmissiveColor(int index, const Vector4& color) {
+	MODEL_MATERIAL* material = GetMaterial(index);
+	if (!material) {
+		return false;
+	}
+	material->emissiveColor = color;
+	return true;
+}
+
+bool ModelRenderer::SetMaterialEmissiveColor(const std::string& name, const Vector4& color) {
+	MODEL_MATERIAL* material = GetMaterial(name);
+	if (!material) {
+		return false;
+	}
+	material->emissiveColor = color;
+	return true;
+}

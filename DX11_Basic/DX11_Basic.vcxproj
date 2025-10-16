@@ -165,6 +165,12 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
+    <FxCompile Include="Shader\lightTestPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="Shader\pixelLightingPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
@@ -244,11 +250,13 @@
     <ClCompile Include="Source\field.cpp" />
     <ClCompile Include="Source\fieldObject.cpp" />
     <ClCompile Include="Source\fpsCamera.cpp" />
+    <ClCompile Include="Source\gameDirectionalLight.cpp" />
     <ClCompile Include="Source\gameScene.cpp" />
     <ClCompile Include="Source\goalGate.cpp" />
     <ClCompile Include="Source\input.cpp" />
     <ClCompile Include="Source\lapDisplay.cpp" />
     <ClCompile Include="Source\lapReadyGate.cpp" />
+    <ClCompile Include="Source\light.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\manager.cpp" />
     <ClCompile Include="Source\minimap.cpp" />
@@ -292,6 +300,7 @@
     <ClInclude Include="Source\fieldObject.h" />
     <ClInclude Include="Source\buoy.h" />
     <ClInclude Include="Source\fpsCamera.h" />
+    <ClInclude Include="Source\gameDirectionalLight.h" />
     <ClInclude Include="Source\gameObject.h" />
     <ClInclude Include="Source\gameScene.h" />
     <ClInclude Include="Source\goalGate.h" />
@@ -299,6 +308,7 @@
     <ClInclude Include="Source\keybordEnum.h" />
     <ClInclude Include="Source\lapDisplay.h" />
     <ClInclude Include="Source\lapReadyGate.h" />
+    <ClInclude Include="Source\light.h" />
     <ClInclude Include="Source\main.h" />
     <ClInclude Include="Source\manager.h" />
     <ClInclude Include="Source\minimap.h" />

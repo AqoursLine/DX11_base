@@ -115,6 +115,39 @@ public:
 	//全モデル解放
 	static void ReleaseAll();
 
+	/************************
+	* マテリアル操作
+	*************************/
+	//マテリアル数を取得
+	int GetMaterialCount() const;
+
+	//マテリアルを取得(インデックス)
+	MODEL_MATERIAL* GetMaterial(int index);
+	const MODEL_MATERIAL* GetMaterial(int index) const;
+
+	//マテリアルを取得(名前)
+	MODEL_MATERIAL* GetMaterial(const std::string& name);
+	const MODEL_MATERIAL* GetMaterial(const std::string& name) const;
+
+	//マテリアルのインデックスを取得(名前)
+	int GetMaterialIndex(const std::string& name) const;
+
+	//マテリアルのdiffuseColorを設定
+	bool SetMaterialDiffuseColor(int index, const Vector4& color);
+	bool SetMaterialDiffuseColor(const std::string& name, const Vector4& color);
+
+	//マテリアルのspecularColorを設定
+	bool SetMaterialSpecularColor(int index, const Vector4& color);
+	bool SetMaterialSpecularColor(const std::string& name, const Vector4& color);
+
+	//マテリアルのambientColorを設定
+	bool SetMaterialAmbientColor(int index, const Vector4& color);
+	bool SetMaterialAmbientColor(const std::string& name, const Vector4& color);
+
+	//マテリアルのemissiveColorを設定
+	bool SetMaterialEmissiveColor(int index, const Vector4& color);
+	bool SetMaterialEmissiveColor(const std::string& name, const Vector4& color);
+
 private:
 	//描画モデル
 	MODEL* m_model = nullptr;

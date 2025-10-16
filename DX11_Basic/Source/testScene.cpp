@@ -7,10 +7,13 @@
 #include "manager.h"
 #include "titleScene.h"
 
+#include "main.h"
 #include "test.h"
 #include "fpsCamera.h"
 
 #include "skyDome.h"
+
+#include "gameDirectionalLight.h"
 
 bool TestScene::Initialize() {
 	//テストオブジェクト追加
@@ -21,6 +24,23 @@ bool TestScene::Initialize() {
 
 	//スカイドーム追加
 	AddGameObject(new SkyDome(), TYPE_OPAQUE);
+
+	//平行光源追加
+	auto light = new GameDirectionalLight();
+	Vector4 dir = { 0.0f, -1.0f, 0.0f, 0.0f };
+	dir.Normalize();
+	light->SetDirection(dir);
+	light->SetEnabled(true);
+	AddGameObject(light, TYPE_LIGHT);
+
+	//平行光源追加
+	light = new GameDirectionalLight();
+	dir = { 1.0f, 0.0f, -1.0f, 0.0f };
+	dir.Normalize();
+	light->SetDirection(dir);
+	light->SetEnabled(true);
+	AddGameObject(light, TYPE_LIGHT);
+
 
 	return true;
 }

@@ -194,10 +194,10 @@ bool Renderer::Initialize(HWND hWnd) {
 
 	//定数バッファの初期化
 	D3D11_BUFFER_DESC bufferDesc = {};
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	bufferDesc.ByteWidth = sizeof(XMFLOAT4X4);
 	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bufferDesc.CPUAccessFlags = 0;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	bufferDesc.MiscFlags = 0;
 	bufferDesc.StructureByteStride = sizeof(float);
 	hr = m_device->CreateBuffer(&bufferDesc, nullptr, m_worldBuffer.GetAddressOf());
@@ -229,7 +229,7 @@ bool Renderer::Initialize(HWND hWnd) {
 	m_deviceContext->PSSetConstantBuffers(3, 1, m_materialBuffer.GetAddressOf());
 	m_deviceContext->VSSetConstantBuffers(3, 1, m_materialBuffer.GetAddressOf());
 
-	bufferDesc.ByteWidth = sizeof(LIGHT);
+	bufferDesc.ByteWidth = sizeof(LIGHT) * MAX_LIGHTS; // 最大8つのライト
 	hr = m_device->CreateBuffer(&bufferDesc, nullptr, m_lightBuffer.GetAddressOf());
 	if (FAILED(hr)) {
 		ErrorMessage(L"ライトバッファの初期化に失敗しました。", hr);
@@ -237,6 +237,12 @@ bool Renderer::Initialize(HWND hWnd) {
 	}
 	m_deviceContext->PSSetConstantBuffers(4, 1, m_lightBuffer.GetAddressOf());
 	m_deviceContext->VSSetConstantBuffers(4, 1, m_lightBuffer.GetAddressOf());
+
+	//ライト配列の初期化
+	for (auto& light : m_lightsData.lights) {
+		light = {};
+		light.directionAndIntensity.w = 0.0f; // 光の強さ0で初期化
+	}
 
 	//カメラバッファの作成
 	bufferDesc.ByteWidth = sizeof(XMFLOAT4);
@@ -257,20 +263,6 @@ bool Renderer::Initialize(HWND hWnd) {
 	}
 	m_deviceContext->VSSetConstantBuffers(6, 1, m_shaderPropertiesBuffer.GetAddressOf());
 	m_deviceContext->PSSetConstantBuffers(6, 1, m_shaderPropertiesBuffer.GetAddressOf());
-
-	//ライト初期化
-	LIGHT light = {};
-	light.enable = true;
-	light.direction = XMFLOAT4(0.0f, -1.0f, 0.0f, 0.0f);
-	light.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	light.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	SetLight(light);
-
-	//マテリアル初期化
-	MATERIAL material = {};
-	material.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	SetMaterial(material);
 
 	return true;
 }
@@ -332,40 +324,70 @@ void Renderer::Set2DMatrix() {
 void Renderer::SetWorldMatrix(const XMMATRIX& worldMatrix) {
 	XMFLOAT4X4 world;
 	XMStoreFloat4x4(&world, XMMatrixTranspose(worldMatrix));
-	m_deviceContext->UpdateSubresource(m_worldBuffer.Get(), 0, nullptr, &world, 0, 0);
+
+	//map/unmapで更新
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	m_deviceContext->Map(m_worldBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	memcpy(mappedResource.pData, &world, sizeof(world));
+	m_deviceContext->Unmap(m_worldBuffer.Get(), 0);
 }
 
 void Renderer::SetViewMatrix(const XMMATRIX& viewMatrix) {
 	XMFLOAT4X4 view;
 	XMStoreFloat4x4(&view, XMMatrixTranspose(viewMatrix));
-	m_deviceContext->UpdateSubresource(m_viewBuffer.Get(), 0, nullptr, &view, 0, 0);
+
+	//mapで更新
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	m_deviceContext->Map(m_viewBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	memcpy(mappedResource.pData, &view, sizeof(view));
+	m_deviceContext->Unmap(m_viewBuffer.Get(), 0);
 }
 
 void Renderer::SetProjectionMatrix(const XMMATRIX& projectionMatrix) {
 	XMFLOAT4X4 projection;
 	XMStoreFloat4x4(&projection, XMMatrixTranspose(projectionMatrix));
-	m_deviceContext->UpdateSubresource(m_projectionBuffer.Get(), 0, nullptr, &projection, 0, 0);
+
+	//mapで更新
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	m_deviceContext->Map(m_projectionBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	memcpy(mappedResource.pData, &projection, sizeof(projection));
+	m_deviceContext->Unmap(m_projectionBuffer.Get(), 0);
 }
 
 void Renderer::SetMaterial(const MATERIAL& material) {
-	m_deviceContext->UpdateSubresource(m_materialBuffer.Get(), 0, nullptr, &material, 0, 0);
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	m_deviceContext->Map(m_materialBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	memcpy(mappedResource.pData, &material, sizeof(material));
+	m_deviceContext->Unmap(m_materialBuffer.Get(), 0);
 }
 
-void Renderer::SetLight(const LIGHT& light) {
-	m_deviceContext->UpdateSubresource(m_lightBuffer.Get(), 0, nullptr, &light, 0, 0);
+void Renderer::SetLight(const LIGHT& light, int lightIndex) {
+	if (lightIndex < 0 || lightIndex >= MAX_LIGHTS) {
+		return;
+	}
+
+	m_lightsData.lights[lightIndex] = light;
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	m_deviceContext->Map(m_lightBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	memcpy(mappedResource.pData, &m_lightsData, sizeof(m_lightsData));
+	m_deviceContext->Unmap(m_lightBuffer.Get(), 0);
 }
 
 void Renderer::SetCameraPosition(const Vector3& position) {
 	XMFLOAT4 cameraPos = { position.x, position.y, position.z, 0.0f };
-	m_deviceContext->UpdateSubresource(m_cameraBuffer.Get(), 0, nullptr, &cameraPos, 0, 0);
-	m_deviceContext->PSSetConstantBuffers(5, 1, m_cameraBuffer.GetAddressOf());
-	m_deviceContext->VSSetConstantBuffers(5, 1, m_cameraBuffer.GetAddressOf());
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	m_deviceContext->Map(m_cameraBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	memcpy(mappedResource.pData, &cameraPos, sizeof(cameraPos));
+	m_deviceContext->Unmap(m_cameraBuffer.Get(), 0);
 }
 
 void Renderer::SetShaderProperties(const SHADER_PROPERTIES& properties) {
-	m_deviceContext->UpdateSubresource(m_shaderPropertiesBuffer.Get(), 0, nullptr, &properties, 0, 0);
-	m_deviceContext->PSSetConstantBuffers(6, 1, m_shaderPropertiesBuffer.GetAddressOf());
-	m_deviceContext->VSSetConstantBuffers(6, 1, m_shaderPropertiesBuffer.GetAddressOf());
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	m_deviceContext->Map(m_shaderPropertiesBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	memcpy(mappedResource.pData, &properties, sizeof(properties));
+	m_deviceContext->Unmap(m_shaderPropertiesBuffer.Get(), 0);
 }
 
 void Renderer::CreateVertexShader(ID3D11VertexShader** vertexShader, ID3D11InputLayout** inputLayout, std::wstring fileName) {

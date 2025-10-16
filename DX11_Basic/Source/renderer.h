@@ -23,11 +23,20 @@ struct MATERIAL {
 
 //ライト構造体
 struct LIGHT {
-	XMFLOAT4 direction;
-	XMFLOAT4 diffuse;
-	XMFLOAT4 ambient;
-	BOOL enable;
-	float dummy[3];
+	XMFLOAT4 positionAndType; // w成分にライトタイプ(0:平衡,1:点,2:スポット)
+	XMFLOAT4 directionAndIntensity; // w成分に光の強さ
+	XMFLOAT4 diffuseAndRange; // w成分に光の届く範囲
+
+	// スポットライト用パラメータ
+	XMFLOAT4 spotParams; // x:innerCone, y:outerCone, z:falloff, w:enabled
+	XMFLOAT4 attenuation; // x:定数, y:線形, z:二次, w:未使用
+};
+
+constexpr int MAX_LIGHTS = 16; // 最大ライト数
+
+//ライト配列構造体
+struct LIGHTS {
+	LIGHT lights[MAX_LIGHTS];
 };
 
 ///シェーダープロパティ構造体
@@ -101,7 +110,7 @@ public:
 	//マテリアル設定
 	void SetMaterial(const MATERIAL& material);
 	//ライト設定
-	void SetLight(const LIGHT& light);
+	void SetLight(const LIGHT& light, int lightIndex);
 	//カメラ位置設定
 	void SetCameraPosition(const Vector3& position);
 	//シェーダープロパティ設定
@@ -153,6 +162,7 @@ private:
 	ComPtr<ID3D11Buffer> m_worldBuffer;
 	ComPtr<ID3D11Buffer> m_viewBuffer;
 	ComPtr<ID3D11Buffer> m_projectionBuffer;
+	LIGHTS m_lightsData; // ライト配列データ
 	ComPtr<ID3D11Buffer> m_lightBuffer;
 	ComPtr<ID3D11Buffer> m_materialBuffer;
 	ComPtr<ID3D11Buffer> m_cameraBuffer;

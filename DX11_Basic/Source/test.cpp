@@ -27,9 +27,9 @@ bool TestObject::Initialize() {
 
 	//シェーダーロード
 	m_vertexShader = new VertexShader();
-	m_vertexShader->Load(L"Shader\\unlitColorVS.cso");
+	m_vertexShader->Load(L"Shader\\pixelLightingVS.cso");
 	m_pixelShader = new PixelShader();
-	m_pixelShader->Load(L"Shader\\unlitColorPS.cso");
+	m_pixelShader->Load(L"Shader\\pixelLightingPS.cso");
 
 	//位置、回転、拡大縮小の設定
 	m_position = { 0.0f, 0.0f, 0.0f };
@@ -63,17 +63,15 @@ void TestObject::Update(double deltaTime) {
 }
 
 void TestObject::Draw() const {
+	//シェーダーの設定
+	m_vertexShader->Set();
+	m_pixelShader->Set();
+
 	if (m_modelRenderer) {
-		//シェーダーの設定
-		m_vertexShader->Set();
-		m_pixelShader->Set();
 		m_modelRenderer->Draw(m_position, m_rotation, m_scale);
 	}
 
 	if (m_box) {
-		//シェーダーの設定
-		m_vertexShader->Set();
-		m_pixelShader->Set();
 		m_box->Draw(m_position + Vector3(3.0f, 0.0f, 0.0f), m_rotation, m_scale);
 	}
 }

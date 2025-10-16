@@ -69,12 +69,12 @@ protected:
 
 private:
 	//物理計算
-	void UpdatePhysics(float deltaTime);
-	void UpdateDragScalar();
+	void UpdatePhysics(float deltaTime, float speed, float horizontalSpeed);
+	void UpdateDragScalar(float horizontalSpeed);
 	Vector3 CalculateThrustForce() const;
 	Vector3 CalculateLateralForce() const;
-	Vector3 CalculateBrakeForce() const;
-	Vector3 CalculateDragForce() const;
+	Vector3 CalculateBrakeForce(float horizontalSpeed) const;
+	Vector3 CalculateDragForce(float speed) const;
 	Vector3 CalculateBuoyancyForce(float deltaTime);
 	Vector3 CalculateWaveForce();
 	Vector3 CalculateWallCollisionForce();
@@ -82,10 +82,10 @@ private:
 	void ApplyForces(float deltaTime);
 
 	//姿勢制御
-	void UpdateRotation(float deltaTime);
-	void UpdateYaw(float deltaTime);
+	void UpdateRotation(float deltaTime, float horizontalSpeed);
+	void UpdateYaw(float deltaTime, float horizontalSpeed);
 	Vector4 UpdateRoll(float deltaTime);
-	void UpdatePitch(float deltaTime);
+	void UpdatePitch(float deltaTime, float horizontalSpeed);
 	void UpdateCorners();
 
 
