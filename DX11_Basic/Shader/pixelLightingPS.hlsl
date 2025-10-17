@@ -26,7 +26,7 @@ void main(in PS_INPUT In, out float4 outDiffuse : SV_TARGET)
 	
 	//各ライトについてループ
 	for (int i = 0; i < MAX_LIGHTS; i++)
-	{	
+	{
 		//拡散光
 		float lightIntensity = -dot(normal.xyz, Lights[i].DirectionAndIntensity.xyz);
 		//クランプ

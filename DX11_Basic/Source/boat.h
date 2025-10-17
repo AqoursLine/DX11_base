@@ -64,8 +64,8 @@ protected:
 	virtual bool Initialize() override;
 	virtual void Update(double deltaTime) override;
 
-	virtual Vector2 GetSceneBoundsMin();
-	virtual Vector2 GetSceneBoundsMax();
+	virtual Vector2 GetSceneBoundsMin() const;
+	virtual Vector2 GetSceneBoundsMax() const;
 
 private:
 	//物理計算

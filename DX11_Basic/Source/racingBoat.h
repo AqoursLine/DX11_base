@@ -27,7 +27,7 @@ public:
 	bool IsLapUpdateReady() const { return m_isLapUpdateReady; }
 
 	//レーンインデックス管理
-	void SetLaneIndex(int index) { m_laneIndex = index; }
+	void SetLaneIndex(int index);
 	int GetLaneIndex() const { return m_laneIndex; }
 
 	//周回数管理
@@ -39,12 +39,21 @@ public:
 
 protected:
 	bool Initialize() override;
+	void Finalize() override;
+	void Update(double deltaTime) override;
+	void Draw() const override;	
 
-	Vector2 GetSceneBoundsMin() override;
-	Vector2 GetSceneBoundsMax() override;
+	Vector2 GetSceneBoundsMin() const override;
+	Vector2 GetSceneBoundsMax() const override;
+
+	Vector4 m_boatColor = Vector4::ONE; //ボートカラー
 
 private:
 	class RaceManager* m_raceManager = nullptr;
+
+	class ModelRenderer* m_model = nullptr;
+	class VertexShader* m_vertexShader = nullptr;
+	class PixelShader* m_pixelShader = nullptr;
 
 	bool m_isStarted = false;
 	bool m_isPassedStartGate = false; //スタートゲート通過フラグ

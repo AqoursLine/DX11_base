@@ -246,6 +246,7 @@
     <ClCompile Include="Source\box.cpp" />
     <ClCompile Include="Source\camera.cpp" />
     <ClCompile Include="Source\countDownText.cpp" />
+    <ClCompile Include="Source\cpuBoat.cpp" />
     <ClCompile Include="Source\engine.cpp" />
     <ClCompile Include="Source\field.cpp" />
     <ClCompile Include="Source\fieldObject.cpp" />
@@ -294,6 +295,7 @@
     <ClInclude Include="Source\box.h" />
     <ClInclude Include="Source\camera.h" />
     <ClInclude Include="Source\countDownText.h" />
+    <ClInclude Include="Source\cpuBoat.h" />
     <ClInclude Include="Source\DirectXTex.h" />
     <ClInclude Include="Source\engine.h" />
     <ClInclude Include="Source\field.h" />

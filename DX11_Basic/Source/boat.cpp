@@ -134,12 +134,12 @@ void Boat::Update(double deltaTime) {
 	UpdateCorners();
 }
 
-Vector2 Boat::GetSceneBoundsMin() {
+Vector2 Boat::GetSceneBoundsMin() const {
 	//シーンの最小座標を取得
 	return SYSTEM.GetManager()->GetScene()->GetBoundsMin();
 }
 
-Vector2 Boat::GetSceneBoundsMax() {
+Vector2 Boat::GetSceneBoundsMax() const {
 	//シーンの最大座標を取得
 	return SYSTEM.GetManager()->GetScene()->GetBoundsMax();
 }

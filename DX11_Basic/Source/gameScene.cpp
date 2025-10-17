@@ -23,6 +23,8 @@
 #include "test.h"
 #include "gameDirectionalLight.h"
 
+#include "cpuBoat.h"
+
 bool GameScene::Initialize() {
 	//とりあえずの壁
 	//右壁
@@ -45,6 +47,9 @@ bool GameScene::Initialize() {
 
 	//プレイヤー
 	AddGameObject(new Player(), TYPE_OPAQUE);
+
+	//CPUボート
+	AddGameObject(new CPUBoat(), TYPE_OPAQUE)->SetPosition({-160.0f, 0.0f, -20.0f});
 
 	//浮き
 	auto bob1 = AddGameObject(new Buoy(), TYPE_OPAQUE);

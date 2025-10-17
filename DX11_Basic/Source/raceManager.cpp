@@ -31,6 +31,13 @@ bool RaceManager::Initialize() {
 
 	m_laneTime.clear();
 
+	//ボートに番号を割り当て
+	int laneIndex = 2;
+	for (auto& boat : m_racingBoats) {
+		boat->SetLaneIndex(laneIndex);
+		laneIndex++;
+	}
+
 	return true;
 }
 
