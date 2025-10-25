@@ -449,6 +449,7 @@ void Boat::UpdateYaw(float deltaTime, float horizontalSpeed) {
 		//クォータニオンを使って回転を適用
 		Vector4 turnQuat = Vector4::FromAxisAngle(Vector3::UP, m_angularVelocity.y);
 		m_yawRotation = turnQuat * m_yawRotation;
+		m_yawRotation.Normalize();
 	}
 }
 

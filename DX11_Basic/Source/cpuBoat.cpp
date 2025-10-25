@@ -1,19 +1,40 @@
 #include "cpuBoat.h"
 
-#include <algorithm>
+#include "system.h"
+#include "manager.h"
+#include "scene.h"
 
+#include <algorithm>
+#include <chrono>
+
+constexpr float M_PI = 3.14159265358979323846f;
+constexpr float M_PIDIV2 = 1.57079632679489661923f;
+constexpr float M_PIDIV4 = 0.78539816339744830961f;
+constexpr float M_PIDIV6 = 0.52359877559829887308f;
+
+/// <summary>
+/// CPUボート初期化
+/// </summary>
+/// <returns>初期化完了</returns>
 bool CPUBoat::Initialize() {
 	if (!RacingBoat::Initialize()) {
 		return false;
 	}
 
-	//初期目標設定
+	//ランダム挙動の初期化
+	InitializeRandomBehavior();
+
+	//初期目標設定：東ブイの南側
 	m_currentTarget = TargetPoint::EAST_BUOY_SOUTH;
-	m_targetPosition = Vector3(m_easeBuoyPosition.x, 0.0f, -m_buoyOuterRadius);
+	m_targetPosition = ApplyRandomOffsets(Vector3(m_eastBuoyPos.x, 0.0f, -m_buoyOuterRadius));
 
 	return true;
 }
 
+/// <summary>
+/// CPUボートの更新処理
+/// </summary>
+/// <param name="deltaTime">デルタタイム</param>
 void CPUBoat::Update(double deltaTime) {
 	//AI制御更新
 	UpdateAI(deltaTime);
@@ -26,6 +47,10 @@ void CPUBoat::Update(double deltaTime) {
 	RacingBoat::Update(deltaTime);
 }
 
+/// <summary>
+/// AI制御更新
+/// </summary>
+/// <param name="deltaTime">デルタタイム</param>
 void CPUBoat::UpdateAI(double deltaTime) {
 	//レース開始前は制御しない
 	if (!IsStarted()) {
@@ -44,7 +69,10 @@ void CPUBoat::UpdateAI(double deltaTime) {
 		return;
 	}
 
-	//目標ブイ更新
+	//ミス挙動の更新
+	UpdateMistakeBehavior(deltaTime);
+
+	//目標通過点の更新
 	UpdateTargetPoint();
 
 	//ステアリング計算
@@ -53,174 +81,191 @@ void CPUBoat::UpdateAI(double deltaTime) {
 	//スロットル計算
 	CalculateThrottle();
 
-	//制御入力平滑化
+	//制御入力の平滑化
 	SmoothControls(deltaTime);
+
 }
 
-void CPUBoat::UpdateTargetPoint() {
-	//現在の通過点に到達したかチェック
-	if (!HasReachedWaypoint()) {
+/// <summary>
+/// ミス挙動の更新
+/// </summary>
+/// <param name="deltaTime">デルタタイム</param>
+void CPUBoat::UpdateMistakeBehavior(double deltaTime) {
+	float dt = static_cast<float>(deltaTime);
+
+	//ミス中の場合
+	if (m_mistakeTimer > 0.0f) {
+		m_mistakeTimer -= dt;
+		if (m_mistakeTimer <= 0.0f) {
+			//ミス終了
+			m_mistakeSteeringOffset = 0.0f;
+		}
 		return;
 	}
 
-	//次の通過点に切り替え
+	//ランダムにミスを発生させる
+	float mistakeProbability = dt / 10.0f; // 平均10秒に1回ミス
+	if (GetRandomFloat(0.0f, 1.0f) < mistakeProbability) {
+		//ミス挙動開始
+		m_mistakeDuration = GetRandomFloat(0.3f, 1.0f); // ミス継続時間
+		m_mistakeTimer = m_mistakeDuration;
+		m_mistakeSteeringOffset = GetRandomFloat(-0.4f, 0.4f); // ミスステアリングオフセット
+	}
+}
+
+/// <summary>
+/// 目標通過点の更新
+/// </summary>
+void CPUBoat::UpdateTargetPoint() {
+	//現在の区間に基づいて次のターゲットに切り替えるべきか判定
+	if (!ShouldSwitchToNextTarget()) {
+		return;
+	}
+
+	//次の通過点に切り替える
 	switch (m_currentTarget) {
 		case CPUBoat::TargetPoint::EAST_BUOY_SOUTH:
 			//次は東ブイ北側
-			m_currentTarget = CPUBoat::TargetPoint::EAST_BUOY_NORTH;
-			m_targetPosition = Vector3(m_easeBuoyPosition.x, 0.0f, m_buoyOuterRadius);
+			m_currentTarget = TargetPoint::EAST_BUOY_NORTH;
+			m_targetPosition = ApplyRandomOffsets(Vector3(m_eastBuoyPos.x, 0.0f, m_buoyOuterRadius));
 			break;
-
 		case CPUBoat::TargetPoint::EAST_BUOY_NORTH:
 			//次は西ブイ北側
-			m_currentTarget = CPUBoat::TargetPoint::WEST_BUOY_NORTH;
-			m_targetPosition = Vector3(m_westBuoyPosition.x, 0.0f, m_buoyOuterRadius);
+			m_currentTarget = TargetPoint::WEST_BUOY_NORTH;
+			m_targetPosition = ApplyRandomOffsets(Vector3(m_westBuoyPos.x, 0.0f, m_buoyOuterRadius));
 			break;
-
 		case CPUBoat::TargetPoint::WEST_BUOY_NORTH:
 			//次は西ブイ南側
-			m_currentTarget = CPUBoat::TargetPoint::WEST_BUOY_SOUTH;
-			m_targetPosition = Vector3(m_westBuoyPosition.x, 0.0f, -m_buoyOuterRadius);
+			m_currentTarget = TargetPoint::WEST_BUOY_SOUTH;
+			m_targetPosition = ApplyRandomOffsets(Vector3(m_westBuoyPos.x, 0.0f, -m_buoyOuterRadius));
 			break;
-
 		case CPUBoat::TargetPoint::WEST_BUOY_SOUTH:
 			//次はゴールゲート
-			m_currentTarget = CPUBoat::TargetPoint::GOAL_GATE;
-			m_targetPosition = Vector3(0.0f, 0.0f, -30.0f);
+			m_currentTarget = TargetPoint::GOAL_GATE;
+			m_targetPosition = ApplyRandomOffsets(Vector3(0.0f, 0.0f, -30.0f));
 			break;
-
 		case CPUBoat::TargetPoint::GOAL_GATE:
 			//次は東ブイ南側
-			m_currentTarget = CPUBoat::TargetPoint::EAST_BUOY_SOUTH;
-			m_targetPosition = Vector3(m_easeBuoyPosition.x, 0.0f, -m_buoyOuterRadius);
+			m_currentTarget = TargetPoint::EAST_BUOY_SOUTH;
+			m_targetPosition = ApplyRandomOffsets(Vector3(m_eastBuoyPos.x, 0.0f, -m_buoyOuterRadius));
 			break;
 	}
 }
 
-bool CPUBoat::HasReachedWaypoint() const {
-	//現在の通過点までの距離
-	Vector4 toTarget = m_targetPosition - m_position;
-	toTarget.y = 0.0f; //水平距離のみ考慮
-	float distance = toTarget.Length();
-
-	//到達判定距離以内か
-	return distance < m_waypointReachDistance;
-}
-
-Vector3 CPUBoat::CalculateWallAvoidance() const {
-	//シーン境界を取得
-	Vector2 sceneMin = GetSceneBoundsMin();
-	Vector2 sceneMax = GetSceneBoundsMax();
-
-	Vector3 avoidance(0.0f, 0.0f, 0.0f);
-
-	//各壁までの距離をチェック
-	float distToEastWall = sceneMax.x - m_position.x;
-	float distToWestWall = m_position.x - sceneMin.x;
-	float distToNorthWall = sceneMax.y - m_position.z;
-	float distToSouthWall = m_position.z - sceneMin.y;
-
-	//東壁
-	if (distToEastWall < m_wallAvoidDistance) {
-		float avoidForce = (m_wallAvoidDistance - distToEastWall) / m_wallAvoidDistance;
-		avoidance.x -= avoidForce * m_wallAvoidStrength;
-	}
-
-	//西壁
-	if (distToWestWall < m_wallAvoidDistance) {
-		float avoidForce = (m_wallAvoidDistance - distToWestWall) / m_wallAvoidDistance;
-		avoidance.x += avoidForce * m_wallAvoidStrength;
-	}
-
-	//北壁
-	if (distToNorthWall < m_wallAvoidDistance) {
-		float avoidForce = (m_wallAvoidDistance - distToNorthWall) / m_wallAvoidDistance;
-		avoidance.z -= avoidForce * m_wallAvoidStrength;
-	}
-
-	//南壁
-	if (distToSouthWall < m_wallAvoidDistance) {
-		float avoidForce = (m_wallAvoidDistance - distToSouthWall) / m_wallAvoidDistance;
-		avoidance.z += avoidForce * m_wallAvoidStrength;
-	}
-
-	return avoidance;
-}
-
+/// <summary>
+/// ステアリングを計算
+/// </summary>
 void CPUBoat::CalculateSteering() {
 	//壁回避ベクトルを計算
-	Vector3 wallAvoidance = CalculateWallAvoidance();
+	Vector3 wallAvoid = CalculateWallAvoidance();
+	
+	//ボート回避ベクトルを計算
+	Vector3 boatAvoid = CalculateBoatAvoidance();
 
 	//目標への方向ベクトル
 	Vector3 toTarget = m_targetPosition - m_position;
-	toTarget.y = 0.0f;
+	toTarget.y = 0.0f; //水平面のみ
+	if (toTarget.Length() < 0.1f) {
+		toTarget = Vector3::FORWARD;
+	}
 	toTarget.Normalize();
 
-	//壁回避が必要な場合は目標方向と合成
-	Vector3 desiredDirection = toTarget;
-	if (wallAvoidance.Length() > 0.01f) {
-		//壁回避ベクトルを正規化
-		wallAvoidance.Normalize();
+	//壁回避の強さを保存
+	float wallAvoidStrength = wallAvoid.Length();
+	//ボート回避の強さを保存
+	float boatAvoidStrength = boatAvoid.Length();
 
-		//目標方向と壁回避方向をブレンド
-		//壁が近い程壁回避成分を強くする
-		float wallAvoidWeight = std::min(wallAvoidance.Length() * 0.2f, 0.8f);
-		desiredDirection = toTarget * (1.0f - wallAvoidWeight) + wallAvoidance * wallAvoidWeight;
-		desiredDirection.Normalize();
+	//合成ベクトルを計算
+	Vector3 desiredDirection = toTarget;
+
+	//壁回避を加算
+	if (wallAvoidStrength > 0.01f) {
+		wallAvoid.y = 0.0f;
+		wallAvoid.Normalize();
+
+		//壁が近いほど壁回避を優先（最大50%）
+		float wallAvoidWeight = std::min(wallAvoidStrength * 0.25f, 0.5f);
+		desiredDirection = desiredDirection * (1.0f - wallAvoidWeight) + wallAvoid * wallAvoidWeight;
 	}
 
-	//ボートの前方ベクトル
+	//ボート回避を加算
+	if (boatAvoidStrength > 0.01f) {
+		boatAvoid.y = 0.0f;
+		boatAvoid.Normalize();
+		//ボートが近いほどボート回避を優先（最大40%）
+		float boatAvoidWeight = std::min(boatAvoidStrength * 0.3f, 0.4f);
+		desiredDirection = desiredDirection * (1.0f - boatAvoidWeight) + boatAvoid * boatAvoidWeight;
+	}
+
+	desiredDirection.Normalize();
+
+	//ボートの前方向ベクトル
 	Vector3 forward = GetYawRotation().RotateVector(Vector3::FORWARD);
 
 	//内積から角度を計算
 	float dot = forward.Dot(desiredDirection);
-	float angleToTarget = std::acos(std::clamp(dot, -1.0f, 1.0f));
+	float angleToDesired = std::acos(std::clamp(dot, -1.0f, 1.0f));
 
-	//外積から符号を決定
+	//外積で左右を判定
 	Vector3 cross = forward.Cross(desiredDirection);
 	if (cross.y < 0.0f) {
-		angleToTarget = -angleToTarget;
+		angleToDesired = -angleToDesired;
 	}
 
-	angleToTarget = NormalizeAngle(angleToTarget);
+	angleToDesired = NormalizeAngle(angleToDesired);
 
 	//ステアリング目標値を計算
-	m_targetSteering = std::clamp(angleToTarget / m_maxSteerAngle, -1.0f, 1.0f);
+	m_targetSteering = std::clamp(angleToDesired / m_maxSteerAngle, -1.0f, 1.0f);
+
+	//ミス挙動を適用
+	m_targetSteering += m_mistakeSteeringOffset;
+	m_targetSteering = std::clamp(m_targetSteering, -1.0f, 1.0f);
 
 	//カーブの鋭さに応じてステアリングを調整
-	float absAngle = std::abs(angleToTarget);
+	float absAngle = std::abs(angleToDesired);
 
-	if (absAngle > XM_PIDIV4) {
-		//45度以上の鋭いカーブ
+	if (absAngle > M_PIDIV4) {
+		//45度以上：急カーブ
 		m_targetSteering *= 1.3f;
 		m_targetSteering = std::clamp(m_targetSteering, -1.0f, 1.0f);
-	} else if (absAngle > XM_PI / 6.0f) {
-		//30度以上の中程度のカーブ
+	} else if (absAngle > M_PIDIV6) {
+		//30度以上：中カーブ
 		m_targetSteering *= 1.15f;
 		m_targetSteering = std::clamp(m_targetSteering, -1.0f, 1.0f);
 	}
 }
 
+/// <summary>
+/// スロットルを計算
+/// </summary>
 void CPUBoat::CalculateThrottle() {
 	//現在の速度取得
 	float currentSpeed = GetSpeed();
 
-	//目標への角度
+	//目標の角度
 	float angleToTarget = CalculateAngleToTarget();
 	float absAngle = std::abs(angleToTarget);
 
 	//壁回避が必要かチェック
-	Vector3 wallAvoidance = CalculateWallAvoidance();
-	bool isAvoidingWall = wallAvoidance.Length() > 0.5f;
+	Vector3 wallAvoid = CalculateWallAvoidance();
+	bool isWallAvoidingWall = wallAvoid.Length() > 0.5f;
 
-	//基本スロットル(目標速度との差に基づく)
-	float speedDiff = m_targetSpeed - currentSpeed;
+	//ボート回避が必要かチェック
+	Vector3 boatAvoid = CalculateBoatAvoidance();
+	bool isAvoidingBoat = boatAvoid.Length() > 0.5f;
+
+	//ランダムな目標速度を適用
+	float adjustedTargetSpeed = m_targetSpeed + m_speedVariation;
+	adjustedTargetSpeed = std::clamp(adjustedTargetSpeed, 20.0f, 35.0f);
+
+	//基本スロットル（目標速度との差に基づく）
+	float speedDiff = adjustedTargetSpeed - currentSpeed;
 	m_targetThrottle = std::clamp(speedDiff * 0.1f, 0.0f, 1.0f);
 
-	//壁回避中はスロットルを抑制
-	if (isAvoidingWall) {
-		m_targetThrottle *= 0.6f;
-		if (currentSpeed > m_targetSpeed * 0.5f) {
+	//壁回避中は減速
+	if (isWallAvoidingWall) {
+		m_targetThrottle *= 0.5f;
+		if (currentSpeed > adjustedTargetSpeed * 0.5f) {
 			m_targetBrake = 0.3f;
 		} else {
 			m_targetBrake = 0.0f;
@@ -228,20 +273,31 @@ void CPUBoat::CalculateThrottle() {
 		return;
 	}
 
-	//カーブの鋭さに応じてスロットルを調整
-	if (absAngle > XM_PI / 3.0f) {
-		//60度以上の鋭いカーブ
+	//ボート回避中は減速
+	if (isAvoidingBoat) {
+		m_targetThrottle *= 0.7f;
+		if (currentSpeed > adjustedTargetSpeed * 0.7f) {
+			m_targetBrake = 0.2f;
+		} else {
+			m_targetBrake = 0.0f;
+		}
+		return;
+	}
+
+	//カーブの鋭さに応じて速度調整
+	if (absAngle > XM_PI / 3) {
+		//60度以上：急カーブ
 		m_targetThrottle *= 0.5f;
-		//ブレーキをかける
-		if (currentSpeed > m_targetSpeed * 0.6f) {
+		//速度が速すぎる場合はブレーキ
+		if (currentSpeed > adjustedTargetSpeed * 0.6f) {
 			m_targetBrake = 0.4f;
 		} else {
 			m_targetBrake = 0.0f;
 		}
-	} else if (absAngle > XM_PIDIV4) {
-		//45度以上の中程度のカーブ
+	} else if (absAngle > M_PIDIV4) {
+		//45度以上：中カーブ
 		m_targetThrottle *= 0.7f;
-		if (currentSpeed > m_targetSpeed * 0.75f) {
+		if (currentSpeed > adjustedTargetSpeed * 0.75f) {
 			m_targetBrake = 0.2f;
 		} else {
 			m_targetBrake = 0.0f;
@@ -250,29 +306,33 @@ void CPUBoat::CalculateThrottle() {
 		m_targetBrake = 0.0f;
 	}
 
-	//目標が遠く、方向があってい場合はフルスロットル
-	Vector4 toTarget = m_targetPosition - m_position;
+	//目標が遠く、方向が合っている場合はフルスロットル
+	Vector3 toTarget = m_targetPosition - m_position;
 	toTarget.y = 0.0f;
 	float distanceToTarget = toTarget.Length();
 
-	if (distanceToTarget > 50.f && absAngle < XM_PI / 6.0f) {
-		//距離50m以上、30度以内
+	if (distanceToTarget > 50.0f && absAngle < M_PIDIV6) {
+		//30度以内
 		m_targetThrottle = 1.0f;
 	}
 
-	//最低スロットル確保
+	//最低スロットルを確保
 	if (m_targetThrottle < 0.3f && m_targetBrake < 0.1f) {
 		m_targetThrottle = 0.3f;
 	}
 }
 
+/// <summary>
+/// スムーズな操作を適用
+/// </summary>
+/// <param name="deltaTime"></param>
 void CPUBoat::SmoothControls(double deltaTime) {
 	float dt = static_cast<float>(deltaTime);
 
 	//ステアリング平滑化
 	float steerRate = std::min(m_steeringSmoothRate * dt, 1.0f);
 
-	//ステアリングを戻す時は速く
+	//ステアリングを戻す時は速くする
 	if (std::abs(m_targetSteering) < std::abs(m_currentSteering)) {
 		steerRate *= 1.5f;
 		steerRate = std::min(steerRate, 1.0f);
@@ -286,27 +346,32 @@ void CPUBoat::SmoothControls(double deltaTime) {
 
 	//ブレーキはそのまま
 	m_currentBrake = m_targetBrake;
+
 }
 
+/// <summary>
+/// 目標への角度を計算
+/// </summary>
+/// <returns>目標への角度</returns>
 float CPUBoat::CalculateAngleToTarget() const {
 	//目標への方向ベクトル
 	Vector3 toTarget = m_targetPosition - m_position;
-	toTarget.y = 0.0f; //水平成分のみ
+	toTarget.y = 0.0f; //水平面のみ
 
-	if (toTarget.Length() < 0.01f) {
-		return 0.0f; //目標にほぼ到達
+	if (toTarget.Length() < 0.1f) {
+		return 0.0f;
 	}
 
 	toTarget.Normalize();
 
-	//ボートの前方ベクトル
+	//ボートの前方向ベクトル
 	Vector3 forward = GetYawRotation().RotateVector(Vector3::FORWARD);
 
 	//内積から角度を計算
 	float dot = forward.Dot(toTarget);
 	float angle = std::acos(std::clamp(dot, -1.0f, 1.0f));
 
-	//外積から符号を決定
+	//外積で左右を判定
 	Vector3 cross = forward.Cross(toTarget);
 	if (cross.y < 0.0f) {
 		angle = -angle;
@@ -315,12 +380,215 @@ float CPUBoat::CalculateAngleToTarget() const {
 	return NormalizeAngle(angle);
 }
 
+
+/// <summary>
+/// 角度を正規化
+/// </summary>
+/// <param name="angle">正規化前の角度</param>
+/// <returns>正規化後の角度</returns>
 float CPUBoat::NormalizeAngle(float angle) const {
-	while (angle > XM_PI) {
-		angle -= XM_2PI;
-	}
-	while (angle < -XM_PI) {
-		angle += XM_2PI;
-	}
+	//-π ～ π の範囲に正規化
+	while (angle > XM_PI) angle -= XM_2PI;
+	while (angle < -XM_PI) angle += XM_2PI;
 	return angle;
+}
+
+/// <summary>
+/// 現在のコース区間を取得
+/// </summary>
+/// <returns>現在のコース区間</returns>
+CPUBoat::CourseSection CPUBoat::GetCurrentCourseSection() const {
+	//現在位置から区間を判定
+	float x = m_position.x;
+	float z = m_position.z;
+
+	//区間１：東ブイ南→北(x > 100 && z < 10)
+	if (x > 100.0f && z < 10.0f) {
+		return CourseSection::SECTION_1;
+	}
+	//区間２：東ブイ北→西ブイ北(z > -10)
+	else if (z > -10.0f) {
+		return CourseSection::SECTION_2;
+	}
+	//区間３：西ブイ北→南(x < -100 && z > -10)
+	else if (x < -100.0f && z > -10.0f) {
+		return CourseSection::SECTION_3;
+	}
+	//区間４：西ブイ南→ゴールゲート(z < 10 && x < 50)
+	else if (z < 10.0f && x < 50.0f) {
+		return CourseSection::SECTION_4;
+	}
+	//区間５：ゴールゲート→東ブイ南
+	else {
+		return CourseSection::SECTION_5;
+	}
+}
+
+/// <summary>
+/// 次のターゲットに切り替えるべきか判定
+/// </summary>
+/// <returns>切り替えるべき</returns>
+bool CPUBoat::ShouldSwitchToNextTarget() const {
+	CourseSection currentSection = GetCurrentCourseSection();
+
+	//現在の目標と区間の対応を確認
+	switch (m_currentTarget) {
+		case CPUBoat::TargetPoint::EAST_BUOY_SOUTH:
+			//区間２（北側）に入ったら次へ
+			return currentSection == CourseSection::SECTION_2;
+		case CPUBoat::TargetPoint::EAST_BUOY_NORTH:
+			//区間３（西側北エリア）に入ったら次へ
+			return currentSection == CourseSection::SECTION_3;
+		case CPUBoat::TargetPoint::WEST_BUOY_NORTH:
+			//区間４（南側）に入ったら次へ
+			return currentSection == CourseSection::SECTION_4;
+		case CPUBoat::TargetPoint::WEST_BUOY_SOUTH:
+			//区間５（南側）に入ったら次へ
+			return currentSection == CourseSection::SECTION_5;
+		case CPUBoat::TargetPoint::GOAL_GATE:
+			//区間１（東側南エリア）に入ったら次へ
+			return currentSection == CourseSection::SECTION_1;
+	}
+
+	return false;
+}
+
+/// <summary>
+/// 壁回避ベクトルを計算
+/// </summary>
+/// <returns>壁回避ベクトル</returns>
+Vector3 CPUBoat::CalculateWallAvoidance() const {
+	//シーン境界を取得
+	Vector2 boundsMin = GetSceneBoundsMin();
+	Vector2 boundsMax = GetSceneBoundsMax();
+
+	Vector3 acoidance(0.0f, 0.0f, 0.0f);
+
+	//各壁までの距離をチェック
+	float distToEastWall = boundsMax.x - m_position.x;	//東の壁(x+)
+	float distToWestWall = m_position.x - boundsMin.x;	//西の壁(x-)
+	float distToNorthWall = boundsMax.y - m_position.z;	//北の壁(z+)
+	float distToSouthWall = m_position.z - boundsMin.y;	//南の壁(z-)
+
+	//東の壁が近い場合、西方向に回避（2乗で滑らかに）
+	if (distToEastWall < m_wallAvoidDistance) {
+		float ratio = distToWestWall / m_wallAvoidDistance;
+		float avoidForce = (1.0f - ratio) * (1.0f - ratio);
+		acoidance.x -= avoidForce * m_wallAvoidStrength;
+	}
+
+	//西の壁が近い場合、東方向に回避（2乗で滑らかに）
+	if (distToWestWall < m_wallAvoidDistance) {
+		float ratio = distToWestWall / m_wallAvoidDistance;
+		float avoidForce = (1.0f - ratio) * (1.0f - ratio);
+		acoidance.x += avoidForce * m_wallAvoidStrength;
+	}
+
+	//北の壁が近い場合、南方向に回避（2乗で滑らかに）
+	if (distToNorthWall < m_wallAvoidDistance) {
+		float ratio = distToNorthWall / m_wallAvoidDistance;
+		float avoidForce = (1.0f - ratio) * (1.0f - ratio);
+		acoidance.z -= avoidForce * m_wallAvoidStrength;
+	}
+
+	//南の壁が近い場合、北方向に回避（2乗で滑らかに）
+	if (distToSouthWall < m_wallAvoidDistance) {
+		float ratio = distToSouthWall / m_wallAvoidDistance;
+		float avoidForce = (1.0f - ratio) * (1.0f - ratio);
+		acoidance.z += avoidForce * m_wallAvoidStrength;
+	}
+
+	return acoidance;
+}
+
+/// <summary>
+/// ボート回避ベクトルを計算
+/// </summary>
+/// <returns>ボート回避ベクトル</returns>
+Vector3 CPUBoat::CalculateBoatAvoidance() const {
+	Vector3 avoidance(0.0f, 0.0f, 0.0f);
+
+	//シーンから他のボートを取得
+	auto scene = SYSTEM.GetManager()->GetScene();
+	if (!scene) return avoidance;
+
+	auto boats = scene->GetGameObjects<RacingBoat>();
+
+	//自分の前方向ベクトル
+	Vector3 forward = GetYawRotation().RotateVector(Vector3::FORWARD);
+
+	//各ボートとの距離をチェック
+	for (auto* otherBoat : boats) {
+		//自分自身はスキップ
+		if (otherBoat == this) continue;
+
+		//他のボートまでのベクトル
+		Vector3 toOther = otherBoat->GetPosition() - m_position;
+		toOther.y = 0.0f; //水平面のみ
+		float distance = toOther.Length();
+
+		//回避距離外ならスキップ
+		if (distance > m_boatAvoidDistance) continue;
+
+		//前方にいるボートのみ回避
+		toOther.Normalize();
+		float dotProduct = forward.Dot(toOther);
+		if (dotProduct < 0.5f) continue; //約60度以内
+
+		//距離に応じた回避力を計算（近いほど強く回避）
+		float ratio = distance / m_boatAvoidDistance;
+		float avoidForce = (1.0f - ratio) * (1.0f - ratio);
+
+		//他のボートから離れる方向に回避ベクトルを追加
+		Vector3 avoidDir = -toOther;	//反対方向
+		avoidance += avoidDir * avoidForce * m_boatAvoidStrength;
+	}
+
+	return avoidance;
+}
+
+/// <summary>
+/// ランダムな挙動を初期化
+/// </summary>
+void CPUBoat::InitializeRandomBehavior() {
+	//乱数エンジンを現在時刻とオブジェクトアドレスでシード
+	auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count() +
+		reinterpret_cast<uintptr_t>(this);
+
+	m_randomEngine.seed(static_cast<unsigned int>(seed));
+
+	//速度のバラツキ
+	m_speedVariation = GetRandomFloat(-5.0f, 5.0f);
+
+	//操舵反応速度のバラツキ
+	m_steeringResponseVariation = GetRandomFloat(-1.0f, 1.0f);
+	m_steeringSmoothRate += m_steeringResponseVariation;
+	m_steeringSmoothRate = std::clamp(m_steeringSmoothRate, 2.0f, 7.0f);
+
+	//スロットル反応速度のバラツキ
+	m_throttleResponseVariation = GetRandomFloat(-0.5f, 0.5f);
+	m_throttleSmoothRate += m_throttleResponseVariation;
+	m_throttleSmoothRate = std::clamp(m_throttleSmoothRate, 2.0f, 5.0f);
+
+	//ブイ外側半径のバラツキ
+	m_buoyOuterRadius += GetRandomFloat(-5.0f, 5.0f);
+	m_buoyOuterRadius = std::clamp(m_buoyOuterRadius, 18.0f, 35.0f);
+}
+
+/// <summary>
+/// ランダムなオフセットを適用
+/// </summary>
+/// <param name="position">オフセット前の座標</param>
+/// <returns>オフセット後の座標</returns>
+Vector3 CPUBoat::ApplyRandomOffsets(const Vector3& position) {
+	//各通過点毎異なるランダムオフセットを生成
+	float offsetX = GetRandomFloat(-8.0f, 8.0f);
+	float offsetZ = GetRandomFloat(-8.0f, 8.0f);
+
+	return Vector3(position.x + offsetX, position.y, position.z + offsetZ);
+}
+
+float CPUBoat::GetRandomFloat(float min, float max) {
+	std::uniform_real_distribution<float> dist(min, max);
+	return dist(m_randomEngine);
 }
