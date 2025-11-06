@@ -22,12 +22,11 @@ class Camera;
 
 class Scene {
 public:
-
-	virtual bool Initialize();
-	virtual void Finalize();
-	virtual void Update(double deltaTime);
-	virtual void Draw();
-	virtual void CleanUp();
+	bool InitializeBase();
+	void FinalizeBase();
+	void UpdateBase(double deltaTime);
+	void DrawBase();
+	void CleanUpBase();
 
 	virtual Vector2 GetBoundsMin() const { return m_boundsMin; }
 	virtual Vector2 GetBoundsMax() const { return m_boundsMax; }
@@ -61,9 +60,27 @@ public:
 		return objects;
 	}
 
+	bool IsInitialized() const { return m_isInitialized; }
+
 protected:
+	virtual bool Initialize() = 0;
+	virtual void Finalize() = 0;
+	virtual void Update(double deltaTime) = 0;
+	virtual void Draw() = 0;
+	virtual void CleanUp() = 0;
 private:
+	//ゲームオブジェクトリスト
 	std::list<GameObject*> m_gameObjects[TYPE_MAX];
+
+	//オブジェクト初期化関数
+	bool ObjectInitialize();
+	void ObjectFinalize();
+	void ObjectUpdate(double deltaTime);
+	void ObjectDestroy();
+	void ObjectDraw();
+	
+	//初期化フラグ
+	bool m_isInitialized = false;
 
 	//描画関数
 	void DrawLights() const;

@@ -3,7 +3,7 @@
 #include "modelRenderer.h"
 
 //静的メンバーの初期化
-std::unordered_map<std::string, std::unique_ptr<MODEL>> ModelRenderer::m_modelCache;
+std::unordered_map<std::string, MODEL_CACHE_ENTRY> ModelRenderer::m_modelCache;
 
 //========================================================
 //モデルノードの変換行列計算
@@ -18,21 +18,49 @@ XMMATRIX MODEL_NODE::GetWorldTransform() const {
 }
 
 //========================================================
+//デストラクタ
+//========================================================
+ModelRenderer::~ModelRenderer() {
+	//参照カウントをデクリメント
+	DecrementReference();
+}
+
+//========================================================
 //モデルの読み込み
 //========================================================
 bool ModelRenderer::Load(const std::string& fileName) {
-	//モデルキャッシュを確認
-	if (m_modelCache.count(fileName)) {
-		m_model = m_modelCache[fileName].get();
-		return true; //キャッシュから取得成功
+	//既に読み込んでいる場合はスキップ
+	if (m_modelFileName == fileName && m_model != nullptr) {
+		return true;
 	}
+
+	//参照カウントをデクリメント
+	DecrementReference();
+
+	//モデルキャッシュを確認
+	auto it = m_modelCache.find(fileName);
+	if (it != m_modelCache.end()) {
+		//キャッシュから取得
+		m_model = it->second.model.get();
+		m_modelFileName = fileName;
+		//参照カウント増加
+		IncrementReference(fileName);
+		return true;
+	}
+
 	//モデルの読み込み
 	m_model = LoadModelInternal(fileName);
 	if (!m_model) {
 		return false;
 	}
+
 	//キャッシュに追加
-	m_modelCache[fileName] = std::unique_ptr<MODEL>(m_model);
+	MODEL_CACHE_ENTRY entry;
+	entry.model = std::unique_ptr<MODEL>(m_model);
+	entry.refCount = 1;
+	m_modelCache[fileName] = std::move(entry);
+
+	m_modelFileName = fileName;
 	return true;
 }
 
@@ -73,6 +101,30 @@ void ModelRenderer::Draw(const Vector3& position, const Vector4& rotation, const
 		XMMatrixTranslation(position.x, position.y, position.z);
 
 	DrawInternal(world);
+}
+
+void ModelRenderer::IncrementReference(const std::string& fileName) {
+	auto it = m_modelCache.find(fileName);
+	if (it != m_modelCache.end()) {
+		it->second.refCount++;
+	}
+}
+
+void ModelRenderer::DecrementReference() {
+	if (m_modelCache.empty()) {
+		return;
+	}
+	auto it = m_modelCache.find(m_modelFileName);
+	if (it != m_modelCache.end()) {
+		it->second.refCount--;
+		if (it->second.refCount <= 0) {
+			m_modelCache.erase(it);
+		}
+	}
+
+	//モデルポインタをクリア
+	m_model = nullptr;
+	m_modelFileName.clear();
 }
 
 void ModelRenderer::DrawInternal(const XMMATRIX& world) {

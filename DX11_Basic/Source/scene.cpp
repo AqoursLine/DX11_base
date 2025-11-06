@@ -8,10 +8,69 @@
 #include "modelRenderer.h"
 #include <algorithm>
 
-bool Scene::Initialize() {
-	//レンダーターゲットの追加
-	RENDERER.AddRenderTarget(SCREEN_WIDTH, SCREEN_HEIGHT);
+bool Scene::InitializeBase() {
+	m_isInitialized = false;
 
+	Initialize();
+
+	ObjectInitialize();
+
+	return true;
+}
+
+void Scene::FinalizeBase() {
+	if (!m_isInitialized) {
+		return;
+	}
+
+	// シーン固有の終了処理
+	Finalize();
+
+	// GameObjectの終了処理と解放
+	ObjectFinalize();
+}
+
+void Scene::UpdateBase(double deltaTime) {
+	if (!m_isInitialized) {
+		return;
+	}
+
+	// シーン固有の更新処理
+	Update(deltaTime);
+
+	// GameObjectの更新処理
+	ObjectUpdate(deltaTime);
+
+	// isDestroyがtrueのGameObjectを削除する
+	ObjectDestroy();
+}
+
+void Scene::DrawBase() {
+	if (!m_isInitialized) {
+		return;
+	}
+
+	// シーン固有の描画処理
+	Draw();
+
+	// GameObjectの描画処理
+	ObjectDraw();
+}
+
+void Scene::CleanUpBase() {
+	if (!m_isInitialized) {
+		return;
+	}
+	// シーン固有のクリーンアップ処理
+	CleanUp();
+}
+
+GameObject* Scene::AddGameObject(GameObject* gameObject, OBJECT_TYPE type) {
+	m_gameObjects[type].push_back(gameObject);
+	return gameObject;
+}
+
+bool Scene::ObjectInitialize() {
 	// GameObjectの初期化
 	for (auto& objects : m_gameObjects) {
 		for (auto& gameObject : objects) {
@@ -21,10 +80,13 @@ bool Scene::Initialize() {
 		}
 	}
 
+	m_isInitialized = true;
+
 	return true;
 }
 
-void Scene::Finalize() {
+void Scene::ObjectFinalize() {
+	// GameObjectの終了処理と解放
 	for (auto& objects : m_gameObjects) {
 		for (auto& gameObject : objects) {
 			gameObject->Finalize();
@@ -32,16 +94,10 @@ void Scene::Finalize() {
 		}
 		objects.clear();
 	}
-
-	ModelRenderer::ReleaseAll(); // モデルレンダラーのキャッシュを解放
-
-	Texture::ReleaseAll(); // テクスチャのキャッシュを解放
-
-	VertexShader::ReleaseAll(); // 頂点シェーダーのキャッシュを解放
-	PixelShader::ReleaseAll(); // ピクセルシェーダーのキャッシュを解放
 }
 
-void Scene::Update(double deltaTime) {
+void Scene::ObjectUpdate(double deltaTime) {
+	// GameObjectの更新処理
 	for (auto& objects : m_gameObjects) {
 		for (auto& gameObject : objects) {
 			gameObject->UpdateBase(deltaTime);
@@ -49,7 +105,16 @@ void Scene::Update(double deltaTime) {
 	}
 }
 
-void Scene::Draw() {
+void Scene::ObjectDestroy() {
+	//isDestroyがtrueのGameObjectを削除する
+	for (auto& objects : m_gameObjects) {
+		objects.remove_if([](GameObject* gameObject) {
+			return gameObject->IsDestroy();
+			});
+	}
+}
+
+void Scene::ObjectDraw() {
 	//レンダーターゲット0に描画
 //	RENDERER.SetRenderTarget(0);
 
@@ -105,20 +170,6 @@ void Scene::Draw() {
 	// レンダーターゲットをデフォルトに戻す
 //	RENDERER.SetDefaultRenderTarget();
 
-}
-
-void Scene::CleanUp() {
-	//isDestroyがtrueのGameObjectを削除する
-	for (auto& objects : m_gameObjects) {
-		objects.remove_if([](GameObject* gameObject) {
-			return gameObject->IsDestroy();
-			});
-	}
-}
-
-GameObject* Scene::AddGameObject(GameObject* gameObject, OBJECT_TYPE type) {
-	m_gameObjects[type].push_back(gameObject);
-	return gameObject;
 }
 
 void Scene::DrawLights() const {

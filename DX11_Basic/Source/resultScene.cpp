@@ -20,8 +20,6 @@ bool ResultScene::Initialize() {
 }
 
 void ResultScene::Update(double deltaTime) {
-	Scene::Update(deltaTime);
-
 	//Enterキーでシーン終了
 	if (Input::GetKeyTrigger(KK_ENTER)) {
 		SYSTEM.GetManager()->SetScene(new TitleScene());

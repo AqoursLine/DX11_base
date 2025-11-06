@@ -96,12 +96,24 @@ struct MODEL {
 };
 
 //========================================================
+// モデルキャッシュエントリ構造体
+//========================================================
+struct MODEL_CACHE_ENTRY {
+	std::unique_ptr<MODEL> model;	//モデルデータ
+	int refCount = 0;				//参照カウント
+};
+
+//========================================================
 // モデルレンダラークラス
 //========================================================
 class ModelRenderer {
 public:
 	ModelRenderer() = default;
-	~ModelRenderer() = default;
+	~ModelRenderer();
+
+	//コピー禁止
+	ModelRenderer(const ModelRenderer&) = delete;
+	ModelRenderer& operator=(const ModelRenderer&) = delete;
 
 	//モデル読み込み
 	bool Load(const std::string& fileName);
@@ -152,8 +164,17 @@ private:
 	//描画モデル
 	MODEL* m_model = nullptr;
 
+	//参照しているモデルファイル名
+	std::string m_modelFileName;
+
 	//モデルキャッシュ
-	static std::unordered_map<std::string, std::unique_ptr<MODEL>> m_modelCache;
+	static std::unordered_map<std::string, MODEL_CACHE_ENTRY> m_modelCache;
+
+	//参照カウント増加
+	void IncrementReference(const std::string& fileName);
+
+	//参照カウント減少
+	void DecrementReference();
 
 	//内部描画関数
 	void DrawInternal(const XMMATRIX& world);

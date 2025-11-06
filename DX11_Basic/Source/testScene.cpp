@@ -49,6 +49,4 @@ void TestScene::Update(double deltaTime) {
 	if (Input::GetKeyTrigger(KK_ENTER)) {
 		SYSTEM.GetManager()->SetScene(new TitleScene());
 	}
-
-	Scene::Update(deltaTime);
 }

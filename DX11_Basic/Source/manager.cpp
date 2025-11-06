@@ -7,8 +7,6 @@
 #include "system.h"
 #include "timer.h"
 
-bool Manager::m_isFinished = false;
-
 Manager::Manager() {
 }
 
@@ -25,7 +23,7 @@ bool Manager::Initialize() {
 	m_scene = new TitleScene();
 #endif // _DEBUG
 
-	if (!m_scene->Initialize()) {
+	if (!m_scene->InitializeBase()) {
 		return false;
 	}
 
@@ -37,7 +35,7 @@ bool Manager::Initialize() {
 
 void Manager::Finalize() {
 	//ワールドの終了
-	m_scene->Finalize();
+	m_scene->FinalizeBase();
 	delete m_scene;
 
 	Input::Uninit();
@@ -49,7 +47,7 @@ void Manager::Update(double dt) {
 	Input::Update();
 
 	//ワールドの更新
-	m_scene->Update(dt);
+	m_scene->UpdateBase(dt);
 
 }
 
@@ -58,7 +56,7 @@ void Manager::Draw() {
 	RENDERER.BeginDraw();
 
 	//ワールドの描画
-	m_scene->Draw();
+	m_scene->DrawBase();
 
 	//描画終了
 	RENDERER.EndDraw();
@@ -71,19 +69,18 @@ bool Manager::CleanUp() {
 	}
 
 	//ワールドのクリーン
-	m_scene->CleanUp();
+	m_scene->CleanUpBase();
 
 	//シーン切り替え
 	if (m_nextScene != nullptr) {
-		m_scene->Finalize();
-		delete m_scene;
-		m_scene = m_nextScene;
-		m_nextScene = nullptr;
-		m_scene->Initialize();
-		// 新しいシーンの初期化に時間がかかると次フレームの deltaTime が大きくなるため、
-		// タイマーをリセットして次の Tick から安定した deltaTime を得る
-		if (SYSTEM.GetTimer()) {
-			SYSTEM.GetTimer()->Reset();
+		if (!m_nextScene->IsInitialized()) {
+			m_nextScene->InitializeBase();
+		} else {
+			m_scene->FinalizeBase();
+			delete m_scene;
+
+			m_scene = m_nextScene;
+			m_nextScene = nullptr;
 		}
 	}
 
