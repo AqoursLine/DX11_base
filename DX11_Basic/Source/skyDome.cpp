@@ -44,7 +44,7 @@ void SkyDome::Finalize() {
 }
 
 void SkyDome::Update(double deltaTime) {
-	auto camera = SYSTEM.GetManager()->GetScene()->GetGameObject<Camera>();
+	auto camera = m_scene->GetGameObject<Camera>();
 
 	if (camera) {
 		m_position = camera->GetPosition();

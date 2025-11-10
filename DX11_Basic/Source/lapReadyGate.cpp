@@ -19,7 +19,7 @@ bool LapReadyGate::Initialize() {
 	m_rotation = { 0.0f, XM_PIDIV2, XM_PI };
 
 	//レースマネージャーの取得
-	m_raceManager = SYSTEM.GetManager()->GetScene()->GetGameObject<RaceManager>();
+	m_raceManager = m_scene->GetGameObject<RaceManager>();
 
 	m_isPassed = false;
 
@@ -32,7 +32,7 @@ void LapReadyGate::Finalize() {
 
 void LapReadyGate::Update(double deltaTime) {
 
-	auto racingBoats = SYSTEM.GetManager()->GetScene()->GetGameObjects<RacingBoat>();
+	auto racingBoats = m_scene->GetGameObjects<RacingBoat>();
 
 	for (auto& boat : racingBoats) {
 		if (boat->IsLapUpdateReady()) {

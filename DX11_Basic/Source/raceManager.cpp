@@ -23,8 +23,7 @@ bool RaceManager::Initialize() {
 	//初期化処理
 
 	//シーンからレース参加ボートを取得
-	auto scene = SYSTEM.GetManager()->GetScene();
-	m_racingBoats = scene->GetGameObjects<RacingBoat>();
+	m_racingBoats = m_scene->GetGameObjects<RacingBoat>();
 
 	//描画オフ
 	SetVisible(false);

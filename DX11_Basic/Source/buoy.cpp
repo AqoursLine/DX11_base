@@ -20,7 +20,7 @@ bool Buoy::Initialize() {
 	m_rotation = { 0.0f, 0.0f, 0.0f };
 	m_scale = { 1.1f, 0.95f, 1.1f };
 
-	m_water = SYSTEM.GetManager()->GetScene()->GetGameObject<Water>();
+	m_water = m_scene->GetGameObject<Water>();
 
 	return true;
 }

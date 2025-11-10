@@ -29,7 +29,7 @@ void Camera::Finalize() {
 
 //カメラクラス更新処理
 void Camera::Update(double deltaTime) {
-	auto player = SYSTEM.GetManager()->GetScene()->GetGameObject<Player>();
+	auto player = m_scene->GetGameObject<Player>();
 	if (!player) {
 		return;
 	}

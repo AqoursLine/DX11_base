@@ -82,7 +82,7 @@ bool RacingBoat::Initialize() {
 	SetStartYaw(m_rotation.y);
 
 	//レースマネージャ取得
-	m_raceManager = SYSTEM.GetManager()->GetScene()->GetGameObject<RaceManager>();
+	m_raceManager = m_scene->GetGameObject<RaceManager>();
 
 	//モデルロード
 	m_model = new ModelRenderer();

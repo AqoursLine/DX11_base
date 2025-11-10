@@ -50,7 +50,7 @@ bool SpeedMeter::Initialize() {
 	m_position = { SCREEN_WIDTH - m_scale.x * 0.5f - 20.0f, SCREEN_HEIGHT - m_scale.y * 0.5f - 20.0f, 0.0f };
 	m_rotation = { 0.0f, 0.0f, 0.0f };
 
-	m_player = SYSTEM.GetManager()->GetScene()->GetGameObject<Player>();
+	m_player = m_scene->GetGameObject<Player>();
 	return true;
 }
 

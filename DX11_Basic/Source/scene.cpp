@@ -66,6 +66,7 @@ void Scene::CleanUpBase() {
 }
 
 GameObject* Scene::AddGameObject(GameObject* gameObject, OBJECT_TYPE type) {
+	gameObject->SetScene(this);
 	m_gameObjects[type].push_back(gameObject);
 	return gameObject;
 }

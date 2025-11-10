@@ -47,7 +47,7 @@ bool MiniMap::Initialize() {
 	m_rotation = { 0.0f, 0.0f, 0.0f };
 
 	//レースボートの取得
-	m_racingBoats = SYSTEM.GetManager()->GetScene()->GetGameObjects<RacingBoat>();
+	m_racingBoats = m_scene->GetGameObjects<RacingBoat>();
 
 	//マップ変換率の設定
 	m_mapConversion = 0.9f; //ワールド座標からミニマップ座標への変換率

@@ -54,7 +54,7 @@ bool GoalGate::Initialize() {
 	m_animationSpeed = 0.5f;
 
 	//レースマネージャーの取得
-	m_raceManager = SYSTEM.GetManager()->GetScene()->GetGameObject<RaceManager>();
+	m_raceManager = m_scene->GetGameObject<RaceManager>();
 
 	m_isPassed = false;
 
@@ -80,7 +80,7 @@ void GoalGate::Finalize() {
 void GoalGate::Update(double deltaTime) {
 	m_animationTime += static_cast<float>(deltaTime);
 
-	auto racingBoats = SYSTEM.GetManager()->GetScene()->GetGameObjects<RacingBoat>();
+	auto racingBoats = m_scene->GetGameObjects<RacingBoat>();
 
 	int minLapCount = INT_MAX;
 

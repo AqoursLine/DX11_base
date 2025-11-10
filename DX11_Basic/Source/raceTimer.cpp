@@ -36,7 +36,7 @@ bool RaceTimer::Initialize() {
 	m_rotation = { 0.0f, 0.0f, 0.0f };
 
 	//レースマネージャーの取得
-	m_raceManager = SYSTEM.GetManager()->GetScene()->GetGameObject<RaceManager>();
+	m_raceManager = m_scene->GetGameObject<RaceManager>();
 
 	return true;
 }

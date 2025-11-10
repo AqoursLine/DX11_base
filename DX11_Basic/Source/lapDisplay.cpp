@@ -28,8 +28,8 @@ bool LapDisplay::Initialize() {
 	m_pixelShader = new PixelShader();
 	m_pixelShader->Load(L"Shader\\spriteAnimationPS.cso");
 	//レースマネージャー取得
-	m_raceManager = SYSTEM.GetManager()->GetScene()->GetGameObject<RaceManager>();
-	m_player = SYSTEM.GetManager()->GetScene()->GetGameObject<Player>();
+	m_raceManager = m_scene->GetGameObject<RaceManager>();
+	m_player = m_scene->GetGameObject<Player>();
 
 	m_scale = { 30.f, 56.0f, 1.0f };
 	m_position = { 20.0f + m_scale.x * 0.5f, SCREEN_HEIGHT - m_scale.y * 0.5f - 20.0f, 0.0f };

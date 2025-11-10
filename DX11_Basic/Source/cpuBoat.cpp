@@ -509,10 +509,7 @@ Vector3 CPUBoat::CalculateBoatAvoidance() const {
 	Vector3 avoidance(0.0f, 0.0f, 0.0f);
 
 	//シーンから他のボートを取得
-	auto scene = SYSTEM.GetManager()->GetScene();
-	if (!scene) return avoidance;
-
-	auto boats = scene->GetGameObjects<RacingBoat>();
+	auto boats = m_scene->GetGameObjects<RacingBoat>();
 
 	//自分の前方向ベクトル
 	Vector3 forward = GetYawRotation().RotateVector(Vector3::FORWARD);

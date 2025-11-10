@@ -86,7 +86,7 @@ void Boat::SetReverse(bool isReverse) {
 
 bool Boat::Initialize() {
 	m_prevPosition = m_position;
-	m_water = SYSTEM.GetManager()->GetScene()->GetGameObject<Water>();
+	m_water = m_scene->GetGameObject<Water>();
 
 	//静止水面の高さを設定
 	if (m_water) {
@@ -136,12 +136,12 @@ void Boat::Update(double deltaTime) {
 
 Vector2 Boat::GetSceneBoundsMin() const {
 	//シーンの最小座標を取得
-	return SYSTEM.GetManager()->GetScene()->GetBoundsMin();
+	return m_scene->GetBoundsMin();
 }
 
 Vector2 Boat::GetSceneBoundsMax() const {
 	//シーンの最大座標を取得
-	return SYSTEM.GetManager()->GetScene()->GetBoundsMax();
+	return m_scene->GetBoundsMax();
 }
 
 
@@ -339,7 +339,7 @@ Vector3 Boat::CalculateWaveForce() {
 
 Vector3 Boat::CalculateWallCollisionForce() {
 	//回転を考慮したボートの4隅の位置を計算
-	if (!SYSTEM.GetManager()->GetScene()) return Vector3(0.0f, 0.0f, 0.0f);
+	if (!m_scene) return Vector3(0.0f, 0.0f, 0.0f);
 
 	//シーンの境界を取得
 	Vector2 sceneMin = GetSceneBoundsMin();
@@ -492,7 +492,7 @@ void Boat::UpdatePitch(float deltaTime, float horizontalSpeed) {
 
 void Boat::UpdateCorners() {
 	//回転を考慮したボートの4隅の位置を計算
-	if (!SYSTEM.GetManager()->GetScene()) return;
+	if (!m_scene) return;
 	//前方と右方向のベクトルを取得
 	Vector3 forward = m_yawRotation.RotateVector(Vector3::FORWARD);
 	Vector3 right = m_yawRotation.RotateVector(Vector3::RIGHT);

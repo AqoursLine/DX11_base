@@ -2,6 +2,8 @@
 
 #include "main.h"
 
+class Scene;
+
 class GameObject {
 public:
 	//コンストラクタ
@@ -50,6 +52,8 @@ public:
 			return false;
 		}
 	}
+
+	void SetScene(Scene* scene) { m_scene = scene; }
 
 	GameObject* SetPosition(const Vector3& position) {
 		m_position = position;
@@ -132,6 +136,8 @@ protected:
 	Vector3 m_rotation = Vector3(0.0f, 0.0f, 0.0f);
 	Vector4 m_quaternion = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
 	Vector3 m_scale = Vector3(1.0f, 1.0f, 1.0f);
+
+	Scene* m_scene = nullptr;
 private:
 	bool m_isActive = true;
 	bool m_isVisible = true;

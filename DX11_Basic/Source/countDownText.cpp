@@ -30,7 +30,7 @@ bool RaceCountDownText::Initialize() {
 	m_pixelShader->Load(L"Shader\\spriteAnimationPS.cso");
 
 	//レースマネージャー取得
-	m_raceManager = SYSTEM.GetManager()->GetScene()->GetGameObject<RaceManager>();
+	m_raceManager = m_scene->GetGameObject<RaceManager>();
 
 	m_position = { SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.3f, 0.0f };
 	m_scale = { 200.0f, 400.0f, 1.0f };
