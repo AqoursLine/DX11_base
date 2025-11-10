@@ -9,17 +9,24 @@
 #include <algorithm>
 
 bool Scene::InitializeBase() {
-	m_isInitialized = false;
+	m_isInitialized.store(false, std::memory_order_release);
 
 	Initialize();
 
-	ObjectInitialize();
+	m_future = std::async(std::launch::async, [this]() { ObjectInitialize(); });
+
+	m_isInitializedBase = true;
 
 	return true;
 }
 
 void Scene::FinalizeBase() {
-	if (!m_isInitialized) {
+	//非同期完了待ち
+	if (m_future.valid()) {
+		m_future.wait();
+	}
+
+	if (!m_isInitialized.load(std::memory_order_acquire)) {
 		return;
 	}
 
@@ -31,7 +38,7 @@ void Scene::FinalizeBase() {
 }
 
 void Scene::UpdateBase(double deltaTime) {
-	if (!m_isInitialized) {
+	if (!m_isInitialized.load(std::memory_order_acquire)) {
 		return;
 	}
 
@@ -46,7 +53,7 @@ void Scene::UpdateBase(double deltaTime) {
 }
 
 void Scene::DrawBase() {
-	if (!m_isInitialized) {
+	if (!m_isInitialized.load(std::memory_order_acquire)) {
 		return;
 	}
 
@@ -58,7 +65,7 @@ void Scene::DrawBase() {
 }
 
 void Scene::CleanUpBase() {
-	if (!m_isInitialized) {
+	if (!m_isInitialized.load(std::memory_order_acquire)) {
 		return;
 	}
 	// シーン固有のクリーンアップ処理
@@ -81,7 +88,7 @@ bool Scene::ObjectInitialize() {
 		}
 	}
 
-	m_isInitialized = true;
+	m_isInitialized.store(true, std::memory_order_release);
 
 	return true;
 }

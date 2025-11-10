@@ -58,7 +58,7 @@ bool GameScene::Initialize() {
 	bob2->SetPosition({ -150.0f, 0.0f, 00.0f });
 
 	//コースマネージャー
-	AddGameObject(new RaceCourseManager(), TYPE_OPAQUE);
+//	AddGameObject(new RaceCourseManager(), TYPE_OPAQUE);
 
 	//レースマネージャー
 	AddGameObject(new RaceManager(), TYPE_CUTOUT);

@@ -2,6 +2,8 @@
 
 #include <list>
 #include <vector>
+#include <atomic>
+#include <future>
 
 enum OBJECT_TYPE {
 	TYPE_NONE = 0,
@@ -22,6 +24,8 @@ class Camera;
 
 class Scene {
 public:
+	virtual ~Scene() { if (m_future.valid()) m_future.wait(); }
+
 	bool InitializeBase();
 	void FinalizeBase();
 	void UpdateBase(double deltaTime);
@@ -60,7 +64,8 @@ public:
 		return objects;
 	}
 
-	bool IsInitialized() const { return m_isInitialized; }
+	bool IsInitialized() const { return m_isInitialized.load(std::memory_order_acquire); }
+	bool IsInitializedBase() const { return m_isInitializedBase; }
 
 protected:
 	virtual bool Initialize() = 0;
@@ -80,7 +85,11 @@ private:
 	void ObjectDraw();
 	
 	//初期化フラグ
-	bool m_isInitialized = false;
+	std::atomic<bool> m_isInitialized { false };
+	bool m_isInitializedBase = false;
+
+	//セーフティ
+	std::future<void> m_future;
 
 	//描画関数
 	void DrawLights() const;

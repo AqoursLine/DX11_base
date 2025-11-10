@@ -73,9 +73,9 @@ bool Manager::CleanUp() {
 
 	//シーン切り替え
 	if (m_nextScene != nullptr) {
-		if (!m_nextScene->IsInitialized()) {
+		if (!m_nextScene->IsInitializedBase()) {
 			m_nextScene->InitializeBase();
-		} else {
+		} else if (m_nextScene->IsInitialized()) {
 			m_scene->FinalizeBase();
 			delete m_scene;
 

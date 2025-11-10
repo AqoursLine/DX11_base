@@ -85,7 +85,6 @@ void Boat::SetReverse(bool isReverse) {
 }
 
 bool Boat::Initialize() {
-	m_prevPosition = m_position;
 	m_water = m_scene->GetGameObject<Water>();
 
 	//静止水面の高さを設定
@@ -94,6 +93,9 @@ bool Boat::Initialize() {
 	} else {
 		m_restingWaterLevel = 0.0f;
 	}
+
+	m_position.y = m_restingWaterLevel - 0.2f;
+	m_prevPosition = m_position;
 
 	return true;
 }
