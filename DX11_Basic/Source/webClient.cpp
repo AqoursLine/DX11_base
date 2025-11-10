@@ -48,6 +48,13 @@ WebClient::WebClient() : m_isConnected(false) {
 WebClient::~WebClient() {
 	//切断
 	Disconnect();
+
+	//WSACleanupの呼び出し
+	std::lock_guard<std::mutex> lock(s_wsaMutex);
+	if (s_wsaInitialized) {
+		WSACleanup();
+		s_wsaInitialized = false;
+	}
 }
 
 bool WebClient::Connect(const std::string& url) {

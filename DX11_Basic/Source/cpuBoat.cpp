@@ -406,13 +406,13 @@ CPUBoat::CourseSection CPUBoat::GetCurrentCourseSection() const {
 	if (x > 100.0f && z < 10.0f) {
 		return CourseSection::SECTION_1;
 	}
-	//区間２：東ブイ北→西ブイ北(z > -10)
-	else if (z > -10.0f) {
-		return CourseSection::SECTION_2;
-	}
 	//区間３：西ブイ北→南(x < -100 && z > -10)
 	else if (x < -100.0f && z > -10.0f) {
 		return CourseSection::SECTION_3;
+	}
+	//区間２：東ブイ北→西ブイ北(z > -10)
+	else if (z > -10.0f) {
+		return CourseSection::SECTION_2;
 	}
 	//区間４：西ブイ南→ゴールゲート(z < 10 && x < 50)
 	else if (z < 10.0f && x < 50.0f) {
@@ -435,19 +435,19 @@ bool CPUBoat::ShouldSwitchToNextTarget() const {
 	switch (m_currentTarget) {
 		case CPUBoat::TargetPoint::EAST_BUOY_SOUTH:
 			//区間２（北側）に入ったら次へ
-			return currentSection == CourseSection::SECTION_2;
+			return currentSection == CourseSection::SECTION_1;
 		case CPUBoat::TargetPoint::EAST_BUOY_NORTH:
 			//区間３（西側北エリア）に入ったら次へ
-			return currentSection == CourseSection::SECTION_3;
+			return currentSection == CourseSection::SECTION_2;
 		case CPUBoat::TargetPoint::WEST_BUOY_NORTH:
 			//区間４（南側）に入ったら次へ
-			return currentSection == CourseSection::SECTION_4;
+			return currentSection == CourseSection::SECTION_3;
 		case CPUBoat::TargetPoint::WEST_BUOY_SOUTH:
 			//区間５（南側）に入ったら次へ
-			return currentSection == CourseSection::SECTION_5;
+			return currentSection == CourseSection::SECTION_4;
 		case CPUBoat::TargetPoint::GOAL_GATE:
 			//区間１（東側南エリア）に入ったら次へ
-			return currentSection == CourseSection::SECTION_1;
+			return currentSection == CourseSection::SECTION_5;
 	}
 
 	return false;
@@ -462,7 +462,7 @@ Vector3 CPUBoat::CalculateWallAvoidance() const {
 	Vector2 boundsMin = GetSceneBoundsMin();
 	Vector2 boundsMax = GetSceneBoundsMax();
 
-	Vector3 acoidance(0.0f, 0.0f, 0.0f);
+	Vector3 avoidance(0.0f, 0.0f, 0.0f);
 
 	//各壁までの距離をチェック
 	float distToEastWall = boundsMax.x - m_position.x;	//東の壁(x+)
@@ -474,31 +474,31 @@ Vector3 CPUBoat::CalculateWallAvoidance() const {
 	if (distToEastWall < m_wallAvoidDistance) {
 		float ratio = distToWestWall / m_wallAvoidDistance;
 		float avoidForce = (1.0f - ratio) * (1.0f - ratio);
-		acoidance.x -= avoidForce * m_wallAvoidStrength;
+		avoidance.x -= avoidForce * m_wallAvoidStrength;
 	}
 
 	//西の壁が近い場合、東方向に回避（2乗で滑らかに）
 	if (distToWestWall < m_wallAvoidDistance) {
 		float ratio = distToWestWall / m_wallAvoidDistance;
 		float avoidForce = (1.0f - ratio) * (1.0f - ratio);
-		acoidance.x += avoidForce * m_wallAvoidStrength;
+		avoidance.x += avoidForce * m_wallAvoidStrength;
 	}
 
 	//北の壁が近い場合、南方向に回避（2乗で滑らかに）
 	if (distToNorthWall < m_wallAvoidDistance) {
 		float ratio = distToNorthWall / m_wallAvoidDistance;
 		float avoidForce = (1.0f - ratio) * (1.0f - ratio);
-		acoidance.z -= avoidForce * m_wallAvoidStrength;
+		avoidance.z -= avoidForce * m_wallAvoidStrength;
 	}
 
 	//南の壁が近い場合、北方向に回避（2乗で滑らかに）
 	if (distToSouthWall < m_wallAvoidDistance) {
 		float ratio = distToSouthWall / m_wallAvoidDistance;
 		float avoidForce = (1.0f - ratio) * (1.0f - ratio);
-		acoidance.z += avoidForce * m_wallAvoidStrength;
+		avoidance.z += avoidForce * m_wallAvoidStrength;
 	}
 
-	return acoidance;
+	return avoidance;
 }
 
 /// <summary>
@@ -569,7 +569,7 @@ void CPUBoat::InitializeRandomBehavior() {
 
 	//ブイ外側半径のバラツキ
 	m_buoyOuterRadius += GetRandomFloat(-5.0f, 5.0f);
-	m_buoyOuterRadius = std::clamp(m_buoyOuterRadius, 18.0f, 35.0f);
+	m_buoyOuterRadius = std::clamp(m_buoyOuterRadius, 25.0f, 45.0f);
 }
 
 /// <summary>

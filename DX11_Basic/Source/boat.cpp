@@ -297,7 +297,7 @@ Vector3 Boat::CalculateBuoyancyForce(float deltaTime) {
 	float currentWaterHeight = m_water->GetWaterHeight(m_position + m_velocity * deltaTime);
 
 	//ボートの底面のy座標
-	float boatBottomY = m_position.y - (m_height);
+	float boatBottomY = m_position.y - (m_height * 0.5f);
 
 	//ボートが水に浸かっているか判定
 	if (boatBottomY < currentWaterHeight) {
@@ -311,7 +311,7 @@ Vector3 Boat::CalculateBuoyancyForce(float deltaTime) {
 		//浸かっている深さを計算
 		float submergedDepth = currentWaterHeight - boatBottomY;
 
-		float buoyancyMagnitude = submergedDepth * m_mass * GRAVITY * 2.0f; //浮力の大きさ（調整可能）
+		float buoyancyMagnitude = submergedDepth * m_mass * GRAVITY * 4.0f; //浮力の大きさ（調整可能）
 
 		return Vector3(0.0f, buoyancyMagnitude, 0.0f);
 	}
@@ -392,11 +392,11 @@ Vector3 Boat::CalculateWallCollisionForce() {
 void Boat::UpdateWaterInteraction(float deltaTime) {
 	if (!m_water) return;
 
-	if (GetSpeed() > 0.1) {
+	if (GetSpeed() > 10.0f) {
 		m_splashTimer += deltaTime;
 
 		if (m_splashTimer >= 0.5f) {
-			m_water->AddRipple(m_position);
+			m_water->AddRipple(m_position, 0.5f);
 			m_splashTimer = 0.0f;
 		}
 	}

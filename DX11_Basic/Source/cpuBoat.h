@@ -52,12 +52,12 @@ private:
 
 	//AI制御パラメータ
 	float m_targetSpeed = 30.0f;		//目標速度
-	float m_buoyOuterRadius = 25.0f;	//ブイの外側通過半径
+	float m_buoyOuterRadius = 35.0f;	//ブイの外側通過半径
 	float m_maxSteerAngle = 1.0f;		//最大ステアリング角
 
 	//壁回避パラメータ
-	float m_wallAvoidDistance = 50.0f;	//壁回避開始距離
-	float m_wallAvoidStrength = 2.0f;	//壁回避強度
+	float m_wallAvoidDistance = 30.0f;	//壁回避開始距離
+	float m_wallAvoidStrength = 1.0f;	//壁回避強度
 
 	//ボート回避パラメータ
 	float m_boatAvoidDistance = 30.0f;	//ボート回避開始距離
