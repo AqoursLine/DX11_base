@@ -8,10 +8,15 @@
 #include "resultScene.h"
 
 //静的メンバ変数の初期化
-std::unordered_map<int, float> RaceManager::m_laneTime;
+std::vector<float> RaceManager::m_laneTime;
 
 void RaceManager::SetLaneTime(int laneIndex) {
-	m_laneTime[laneIndex] = m_raceTime;
+	if (laneIndex >= 0 && laneIndex < static_cast<int>(m_laneTime.size())) {
+		m_laneTime[laneIndex] = m_raceTime;
+	} else if (laneIndex == static_cast<int>(m_laneTime.size())) {
+		//新しいレーンのタイムを追加
+		m_laneTime.push_back(m_raceTime);
+	}
 
 	if (m_laneTime.size() >= m_racingBoats.size()) {
 		m_raceFinished = true;

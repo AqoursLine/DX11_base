@@ -140,11 +140,6 @@ void CPUBoat::UpdateTargetPoint() {
 			m_targetPosition = ApplyRandomOffsets(Vector3(m_westBuoyPos.x, 0.0f, -m_buoyOuterRadius));
 			break;
 		case CPUBoat::TargetPoint::WEST_BUOY_SOUTH:
-			//次はゴールゲート
-			m_currentTarget = TargetPoint::GOAL_GATE;
-			m_targetPosition = ApplyRandomOffsets(Vector3(0.0f, 0.0f, -30.0f));
-			break;
-		case CPUBoat::TargetPoint::GOAL_GATE:
 			//次は東ブイ南側
 			m_currentTarget = TargetPoint::EAST_BUOY_SOUTH;
 			m_targetPosition = ApplyRandomOffsets(Vector3(m_eastBuoyPos.x, 0.0f, -m_buoyOuterRadius));
@@ -184,7 +179,7 @@ void CPUBoat::CalculateSteering() {
 		wallAvoid.Normalize();
 
 		//壁が近いほど壁回避を優先（最大50%）
-		float wallAvoidWeight = std::min(wallAvoidStrength * 0.25f, 0.5f);
+		float wallAvoidWeight = std::min(wallAvoidStrength * 0.2f, 0.5f);
 		desiredDirection = desiredDirection * (1.0f - wallAvoidWeight) + wallAvoid * wallAvoidWeight;
 	}
 
@@ -402,25 +397,21 @@ CPUBoat::CourseSection CPUBoat::GetCurrentCourseSection() const {
 	float x = m_position.x;
 	float z = m_position.z;
 
-	//区間１：東ブイ南→北(x > 100 && z < 10)
-	if (x > 100.0f && z < 10.0f) {
-		return CourseSection::SECTION_1;
-	}
-	//区間３：西ブイ北→南(x < -100 && z > -10)
-	else if (x < -100.0f && z > -10.0f) {
-		return CourseSection::SECTION_3;
-	}
-	//区間２：東ブイ北→西ブイ北(z > -10)
-	else if (z > -10.0f) {
-		return CourseSection::SECTION_2;
-	}
-	//区間４：西ブイ南→ゴールゲート(z < 10 && x < 50)
-	else if (z < 10.0f && x < 50.0f) {
+	//南エリア
+	if (z < 0.0f && x > m_westBuoyPos.x && x < m_eastBuoyPos.x - 30.0f) {
 		return CourseSection::SECTION_4;
 	}
-	//区間５：ゴールゲート→東ブイ南
+	//北エリア
+	else if (z > 0.0f && x > m_westBuoyPos.x + 30.0f && x < m_eastBuoyPos.x) {
+		return CourseSection::SECTION_2;
+	}
+	//東エリア
+	else if (x > 0.0f) {
+		return CourseSection::SECTION_1;
+	}
+	//西エリア
 	else {
-		return CourseSection::SECTION_5;
+		return CourseSection::SECTION_3;
 	}
 }
 
@@ -434,20 +425,17 @@ bool CPUBoat::ShouldSwitchToNextTarget() const {
 	//現在の目標と区間の対応を確認
 	switch (m_currentTarget) {
 		case CPUBoat::TargetPoint::EAST_BUOY_SOUTH:
-			//区間２（北側）に入ったら次へ
+			//区間1（東側）に入ったら次へ
 			return currentSection == CourseSection::SECTION_1;
 		case CPUBoat::TargetPoint::EAST_BUOY_NORTH:
-			//区間３（西側北エリア）に入ったら次へ
+			//区間２（北側）に入ったら次へ
 			return currentSection == CourseSection::SECTION_2;
 		case CPUBoat::TargetPoint::WEST_BUOY_NORTH:
-			//区間４（南側）に入ったら次へ
+			//区間３（西側北エリア）に入ったら次へ
 			return currentSection == CourseSection::SECTION_3;
 		case CPUBoat::TargetPoint::WEST_BUOY_SOUTH:
-			//区間５（南側）に入ったら次へ
+			//区間４（南側）に入ったら次へ
 			return currentSection == CourseSection::SECTION_4;
-		case CPUBoat::TargetPoint::GOAL_GATE:
-			//区間１（東側南エリア）に入ったら次へ
-			return currentSection == CourseSection::SECTION_5;
 	}
 
 	return false;
@@ -579,8 +567,12 @@ void CPUBoat::InitializeRandomBehavior() {
 /// <returns>オフセット後の座標</returns>
 Vector3 CPUBoat::ApplyRandomOffsets(const Vector3& position) {
 	//各通過点毎異なるランダムオフセットを生成
-	float offsetX = GetRandomFloat(-8.0f, 8.0f);
-	float offsetZ = GetRandomFloat(-8.0f, 8.0f);
+	float offsetX = GetRandomFloat(0.0f, 8.0f);
+	float offsetZ = GetRandomFloat(-8.0f, 5.0f);
+
+	//X座標の符号に応じてオフセットを反転
+	float sign = position.x / std::abs(position.x);
+	offsetX *= sign;
 
 	return Vector3(position.x + offsetX, position.y, position.z + offsetZ);
 }

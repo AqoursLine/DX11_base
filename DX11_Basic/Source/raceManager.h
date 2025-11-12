@@ -29,10 +29,10 @@ public:
 	//レーンごとのタイム記録
 	void SetLaneTime(int laneIndex);
 	static float GetLaneTime(int laneIndex) {
-		auto it = m_laneTime.find(laneIndex);
-		if (it != m_laneTime.end()) {
-			return it->second;
+		if (laneIndex >= 0 && laneIndex < static_cast<int>(m_laneTime.size())) {
+			return m_laneTime[laneIndex];
 		}
+
 		return -1.0f; // タイムが記録されていない場合のデフォルト値
 	}
 
@@ -56,5 +56,5 @@ private:
 
 	int m_lapCountToFinish = 3; //完走に必要な周回数
 
-	static std::unordered_map<int, float> m_laneTime;	//レーンごとのタイム記録
+	static std::vector<float> m_laneTime;	//レーンごとのタイム記録
 };

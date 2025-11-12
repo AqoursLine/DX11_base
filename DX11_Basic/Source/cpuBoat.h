@@ -19,16 +19,14 @@ private:
 		EAST_BUOY_NORTH,
 		WEST_BUOY_NORTH,
 		WEST_BUOY_SOUTH,
-		GOAL_GATE
 	};
 
 	//コース区間判定用
 	enum class CourseSection {
-		SECTION_1,	//東ブイ南→北(東側南エリア)
+		SECTION_1,	//東ブイ南→北(東エリア)
 		SECTION_2,	//東ブイ北→西ブイ北(北エリア)
-		SECTION_3,	//西ブイ北→南(西側北エリア)
-		SECTION_4,	//西ブイ南→ゴールゲート(南エリア)
-		SECTION_5	//ゴールゲート→東ブイ南(南エリア)
+		SECTION_3,	//西ブイ北→南(西エリア)
+		SECTION_4,	//西ブイ南→東ブイ南(南エリア)
 	};
 
 	TargetPoint m_currentTarget = TargetPoint::EAST_BUOY_SOUTH;
@@ -52,15 +50,15 @@ private:
 
 	//AI制御パラメータ
 	float m_targetSpeed = 30.0f;		//目標速度
-	float m_buoyOuterRadius = 35.0f;	//ブイの外側通過半径
+	float m_buoyOuterRadius = 30.0f;	//ブイの外側通過半径
 	float m_maxSteerAngle = 1.0f;		//最大ステアリング角
 
 	//壁回避パラメータ
-	float m_wallAvoidDistance = 30.0f;	//壁回避開始距離
-	float m_wallAvoidStrength = 1.0f;	//壁回避強度
+	float m_wallAvoidDistance = 10.0f;	//壁回避開始距離
+	float m_wallAvoidStrength = 1.5f;	//壁回避強度
 
 	//ボート回避パラメータ
-	float m_boatAvoidDistance = 30.0f;	//ボート回避開始距離
+	float m_boatAvoidDistance = 10.0f;	//ボート回避開始距離
 	float m_boatAvoidStrength = 1.5f;	//ボート回避強度
 
 	//ランダム挙動パラメータ

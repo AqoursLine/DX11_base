@@ -6,7 +6,6 @@
 #include "player.h"
 #include "camera.h"
 #include "fpsCamera.h"
-#include "raceCourseManager.h"
 #include "water.h"
 #include "buoy.h"
 #include "skyDome.h"
@@ -50,15 +49,13 @@ bool GameScene::Initialize() {
 
 	//CPUボート
 	AddGameObject(new CPUBoat(), TYPE_OPAQUE)->SetPosition({-160.0f, 0.0f, -20.0f});
+	AddGameObject(new CPUBoat(), TYPE_OPAQUE)->SetPosition({-160.0f, 0.0f, -40.0f });
 
 	//浮き
 	auto bob1 = AddGameObject(new Buoy(), TYPE_OPAQUE);
 	bob1->SetPosition({ 150.0f, 0.0f, 0.0f });
 	auto bob2 = AddGameObject(new Buoy(), TYPE_OPAQUE);
-	bob2->SetPosition({ -150.0f, 0.0f, 00.0f });
-
-	//コースマネージャー
-//	AddGameObject(new RaceCourseManager(), TYPE_OPAQUE);
+	bob2->SetPosition({ -150.0f, 0.0f, 0.0f });
 
 	//レースマネージャー
 	AddGameObject(new RaceManager(), TYPE_CUTOUT);

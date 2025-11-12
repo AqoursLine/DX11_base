@@ -266,7 +266,6 @@
     <ClCompile Include="Source\modelLoader.cpp" />
     <ClCompile Include="Source\modelRenderer.cpp" />
     <ClCompile Include="Source\player.cpp" />
-    <ClCompile Include="Source\raceCourseManager.cpp" />
     <ClCompile Include="Source\raceManager.cpp" />
     <ClCompile Include="Source\raceTimer.cpp" />
     <ClCompile Include="Source\racingBoat.cpp" />
@@ -318,7 +317,6 @@
     <ClInclude Include="Source\minimap.h" />
     <ClInclude Include="Source\modelRenderer.h" />
     <ClInclude Include="Source\player.h" />
-    <ClInclude Include="Source\raceCourseManager.h" />
     <ClInclude Include="Source\raceManager.h" />
     <ClInclude Include="Source\raceTimer.h" />
     <ClInclude Include="Source\racingBoat.h" />
