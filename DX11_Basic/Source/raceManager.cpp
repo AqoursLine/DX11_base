@@ -18,6 +18,14 @@ void RaceManager::SetLaneTime(int laneIndex) {
 		m_laneTime.push_back(m_raceTime);
 	}
 
+	//デバッグ
+#ifdef _DEBUG
+	std::cout << "\n\n\n\n";
+	std::cout << "Lane " << laneIndex << " Time: " << m_raceTime << " seconds" << std::endl;
+
+#endif // _DEBUG
+
+
 	if (m_laneTime.size() >= m_racingBoats.size()) {
 		m_raceFinished = true;
 		m_raceTime = 0.0f;

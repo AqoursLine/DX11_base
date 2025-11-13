@@ -9,6 +9,7 @@
 
 constexpr float M_PI = 3.14159265358979323846f;
 constexpr float M_PIDIV2 = 1.57079632679489661923f;
+constexpr float M_PIDIV3 = 1.04719755119659774615f;
 constexpr float M_PIDIV4 = 0.78539816339744830961f;
 constexpr float M_PIDIV6 = 0.52359877559829887308f;
 
@@ -280,19 +281,27 @@ void CPUBoat::CalculateThrottle() {
 	}
 
 	//カーブの鋭さに応じて速度調整
-	if (absAngle > XM_PI / 3) {
+	if (absAngle > M_PIDIV3) {
 		//60度以上：急カーブ
-		m_targetThrottle *= 0.5f;
+		m_targetThrottle *= 0.3f;
 		//速度が速すぎる場合はブレーキ
-		if (currentSpeed > adjustedTargetSpeed * 0.6f) {
-			m_targetBrake = 0.4f;
+		if (currentSpeed > adjustedTargetSpeed * 0.5f) {
+			m_targetBrake = 0.6f;
 		} else {
 			m_targetBrake = 0.0f;
 		}
 	} else if (absAngle > M_PIDIV4) {
 		//45度以上：中カーブ
+		m_targetThrottle *= 0.5f;
+		if (currentSpeed > adjustedTargetSpeed * 0.65f) {
+			m_targetBrake = 0.4f;
+		} else {
+			m_targetBrake = 0.0f;
+		}
+	} else if (absAngle > M_PIDIV6) {
+		//30度以上：緩カーブ
 		m_targetThrottle *= 0.7f;
-		if (currentSpeed > adjustedTargetSpeed * 0.75f) {
+		if (currentSpeed > adjustedTargetSpeed * 0.8f) {
 			m_targetBrake = 0.2f;
 		} else {
 			m_targetBrake = 0.0f;
@@ -398,11 +407,11 @@ CPUBoat::CourseSection CPUBoat::GetCurrentCourseSection() const {
 	float z = m_position.z;
 
 	//南エリア
-	if (z < 0.0f && x > m_westBuoyPos.x && x < m_eastBuoyPos.x - 30.0f) {
+	if (z < 0.0f && x > m_westBuoyPos.x && x < m_eastBuoyPos.x - 40.0f) {
 		return CourseSection::SECTION_4;
 	}
 	//北エリア
-	else if (z > 0.0f && x > m_westBuoyPos.x + 30.0f && x < m_eastBuoyPos.x) {
+	else if (z > 0.0f && x > m_westBuoyPos.x + 40.0f && x < m_eastBuoyPos.x) {
 		return CourseSection::SECTION_2;
 	}
 	//東エリア
@@ -457,6 +466,21 @@ Vector3 CPUBoat::CalculateWallAvoidance() const {
 	float distToWestWall = m_position.x - boundsMin.x;	//西の壁(x-)
 	float distToNorthWall = boundsMax.y - m_position.z;	//北の壁(z+)
 	float distToSouthWall = m_position.z - boundsMin.y;	//南の壁(z-)
+
+	//中央線からの距離も考慮
+	float distToCenterLine = std::abs(m_position.z); //中央線(z=0)からの距離
+	//中央線が近い場合、遠ざかるように回避力を追加
+	if (distToCenterLine < m_wallAvoidDistance) {
+		float ratio = distToCenterLine / m_wallAvoidDistance;
+		float avoidForce = (1.0f - ratio) * (1.0f - ratio);
+		if (m_position.z > 0.0f) {
+			//北側にいる場合、南方向に回避
+			avoidance.z -= avoidForce * m_wallAvoidStrength * 0.5f;
+		} else {
+			//南側にいる場合、北方向に回避
+			avoidance.z += avoidForce * m_wallAvoidStrength * 0.5f;
+		}
+	}
 
 	//東の壁が近い場合、西方向に回避（2乗で滑らかに）
 	if (distToEastWall < m_wallAvoidDistance) {
@@ -567,12 +591,14 @@ void CPUBoat::InitializeRandomBehavior() {
 /// <returns>オフセット後の座標</returns>
 Vector3 CPUBoat::ApplyRandomOffsets(const Vector3& position) {
 	//各通過点毎異なるランダムオフセットを生成
-	float offsetX = GetRandomFloat(0.0f, 8.0f);
-	float offsetZ = GetRandomFloat(-8.0f, 5.0f);
+	float offsetX = GetRandomFloat(15.0f, 20.0f);
+	float offsetZ = GetRandomFloat(0, 20.0f);
 
 	//X座標の符号に応じてオフセットを反転
-	float sign = position.x / std::abs(position.x);
-	offsetX *= sign;
+	float signX = position.x / std::abs(position.x);
+	offsetX *= -signX;
+
+	offsetZ *= -signX;
 
 	return Vector3(position.x + offsetX, position.y, position.z + offsetZ);
 }

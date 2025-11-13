@@ -100,6 +100,18 @@ void StartGate::Update(double deltaTime) {
 
 		}
 	}
+
+	//全ボートが通過した場合、ゲートを非アクティブにする
+	bool allPassed = true;
+	for (auto& boat : racingBoats) {
+		if (!boat->IsPassedStartGate()) {
+			allPassed = false;
+			break;
+		}
+	}
+	if (allPassed) {
+		SetActive(false);
+	}
 }
 
 void StartGate::Draw() const {

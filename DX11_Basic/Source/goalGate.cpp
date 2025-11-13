@@ -89,7 +89,6 @@ void GoalGate::Update(double deltaTime) {
 			continue;
 		}
 
-
 		Vector3 boatPos = boat->GetPosition();
 
 		bool isCollided = false;
@@ -117,15 +116,17 @@ void GoalGate::Update(double deltaTime) {
 			if (boat->GetLapCount() > m_topLapCount) {
 				m_topLapCount = boat->GetLapCount();
 			}
-			if (boat->GetLapCount() < minLapCount) {
-				minLapCount = boat->GetLapCount();
-			}
 
 			if (boat->GetLapCount() > m_raceManager->GetLapCountToFinish()) {
 				boat->SetPassedGoalGate(true);
 				boat->FinishRace();
 			}
 		}
+
+		if (boat->GetLapCount() < minLapCount) {
+			minLapCount = boat->GetLapCount();
+		}
+
 	}
 
 	if (minLapCount != INT_MAX) {

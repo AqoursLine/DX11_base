@@ -535,7 +535,7 @@ public:
 				(f.x - r.z) * invS,
 				(r.y - u.x) * invS,
 				s * 0.25f
-			);
+			).Normalize();
 		} else if ((r.x > u.y) && (r.x > f.z)) {
 			const float s = std::sqrt(1.0f + r.x - u.y - f.z) * 2.0f;
 			const float invS = 1.0f / s;
@@ -544,7 +544,7 @@ public:
 				(u.x + r.y) * invS,
 				(f.x + r.z) * invS,
 				(u.z - f.y) * invS
-			);
+			).Normalize();
 		} else if (u.y > f.z) {
 			const float s = std::sqrt(1.0f + u.y - r.x - f.z) * 2.0f;
 			const float invS = 1.0f / s;
@@ -553,7 +553,7 @@ public:
 				0.25f * s,
 				(f.y + u.z) * invS,
 				(f.x - r.z) * invS
-			);
+			).Normalize();
 		} else {
 			const float s = std::sqrt(1.0f + f.z - r.x - u.y) * 2.0f;
 			const float invS = 1.0f / s;
@@ -562,7 +562,7 @@ public:
 				(u.z + f.y) * invS,
 				0.25f * s,
 				(r.y - u.x) * invS
-			);
+			).Normalize();
 		}
 	}
 };
