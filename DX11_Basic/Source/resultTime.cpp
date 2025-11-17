@@ -38,7 +38,11 @@ bool ResultTime::Initialize() {
 	m_rotation = { 0.0f, 0.0f, 0.0f };
 
 	//レースタイムの取得
-	m_resultTime = RaceManager::GetLaneTime(0);
+	auto resultData = RaceManager::GetResultData();
+	if (!resultData.empty()) {
+		//先頭のタイムを取得
+		m_resultTime = resultData[0].finishTime;
+	}
 
 	return true;
 }

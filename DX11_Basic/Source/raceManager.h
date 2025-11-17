@@ -4,6 +4,13 @@
 
 class RacingBoat;
 
+struct BoatResultData {
+	int laneIndex;		// レーンインデックス
+	float finishTime;	// ゴールタイム
+	Vector4 boatColor;	// ボートカラー
+	std::string playerName; // プレイヤー名
+};
+
 class RaceManager : public GameObject {
 public:
 	RaceManager() = default;
@@ -27,14 +34,8 @@ public:
 	int GetLapCountToFinish() const { return m_lapCountToFinish; }
 
 	//レーンごとのタイム記録
-	void SetLaneTime(int laneIndex);
-	static float GetLaneTime(int laneIndex) {
-		if (laneIndex >= 0 && laneIndex < static_cast<int>(m_laneTime.size())) {
-			return m_laneTime[laneIndex];
-		}
-
-		return -1.0f; // タイムが記録されていない場合のデフォルト値
-	}
+	void SetResultData(const BoatResultData& data);
+	static const std::vector<BoatResultData>& GetResultData() { return m_result; }
 
 protected:
 	virtual bool Initialize() override;
@@ -56,5 +57,5 @@ private:
 
 	int m_lapCountToFinish = 3; //完走に必要な周回数
 
-	static std::vector<float> m_laneTime;	//レーンごとのタイム記録
+	static std::vector<BoatResultData> m_result;	//レース結果
 };

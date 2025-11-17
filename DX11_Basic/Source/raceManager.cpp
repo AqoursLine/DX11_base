@@ -8,25 +8,16 @@
 #include "resultScene.h"
 
 //静的メンバ変数の初期化
-std::vector<float> RaceManager::m_laneTime;
+std::vector<BoatResultData> RaceManager::m_result;
 
-void RaceManager::SetLaneTime(int laneIndex) {
-	if (laneIndex >= 0 && laneIndex < static_cast<int>(m_laneTime.size())) {
-		m_laneTime[laneIndex] = m_raceTime;
-	} else if (laneIndex == static_cast<int>(m_laneTime.size())) {
-		//新しいレーンのタイムを追加
-		m_laneTime.push_back(m_raceTime);
-	}
+void RaceManager::SetResultData(const BoatResultData& data) {
+	m_result.push_back(data);
 
-	//デバッグ
-#ifdef _DEBUG
-	std::cout << "\n\n\n\n";
-	std::cout << "Lane " << laneIndex << " Time: " << m_raceTime << " seconds" << std::endl;
+	//データにゴールタイムを設定
+	m_result.back().finishTime = m_raceTime;
 
-#endif // _DEBUG
-
-
-	if (m_laneTime.size() >= m_racingBoats.size()) {
+	//全ボートが完走したらレース終了
+	if (m_result.size() >= m_racingBoats.size()) {
 		m_raceFinished = true;
 		m_raceTime = 0.0f;
 	}
@@ -41,7 +32,7 @@ bool RaceManager::Initialize() {
 	//描画オフ
 	SetVisible(false);
 
-	m_laneTime.clear();
+	m_result.clear();
 
 	//ボートに番号を割り当て
 	int laneIndex = 2;
@@ -70,7 +61,14 @@ void RaceManager::Update(double deltaTime) {
 		m_raceTime += static_cast<float>(deltaTime);
 
 		if (m_raceTime >= 3.0f) {
+
+			//結果シーンへ移行
 			SYSTEM.GetManager()->SetScene(new ResultScene());
+
+			//リセット
+			m_raceFinished = false;
+			m_raceTime = 0.0f;
+			m_raceStarted = false;
 		}
 	} else if (m_raceStarted) {
 		//レースタイム更新

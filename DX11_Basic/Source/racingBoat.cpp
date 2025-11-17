@@ -72,7 +72,12 @@ void RacingBoat::SetLaneIndex(int index) {
 
 void RacingBoat::FinishRace() {
 	//レース終了処理
-	m_raceManager->SetLaneTime(m_laneIndex);
+
+	BoatResultData result = {};
+	result.laneIndex = m_laneIndex;
+	result.boatColor = m_boatColor;
+
+	m_raceManager->SetResultData(result);
 }
 
 bool RacingBoat::Initialize() {

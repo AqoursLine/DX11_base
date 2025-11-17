@@ -591,7 +591,7 @@ void CPUBoat::InitializeRandomBehavior() {
 /// <returns>オフセット後の座標</returns>
 Vector3 CPUBoat::ApplyRandomOffsets(const Vector3& position) {
 	//各通過点毎異なるランダムオフセットを生成
-	float offsetX = GetRandomFloat(15.0f, 20.0f);
+	float offsetX = GetRandomFloat(20.0f, 30.0f);
 	float offsetZ = GetRandomFloat(0, 20.0f);
 
 	//X座標の符号に応じてオフセットを反転
