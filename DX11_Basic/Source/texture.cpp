@@ -63,6 +63,18 @@ bool Texture::Load(std::wstring fileName) {
 }
 
 /// <summary>
+/// シェーダーリソースビューを設定
+/// </summary>
+/// <param name="name">エントリ名</param>
+/// <param name="srv">シェーダーリソースビュー</param>
+void Texture::SetSRV(std::wstring name, ID3D11ShaderResourceView* srv) {
+	m_texture = new TextureEntry();
+	m_texture->srv = srv;
+	m_texture->refCount = 1;
+	m_textureCache[name] = m_texture; // キャッシュに追加
+}
+
+/// <summary>
 /// テクスチャを設定
 /// </summary>
 /// <param name="slot">設定するスロット番号</param>

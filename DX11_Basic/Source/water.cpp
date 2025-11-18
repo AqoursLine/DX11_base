@@ -27,6 +27,68 @@ Water::Water()
 }
 
 /// <summary>
+/// 波紋追加
+/// </summary>
+/// <param name="position">生成座標</param>
+/// <param name="amplitude">波紋の振幅</param>
+/// <param name="frequency">波紋の周波数</param>
+/// <param name="speed">波紋の速度</param>
+void Water::AddRipple(const Vector3& position, float amplitude, float frequency, float speed) {
+	// 最大数チェック
+	if (m_activeRippleCount >= MAX_RIPPLES) {
+		// 最も古い波紋を削除
+		m_activeRippleCount = MAX_RIPPLES - 1;
+	}
+
+	// 既存の波紋をシフト
+	for (int i = m_activeRippleCount; i > 0; i--) {
+		m_ripples[i] = m_ripples[i - 1];
+	}
+
+	// 新しい波紋を追加
+	Ripple& newRipple = m_ripples[0];
+	newRipple.position = position;
+	newRipple.amplitude = amplitude;
+	newRipple.frequency = frequency;
+	newRipple.speed = speed;
+	newRipple.time = 0.0f;
+	newRipple.active = true;
+
+	m_activeRippleCount++;
+}
+
+/// <summary>
+/// 波高取得（CPU計算）
+/// </summary>
+/// <param name="position">座標</param>
+/// <returns>波高</returns>
+float Water::GetWaterHeight(const Vector3& position) const {
+	return m_position.y + CalculateWaveHeight(position, m_time);
+}
+
+/// <summary>
+/// 法線取得（CPU計算）
+/// </summary>
+/// <param name="position">座標</param>
+/// <returns>法線</returns>
+Vector3 Water::GetWaterNormal(const Vector3& position) const {
+	float delta = 0.1f;
+
+	float heightL = CalculateWaveHeight(Vector3(position.x - delta, 0.0f, position.z), m_time);
+	float heightR = CalculateWaveHeight(Vector3(position.x + delta, 0.0f, position.z), m_time);
+	float heightD = CalculateWaveHeight(Vector3(position.x, 0.0f, position.z - delta), m_time);
+	float heightU = CalculateWaveHeight(Vector3(position.x, 0.0f, position.z + delta), m_time);
+
+	Vector3 normal;
+	normal.x = (heightL - heightR) / (2.0f * delta);
+	normal.y = 1.0f;
+	normal.z = (heightD - heightU) / (2.0f * delta);
+
+	normal.Normalize();
+	return normal;
+}
+
+/// <summary>
 /// 初期化
 /// </summary>
 /// <returns>初期化成功</returns>
@@ -294,6 +356,8 @@ void Water::CreateMesh() {
 void Water::CreateNormalMap() {
 	auto device = RENDERER.GetDevice();
 
+	m_normalMap = new Texture();
+
 	const int size = 256;
 	std::vector<BYTE> normalData(size * size * 4);
 
@@ -344,4 +408,161 @@ void Water::CreateNormalMap() {
 		}
 		texture->Release();
 	}
+}
+
+/// <summary>
+/// 泡テクスチャ生成
+/// </summary>
+void Water::CreateFoamTexture() {
+	auto device = RENDERER.GetDevice();
+
+	m_foamTexture = new Texture();
+
+	const int size = 256;
+	std::vector<BYTE> foamData(size * size * 4);
+
+	std::srand(12345);
+
+	for (int y = 0; y < size; y++) {
+		for (int x = 0; x < size; x++) {
+			float noise = static_cast<float>(std::rand()) / RAND_MAX;
+			BYTE value = static_cast<BYTE>(noise * 255);
+
+			int index = (y * size + x) * 4;
+			foamData[index + 0] = value;	// R
+			foamData[index + 1] = value;	// G
+			foamData[index + 2] = value;	// B
+			foamData[index + 3] = 255;		// A
+		}
+	}
+
+	// テクスチャ生成
+	D3D11_TEXTURE2D_DESC texDesc = {};
+	texDesc.Width = size;
+	texDesc.Height = size;
+	texDesc.MipLevels = 1;
+	texDesc.ArraySize = 1;
+	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	texDesc.SampleDesc.Count = 1;
+	texDesc.Usage = D3D11_USAGE_DEFAULT;
+	texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
+	D3D11_SUBRESOURCE_DATA initData = {};
+	initData.pSysMem = foamData.data();
+	initData.SysMemPitch = size * 4;
+
+	ID3D11Texture2D* texture = nullptr;
+	HRESULT hr = device->CreateTexture2D(&texDesc, &initData, &texture);
+	if (SUCCEEDED(hr)) {
+		ID3D11ShaderResourceView* srv = nullptr;
+		hr = device->CreateShaderResourceView(texture, nullptr, &srv);
+		if (SUCCEEDED(hr)) {
+			m_foamTexture->SetSRV(L"WaterFoamTexture", srv);
+		}
+		texture->Release();
+	}
+}
+
+/// <summary>
+/// 定数バッファ更新
+/// </summary>
+void Water::UpdateConstantBuffer() {
+	auto context = RENDERER.GetDeviceContext();
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	HRESULT hr = context->Map(m_constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+
+	if (SUCCEEDED(hr)) {
+		WaterConstantBuffer* cb = reinterpret_cast<WaterConstantBuffer*>(mappedResource.pData);
+
+		cb->time = m_time;
+		cb->waveHeight = m_waveHeight;
+		cb->waterSize = m_waterSize;
+		cb->activeRippleCount = m_activeRippleCount;
+
+		cb->baseWaveFreq1 = m_baseWaveFreqency1;
+		cb->baseWaveFreq2 = m_baseWaveFreqency2;
+		cb->baseWaveFreq3 = m_baseWaveFreqency3;
+		cb->baseWaveSpeed1 = m_baseWaveSpeed1;
+		cb->baseWaveSpeed2 = m_baseWaveSpeed2;
+		cb->baseWaveSpeed3 = m_baseWaveSpeed3;
+		cb->waveSharpness = m_waveSharpness;
+
+		cb->padding3 = 0.0f;
+
+		cb->reflectionStrength = m_reflectionStrength;
+		cb->refractionStrength = m_refractionStrength;
+		cb->fresnelPower = m_fresnelPower;
+		cb->waterClarityDepth = m_waterClarityDepth;
+
+		// 波紋データ設定
+		// アクティブな波紋のみ設定
+		for (int i = 0; i < m_activeRippleCount; i++) {
+			const Ripple& ripple = m_ripples[i];
+			cb->ripples[i].positionAndTime = XMFLOAT4(ripple.position.x, ripple.position.y, ripple.position.z, ripple.time);
+			cb->ripples[i].params = XMFLOAT4(ripple.amplitude, ripple.frequency, ripple.speed, 1.0f);
+		}
+
+		// 非アクティブな波紋はゼロクリア
+		for (int i = m_activeRippleCount; i < MAX_RIPPLES; i++) {
+			cb->ripples[i].positionAndTime = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+			cb->ripples[i].params = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+		}
+
+		context->Unmap(m_constantBuffer, 0);
+	}
+
+	// 定数バッファをb7にセット
+	context->VSSetConstantBuffers(7, 1, &m_constantBuffer);
+	context->PSSetConstantBuffers(7, 1, &m_constantBuffer);
+}
+
+/// <summary>
+/// 波高計算（CPU計算）
+/// </summary>
+/// <param name="position">座標</param>
+/// <param name="time">時間</param>
+/// <returns>波高</returns>
+float Water::CalculateWaveHeight(const Vector3& position, float time) const {
+	float height = 0.0f;
+	float x = position.x;
+	float z = position.z;
+
+	// べき乗sin波で波頭を尖らせる
+	auto applySharpness = [this](float wave) -> float {
+		float wave01 = wave * 0.5f + 0.5f; // -1~1 -> 0~1
+		wave01 = std::pow(wave01, m_waveSharpness);
+		return wave01 * 2.0f - 1.0f; // 0~1 -> -1~1
+	};
+
+	float wave1 = std::sin(x * m_baseWaveFreqency1 + time * m_baseWaveSpeed1);
+	float wave2 = std::sin(z * m_baseWaveFreqency2 + time * m_baseWaveSpeed2);
+	float wave3 = std::sin((x + z) * m_baseWaveFreqency3 + time * m_baseWaveSpeed3);
+
+	wave1 = applySharpness(wave1);
+	wave2 = applySharpness(wave2);
+	wave3 = applySharpness(wave3);
+
+	height += wave1 * m_waveHeight * 0.3f;
+	height += wave2 * m_waveHeight * 0.2f;
+	height += wave3 * m_waveHeight * 0.5f;
+
+	// 波紋の影響
+	for (int i = 0; i < m_activeRippleCount; i++) {
+		const Ripple& ripple = m_ripples[i];
+		if (!ripple.active) continue;
+
+		float dx = x - ripple.position.x;
+		float dz = z - ripple.position.z;
+		float distance = std::sqrt(dx * dx + dz * dz);
+
+		if (distance < ripple.speed * ripple.time && ripple.time > 0.0f) {
+			float wavePhase = ripple.frequency * (distance - ripple.speed * ripple.time);
+			float attenuation = std::exp(-ripple.time * 0.5f); // 時間経過による減衰
+			float distanceAttenuation = 1.0f / (1.0f + distance * 0.01f); // 距離による減衰
+
+			height += std::sin(wavePhase) * ripple.amplitude * attenuation * distanceAttenuation;
+		}
+	}
+	return height;
 }

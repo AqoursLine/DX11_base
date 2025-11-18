@@ -12,9 +12,7 @@ public:
 
 	bool Load(std::wstring fileName);
 
-	void SetSRV(std::wstring name, ID3D11ShaderResourceView* srv) {
-		m_textureCache[name] = new TextureEntry{ 1, srv };
-	}
+	void SetSRV(std::wstring name, ID3D11ShaderResourceView* srv);
 
 	static void ReleaseAll();
 
