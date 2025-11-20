@@ -8,6 +8,8 @@
 #include "scene.h"
 #include "camera.h"
 
+#include "water.h"
+
 bool SkyDome::Initialize() {
 
 	m_model = new ModelRenderer();
@@ -23,6 +25,12 @@ bool SkyDome::Initialize() {
 	m_pixelShader->Load(L"Shader\\unlitTexturePS.cso");
 
 	m_scale = { 100000.0f, 100000.0f, 100000.0f };
+
+	auto water = m_scene->GetGameObject<Water>();
+
+	if (water) {
+		water->SetEnvironmentMap(m_model->GetTexture(0));
+	}
 
 	return true;
 }
