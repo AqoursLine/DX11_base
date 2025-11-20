@@ -14,6 +14,4 @@ protected:
 	void Draw() override {};
 	void CleanUp() override {};
 private:
-
-	class Texture* m_circleTex = nullptr;
 };

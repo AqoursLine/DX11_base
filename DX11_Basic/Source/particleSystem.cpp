@@ -12,7 +12,12 @@ void ParticleSystem::Emit(int count) {
 			if (particle.active) continue;
 
 			// パーティクル初期化
-			particle.position = m_position + m_settings.position;
+			Vector3 offsetPos = Vector3(
+				MyRandom::GetFloat(-1.0f, 1.0f) * m_settings.position.x,
+				MyRandom::GetFloat(-1.0f, 1.0f) * m_settings.position.y,
+				MyRandom::GetFloat(-1.0f, 1.0f) * m_settings.position.z
+			);
+			particle.position = m_position + offsetPos;
 
 			// 速度にランダムな変動を加える
 			particle.velocity = m_settings.velocity + Vector3(

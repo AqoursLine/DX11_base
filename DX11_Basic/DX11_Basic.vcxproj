@@ -294,6 +294,7 @@
     <ClCompile Include="Source\startGate.cpp" />
     <ClCompile Include="Source\system.cpp" />
     <ClCompile Include="Source\test.cpp" />
+    <ClCompile Include="Source\testParticle.cpp" />
     <ClCompile Include="Source\testScene.cpp" />
     <ClCompile Include="Source\texture.cpp" />
     <ClCompile Include="Source\timer.cpp" />
@@ -347,6 +348,7 @@
     <ClInclude Include="Source\startGate.h" />
     <ClInclude Include="Source\system.h" />
     <ClInclude Include="Source\test.h" />
+    <ClInclude Include="Source\testParticle.h" />
     <ClInclude Include="Source\testScene.h" />
     <ClInclude Include="Source\texture.h" />
     <ClInclude Include="Source\timer.h" />
