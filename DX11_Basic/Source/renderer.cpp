@@ -432,10 +432,19 @@ void Renderer::CreateVertexShader(ID3D11VertexShader** vertexShader, ID3D11Input
 		D3D11_INPUT_ELEMENT_DESC elementDesc = {};
 		elementDesc.SemanticName = paramDesc.SemanticName;
 		elementDesc.SemanticIndex = paramDesc.SemanticIndex;
-		elementDesc.InputSlot = 0;
+
+		// セマンティクス名に"INSTANCE_"が含まれている場合、インスタンスデータとして扱う
+		if (std::string(elementDesc.SemanticName).find("INSTANCE_") != std::string::npos) {
+			elementDesc.InputSlot = 1;
+			elementDesc.InputSlotClass = D3D11_INPUT_PER_INSTANCE_DATA;
+			elementDesc.InstanceDataStepRate = 1;
+		} else {
+			elementDesc.InputSlot = 0;
+			elementDesc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+			elementDesc.InstanceDataStepRate = 0;
+		}
+
 		elementDesc.AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-		elementDesc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-		elementDesc.InstanceDataStepRate = 0;
 
 		//データ形式の決定
 		if (paramDesc.Mask == 1) {

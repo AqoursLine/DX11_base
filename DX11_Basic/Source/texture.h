@@ -13,10 +13,12 @@ public:
 	bool Load(std::wstring fileName);
 
 	void SetSRV(std::wstring name, ID3D11ShaderResourceView* srv);
+	ID3D11ShaderResourceView* GetSRV() { return m_texture->srv; }
 
 	static void ReleaseAll();
 
 	void Set(int slot = 0);
+
 
 private:
 	TextureEntry* m_texture;

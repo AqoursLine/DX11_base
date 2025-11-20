@@ -109,14 +109,20 @@ void Camera::Draw() const {
 	//ビュー行列を設定
 	RENDERER.SetViewMatrix(view);
 
-	//カメラ位置をレンダラーに設定
+	//カメラ定数を設定
 	CAMERA cameraData;
 	cameraData.position = XMFLOAT4(m_position.x, m_position.y, m_position.z, 1.0f);
-	Vector4 right = GetRightQ();
+
+	Vector3 forward = m_targetPosition - m_position;
+	forward.Normalize();
+	Vector3 right = Vector3(0.0f, 1.0f, 0.0f).Cross(forward).Normalize();
+	Vector3 up = forward.Cross(right).Normalize();
+
 	cameraData.Right = XMFLOAT4(right.x, right.y, right.z, 0.0f);
-	Vector4 up = GetUpQ();
 	cameraData.Up = XMFLOAT4(up.x, up.y, up.z, 0.0f);
+
 	RENDERER.SetCameraData(cameraData);
+
 }
 
 void Camera::CleanUp() {

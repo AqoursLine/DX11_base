@@ -1,5 +1,5 @@
-Texture2D ParticleTexture : register(t0);
-SamplerState ParticleSampler : register(s0);
+Texture2D g_particleTexture : register(t0);
+SamplerState g_particleSampler : register(s0);
 
 struct PS_PARTICLE_INPUT
 {
@@ -11,14 +11,9 @@ struct PS_PARTICLE_INPUT
 void main(in PS_PARTICLE_INPUT inputm, out float4 outputColor : SV_TARGET)
 {
 	// テクスチャカラーを取得
-	float4 texColor = ParticleTexture.Sample(ParticleSampler, inputm.TexCoord);
+	float4 texColor = g_particleTexture.Sample(g_particleSampler, inputm.TexCoord);
 	
 	// 頂点カラーとテクスチャカラーを乗算
 	outputColor = texColor * inputm.Color;
 	
-	// アルファ値で透明度を調整
-	if (outputColor.a < 0.01f)
-	{
-		discard; // 透明なピクセルは描画しない
-	}
 }

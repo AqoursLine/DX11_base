@@ -120,8 +120,6 @@ private:
 
 	//水面への参照
 	Water* m_water;
-	//水しぶきへの参照
-	class SplashEffect* m_splashEffect;
 
 	//水滴用タイマー
 	float m_splashTimer;

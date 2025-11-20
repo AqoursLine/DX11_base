@@ -185,13 +185,13 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Shader\%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Shader\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="Shader\splashEffectPS.hlsl">
+    <FxCompile Include="Shader\particlePS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="Shader\splashEffectVS.hlsl">
+    <FxCompile Include="Shader\particleVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
@@ -289,7 +289,7 @@
     <ClCompile Include="Source\shaders.cpp" />
     <ClCompile Include="Source\skyDome.cpp" />
     <ClCompile Include="Source\speedMeter.cpp" />
-    <ClCompile Include="Source\splashEffect.cpp" />
+    <ClCompile Include="Source\particleSystem.cpp" />
     <ClCompile Include="Source\sprite.cpp" />
     <ClCompile Include="Source\startGate.cpp" />
     <ClCompile Include="Source\system.cpp" />
@@ -342,7 +342,7 @@
     <ClInclude Include="Source\shaders.h" />
     <ClInclude Include="Source\skyDome.h" />
     <ClInclude Include="Source\speedMeter.h" />
-    <ClInclude Include="Source\splashEffect.h" />
+    <ClInclude Include="Source\particleSystem.h" />
     <ClInclude Include="Source\sprite.h" />
     <ClInclude Include="Source\startGate.h" />
     <ClInclude Include="Source\system.h" />
