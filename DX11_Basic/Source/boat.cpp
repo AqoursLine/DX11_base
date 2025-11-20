@@ -8,6 +8,8 @@
 #include "water.h"
 #include "raceManager.h"
 
+#include "splashEffect.h"
+
 Boat::Boat()
 	: m_throttleInput(0.0f)	//スロットル入力(0.0f ~ 1.0f)
 	, m_steeringInput(0.0f)	//ステアリング入力(-1.0f ~ 1.0f)
@@ -86,6 +88,8 @@ void Boat::SetReverse(bool isReverse) {
 
 bool Boat::Initialize() {
 	m_water = m_scene->GetGameObject<Water>();
+
+	m_splashEffect = m_scene->GetGameObject<SplashEffect>();
 
 	//静止水面の高さを設定
 	if (m_water) {
@@ -305,7 +309,7 @@ Vector3 Boat::CalculateBuoyancyForce(float deltaTime) {
 	if (boatBottomY < currentWaterHeight) {
 		//直前に水に浸かっていなかった場合
 		if (!m_isInWater) {
-			m_water->AddRipple(m_position);
+//			m_water->AddRipple(m_position);
 		}
 
 		m_isInWater = true;
@@ -398,7 +402,12 @@ void Boat::UpdateWaterInteraction(float deltaTime) {
 		m_splashTimer += deltaTime;
 
 		if (m_splashTimer >= 0.5f) {
-			m_water->AddRipple(m_position, 0.5f);
+			m_water->AddRipple(m_position, 0.5f, 2.0f);
+
+			if (m_splashEffect) {
+				m_splashEffect->EmitSplash(m_position, GetForwardQ(), 1.0f);
+			}
+
 			m_splashTimer = 0.0f;
 		}
 	}

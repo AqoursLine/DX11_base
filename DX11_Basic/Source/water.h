@@ -51,6 +51,14 @@ public:
 	}
 
 	// ==== 波紋管理 ====
+	
+	/// <summary>
+	/// 波紋追加
+	/// </summary>
+	/// <param name="position">座標</param>
+	/// <param name="amplitude">振幅</param>
+	/// <param name="frequency">周波数</param>
+	/// <param name="speed">速度</param>
 	void AddRipple(const Vector3& position, float amplitude = 2.0f, float frequency = 2.0f, float speed = 8.0f);
 	int GetActiveRippleCount() const { return m_activeRippleCount; }
 

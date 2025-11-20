@@ -21,6 +21,7 @@
 #include "lapDisplay.h"
 #include "test.h"
 #include "gameDirectionalLight.h"
+#include "splashEffect.h"
 
 #include "cpuBoat.h"
 
@@ -99,6 +100,9 @@ bool GameScene::Initialize() {
 	light->SetDirection({ -1.0f, -1.0f, -1.0f, 0.0f });
 	light->SetEnabled(true);
 	AddGameObject(light, TYPE_LIGHT);
+
+	//スプラッシュエフェクト
+	AddGameObject(new SplashEffect(), TYPE_TRANSPARENT);
 
 	return true;
 }

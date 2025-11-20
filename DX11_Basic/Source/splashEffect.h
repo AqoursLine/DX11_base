@@ -28,7 +28,7 @@ public:
 	void SetParticleLifeTime(float minLifeTime, float maxLifeTime);
 	void SetParticleSize(float minSize, float maxSize);
 	void SetParticleSpeed(float minSpeed, float maxSpeed);
-	void SetGravity(float gravity);
+	void SetGravity(float gravity) { m_gravity = gravity; }
 
 	// 情報取得
 	int GetActiveParticleCount() const;
@@ -43,6 +43,7 @@ private:
 	struct ParticleVertex {
 		XMFLOAT4 position;
 		XMFLOAT4 color;
+		XMFLOAT4 rotation;
 	};
 
 	// パーティクルデータ
@@ -56,6 +57,9 @@ private:
 	// シェーダー
 	class VertexShader* m_vertexShader;
 	class PixelShader* m_pixelShader;
+
+	// テクスチャ
+	class Texture* m_texture;
 
 	// ブレンドステート
 	ID3D11BlendState* m_blendState;
@@ -72,6 +76,5 @@ private:
 	// 内部メソッド
 	void UpdateInstanceBuffer();
 	void EmitParticle(const Vector3& position, const Vector3& velocity, float size, float lifeTime);
-	float RandomRange(float min, float max) const;
 
 };

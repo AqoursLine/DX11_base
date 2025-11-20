@@ -1,7 +1,10 @@
 #include "main.h"
 #include "renderer.h"
 #include "shaders.h"
+#include "texture.h"
 #include "splashEffect.h"
+
+#include "myRandom.h"
 
 /// <summary>
 /// コンストラクタ
@@ -11,6 +14,7 @@ SplashEffect::SplashEffect()
 	, m_instanceBuffer(nullptr)
 	, m_vertexShader(nullptr)
 	, m_pixelShader(nullptr)
+	, m_texture(nullptr)
 	, m_blendState(nullptr)
 	, m_maxParticles(1000)
 	, m_minLifeTime(0.5f)
@@ -25,6 +29,135 @@ SplashEffect::SplashEffect()
 }
 
 /// <summary>
+/// パーティクル発生
+/// </summary>
+/// <param name="position">座標</param>
+/// <param name="direction">方向</param>
+/// <param name="intensity">強度</param>
+void SplashEffect::EmitSplash(const Vector3& position, const Vector3& direction, float intensity) {
+	int particleCount = static_cast<int>(10 * intensity);
+
+	for (int i = 0; i < particleCount; i++) {
+		// ランダムな速度ベクトルを生成
+		float angle = MyRandom::GetFloat(0.0f, XM_2PI);
+		float elevation = MyRandom::GetFloat(0.3f, 1.0f);
+
+		Vector3 velocity = direction;
+		velocity.x += std::cos(angle) * elevation;
+		velocity.z += std::sin(angle) * elevation;
+		velocity.y = std::abs(velocity.y) + MyRandom::GetFloat(0.5f, 2.0f);
+		velocity.Normalize();
+
+		velocity *= MyRandom::GetFloat(m_minSpeed, m_maxSpeed) * intensity;
+
+		float size = MyRandom::GetFloat(m_minSize, m_maxSize);
+		float lifeTime = MyRandom::GetFloat(m_minLifeTime, m_maxLifeTime);
+
+		EmitParticle(position, velocity, size, lifeTime);		
+	}
+}
+
+/// <summary>
+/// 連続的に少量のパーティクルを発生させる
+/// </summary>
+/// <param name="position">座標</param>
+/// <param name="direction">方向</param>
+/// <param name="intensity">強度</param>
+void SplashEffect::EmitContinuousSplash(const Vector3& position, const Vector3& direction, float intensity) {
+	int particleCount = static_cast<int>(2 * intensity);
+
+	for (int i = 0; i < particleCount; i++) {
+		Vector3 velocity = direction;
+		velocity.x += MyRandom::GetFloat(-0.3f, 0.3f);
+		velocity.z += MyRandom::GetFloat(-0.3f, 0.3f);
+		velocity.y = MyRandom::GetFloat(0.5f, 1.5f);
+		velocity *= MyRandom::GetFloat(m_minSpeed * 0.5f, m_maxSpeed * 0.5f);
+
+		float size = MyRandom::GetFloat(m_minSize * 0.7f, m_maxSize * 0.7f);
+		float lifeTime = MyRandom::GetFloat(m_minLifeTime, m_maxLifeTime * 0.8f);
+
+		EmitParticle(position, velocity, size, lifeTime);
+	}
+}
+
+/// <summary>
+/// 波紋エフェクト発生
+/// </summary>
+/// <param name="position">座標</param>
+/// <param name="waveHeight">波の高さ</param>
+void SplashEffect::EmitWaveSplash(const Vector3& position, float waveHeight) {
+	float intensity = std::min(waveHeight / 5.0f, 1.0f);
+	int particleCount = static_cast<int>(5 * intensity);
+
+	for (int i = 0; i < particleCount; i++) {
+		Vector3 velocity;
+		velocity.x = MyRandom::GetFloat(-1.0f, 1.0f);
+		velocity.z = MyRandom::GetFloat(-1.0f, 1.0f);
+		velocity.y = MyRandom::GetFloat(1.0f, 3.0f);
+		velocity.Normalize();
+
+		velocity *= MyRandom::GetFloat(m_minSpeed, m_maxSpeed) * intensity;
+
+		float size = MyRandom::GetFloat(m_minSize, m_maxSize);
+		float lifeTime = MyRandom::GetFloat(m_minLifeTime, m_maxLifeTime);
+		EmitParticle(position, velocity, size, lifeTime);
+	}
+}
+
+/// <summary>
+/// 最大パーティクル数設定
+/// </summary>
+/// <param name="maxParticles">最大パーティクル数</param>
+void SplashEffect::SetMaxParticles(int maxParticles) {
+	m_maxParticles = maxParticles;
+	m_particles.resize(m_maxParticles);
+}
+
+/// <summary>
+/// パーティクル寿命設定
+/// </summary>
+/// <param name="minLifeTime">最小寿命</param>
+/// <param name="maxLifeTime">最大寿命</param>
+void SplashEffect::SetParticleLifeTime(float minLifeTime, float maxLifeTime) {
+	m_minLifeTime = minLifeTime;
+	m_maxLifeTime = maxLifeTime;
+}
+
+/// <summary>
+/// パーティクルサイズ設定
+/// </summary>
+/// <param name="minSize">最小サイズ</param>
+/// <param name="maxSize">最大サイズ</param>
+void SplashEffect::SetParticleSize(float minSize, float maxSize) {
+	m_minSize = minSize;
+	m_maxSize = maxSize;
+}
+
+/// <summary>
+/// パーティクル速度設定
+/// </summary>
+/// <param name="minSpeed">最小速度</param>
+/// <param name="maxSpeed">最大速度</param>
+void SplashEffect::SetParticleSpeed(float minSpeed, float maxSpeed) {
+	m_minSpeed = minSpeed;
+	m_maxSpeed = maxSpeed;
+}
+
+/// <summary>
+/// アクティブなパーティクル数取得
+/// </summary>
+/// <returns>アクティブなパーティクル数</returns>
+int SplashEffect::GetActiveParticleCount() const {
+	int count = 0;
+	for (const auto& particle : m_particles) {
+		if (particle.active) {
+			count++;
+		}
+	}
+	return count;
+}
+
+/// <summary>
 /// イニシャライズ
 /// </summary>
 /// <returns>初期化完了</returns>
@@ -36,6 +169,12 @@ bool SplashEffect::Initialize() {
 	m_vertexShader->Load(L"Shader\\splashEffectVS.cso");
 	m_pixelShader = new PixelShader();
 	m_pixelShader->Load(L"Shader\\splashEffectPS.cso");
+
+	// テクスチャ読み込み
+	m_texture = new Texture();
+	if (!m_texture->Load(L"Asset\\Texture\\circle.png")) {
+		return false;
+	}
 
 	// 頂点バッファ生成
 	VERTEX_3D vertices[4] = {
@@ -119,6 +258,10 @@ void SplashEffect::Finalize() {
 		delete m_pixelShader;
 		m_pixelShader = nullptr;
 	}
+	if (m_texture) {
+		delete m_texture;
+		m_texture = nullptr;
+	}
 }
 
 /// <summary>
@@ -162,6 +305,9 @@ void SplashEffect::Draw() const {
 	// シェーダー設定
 	m_vertexShader->Set();
 	m_pixelShader->Set();
+
+	// テクスチャ設定
+	m_texture->Set(0);
 
 	// ブレンドステート設定
 	float blendFactor[4] = { 0.0f,0.0f,0.0f,0.0f };
@@ -215,9 +361,40 @@ void SplashEffect::UpdateInstanceBuffer() {
 
 			vertices[index].position = XMFLOAT4(particle.position.x, particle.position.y, particle.position.z, particle.size);
 			vertices[index].color = XMFLOAT4(1.0f, 1.0f, 1.0f, alpha);
+			vertices[index].rotation.x = particle.rotation.x;
+			vertices[index].rotation.y = particle.rotation.y;
+			vertices[index].rotation.z = particle.rotation.z;
 			++index;
 		}
 
 		context->Unmap(m_instanceBuffer, 0);
+	}
+}
+
+/// <summary>
+/// パーティクル発生
+/// </summary>
+/// <param name="position">座標</param>
+/// <param name="velocity">速度</param>
+/// <param name="size">サイズ</param>
+/// <param name="lifeTime">寿命</param>
+void SplashEffect::EmitParticle(const Vector3& position, const Vector3& velocity, float size, float lifeTime) {
+	//非アクティブなパーティクルを検索
+	for (auto& particle : m_particles) {
+		if (!particle.active) {
+			particle.position = position;
+			particle.velocity = velocity;
+			particle.size = size;
+			particle.life = lifeTime;
+			particle.maxLife = lifeTime;
+			particle.rotation = Vector3::ZERO;
+			particle.angularVelocity = Vector3(
+				MyRandom::GetFloat(-XM_PI, XM_PI),
+				MyRandom::GetFloat(-XM_PI, XM_PI),
+				MyRandom::GetFloat(-XM_PI, XM_PI)
+			);
+			particle.active = true;
+			break;
+		}
 	}
 }

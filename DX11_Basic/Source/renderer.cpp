@@ -245,7 +245,7 @@ bool Renderer::Initialize(HWND hWnd) {
 	}
 
 	//カメラバッファの作成
-	bufferDesc.ByteWidth = sizeof(XMFLOAT4);
+	bufferDesc.ByteWidth = sizeof(CAMERA);
 	hr = m_device->CreateBuffer(&bufferDesc, nullptr, m_cameraBuffer.GetAddressOf());
 	if (FAILED(hr)) {
 		ErrorMessage(L"カメラバッファの初期化に失敗しました。", hr);
@@ -374,12 +374,10 @@ void Renderer::SetLight(const LIGHT& light, int lightIndex) {
 	m_deviceContext->Unmap(m_lightBuffer.Get(), 0);
 }
 
-void Renderer::SetCameraPosition(const Vector3& position) {
-	XMFLOAT4 cameraPos = { position.x, position.y, position.z, 0.0f };
-
+void Renderer::SetCameraData(const CAMERA& camera) {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	m_deviceContext->Map(m_cameraBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	memcpy(mappedResource.pData, &cameraPos, sizeof(cameraPos));
+	memcpy(mappedResource.pData, &camera, sizeof(camera));
 	m_deviceContext->Unmap(m_cameraBuffer.Get(), 0);
 }
 
