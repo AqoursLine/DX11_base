@@ -48,8 +48,11 @@ bool GameScene::Initialize() {
 	AddGameObject(new Player(), TYPE_OPAQUE);
 
 	//CPUボート
-	AddGameObject(new CPUBoat(), TYPE_OPAQUE)->SetPosition({-160.0f, 0.0f, -20.0f});
-	AddGameObject(new CPUBoat(), TYPE_OPAQUE)->SetPosition({-160.0f, 0.0f, -40.0f });
+	AddGameObject(new CPUBoat(), TYPE_OPAQUE)->SetPosition({ -160.0f, 0.0f, -10.0f});
+	AddGameObject(new CPUBoat(), TYPE_OPAQUE)->SetPosition({ -160.0f, 0.0f, -20.0f });
+	AddGameObject(new CPUBoat(), TYPE_OPAQUE)->SetPosition({ -160.0f, 0.0f, -30.0f });
+	AddGameObject(new CPUBoat(), TYPE_OPAQUE)->SetPosition({ -160.0f, 0.0f, -40.0f });
+	AddGameObject(new CPUBoat(), TYPE_OPAQUE)->SetPosition({ -160.0f, 0.0f, -50.0f });
 
 	//浮き
 	auto bob1 = AddGameObject(new Buoy(), TYPE_OPAQUE);

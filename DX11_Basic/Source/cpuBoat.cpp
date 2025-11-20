@@ -4,6 +4,8 @@
 #include "manager.h"
 #include "scene.h"
 
+#include "myRandom.h"
+
 #include <algorithm>
 #include <chrono>
 
@@ -106,11 +108,11 @@ void CPUBoat::UpdateMistakeBehavior(double deltaTime) {
 
 	//ランダムにミスを発生させる
 	float mistakeProbability = dt / 10.0f; // 平均10秒に1回ミス
-	if (GetRandomFloat(0.0f, 1.0f) < mistakeProbability) {
+	if (MyRandom::GetFloat(0.0f, 1.0f) < mistakeProbability) {
 		//ミス挙動開始
-		m_mistakeDuration = GetRandomFloat(0.3f, 1.0f); // ミス継続時間
+		m_mistakeDuration = MyRandom::GetFloat(0.3f, 1.0f); // ミス継続時間
 		m_mistakeTimer = m_mistakeDuration;
-		m_mistakeSteeringOffset = GetRandomFloat(-0.4f, 0.4f); // ミスステアリングオフセット
+		m_mistakeSteeringOffset = MyRandom::GetFloat(-0.4f, 0.4f); // ミスステアリングオフセット
 	}
 }
 
@@ -560,27 +562,21 @@ Vector3 CPUBoat::CalculateBoatAvoidance() const {
 /// ランダムな挙動を初期化
 /// </summary>
 void CPUBoat::InitializeRandomBehavior() {
-	//乱数エンジンを現在時刻とオブジェクトアドレスでシード
-	auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count() +
-		reinterpret_cast<uintptr_t>(this);
-
-	m_randomEngine.seed(static_cast<unsigned int>(seed));
-
 	//速度のバラツキ
-	m_speedVariation = GetRandomFloat(-5.0f, 5.0f);
+	m_speedVariation = MyRandom::GetFloat(-5.0f, 5.0f);
 
 	//操舵反応速度のバラツキ
-	m_steeringResponseVariation = GetRandomFloat(-1.0f, 1.0f);
+	m_steeringResponseVariation = MyRandom::GetFloat(-1.0f, 1.0f);
 	m_steeringSmoothRate += m_steeringResponseVariation;
 	m_steeringSmoothRate = std::clamp(m_steeringSmoothRate, 2.0f, 7.0f);
 
 	//スロットル反応速度のバラツキ
-	m_throttleResponseVariation = GetRandomFloat(-0.5f, 0.5f);
+	m_throttleResponseVariation = MyRandom::GetFloat(-0.5f, 0.5f);
 	m_throttleSmoothRate += m_throttleResponseVariation;
 	m_throttleSmoothRate = std::clamp(m_throttleSmoothRate, 2.0f, 5.0f);
 
 	//ブイ外側半径のバラツキ
-	m_buoyOuterRadius += GetRandomFloat(-5.0f, 5.0f);
+	m_buoyOuterRadius += MyRandom::GetFloat(-5.0f, 5.0f);
 	m_buoyOuterRadius = std::clamp(m_buoyOuterRadius, 25.0f, 45.0f);
 }
 
@@ -591,8 +587,8 @@ void CPUBoat::InitializeRandomBehavior() {
 /// <returns>オフセット後の座標</returns>
 Vector3 CPUBoat::ApplyRandomOffsets(const Vector3& position) {
 	//各通過点毎異なるランダムオフセットを生成
-	float offsetX = GetRandomFloat(20.0f, 30.0f);
-	float offsetZ = GetRandomFloat(0, 20.0f);
+	float offsetX = MyRandom::GetFloat(20.0f, 30.0f);
+	float offsetZ = MyRandom::GetFloat(0, 20.0f);
 
 	//X座標の符号に応じてオフセットを反転
 	float signX = position.x / std::abs(position.x);
@@ -601,9 +597,4 @@ Vector3 CPUBoat::ApplyRandomOffsets(const Vector3& position) {
 	offsetZ *= -signX;
 
 	return Vector3(position.x + offsetX, position.y, position.z + offsetZ);
-}
-
-float CPUBoat::GetRandomFloat(float min, float max) {
-	std::uniform_real_distribution<float> dist(min, max);
-	return dist(m_randomEngine);
 }

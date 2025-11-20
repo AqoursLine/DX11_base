@@ -316,6 +316,7 @@
     <ClInclude Include="Source\manager.h" />
     <ClInclude Include="Source\minimap.h" />
     <ClInclude Include="Source\modelRenderer.h" />
+    <ClInclude Include="Source\myRandom.h" />
     <ClInclude Include="Source\player.h" />
     <ClInclude Include="Source\raceManager.h" />
     <ClInclude Include="Source\raceTimer.h" />

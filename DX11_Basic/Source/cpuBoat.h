@@ -62,7 +62,6 @@ private:
 	float m_boatAvoidStrength = 1.5f;	//ボート回避強度
 
 	//ランダム挙動パラメータ
-	std::mt19937 m_randomEngine;				//乱数エンジン
 	float m_speedVariation = 0.0f;				//速度変動量
 	float m_targetPositionOffsetX = 0.0f;		//目標位置Xオフセット
 	float m_targetPositionOffsetZ = 0.0f;		//目標位置Zオフセット
@@ -93,6 +92,4 @@ private:
 	//ランダム挙動
 	void InitializeRandomBehavior();						//ランダム挙動初期化
 	Vector3 ApplyRandomOffsets(const Vector3& position) ;	//目標位置にランダムオフセット適用
-	float GetRandomFloat(float min, float max);				//乱数取得
-
 };

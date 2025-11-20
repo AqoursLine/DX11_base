@@ -5,6 +5,9 @@
 #include "scene.h"
 #include "racingBoat.h"
 
+#include "webClient.h"
+#include "myRandom.h"
+
 #include "resultScene.h"
 
 //静的メンバ変数の初期化
@@ -34,10 +37,22 @@ bool RaceManager::Initialize() {
 
 	m_result.clear();
 
+	//ボートの順番をシャッフル
+	std::shuffle(m_racingBoats.begin(), m_racingBoats.end(), MyRandom::GetEngine());
+
 	//ボートに番号を割り当て
-	int laneIndex = 2;
+	int laneIndex = 0;
 	for (auto& boat : m_racingBoats) {
+		//レーンインデックス設定
 		boat->SetLaneIndex(laneIndex);
+
+		//初期位置設定
+		float laneSpacing = 10.0f; //レーン間隔
+		float startx = -160.0f; //スタート位置X座標
+		float startz = -(5.0f + laneIndex * laneSpacing);
+
+		boat->SetPosition({ startx, 0.0f, startz });
+
 		laneIndex++;
 	}
 
@@ -64,6 +79,24 @@ void RaceManager::Update(double deltaTime) {
 
 			//結果シーンへ移行
 			SYSTEM.GetManager()->SetScene(new ResultScene());
+
+			// 結果を送信
+			auto webClient = SYSTEM.GetWebClient();
+
+			if (webClient->IsConnected()) {
+				json message;
+				message["type"] = "raceResult";
+				message["results"] = json::array();
+				for (const auto& resultData : m_result) {
+					json resultJson;
+					resultJson["laneIndex"] = resultData.laneIndex;
+					resultJson["finishTime"] = resultData.finishTime;
+					resultJson["boatColor"] = { resultData.boatColor.x, resultData.boatColor.y, resultData.boatColor.z, resultData.boatColor.w };
+					resultJson["playerName"] = resultData.playerName;
+					message["results"].push_back(resultJson);
+				}
+				webClient->SendMessageClient(message);
+			}
 
 			//リセット
 			m_raceFinished = false;
