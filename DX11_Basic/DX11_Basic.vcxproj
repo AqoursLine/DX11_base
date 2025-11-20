@@ -290,6 +290,7 @@
     <ClCompile Include="Source\skyDome.cpp" />
     <ClCompile Include="Source\speedMeter.cpp" />
     <ClCompile Include="Source\particleSystem.cpp" />
+    <ClCompile Include="Source\splashParticle.cpp" />
     <ClCompile Include="Source\sprite.cpp" />
     <ClCompile Include="Source\startGate.cpp" />
     <ClCompile Include="Source\system.cpp" />
@@ -344,6 +345,7 @@
     <ClInclude Include="Source\skyDome.h" />
     <ClInclude Include="Source\speedMeter.h" />
     <ClInclude Include="Source\particleSystem.h" />
+    <ClInclude Include="Source\splashParticle.h" />
     <ClInclude Include="Source\sprite.h" />
     <ClInclude Include="Source\startGate.h" />
     <ClInclude Include="Source\system.h" />
