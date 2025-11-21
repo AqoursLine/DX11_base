@@ -28,5 +28,7 @@ using namespace DirectX;
 
 void ErrorMessage(const std::wstring& msg, HRESULT hr);
 
+HWND GetHwnd();
+
 constexpr int SCREEN_WIDTH = 1920;
 constexpr int SCREEN_HEIGHT = 1080;

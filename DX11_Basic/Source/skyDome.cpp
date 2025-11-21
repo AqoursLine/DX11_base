@@ -59,7 +59,7 @@ void SkyDome::Update(double deltaTime) {
 	}
 }
 
-void SkyDome::Draw() const {
+void SkyDome::Draw() {
 	//シェーダーの設定
 	m_vertexShader->Set();
 	m_pixelShader->Set();

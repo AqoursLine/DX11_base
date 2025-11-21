@@ -60,7 +60,7 @@ void RaceTimer::Update(double deltaTime) {
 	m_raceTime = m_raceManager->GetRaceTime();
 }
 
-void RaceTimer::Draw() const {
+void RaceTimer::Draw() {
 	//シェーダーの設定
 	m_animationVertexShader->Set();
 	m_animationPixelShader->Set();

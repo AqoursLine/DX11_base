@@ -109,7 +109,7 @@ void RaceManager::Update(double deltaTime) {
 	}
 }
 
-void RaceManager::Draw() const {
+void RaceManager::Draw() {
 }
 
 void RaceManager::CleanUp() {

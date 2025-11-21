@@ -140,7 +140,7 @@ void GoalGate::Update(double deltaTime) {
 	}
 }
 
-void GoalGate::Draw() const {
+void GoalGate::Draw() {
 	m_vertexShader->Set();
 
 	//マテリアルセット

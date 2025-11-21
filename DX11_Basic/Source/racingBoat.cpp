@@ -150,7 +150,7 @@ void RacingBoat::Update(double deltaTime) {
 	Boat::Update(deltaTime);
 }
 
-void RacingBoat::Draw() const {
+void RacingBoat::Draw() {
 	//シェーダー設定
 	m_vertexShader->Set();
 	m_pixelShader->Set();

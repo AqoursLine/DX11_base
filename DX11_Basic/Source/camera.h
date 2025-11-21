@@ -10,7 +10,7 @@ public:
 	virtual bool Initialize() override;
 	virtual void Finalize() override;
 	virtual void Update(double deltaTime) override;
-	virtual void Draw() const override;
+	virtual void Draw() override;
 	virtual void CleanUp() override;
 
 	//メインカメラ

@@ -57,7 +57,7 @@ void Buoy::Update(double deltaTime) {
 	//デバッグ表示
 }
 
-void Buoy::Draw() const {
+void Buoy::Draw() {
 	if (m_model) {
 		m_model->Draw(m_position, m_rotation, m_scale);
 	}

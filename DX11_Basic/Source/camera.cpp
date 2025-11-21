@@ -89,7 +89,7 @@ void Camera::Update(double deltaTime) {
 }
 
 //カメラクラス描画処理
-void Camera::Draw() const {
+void Camera::Draw() {
 	//プロジェクション行列を設定
 	XMMATRIX projection = XMMatrixPerspectiveFovLH(
 		XMConvertToRadians(45.0f), //視野角

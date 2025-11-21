@@ -70,7 +70,7 @@ protected:
 	virtual bool Initialize() override;
 	virtual void Finalize() override;
 	virtual void Update(double deltaTime) override;
-	virtual void Draw() const override;
+	virtual void Draw() override;
 private:
 	constexpr static int MAX_RIPPLES = 32; // 最大波紋数
 

@@ -15,6 +15,8 @@
 
 #include "gameDirectionalLight.h"
 
+#include "imguiSystem.h"
+
 bool TestScene::Initialize() {
 	//テストオブジェクト追加
 	AddGameObject(new TestObject(), TYPE_OPAQUE);
@@ -56,4 +58,11 @@ void TestScene::Update(double deltaTime) {
 	if (Input::GetKeyTrigger(KK_ENTER)) {
 		SYSTEM.GetManager()->SetScene(new TitleScene());
 	}
+}
+
+void TestScene::Draw() {
+	ImGui::Begin("Test Scene");
+	ImGui::Text("Hello, ImGui!");
+	ImGui::SliderFloat("Float Value", &m_testTimer, 0.0f, 1.0f);
+	ImGui::End();
 }

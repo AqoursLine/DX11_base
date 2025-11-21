@@ -219,7 +219,7 @@ void Water::Update(double deltaTime) {
 /// <summary>
 /// 描画
 /// </summary>
-void Water::Draw() const {
+void Water::Draw() {
 	auto context = RENDERER.GetDeviceContext();
 
 	// シェーダー設定
@@ -227,7 +227,7 @@ void Water::Draw() const {
 	m_pixelShader->Set();
 
 	// 定数バッファ更新
-	const_cast<Water*>(this)->UpdateConstantBuffer();
+	UpdateConstantBuffer();
 
 	// テクスチャ設定
 	m_normalMap->Set(0);

@@ -95,7 +95,7 @@ void ParticleSystem::Update(double deltaTime) {
 	UpdateParticles(dt);
 }
 
-void ParticleSystem::Draw() const {
+void ParticleSystem::Draw() {
 	if (!m_textureSRV) return;
 
 	auto context = RENDERER.GetDeviceContext();

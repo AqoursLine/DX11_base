@@ -59,7 +59,7 @@ void LapDisplay::Update(double deltaTime) {
 	m_maxLapCount = m_raceManager->GetLapCountToFinish();
 }
 
-void LapDisplay::Draw() const {
+void LapDisplay::Draw() {
 	//シェーダーの設定
 	m_vertexShader->Set();
 	m_pixelShader->Set();

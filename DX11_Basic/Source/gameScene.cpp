@@ -21,7 +21,7 @@
 #include "lapDisplay.h"
 #include "test.h"
 #include "gameDirectionalLight.h"
-//#include "splashEffect.h"
+#include "splashParticle.h"
 
 #include "cpuBoat.h"
 
@@ -102,7 +102,7 @@ bool GameScene::Initialize() {
 	AddGameObject(light, TYPE_LIGHT);
 
 	//スプラッシュエフェクト
-//	AddGameObject(new SplashEffect(), TYPE_TRANSPARENT);
+	AddGameObject(new SplashParticle(), TYPE_TRANSPARENT);
 
 	return true;
 }

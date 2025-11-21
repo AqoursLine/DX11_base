@@ -48,7 +48,7 @@ void Temp2D::Update(double deltaTime) {
 
 }
 
-void Temp2D::Draw() const {
+void Temp2D::Draw() {
 	//シェーダーの設定
 	m_vertexShader->Set();
 	m_pixelShader->Set();

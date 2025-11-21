@@ -105,7 +105,7 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>Library\cri\include;Library\webrtc\include;Source;Library\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Library\imgui\backends;Library\imgui;Library\cri\include;Library\webrtc\include;Source;Library\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
@@ -131,7 +131,7 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(VcpkgRoot)installed\x64-windows\include;Library\cri\include;Library\webrtc\include;Source;Library\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Library\imgui\backends;Library\imgui;$(VcpkgRoot)installed\x64-windows\include;Library\cri\include;Library\webrtc\include;Source;Library\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
@@ -255,6 +255,13 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Library\imgui\backends\imgui_impl_dx11.cpp" />
+    <ClCompile Include="Library\imgui\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="Library\imgui\imgui.cpp" />
+    <ClCompile Include="Library\imgui\imgui_demo.cpp" />
+    <ClCompile Include="Library\imgui\imgui_draw.cpp" />
+    <ClCompile Include="Library\imgui\imgui_tables.cpp" />
+    <ClCompile Include="Library\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Source\boat.cpp" />
     <ClCompile Include="Source\buoy.cpp" />
     <ClCompile Include="Source\box.cpp" />
@@ -268,6 +275,7 @@
     <ClCompile Include="Source\gameDirectionalLight.cpp" />
     <ClCompile Include="Source\gameScene.cpp" />
     <ClCompile Include="Source\goalGate.cpp" />
+    <ClCompile Include="Source\imguiSystem.cpp" />
     <ClCompile Include="Source\input.cpp" />
     <ClCompile Include="Source\lapDisplay.cpp" />
     <ClCompile Include="Source\lapReadyGate.cpp" />
@@ -307,6 +315,14 @@
     <ClCompile Include="Source\webClient.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Library\imgui\backends\imgui_impl_dx11.h" />
+    <ClInclude Include="Library\imgui\backends\imgui_impl_win32.h" />
+    <ClInclude Include="Library\imgui\imconfig.h" />
+    <ClInclude Include="Library\imgui\imgui.h" />
+    <ClInclude Include="Library\imgui\imgui_internal.h" />
+    <ClInclude Include="Library\imgui\imstb_rectpack.h" />
+    <ClInclude Include="Library\imgui\imstb_textedit.h" />
+    <ClInclude Include="Library\imgui\imstb_truetype.h" />
     <ClInclude Include="Source\boat.h" />
     <ClInclude Include="Source\box.h" />
     <ClInclude Include="Source\camera.h" />
@@ -322,6 +338,7 @@
     <ClInclude Include="Source\gameObject.h" />
     <ClInclude Include="Source\gameScene.h" />
     <ClInclude Include="Source\goalGate.h" />
+    <ClInclude Include="Source\imguiSystem.h" />
     <ClInclude Include="Source\input.h" />
     <ClInclude Include="Source\keybordEnum.h" />
     <ClInclude Include="Source\lapDisplay.h" />

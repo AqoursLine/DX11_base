@@ -75,12 +75,13 @@ protected:
 	bool Initialize() override;
 	void Finalize() override;
 	void Update(double deltaTime) override;
-	void Draw() const override;
+	void Draw() override;
+
+	EmitterSettings m_settings;
 
 private:
 	// パーティクル管理
 	std::vector<Particle> m_particles;
-	EmitterSettings m_settings;
 
 	// GPUリソース
 	ID3D11Buffer* m_vertexBuffer = nullptr;

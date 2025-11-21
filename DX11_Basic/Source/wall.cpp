@@ -35,7 +35,7 @@ void Wall::Finalize() {
 void Wall::Update(double deltaTime) {
 }
 
-void Wall::Draw() const {
+void Wall::Draw() {
 	if (m_model) {
 		//シェーダーの設定
 		m_vs->Set();

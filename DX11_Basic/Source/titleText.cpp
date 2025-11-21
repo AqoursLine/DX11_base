@@ -43,7 +43,7 @@ void TitleText::Finalize() {
 void TitleText::Update(double deltaTime) {
 }
 
-void TitleText::Draw() const {
+void TitleText::Draw() {
 	//シェーダーの設定
 	m_vertexShader->Set();
 	m_pixelShader->Set();

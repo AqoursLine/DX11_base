@@ -86,7 +86,7 @@ void MiniMap::Finalize() {
 void MiniMap::Update(double deltaTime) {
 }
 
-void MiniMap::Draw() const {
+void MiniMap::Draw() {
 	//シェーダーの設定
 	m_minimapVS->Set();
 	m_minimapPS->Set();
