@@ -404,3 +404,26 @@ bool ModelRenderer::SetMaterialEmissiveColor(const std::string& name, const Vect
 	material->emissiveColor = color;
 	return true;
 }
+
+//========================================================
+//テクスチャ数を取得
+//========================================================
+int ModelRenderer::GetTextureCount() const {
+	if (!m_model) {
+		return 0;
+	}
+	return static_cast<int>(m_model->textures.size());
+}
+
+//========================================================
+//テクスチャを取得(インデックス)
+//========================================================
+ID3D11ShaderResourceView* ModelRenderer::GetTexture(int index) const {
+	if (!m_model) {
+		return nullptr;
+	}
+	if (index < 0 || index >= static_cast<int>(m_model->textures.size())) {
+		return nullptr;
+	}
+	return m_model->textures[index].Get();
+}

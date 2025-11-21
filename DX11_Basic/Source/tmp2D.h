@@ -9,7 +9,7 @@ public:
 	bool Initialize() override;
 	void Finalize() override;
 	void Update(double deltaTime) override;
-	void Draw() const override;
+	void Draw() override;
 	void CleanUp() override;
 
 private:

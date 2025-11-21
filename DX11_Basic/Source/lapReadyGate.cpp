@@ -65,5 +65,5 @@ void LapReadyGate::Update(double deltaTime) {
 	}
 }
 
-void LapReadyGate::Draw() const {
+void LapReadyGate::Draw() {
 }

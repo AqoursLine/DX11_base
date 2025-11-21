@@ -21,8 +21,10 @@ public:
 	void SetScene(Scene* scene);
 private:
 	//終了したか
-	bool m_isFinished;
+	bool m_isFinished = false;
 
 	Scene* m_scene = nullptr;
 	Scene* m_nextScene = nullptr;
+
+	class ImguiSystem* m_imguiSystem = nullptr;
 };

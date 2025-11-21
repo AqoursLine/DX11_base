@@ -41,7 +41,7 @@ protected:
 	bool Initialize() override;
 	void Finalize() override;
 	void Update(double deltaTime) override;
-	void Draw() const override;	
+	void Draw() override;	
 
 	Vector2 GetSceneBoundsMin() const override;
 	Vector2 GetSceneBoundsMax() const override;

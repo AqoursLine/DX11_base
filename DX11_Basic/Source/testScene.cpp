@@ -7,13 +7,15 @@
 #include "manager.h"
 #include "titleScene.h"
 
-#include "main.h"
 #include "test.h"
 #include "fpsCamera.h"
-
 #include "skyDome.h"
+#include "testParticle.h"
+#include "splashParticle.h"
 
 #include "gameDirectionalLight.h"
+
+#include "imguiSystem.h"
 
 bool TestScene::Initialize() {
 	//テストオブジェクト追加
@@ -41,12 +43,26 @@ bool TestScene::Initialize() {
 	light->SetEnabled(true);
 	AddGameObject(light, TYPE_LIGHT);
 
+	auto ps = new TestParticle();
+	AddGameObject(ps, TYPE_TRANSPARENT);
+
+	AddGameObject(new SplashParticle(), TYPE_TRANSPARENT);
 
 	return true;
+}
+
+void TestScene::Finalize() {
 }
 
 void TestScene::Update(double deltaTime) {
 	if (Input::GetKeyTrigger(KK_ENTER)) {
 		SYSTEM.GetManager()->SetScene(new TitleScene());
 	}
+}
+
+void TestScene::Draw() {
+	ImGui::Begin("Test Scene");
+	ImGui::Text("Hello, ImGui!");
+	ImGui::SliderFloat("Float Value", &m_testTimer, 0.0f, 1.0f);
+	ImGui::End();
 }

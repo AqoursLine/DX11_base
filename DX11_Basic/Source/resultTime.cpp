@@ -62,7 +62,7 @@ void ResultTime::Finalize() {
 void ResultTime::Update(double deltaTime) {
 }
 
-void ResultTime::Draw() const {
+void ResultTime::Draw() {
 	//シェーダーの設定
 	m_vertexShader->Set();
 	m_pixelShader->Set();

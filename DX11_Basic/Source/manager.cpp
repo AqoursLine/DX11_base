@@ -6,15 +6,26 @@
 #include "titleScene.h"
 #include "system.h"
 #include "timer.h"
+#include "imguiSystem.h"
 
 Manager::Manager() {
+	m_imguiSystem = new ImguiSystem();
 }
 
 Manager::~Manager() {
+	if (m_imguiSystem) {
+		delete m_imguiSystem;
+		m_imguiSystem = nullptr;
+	}
 }
 
 bool Manager::Initialize() {
 	m_isFinished = false;
+
+	//ImGuiシステム初期化
+	if (!m_imguiSystem->Initialize(GetHwnd(), RENDERER.GetDevice(), RENDERER.GetDeviceContext())) {
+		return false;
+	}
 
 	//ワールド作成
 #ifdef _DEBUG
@@ -55,8 +66,23 @@ void Manager::Draw() {
 	//描画開始
 	RENDERER.BeginDraw();
 
+	//ImGui描画開始
+	m_imguiSystem->Begin();
+
 	//ワールドの描画
 	m_scene->DrawBase();
+
+	// deltaTime表示
+#ifdef _DEBUG
+	ImGui::SetNextWindowSize(ImVec2(240, 50));
+	ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_Always);
+	ImGui::Begin("Debug Info");
+	ImGui::Text("Delta Time: %.6f seconds", SYSTEM.GetTimer()->GetDeltaTime());
+	ImGui::End();
+#endif // _DEBUG
+
+	//ImGui描画終了
+	m_imguiSystem->End();
 
 	//描画終了
 	RENDERER.EndDraw();

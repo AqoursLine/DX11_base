@@ -7,6 +7,7 @@
 #include "scene.h"
 #include "water.h"
 #include "raceManager.h"
+#include "splashParticle.h"
 
 Boat::Boat()
 	: m_throttleInput(0.0f)	//スロットル入力(0.0f ~ 1.0f)
@@ -32,6 +33,7 @@ Boat::Boat()
 	, m_prevPosition(0.0f, 0.0f, 0.0f)
 
 	, m_water(nullptr)
+	, m_splashEffect(nullptr)
 	, m_splashTimer(0.0f)
 
 	, m_length(2.9f)			//ボートの長さ(m)
@@ -96,6 +98,9 @@ bool Boat::Initialize() {
 
 	m_position.y = m_restingWaterLevel - 0.2f;
 	m_prevPosition = m_position;
+
+	// 水しぶきパーティクル取得
+	m_splashEffect = m_scene->GetGameObject<SplashParticle>();
 
 	return true;
 }
@@ -305,7 +310,7 @@ Vector3 Boat::CalculateBuoyancyForce(float deltaTime) {
 	if (boatBottomY < currentWaterHeight) {
 		//直前に水に浸かっていなかった場合
 		if (!m_isInWater) {
-			m_water->AddRipple(m_position);
+//			m_water->AddRipple(m_position);
 		}
 
 		m_isInWater = true;
@@ -398,8 +403,18 @@ void Boat::UpdateWaterInteraction(float deltaTime) {
 		m_splashTimer += deltaTime;
 
 		if (m_splashTimer >= 0.5f) {
-			m_water->AddRipple(m_position, 0.5f);
+			m_water->AddRipple(m_position, 0.5f, 2.0f);
+
 			m_splashTimer = 0.0f;
+		}
+
+		//水しぶきエフェクト生成
+		if (m_splashEffect) {
+			Vector3 forward = GetForwardQ();
+			Vector3 splashPos = m_position - forward * (m_length * 0.5f);
+			splashPos.y -= m_height* 0.3f;
+
+			m_splashEffect->EmitOneShot(splashPos);
 		}
 	}
 }

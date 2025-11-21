@@ -54,9 +54,11 @@ cbuffer LightBuffer : register(b4)
 };
 
 //カメラ位置バッファ
-cbuffer CameraPositionBuffer : register(b5)
+cbuffer CameraBuffer : register(b5)
 {
 	float4 CameraPosition; // カメラの位置
+	float4 CameraRight; // カメラの右方向ベクトル
+	float4 CameraUp; // カメラの上方向ベクトル
 };
 
 //シェーダーパラメータバッファ(汎用)

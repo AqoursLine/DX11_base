@@ -39,6 +39,13 @@ struct LIGHTS {
 	LIGHT lights[MAX_LIGHTS];
 };
 
+//シェーダー用カメラ構造体
+struct CAMERA {
+	XMFLOAT4 position; // カメラ位置
+	XMFLOAT4 Right; // カメラの右方向ベクトル
+	XMFLOAT4 Up; // カメラの上方向ベクトル
+};
+
 ///シェーダープロパティ構造体
 struct SHADER_PROPERTIES {
 	Vector4 params1; // 汎用パラメータ1
@@ -111,8 +118,8 @@ public:
 	void SetMaterial(const MATERIAL& material);
 	//ライト設定
 	void SetLight(const LIGHT& light, int lightIndex);
-	//カメラ位置設定
-	void SetCameraPosition(const Vector3& position);
+	//カメラ設定
+	void SetCameraData(const CAMERA& camera);
 	//シェーダープロパティ設定
 	void SetShaderProperties(const SHADER_PROPERTIES& properties);
 

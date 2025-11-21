@@ -44,7 +44,7 @@ void FieldObject::Finalize() {
 void FieldObject::Update(double deltaTime) {
 }
 
-void FieldObject::Draw() const {
+void FieldObject::Draw() {
 	//シェーダーの設定
 	m_vertexShader->Set();
 	m_pixelShader->Set();

@@ -160,6 +160,15 @@ public:
 	bool SetMaterialEmissiveColor(int index, const Vector4& color);
 	bool SetMaterialEmissiveColor(const std::string& name, const Vector4& color);
 
+	/************************
+	* テクスチャ操作
+	*************************/
+	//テクスチャ数を取得
+	int GetTextureCount() const;
+
+	//テクスチャを取得(インデックス)
+	ID3D11ShaderResourceView* GetTexture(int index) const;
+
 private:
 	//描画モデル
 	MODEL* m_model = nullptr;

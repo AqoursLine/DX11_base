@@ -4,8 +4,12 @@
 #include "system.h"
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
+#include "imguiSystem.h"
 
+//
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+//グローバル変数
 HWND g_hWnd = nullptr;
 
 #define WNDOW_CLASS_NAME L"DirectX11Window"
@@ -53,8 +57,18 @@ void ErrorMessage(const std::wstring& msg, HRESULT hr) {
 
 }
 
+HWND GetHwnd() {
+	return g_hWnd;
+}
+
 //プロシージャ
 LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+	// imgui用のメッセージ処理
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam)) {
+		return true;
+	}
+
+	//メッセージ分岐
 	switch (msg) {
 		case WM_DESTROY:
 			PostQuitMessage(0);
@@ -65,7 +79,6 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 			break;
 	}
-
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 

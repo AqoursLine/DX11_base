@@ -78,7 +78,7 @@ void RaceCountDownText::Update(double deltaTime) {
 
 }
 
-void RaceCountDownText::Draw() const {
+void RaceCountDownText::Draw() {
 	//レースマネージャーがない場合は処理しない
 	if (!m_raceManager) {
 		return;

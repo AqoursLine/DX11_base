@@ -42,7 +42,7 @@ void Light::Finalize() {
 void Light::Update(double deltaTime) {
 }
 
-void Light::Draw() const {
+void Light::Draw() {
 	if (m_lightIndex == -1) {
 		return; // 無効なライトインデックスの場合は何もしない
 	}

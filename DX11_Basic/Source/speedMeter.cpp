@@ -85,7 +85,7 @@ void SpeedMeter::Update(double deltaTime) {
 	}
 }
 
-void SpeedMeter::Draw() const {
+void SpeedMeter::Draw() {
 	//シェーダーの設定
 	m_vertexShader->Set();
 	m_pixelShader->Set();

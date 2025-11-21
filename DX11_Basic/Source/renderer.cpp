@@ -245,7 +245,7 @@ bool Renderer::Initialize(HWND hWnd) {
 	}
 
 	//カメラバッファの作成
-	bufferDesc.ByteWidth = sizeof(XMFLOAT4);
+	bufferDesc.ByteWidth = sizeof(CAMERA);
 	hr = m_device->CreateBuffer(&bufferDesc, nullptr, m_cameraBuffer.GetAddressOf());
 	if (FAILED(hr)) {
 		ErrorMessage(L"カメラバッファの初期化に失敗しました。", hr);
@@ -374,12 +374,10 @@ void Renderer::SetLight(const LIGHT& light, int lightIndex) {
 	m_deviceContext->Unmap(m_lightBuffer.Get(), 0);
 }
 
-void Renderer::SetCameraPosition(const Vector3& position) {
-	XMFLOAT4 cameraPos = { position.x, position.y, position.z, 0.0f };
-
+void Renderer::SetCameraData(const CAMERA& camera) {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	m_deviceContext->Map(m_cameraBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	memcpy(mappedResource.pData, &cameraPos, sizeof(cameraPos));
+	memcpy(mappedResource.pData, &camera, sizeof(camera));
 	m_deviceContext->Unmap(m_cameraBuffer.Get(), 0);
 }
 
@@ -434,10 +432,19 @@ void Renderer::CreateVertexShader(ID3D11VertexShader** vertexShader, ID3D11Input
 		D3D11_INPUT_ELEMENT_DESC elementDesc = {};
 		elementDesc.SemanticName = paramDesc.SemanticName;
 		elementDesc.SemanticIndex = paramDesc.SemanticIndex;
-		elementDesc.InputSlot = 0;
+
+		// セマンティクス名に"INSTANCE_"が含まれている場合、インスタンスデータとして扱う
+		if (std::string(elementDesc.SemanticName).find("INSTANCE_") != std::string::npos) {
+			elementDesc.InputSlot = 1;
+			elementDesc.InputSlotClass = D3D11_INPUT_PER_INSTANCE_DATA;
+			elementDesc.InstanceDataStepRate = 1;
+		} else {
+			elementDesc.InputSlot = 0;
+			elementDesc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+			elementDesc.InstanceDataStepRate = 0;
+		}
+
 		elementDesc.AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-		elementDesc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-		elementDesc.InstanceDataStepRate = 0;
 
 		//データ形式の決定
 		if (paramDesc.Mask == 1) {

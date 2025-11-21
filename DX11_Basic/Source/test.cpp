@@ -62,7 +62,7 @@ void TestObject::Update(double deltaTime) {
 
 }
 
-void TestObject::Draw() const {
+void TestObject::Draw() {
 	//シェーダーの設定
 	m_vertexShader->Set();
 	m_pixelShader->Set();

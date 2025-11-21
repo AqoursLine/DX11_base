@@ -10,7 +10,7 @@ public:
 	virtual bool Initialize() override;
 	virtual void Finalize() override;
 	virtual void Update(double deltaTime) override;
-	virtual void Draw() const override;
+	virtual void Draw() override;
 
 private:
 	class Sprite* m_sprite = nullptr;
@@ -21,5 +21,5 @@ private:
 	class RaceManager* m_raceManager = nullptr;
 
 	float m_displayTime = 1.0f; //表示時間
-	float m_time;
+	float m_time = 0.0f; //経過時間
 };
