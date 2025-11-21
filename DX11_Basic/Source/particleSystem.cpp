@@ -38,6 +38,18 @@ void ParticleSystem::Emit(int count) {
 	}
 }
 
+void ParticleSystem::EmitOneShot(const Vector3& position, int count) {
+	Vector3 originalPosition = m_position;
+	m_position = position;
+
+	if (count < 0) {
+		count = m_settings.oneShotCount;
+	}
+
+	Emit(count);
+	m_position = originalPosition;
+}
+
 bool ParticleSystem::Initialize() {
 	// パーティクル配列の初期化
 	m_particles.resize(m_settings.maxParticles);
@@ -69,7 +81,7 @@ void ParticleSystem::Update(double deltaTime) {
 	if (m_isPaused) return;
 
 	// パーティクル発生
-	if (m_isPlaying) {
+	if (m_isPlaying && !m_settings.oneShot) {
 		m_enmitTimer += dt;
 		float emitInterval = 1.0f / m_settings.emitRate;
 

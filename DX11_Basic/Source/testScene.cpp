@@ -11,7 +11,7 @@
 #include "fpsCamera.h"
 #include "skyDome.h"
 #include "testParticle.h"
-#include "texture.h"
+#include "splashParticle.h"
 
 #include "gameDirectionalLight.h"
 
@@ -43,6 +43,8 @@ bool TestScene::Initialize() {
 
 	auto ps = new TestParticle();
 	AddGameObject(ps, TYPE_TRANSPARENT);
+
+	AddGameObject(new SplashParticle(), TYPE_TRANSPARENT);
 
 	return true;
 }

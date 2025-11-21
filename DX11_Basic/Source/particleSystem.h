@@ -43,6 +43,8 @@ struct EmitterSettings {
 	float gravity = -9.81f;
 	int maxParticles = 100;
 	bool loop = true;
+	bool oneShot = false;
+	int oneShotCount = 10;
 };
 
 class ParticleSystem : public GameObject {
@@ -59,6 +61,9 @@ public:
 
 	// パーティクル発生
 	void Emit(int count = 1);
+
+	// ワンショット発生
+	void EmitOneShot(const Vector3& position, int count = -1);
 
 	// 一時停止・再開
 	void Pause() { m_isPaused = true; }

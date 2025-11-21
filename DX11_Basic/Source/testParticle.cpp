@@ -1,5 +1,6 @@
 #include "testParticle.h"
 #include "texture.h"
+#include "input.h"
 
 bool TestParticle::Initialize() {
 	m_texture = new Texture();
@@ -15,7 +16,7 @@ bool TestParticle::Initialize() {
 
 	EmitterSettings settings;
 	settings.startColor = { 1.0f, 0.2f, 0.2f, 1.0f };
-	settings.endColor = { 1.0f, 1.0f, 0.2f, 1.0f };
+	settings.endColor = { 1.0f, 1.0f, 0.2f, 0.1f };
 	settings.startSize = 1.0f;
 	settings.endSize = 0.1f;
 	settings.lifeTime = 2.0f;
@@ -23,6 +24,8 @@ bool TestParticle::Initialize() {
 	settings.velocity = { 0.0f, 5.0f, 0.0f };
 	settings.velocityVariation = { 2.0f, 1.0f, 2.0f };
 	settings.gravity = -3.0f;
+	settings.oneShot = true;
+	settings.maxParticles = 500;
 
 	SetEmitterSettings(settings);
 
@@ -37,4 +40,14 @@ void TestParticle::Finalize() {
 	}
 
 	ParticleSystem::Finalize();
+}
+
+void TestParticle::Update(double deltaTime) {
+	if (Input::GetKeyTrigger(KK_D0)) {
+		EmitOneShot(m_position);
+
+		EmitOneShot({ -5.0f, 0.0f, 0.0f });
+	}
+
+	ParticleSystem::Update(deltaTime);
 }
