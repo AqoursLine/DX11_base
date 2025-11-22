@@ -414,6 +414,8 @@ void Boat::UpdateWaterInteraction(float deltaTime) {
 			Vector3 splashPos = m_position - forward * (m_length * 0.5f);
 			splashPos.y -= m_height* 0.3f;
 
+			splashPos.y = std::min(splashPos.y, m_water->GetWaterHeight(splashPos));
+
 			m_splashEffect->EmitOneShot(splashPos);
 		}
 	}
