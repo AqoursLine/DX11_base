@@ -16,6 +16,7 @@
 #include "gameDirectionalLight.h"
 
 #include "imguiSystem.h"
+#include "testField.h"
 
 bool TestScene::Initialize() {
 	//テストオブジェクト追加
@@ -43,10 +44,11 @@ bool TestScene::Initialize() {
 	light->SetEnabled(true);
 	AddGameObject(light, TYPE_LIGHT);
 
-	auto ps = new TestParticle();
-	AddGameObject(ps, TYPE_TRANSPARENT);
+	AddGameObject(new TestParticle, TYPE_TRANSPARENT);
 
 	AddGameObject(new SplashParticle(), TYPE_TRANSPARENT);
+
+	AddGameObject(new TestField(), TYPE_OPAQUE);
 
 	return true;
 }
@@ -61,8 +63,4 @@ void TestScene::Update(double deltaTime) {
 }
 
 void TestScene::Draw() {
-	ImGui::Begin("Test Scene");
-	ImGui::Text("Hello, ImGui!");
-	ImGui::SliderFloat("Float Value", &m_testTimer, 0.0f, 1.0f);
-	ImGui::End();
 }

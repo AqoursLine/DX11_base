@@ -15,6 +15,9 @@ public:
 	Light() = default;
 	~Light() = default;
 
+	// ライト情報取得用ゲッター
+	bool IsShadowCaster() const { return m_isShadowCaster; }
+
 	static int GetCurrentLightCount();
 
 	// ライトの各種パラメータ設定用セッター
@@ -53,6 +56,8 @@ protected:
 private:
 
 	int m_lightIndex = -1; // ライトインデックス（シェーダー用）
+
+	bool m_isShadowCaster = false; // シャドウキャスターかどうか
 
 	//使用済みインデックス管理
 	static int s_maxLights;

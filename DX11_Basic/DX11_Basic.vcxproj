@@ -197,6 +197,10 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
+    <FxCompile Include="Shader\shadowMap.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="Shader\spriteAnimationPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -303,6 +307,7 @@
     <ClCompile Include="Source\startGate.cpp" />
     <ClCompile Include="Source\system.cpp" />
     <ClCompile Include="Source\test.cpp" />
+    <ClCompile Include="Source\testField.cpp" />
     <ClCompile Include="Source\testParticle.cpp" />
     <ClCompile Include="Source\testScene.cpp" />
     <ClCompile Include="Source\texture.cpp" />
@@ -367,6 +372,7 @@
     <ClInclude Include="Source\startGate.h" />
     <ClInclude Include="Source\system.h" />
     <ClInclude Include="Source\test.h" />
+    <ClInclude Include="Source\testField.h" />
     <ClInclude Include="Source\testParticle.h" />
     <ClInclude Include="Source\testScene.h" />
     <ClInclude Include="Source\texture.h" />

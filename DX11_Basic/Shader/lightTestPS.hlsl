@@ -2,14 +2,16 @@
 
 void main(in PS_INPUT In, out float4 outDiffuse : SV_Target)
 {
-	//outDiffuse = In.Diffuse * Material.Diffuse;
+	outDiffuse = In.Diffuse * Material.Diffuse;
 	
 	//for (int i = 0; i < MAX_LIGHTS; i++)
 	//{
 	//	outDiffuse.rgb *= Lights[i].DiffuseAndRange.rgb;
 	//}
 
-	outDiffuse.rgb = Lights[0].DiffuseAndRange.rgb;
+//	outDiffuse.rgb = Lights[0].DiffuseAndRange.rgb;
 	
+//	outDiffuse.rgb += float3(0.0, 100.0, 0.0);
+
 	outDiffuse.a = 1.0f;
 }

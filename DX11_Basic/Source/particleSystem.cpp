@@ -151,7 +151,7 @@ void ParticleSystem::Draw() {
 	context->DrawIndexedInstanced(6, static_cast<UINT>(instances.size()), 0, 0, 0);
 
 	// ステートリセット
-	context->OMSetBlendState(nullptr, nullptr, 0xffffffff);
+	RENDERER.SetATCEnable(false);
 
 }
 

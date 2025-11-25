@@ -1,10 +1,11 @@
 #pragma once
 
 #include "gameObject.h"
+#include "raceManager.h"
 
 class ResultTime : public GameObject {
 public:
-	ResultTime() = default;
+	ResultTime(int resultCount, const BoatResultData& resultData, int index);
 	~ResultTime() = default;
 
 protected:
@@ -20,5 +21,7 @@ private:
 	class VertexShader* m_vertexShader = nullptr;
 	class PixelShader* m_pixelShader = nullptr;
 
-	float m_resultTime = 0.0f;
+	int m_resultCount = 0;
+	int m_index = 0;
+	BoatResultData m_resultData;
 };

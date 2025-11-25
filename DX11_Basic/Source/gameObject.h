@@ -29,6 +29,11 @@ public:
 			Update(deltaTime);
 		}
 	}
+	void DrawShadowBase() {
+		if (m_isVisible && m_isActive) {
+			DrawShadow();
+		}
+	}
 	void DrawBase() {
 		if (m_isVisible && m_isActive) {
 			Draw();
@@ -130,6 +135,7 @@ public:
 protected:
 	virtual bool Initialize() { return true; }
 	virtual void Update(double deltaTime) {}
+	virtual void DrawShadow() {}
 	virtual void Draw() {}
 
 	Vector3 m_position = Vector3(0.0f, 0.0f, 0.0f);

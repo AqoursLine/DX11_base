@@ -7,6 +7,13 @@
 
 #include "raceManager.h"
 
+ResultTime::ResultTime(int resultCount, const BoatResultData& resultData, int index) 
+	: m_resultCount(resultCount)
+	, m_index(index)
+	, m_resultData(resultData)
+{
+}
+
 bool ResultTime::Initialize() {
 	m_sprite = new Sprite();
 	if (!m_sprite->Initialize()) {
@@ -34,15 +41,9 @@ bool ResultTime::Initialize() {
 
 	//位置、回転、拡大縮小の設定
 	m_scale = { 250.0f, 100.0f, 1.0f };
-	m_position = { m_scale.x * 0.5f + 20.0f, SCREEN_HEIGHT * 0.5f, 0.0f };
+	float posY = SCREEN_HEIGHT * 0.4f + m_index * (m_scale.y + 20.0f);
+	m_position = { m_scale.x * 0.5f + 20.0f, posY, 0.0f };
 	m_rotation = { 0.0f, 0.0f, 0.0f };
-
-	//レースタイムの取得
-	auto resultData = RaceManager::GetResultData();
-	if (!resultData.empty()) {
-		//先頭のタイムを取得
-		m_resultTime = resultData[0].finishTime;
-	}
 
 	return true;
 }
@@ -70,7 +71,7 @@ void ResultTime::Draw() {
 	m_texture->Set(0);
 	//マテリアルセット
 	MATERIAL material = {};
-	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.diffuse = XMFLOAT4(m_resultData.boatColor.x, m_resultData.boatColor.y, m_resultData.boatColor.z, 1.0f);
 	material.textureEnable = true;
 	RENDERER.SetMaterial(material);
 
@@ -88,7 +89,7 @@ void ResultTime::Draw() {
 	Vector3 numberScale = { 60.0f, 112.0f, 1.0f };
 	 
 	//ポジション
-	Vector3 pos = { SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f };
+	Vector3 pos = { SCREEN_WIDTH * 0.5f, m_position.y, 0.0f };
 	pos.x += numberScale.x * 3.5f; //右端の位置調整
 
 	//テクスチャの設定
@@ -100,7 +101,7 @@ void ResultTime::Draw() {
 	properties.params1.w = 1.0f / 2.0f; //1フレームの高さ(2行)
 
 	//ミリ秒を整数に変換して表示
-	int timeInt = static_cast<int>(m_resultTime * 100); // 小数第2位まで表示
+	int timeInt = static_cast<int>(m_resultData.finishTime * 100); // 小数第2位まで表示
 
 	//各桁の数字を取得
 	int digits[7];

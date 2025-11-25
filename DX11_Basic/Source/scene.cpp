@@ -1,11 +1,9 @@
 #include "main.h"
 #include "scene.h"
 #include "gameObject.h"
-#include "texture.h"
 #include "renderer.h"
-#include "shaders.h"
 #include "camera.h"
-#include "modelRenderer.h"
+#include "light.h"
 #include <algorithm>
 
 bool Scene::InitializeBase() {
@@ -130,6 +128,10 @@ void Scene::ObjectDraw() {
 
 	Camera* mainCamera = nullptr;
 
+	// ライトの描画
+	DrawLights();
+
+
 	// カメラごとに描画
 	for (auto& object : m_gameObjects[TYPE_CAMERA]) {
 		auto camera = static_cast<Camera*>(object);
@@ -138,9 +140,6 @@ void Scene::ObjectDraw() {
 			continue;
 		}
 		object->DrawBase();
-
-		// ライトの描画
-		DrawLights();
 
 		// GameObjectの描画
 		DrawOpaque(camera);
@@ -151,9 +150,6 @@ void Scene::ObjectDraw() {
 	// メインカメラで描画
 	if (mainCamera) {
 		mainCamera->DrawBase();
-
-		// ライトの描画
-		DrawLights();
 
 		// GameObjectの描画
 		DrawOpaque(mainCamera);
@@ -182,8 +178,16 @@ void Scene::ObjectDraw() {
 
 void Scene::DrawLights() const {
 	//ライトオブジェクトの描画
-	for (auto& gameObject : m_gameObjects[TYPE_LIGHT]) {
-		gameObject->DrawBase();
+	for (auto& light : m_gameObjects[TYPE_LIGHT]) {
+		light->DrawBase();
+		if (light->IsActive() && static_cast<Light*>(light)->IsShadowCaster()) {
+			for (auto& object : m_gameObjects[TYPE_OPAQUE]) {
+				object->DrawShadowBase();
+			}
+			for (auto& object : m_gameObjects[TYPE_CUTOUT]) {
+				object->DrawShadowBase();
+			}
+		}
 	}
 }
 

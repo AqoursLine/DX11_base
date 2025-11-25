@@ -29,7 +29,7 @@ bool TestObject::Initialize() {
 	m_vertexShader = new VertexShader();
 	m_vertexShader->Load(L"Shader\\pixelLightingVS.cso");
 	m_pixelShader = new PixelShader();
-	m_pixelShader->Load(L"Shader\\pixelLightingPS.cso");
+	m_pixelShader->Load(L"Shader\\lightTestPS.cso");
 
 	//位置、回転、拡大縮小の設定
 	m_position = { 0.0f, 0.0f, 0.0f };
@@ -60,6 +60,16 @@ void TestObject::Finalize() {
 
 void TestObject::Update(double deltaTime) {
 
+}
+
+void TestObject::DrawShadow() {
+	if (m_modelRenderer) {
+		m_modelRenderer->Draw(m_position, m_rotation, m_scale);
+	}
+
+	if (m_box) {
+		m_box->Draw(m_position + Vector3(3.0f, 0.0f, 0.0f), m_rotation, m_scale);
+	}
 }
 
 void TestObject::Draw() {

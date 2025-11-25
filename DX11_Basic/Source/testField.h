@@ -2,23 +2,20 @@
 
 #include "gameObject.h"
 
-class TestObject : public GameObject {
+class TestField : public GameObject {
 public:
-	TestObject() = default;
-	~TestObject() = default;
+	TestField() = default;
+	~TestField() = default;
 
-protected:
 	bool Initialize() override;
 	void Finalize() override;
 	void Update(double deltaTime) override;
-	void DrawShadow() override;
 	void Draw() override;
-
 private:
-
-	class ModelRenderer* m_modelRenderer = nullptr;
-	class Box* m_box = nullptr;
-
+	class Field* m_field = nullptr;
+	//テクスチャ
+	class Texture* m_texture = nullptr;
+	// Shader
 	class VertexShader* m_vertexShader = nullptr;
 	class PixelShader* m_pixelShader = nullptr;
 };
