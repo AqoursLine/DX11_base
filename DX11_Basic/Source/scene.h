@@ -64,6 +64,18 @@ public:
 		return objects;
 	}
 
+	template <typename T>
+	std::vector<T*> GetGameObjectsOfType(OBJECT_TYPE type) {
+		std::vector<T*> objects;
+		for (auto& gameObject : m_gameObjects[type]) {
+			T* obj = dynamic_cast<T*>(gameObject);
+			if (obj) {
+				objects.push_back(obj);
+			}
+		}
+		return objects;
+	}
+
 	bool IsInitialized() const { return m_isInitialized.load(std::memory_order_acquire); }
 	bool IsInitializedBase() const { return m_isInitializedBase; }
 

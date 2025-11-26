@@ -50,6 +50,10 @@ struct LIGHT
 //ライトバッファ
 cbuffer LightBuffer : register(b4)
 {
+	uint DirectionalLightCount;
+	uint PointLightCount;
+	uint SpotLightCount;
+	uint padding; // パディング
 	LIGHT Lights[MAX_LIGHTS];
 };
 

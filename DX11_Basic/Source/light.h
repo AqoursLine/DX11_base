@@ -17,8 +17,21 @@ public:
 
 	// ライト情報取得用ゲッター
 	bool IsShadowCaster() const { return m_isShadowCaster; }
+	XMMATRIX GetLightViewMatrix() const { return m_lightViewMatrix; }
+	XMMATRIX GetLightProjectionMatrix() const { return m_lightProjectionMatrix; }
 
-	static int GetCurrentLightCount();
+	LIGHT_TYPE GetType() const { return m_type; }
+	Vector4 GetDirection() const { return m_direction; }
+	float GetIntensity() const { return m_intensity; }
+	Vector4 GetDiffuseColor() const { return m_diffuseColor; }
+	float GetRange() const { return m_range; }
+	float GetInnerCone() const { return m_innerCone; }
+	float GetOuterCone() const { return m_outerCone; }
+	float GetFalloff() const { return m_falloff; }
+	bool IsEnabled() const { return m_enabled > 0.5f; }
+	float GetAttenuationConstant() const { return m_attenuationConstant; }
+	float GetAttenuationLinear() const { return m_attenuationLinear; }
+	float GetAttenuationQuadratic() const { return m_attenuationQuadratic; }
 
 	// ライトの各種パラメータ設定用セッター
 	Light* SetType(LIGHT_TYPE type) { m_type = type; return this; }
@@ -31,6 +44,11 @@ public:
 	Light* SetFalloff(float falloff) { m_falloff = falloff; return this; }
 	Light* SetEnabled(bool enabled) { m_enabled = enabled ? 1.0f : 0.0f; return this; }
 	Light* SetAttenuation(float constant, float linear, float quadratic) { m_attenuationConstant = constant; m_attenuationLinear = linear; m_attenuationQuadratic = quadratic; return this; }
+	Light* SetShadowCaster(bool isCaster) { m_isShadowCaster = isCaster; SetVisible(isCaster) return this; }
+	Light* SetShadowMapIndex(int index) { m_shadowMapIndex = index; return this; }
+
+	// ライトビュー行列と射影行列の計算
+	void CalculateLightMatrices();
 
 protected:
 	virtual bool Initialize() override;
@@ -45,8 +63,8 @@ protected:
 	Vector4 m_diffuseColor = Vector4(1.0f, 1.0f, 1.0f, 1.0f); // 拡散反射色
 	float m_range = 10.0f; // 光の届く範囲（点光源、スポットライト用）
 
-	float m_innerCone = 0.9f; // スポットライトの内側コーン角度（0.0〜1.0）
-	float m_outerCone = 0.8f; // スポットライトの外側コーン角度（0.0〜1.0）
+	float m_innerCone = 0.9f; // スポットライトの内側コーン角度（radians）
+	float m_outerCone = 0.8f; // スポットライトの外側コーン角度（radians）
 	float m_falloff = 1.0f; // スポットライトの減衰（1.0で線形、2.0で二次）
 	float m_enabled = 1.0f; // ライトの有効フラグ（1.0で有効、0.0で無効）
 	float m_attenuationConstant = 1.0f; // 減衰定数項
@@ -54,15 +72,9 @@ protected:
 	float m_attenuationQuadratic = 0.032f; // 減衰二次項
 
 private:
-
-	int m_lightIndex = -1; // ライトインデックス（シェーダー用）
-
+	// シャドウキャスト用
 	bool m_isShadowCaster = false; // シャドウキャスターかどうか
-
-	//使用済みインデックス管理
-	static int s_maxLights;
-	static std::vector<bool> s_usedLightMask;
-
-	int AllocateLightIndex();
-	void ReleaseLightIndex(int index);
+	int m_shadowMapIndex = -1; // シャドウマップインデックス
+	XMMATRIX m_lightViewMatrix = XMMatrixIdentity(); // ライトビュー行列
+	XMMATRIX m_lightProjectionMatrix = XMMatrixIdentity(); // ライト射影行列
 };

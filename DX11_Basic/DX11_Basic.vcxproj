@@ -284,6 +284,7 @@
     <ClCompile Include="Source\lapDisplay.cpp" />
     <ClCompile Include="Source\lapReadyGate.cpp" />
     <ClCompile Include="Source\light.cpp" />
+    <ClCompile Include="Source\lightManager.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\manager.cpp" />
     <ClCompile Include="Source\minimap.cpp" />
@@ -349,6 +350,7 @@
     <ClInclude Include="Source\lapDisplay.h" />
     <ClInclude Include="Source\lapReadyGate.h" />
     <ClInclude Include="Source\light.h" />
+    <ClInclude Include="Source\lightManager.h" />
     <ClInclude Include="Source\main.h" />
     <ClInclude Include="Source\manager.h" />
     <ClInclude Include="Source\minimap.h" />

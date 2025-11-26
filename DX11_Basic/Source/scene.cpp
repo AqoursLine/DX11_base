@@ -4,10 +4,14 @@
 #include "renderer.h"
 #include "camera.h"
 #include "light.h"
+#include "lightManager.h"
 #include <algorithm>
 
 bool Scene::InitializeBase() {
 	m_isInitialized.store(false, std::memory_order_release);
+
+	// ライトマネージャーは必ずライトの先頭に追加する
+	AddGameObject(new LightManager(), TYPE_LIGHT);
 
 	Initialize();
 
@@ -124,13 +128,12 @@ void Scene::ObjectDraw() {
 	//レンダーターゲット0に描画
 //	RENDERER.SetRenderTarget(0);
 
-	RENDERER.SetDefaultRenderTarget();
-
-	Camera* mainCamera = nullptr;
-
 	// ライトの描画
 	DrawLights();
 
+	RENDERER.SetDefaultRenderTarget();
+
+	Camera* mainCamera = nullptr;
 
 	// カメラごとに描画
 	for (auto& object : m_gameObjects[TYPE_CAMERA]) {
@@ -180,7 +183,10 @@ void Scene::DrawLights() const {
 	//ライトオブジェクトの描画
 	for (auto& light : m_gameObjects[TYPE_LIGHT]) {
 		light->DrawBase();
-		if (light->IsActive() && static_cast<Light*>(light)->IsShadowCaster()) {
+		//シャドウキャスターの場合、シャドウマップ作成用にシーンを描画
+		Light* lightObj = dynamic_cast<Light*>(light);
+		if (lightObj && lightObj->IsShadowCaster() && lightObj->IsActive()) {
+			RENDERER.SetRasterizerState(RASTERIZER_MODE::SHADOW);
 			for (auto& object : m_gameObjects[TYPE_OPAQUE]) {
 				object->DrawShadowBase();
 			}

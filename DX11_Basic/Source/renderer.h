@@ -36,7 +36,21 @@ constexpr int MAX_LIGHTS = 16; // 最大ライト数
 
 //ライト配列構造体
 struct LIGHTS {
+	UINT directionalLightCount; // 平行光源の数
+	UINT pointLightCount; // 点光源の数
+	UINT spotLightCount; // スポットライトの数
+	UINT padding; // パディング
 	LIGHT lights[MAX_LIGHTS];
+};
+
+constexpr int MAX_SHADOW_LIGHTS = 8; // 最大シャドウキャストライト数
+constexpr int SHADOW_MAP_SIZE = 1024; // シャドウマップサイズ
+
+//シャドウキャスト用ライト配列構造体
+struct SHADOW_LIGHTS {
+	UINT shadowLightCount; // シャドウキャストライトの数
+	UINT padding[3]; // パディング
+	XMMATRIX shadowLights[MAX_SHADOW_LIGHTS];
 };
 
 //シェーダー用カメラ構造体
@@ -58,6 +72,13 @@ enum class DEPTH_MODE {
 	ENABLE, // 深度有効
 	READ_ONLY, // 深度読み取り専用
 	DISABLE // 深度無効
+};
+
+//ラスタライザモード
+enum class RASTERIZER_MODE {
+	BACK, // 裏面カリング
+	FRONT, // 表面カリング
+	SHADOW // シャドウマップ用（表面カリング + デプスバイアス）
 };
 
 class Renderer {
@@ -104,6 +125,8 @@ public:
 	void SetATCEnable(bool enable);
 	//デフォルトサンプラーステート設定
 	void SetSamplerState();
+	//ラスタライザーステート設定
+	void SetRasterizerState(RASTERIZER_MODE mode);
 
 	//2D用行列設定
 	void Set2DMatrix();
@@ -117,11 +140,13 @@ public:
 	//マテリアル設定
 	void SetMaterial(const MATERIAL& material);
 	//ライト設定
-	void SetLight(const LIGHT& light, int lightIndex);
+	void SetLights(const LIGHTS& light);
 	//カメラ設定
 	void SetCameraData(const CAMERA& camera);
 	//シェーダープロパティ設定
 	void SetShaderProperties(const SHADER_PROPERTIES& properties);
+	//シャドウキャスト用ライト設定
+	void SetShadowLights(const SHADOW_LIGHTS& shadowLights);
 
 	//デバイス取得
 	ID3D11Device* GetDevice() { return m_device.Get(); }
@@ -143,6 +168,9 @@ public:
 	//srv取得
 	ID3D11ShaderResourceView* GetRenderTargetSRV(int index);
 
+	//ターゲットをシャドウマップに設定
+	void SetShadowMapAsRenderTarget(int index);
+
 private:
 	ComPtr<IDXGISwapChain> m_swapChain;
 	ComPtr<ID3D11Device> m_device;
@@ -152,6 +180,10 @@ private:
 	ComPtr<ID3D11RenderTargetView> m_renderTargetView;
 	ComPtr<ID3D11DepthStencilView> m_depthStencilView;
 
+	//ラスタライザステート
+	ComPtr<ID3D11RasterizerState> m_rasterizerBack;
+	ComPtr<ID3D11RasterizerState> m_rasterizerFront;
+	ComPtr<ID3D11RasterizerState> m_rasterizerShadow;
 
 	//ブレンドステート
 	ComPtr<ID3D11BlendState> m_blendState;
@@ -164,21 +196,26 @@ private:
 
 	//サンプラーステート
 	ComPtr<ID3D11SamplerState> m_samplerState;
+	ComPtr<ID3D11SamplerState> m_shadowSamplerState;
 
 	//コンスタントバッファ
 	ComPtr<ID3D11Buffer> m_worldBuffer;
 	ComPtr<ID3D11Buffer> m_viewBuffer;
 	ComPtr<ID3D11Buffer> m_projectionBuffer;
-	LIGHTS m_lightsData; // ライト配列データ
 	ComPtr<ID3D11Buffer> m_lightBuffer;
 	ComPtr<ID3D11Buffer> m_materialBuffer;
 	ComPtr<ID3D11Buffer> m_cameraBuffer;
 	ComPtr<ID3D11Buffer> m_shaderPropertiesBuffer;
+	ComPtr<ID3D11Buffer> m_shadowLightBuffer;
 
 	//レンダーターゲット
+	std::vector<Vector2> m_renderTargetSizes;
 	std::vector<ComPtr<ID3D11ShaderResourceView>> m_renderTargetSRV;
 	std::vector<ComPtr<ID3D11RenderTargetView>> m_renderTargetRTV;
 
+	//シャドウマップ関連
+	ComPtr<ID3D11ShaderResourceView> m_shadowSRV;
+	std::vector<ComPtr<ID3D11DepthStencilView>> m_shadowDSV;
 };
 
 //シングルトンインスタンス取得マクロ

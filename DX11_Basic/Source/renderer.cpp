@@ -105,13 +105,27 @@ bool Renderer::Initialize(HWND hWnd) {
 	rasterizerDesc.DepthClipEnable = TRUE;
 	rasterizerDesc.MultisampleEnable = FALSE;
 
-	ComPtr<ID3D11RasterizerState> rasterizerState;
-	hr = m_device->CreateRasterizerState(&rasterizerDesc, rasterizerState.GetAddressOf());
+	hr = m_device->CreateRasterizerState(&rasterizerDesc, m_rasterizerBack.GetAddressOf());
 	if (FAILED(hr)) {
 		ErrorMessage(L"ラスタライザーステートの初期化に失敗しました。", hr);
 		return false;
 	}
-	m_deviceContext->RSSetState(rasterizerState.Get());
+	rasterizerDesc.CullMode = D3D11_CULL_FRONT;
+	hr = m_device->CreateRasterizerState(&rasterizerDesc, m_rasterizerFront.GetAddressOf());
+	if (FAILED(hr)) {
+		ErrorMessage(L"ラスタライザーステートの初期化に失敗しました。", hr);
+		return false;
+	}
+	rasterizerDesc.DepthBias = 100;
+	rasterizerDesc.SlopeScaledDepthBias = 0.5f;
+	rasterizerDesc.DepthBiasClamp = 0.0f;
+	hr = m_device->CreateRasterizerState(&rasterizerDesc, m_rasterizerShadow.GetAddressOf());
+	if (FAILED(hr)) {
+		ErrorMessage(L"ラスタライザーステートの初期化に失敗しました。", hr);
+		return false;
+	}
+
+	m_deviceContext->RSSetState(m_rasterizerBack.Get());
 
 	//ブレンドステートの初期化
 	D3D11_BLEND_DESC blendDesc = {};
@@ -238,12 +252,6 @@ bool Renderer::Initialize(HWND hWnd) {
 	m_deviceContext->PSSetConstantBuffers(4, 1, m_lightBuffer.GetAddressOf());
 	m_deviceContext->VSSetConstantBuffers(4, 1, m_lightBuffer.GetAddressOf());
 
-	//ライト配列の初期化
-	for (auto& light : m_lightsData.lights) {
-		light = {};
-		light.directionAndIntensity.w = 0.0f; // 光の強さ0で初期化
-	}
-
 	//カメラバッファの作成
 	bufferDesc.ByteWidth = sizeof(CAMERA);
 	hr = m_device->CreateBuffer(&bufferDesc, nullptr, m_cameraBuffer.GetAddressOf());
@@ -263,6 +271,89 @@ bool Renderer::Initialize(HWND hWnd) {
 	}
 	m_deviceContext->VSSetConstantBuffers(6, 1, m_shaderPropertiesBuffer.GetAddressOf());
 	m_deviceContext->PSSetConstantBuffers(6, 1, m_shaderPropertiesBuffer.GetAddressOf());
+
+	//ライトビュー投影行列バッファの作成
+	bufferDesc.ByteWidth = sizeof(SHADOW_LIGHTS);
+	hr = m_device->CreateBuffer(&bufferDesc, nullptr, m_shadowLightBuffer.GetAddressOf());
+	if (FAILED(hr)) {
+		ErrorMessage(L"ライトビュー投影行列バッファの初期化に失敗しました。", hr);
+		return false;
+	}
+	m_deviceContext->VSSetConstantBuffers(10, 1, m_shadowLightBuffer.GetAddressOf());
+	m_deviceContext->PSSetConstantBuffers(10, 1, m_shadowLightBuffer.GetAddressOf());
+
+	//シャドウマップ用のレンダーターゲット作成
+	D3D11_TEXTURE2D_DESC shadowMapDesc = {};
+	shadowMapDesc.Width = SHADOW_MAP_SIZE;
+	shadowMapDesc.Height = SHADOW_MAP_SIZE;
+	shadowMapDesc.MipLevels = 1;
+	shadowMapDesc.ArraySize = MAX_SHADOW_LIGHTS;
+	shadowMapDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	shadowMapDesc.SampleDesc.Count = 1;
+	shadowMapDesc.SampleDesc.Quality = 0;
+	shadowMapDesc.Usage = D3D11_USAGE_DEFAULT;
+	shadowMapDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+
+	ComPtr<ID3D11Texture2D> shadowMapTexture;
+	hr = m_device->CreateTexture2D(&shadowMapDesc, nullptr, shadowMapTexture.GetAddressOf());
+	if (FAILED(hr)) {
+		ErrorMessage(L"シャドウマップ用テクスチャの初期化に失敗しました。", hr);
+		return false;
+	}
+
+	//シェーダーリソースビューの作成
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+	srvDesc.Texture2DArray.MostDetailedMip = 0;
+	srvDesc.Texture2DArray.MipLevels = 1;
+	srvDesc.Texture2DArray.FirstArraySlice = 0;
+	srvDesc.Texture2DArray.ArraySize = MAX_SHADOW_LIGHTS;
+
+	hr = m_device->CreateShaderResourceView(shadowMapTexture.Get(), &srvDesc, m_shadowSRV.GetAddressOf());
+	if (FAILED(hr)) {
+		ErrorMessage(L"シャドウマップ用シェーダーリソースビューの初期化に失敗しました。", hr);
+		return false;
+	}
+
+	//シャドウマップをシェーダーにセット
+	m_deviceContext->PSSetShaderResources(10, 1, m_shadowSRV.GetAddressOf());
+
+	//レンダーターゲットビューの作成
+	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+	dsvDesc.Texture2DArray.MipSlice = 0;
+	for (int i = 0; i < MAX_SHADOW_LIGHTS; i++) {
+		dsvDesc.Texture2DArray.FirstArraySlice = i;
+		dsvDesc.Texture2DArray.ArraySize = 1;
+		ComPtr<ID3D11DepthStencilView> shadowDSV;
+		hr = m_device->CreateDepthStencilView(shadowMapTexture.Get(), &dsvDesc, shadowDSV.GetAddressOf());
+		if (FAILED(hr)) {
+			ErrorMessage(L"シャドウマップ用デプスステンシルビューの初期化に失敗しました。", hr);
+			return false;
+		}
+		m_shadowDSV.push_back(shadowDSV);
+	}
+
+	//比較サンプラーの作成
+	D3D11_SAMPLER_DESC comparisonSamplerDesc = {};
+	comparisonSamplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+	comparisonSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	comparisonSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	comparisonSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	comparisonSamplerDesc.BorderColor[0] = 1.0f;
+	comparisonSamplerDesc.BorderColor[1] = 1.0f;
+	comparisonSamplerDesc.BorderColor[2] = 1.0f;
+	comparisonSamplerDesc.BorderColor[3] = 1.0f;
+	comparisonSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+	hr = m_device->CreateSamplerState(&comparisonSamplerDesc, m_shadowSamplerState.GetAddressOf());
+
+	if (FAILED(hr)) {
+		ErrorMessage(L"比較サンプラーの初期化に失敗しました。", hr);
+		return false;
+	}
+	m_deviceContext->PSSetSamplers(10, 1, m_shadowSamplerState.GetAddressOf());
 
 	return true;
 }
@@ -310,6 +401,22 @@ void Renderer::SetATCEnable(bool enable) {
 
 void Renderer::SetSamplerState() {
 	m_deviceContext->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
+}
+
+void Renderer::SetRasterizerState(RASTERIZER_MODE mode) {
+	switch (mode) {
+		case RASTERIZER_MODE::BACK:
+			m_deviceContext->RSSetState(m_rasterizerBack.Get());
+			break;
+		case RASTERIZER_MODE::FRONT:
+			m_deviceContext->RSSetState(m_rasterizerFront.Get());
+			break;
+		case RASTERIZER_MODE::SHADOW:
+			m_deviceContext->RSSetState(m_rasterizerShadow.Get());
+			break;
+		default:
+			break;
+	}
 }
 
 void Renderer::Set2DMatrix() {
@@ -361,16 +468,10 @@ void Renderer::SetMaterial(const MATERIAL& material) {
 	m_deviceContext->Unmap(m_materialBuffer.Get(), 0);
 }
 
-void Renderer::SetLight(const LIGHT& light, int lightIndex) {
-	if (lightIndex < 0 || lightIndex >= MAX_LIGHTS) {
-		return;
-	}
-
-	m_lightsData.lights[lightIndex] = light;
-
+void Renderer::SetLights(const LIGHTS& light) {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	m_deviceContext->Map(m_lightBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	memcpy(mappedResource.pData, &m_lightsData, sizeof(m_lightsData));
+	memcpy(mappedResource.pData, &light, sizeof(light));
 	m_deviceContext->Unmap(m_lightBuffer.Get(), 0);
 }
 
@@ -386,6 +487,13 @@ void Renderer::SetShaderProperties(const SHADER_PROPERTIES& properties) {
 	m_deviceContext->Map(m_shaderPropertiesBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	memcpy(mappedResource.pData, &properties, sizeof(properties));
 	m_deviceContext->Unmap(m_shaderPropertiesBuffer.Get(), 0);
+}
+
+void Renderer::SetShadowLights(const SHADOW_LIGHTS& shadowLights) {
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	m_deviceContext->Map(m_shadowLightBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	memcpy(mappedResource.pData, &shadowLights, sizeof(shadowLights));
+	m_deviceContext->Unmap(m_shadowLightBuffer.Get(), 0);
 }
 
 void Renderer::CreateVertexShader(ID3D11VertexShader** vertexShader, ID3D11InputLayout** inputLayout, std::wstring fileName) {
@@ -559,16 +667,48 @@ int Renderer::AddRenderTarget(UINT width, UINT height) {
 	}
 	m_renderTargetSRV.push_back(srv);
 
+	//サイズ保存
+	m_renderTargetSizes.push_back({ static_cast<float>(width), static_cast<float>(height) });
+
+	//インデックスを返す
 	return static_cast<int>(m_renderTargetRTV.size() - 1);
 }
 
 void Renderer::SetRenderTarget(int index) {
 	if (index < 0) {
+		//ビューポートの設定
+		D3D11_VIEWPORT viewport = {};
+		viewport.Width = static_cast<float>(SCREEN_WIDTH);
+		viewport.Height = static_cast<float>(SCREEN_HEIGHT);
+		viewport.MinDepth = 0.0f;
+		viewport.MaxDepth = 1.0f;
+		viewport.TopLeftX = 0.0f;
+		viewport.TopLeftY = 0.0f;
+		m_deviceContext->RSSetViewports(1, &viewport);
+
 		m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
 	} else {
 		if (index >= static_cast<int>(m_renderTargetRTV.size())) {
 			return;
 		}
+		//レンダリングターゲットのクリア
+		float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+		m_deviceContext->ClearRenderTargetView(m_renderTargetRTV[index].Get(), clearColor);
+
+		//デプスステンシルビューのクリア
+		m_deviceContext->ClearDepthStencilView(m_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+		//ビューポートの設定
+		D3D11_VIEWPORT viewport = {};
+		viewport.Width = m_renderTargetSizes[index].x;
+		viewport.Height = m_renderTargetSizes[index].y;
+		viewport.MinDepth = 0.0f;
+		viewport.MaxDepth = 1.0f;
+		viewport.TopLeftX = 0.0f;
+		viewport.TopLeftY = 0.0f;
+		m_deviceContext->RSSetViewports(1, &viewport);
+
+		//レンダーターゲットの設定
 		m_deviceContext->OMSetRenderTargets(1, m_renderTargetRTV[index].GetAddressOf(), m_depthStencilView.Get());
 	}
 }
@@ -582,4 +722,25 @@ ID3D11ShaderResourceView* Renderer::GetRenderTargetSRV(int index) {
 		return nullptr;
 	}
 	return m_renderTargetSRV[index].Get();
+}
+
+void Renderer::SetShadowMapAsRenderTarget(int index) {
+	if (index < 0 || index >= static_cast<int>(m_shadowDSV.size())) {
+		return;
+	}
+	//深度ステンシルビューのクリア
+	m_deviceContext->ClearDepthStencilView(m_shadowDSV[index].Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+	//ビューポートの設定
+	D3D11_VIEWPORT viewport = {};
+	viewport.Width = static_cast<float>(SHADOW_MAP_SIZE);
+	viewport.Height = static_cast<float>(SHADOW_MAP_SIZE);
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+	m_deviceContext->RSSetViewports(1, &viewport);
+
+	//シャドウマップ用デプスステンシルビューをレンダーターゲットに設定
+	m_deviceContext->OMSetRenderTargets(0, nullptr, m_shadowDSV[index].Get());
 }
