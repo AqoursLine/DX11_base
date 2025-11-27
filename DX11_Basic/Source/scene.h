@@ -76,6 +76,10 @@ public:
 		return objects;
 	}
 
+	int GetGameObjectCount(OBJECT_TYPE type) const {
+		return static_cast<int>(m_gameObjects[type].size());
+	}
+
 	bool IsInitialized() const { return m_isInitialized.load(std::memory_order_acquire); }
 	bool IsInitializedBase() const { return m_isInitializedBase; }
 

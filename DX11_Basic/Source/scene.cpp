@@ -187,12 +187,15 @@ void Scene::DrawLights() const {
 		Light* lightObj = dynamic_cast<Light*>(light);
 		if (lightObj && lightObj->IsShadowCaster() && lightObj->IsActive()) {
 			RENDERER.SetRasterizerState(RASTERIZER_MODE::SHADOW);
+			RENDERER.SetDepthStencilState(DEPTH_MODE::ENABLE);
 			for (auto& object : m_gameObjects[TYPE_OPAQUE]) {
 				object->DrawShadowBase();
 			}
 			for (auto& object : m_gameObjects[TYPE_CUTOUT]) {
 				object->DrawShadowBase();
 			}
+
+			RENDERER.SetRasterizerState(RASTERIZER_MODE::BACK);
 		}
 	}
 }

@@ -1,12 +1,12 @@
-Texture2DArray shadowMapArray : register(t10);
-SamplerComparisonState shadowSampler : register(s10);
+Texture2DArray g_shadowMapArray : register(t10);
+SamplerComparisonState g_shadowSampler : register(s10);
 
 #define MAX_SHDOW_LIGHTS 8
 
 cbuffer ShadowLightBuffer : register(b10)
 {
 	uint ShadowLightCount;
-	float3 padding; // パディング
+	float3 ShadowPadding; // パディング
 	matrix LightViewProjBiasMatrices[MAX_SHDOW_LIGHTS];
 }
 
@@ -26,8 +26,8 @@ float CalculateHardShadow(float3 worldPos, uint lightIndex)
 	shadowCoord /= shadowCoord.w;
 	
 	// ハードシャドウのサンプリング
-	return shadowMapArray.SampleCmpLevelZero(
-		shadowSampler,
+	return g_shadowMapArray.SampleCmpLevelZero(
+		g_shadowSampler,
 		float3(shadowCoord.xy, lightIndex),
 		shadowCoord.z
 	);
@@ -51,8 +51,8 @@ float CalculateHardShadowWithNormalBias(float3 worldPos, float3 normal, uint lig
 	shadowCoord.xyz /= shadowCoord.w;
 		
 	// ハードシャドウのサンプリング
-	return shadowMapArray.SampleCmpLevelZero(
-		shadowSampler,
+	return g_shadowMapArray.SampleCmpLevelZero(
+		g_shadowSampler,
 		float3(shadowCoord.xy, lightIndex),
 		shadowCoord.z
 	);

@@ -19,7 +19,7 @@ bool TestField::Initialize() {
 	m_vertexShader = new VertexShader();
 	m_vertexShader->Load(L"Shader\\unlitTextureVS.cso");
 	m_pixelShader = new PixelShader();
-	m_pixelShader->Load(L"Shader\\unlitTexturePS.cso");
+	m_pixelShader->Load(L"Shader\\lightShadowPS.cso");
 
 	m_scale = {10.0f, 1.0f, 10.0f};
 	m_position = { 0.0f, -1.0f, 0.0f };

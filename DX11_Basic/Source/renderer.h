@@ -163,13 +163,16 @@ public:
 
 	//レンダーターゲット設定
 	void SetRenderTarget(int index);
+	void ClearRenderTarget(int index, float r, float g, float b, float a);
 	//デフォルトレンダーターゲット設定
 	void SetDefaultRenderTarget();
+	void ClearDefaultRenderTarget(float r, float g, float b, float a);
 	//srv取得
 	ID3D11ShaderResourceView* GetRenderTargetSRV(int index);
 
 	//ターゲットをシャドウマップに設定
 	void SetShadowMapAsRenderTarget(int index);
+	void ClearShadowMap(int index);
 
 private:
 	ComPtr<IDXGISwapChain> m_swapChain;

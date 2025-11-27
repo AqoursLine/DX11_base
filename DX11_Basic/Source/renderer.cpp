@@ -319,7 +319,7 @@ bool Renderer::Initialize(HWND hWnd) {
 	//シャドウマップをシェーダーにセット
 	m_deviceContext->PSSetShaderResources(10, 1, m_shadowSRV.GetAddressOf());
 
-	//レンダーターゲットビューの作成
+	//デプスステンシルビューの作成
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
 	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
 	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
@@ -713,8 +713,32 @@ void Renderer::SetRenderTarget(int index) {
 	}
 }
 
+void Renderer::ClearRenderTarget(int index, float r, float g, float b, float a) {
+	if (index < 0 || index >= static_cast<int>(m_renderTargetRTV.size())) {
+		return;
+	}
+	float clearColor[4] = { r, g, b, a };
+	m_deviceContext->ClearRenderTargetView(m_renderTargetRTV[index].Get(), clearColor);
+}
+
 void Renderer::SetDefaultRenderTarget() {
+	//ビューポートの設定
+	D3D11_VIEWPORT viewport = {};
+	viewport.Width = static_cast<float>(SCREEN_WIDTH);
+	viewport.Height = static_cast<float>(SCREEN_HEIGHT);
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+
+	m_deviceContext->RSSetViewports(1, &viewport);
+
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
+}
+
+void Renderer::ClearDefaultRenderTarget(float r, float g, float b, float a) {
+	float clearColor[4] = { r, g, b, a };
+	m_deviceContext->ClearRenderTargetView(m_renderTargetView.Get(), clearColor);
 }
 
 ID3D11ShaderResourceView* Renderer::GetRenderTargetSRV(int index) {
@@ -728,9 +752,6 @@ void Renderer::SetShadowMapAsRenderTarget(int index) {
 	if (index < 0 || index >= static_cast<int>(m_shadowDSV.size())) {
 		return;
 	}
-	//深度ステンシルビューのクリア
-	m_deviceContext->ClearDepthStencilView(m_shadowDSV[index].Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
-
 	//ビューポートの設定
 	D3D11_VIEWPORT viewport = {};
 	viewport.Width = static_cast<float>(SHADOW_MAP_SIZE);
@@ -742,5 +763,14 @@ void Renderer::SetShadowMapAsRenderTarget(int index) {
 	m_deviceContext->RSSetViewports(1, &viewport);
 
 	//シャドウマップ用デプスステンシルビューをレンダーターゲットに設定
-	m_deviceContext->OMSetRenderTargets(0, nullptr, m_shadowDSV[index].Get());
+	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_shadowDSV[index].Get());
+
+}
+
+void Renderer::ClearShadowMap(int index) {
+	if (index < 0 || index >= static_cast<int>(m_shadowDSV.size())) {
+		return;
+	}
+	//深度ステンシルビューのクリア
+	m_deviceContext->ClearDepthStencilView(m_shadowDSV[index].Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 }

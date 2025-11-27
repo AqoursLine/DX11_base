@@ -44,7 +44,7 @@ public:
 	Light* SetFalloff(float falloff) { m_falloff = falloff; return this; }
 	Light* SetEnabled(bool enabled) { m_enabled = enabled ? 1.0f : 0.0f; return this; }
 	Light* SetAttenuation(float constant, float linear, float quadratic) { m_attenuationConstant = constant; m_attenuationLinear = linear; m_attenuationQuadratic = quadratic; return this; }
-	Light* SetShadowCaster(bool isCaster) { m_isShadowCaster = isCaster; SetVisible(isCaster) return this; }
+	Light* SetShadowCaster(bool isCaster) { m_isShadowCaster = isCaster; SetVisible(isCaster); return this; }
 	Light* SetShadowMapIndex(int index) { m_shadowMapIndex = index; return this; }
 
 	// ライトビュー行列と射影行列の計算

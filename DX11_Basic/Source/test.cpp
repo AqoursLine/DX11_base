@@ -32,7 +32,7 @@ bool TestObject::Initialize() {
 	m_pixelShader->Load(L"Shader\\lightTestPS.cso");
 
 	//位置、回転、拡大縮小の設定
-	m_position = { 0.0f, 0.0f, 0.0f };
+	m_position = { 0.0f, 2.0f, 0.0f };
 	m_rotation = { 0.0f, 0.0f, 0.0f };
 	m_scale = { 1.0f, 1.0f, 1.0f };
 	 return true;
@@ -70,6 +70,8 @@ void TestObject::DrawShadow() {
 	if (m_box) {
 		m_box->Draw(m_position + Vector3(3.0f, 0.0f, 0.0f), m_rotation, m_scale);
 	}
+
+
 }
 
 void TestObject::Draw() {

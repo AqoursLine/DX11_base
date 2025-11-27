@@ -2,26 +2,62 @@
 #include "renderer.h"
 #include "scene.h"
 #include "light.h"
+#include "shaders.h"
 
 bool LightManager::Initialize() {
+	m_vertexShader = new VertexShader();
+
+	m_vertexShader->Load(L"Shader\\shadowMapVS.cso");
+
+	m_pixelShader = new PixelShader();
+	m_pixelShader->Load(L"Shader\\shadowMapPS.cso");
+
+
+	m_lights.clear();
+
+	m_lights = m_scene->GetGameObjectsOfType<Light>(TYPE_LIGHT);
+	
+	// ライト数を取得（マネージャー自身を除く）
+	m_lightCount = m_scene->GetGameObjectCount(TYPE_LIGHT) - 1;
+
 	return true;
 }
 
-void LightManager::Finalize() {}
+void LightManager::Finalize() {
+	if (m_vertexShader) {
+		delete m_vertexShader;
+		m_vertexShader = nullptr;
+	}
+
+	if (m_pixelShader) {
+		delete m_pixelShader;
+		m_pixelShader = nullptr;
+	}
+}
 
 void LightManager::Update(double deltaTime) {}
 
 void LightManager::Draw() {
-	//ライトの情報をシェーダーにセット
-	auto lights = m_scene->GetGameObjectsOfType<Light>(TYPE_LIGHT);
+	// ライト数が0の場合は終了
+	if (m_lightCount == 0) return;
 
+	// ライト数を取得（マネージャー自身を除く）
+	int lightCount = m_scene->GetGameObjectCount(TYPE_LIGHT) - 1;
+
+	// ライト数が変化した場合は再設定
+	if (lightCount != m_lightCount) {
+		m_lightCount = lightCount;
+		m_lights = m_scene->GetGameObjectsOfType<Light>(TYPE_LIGHT);
+	}
+
+	// ライト情報を収集
 	LIGHTS lightData = {};
 
 	std::vector<Light*> directionalLights;
 	std::vector<Light*> pointLights;
 	std::vector<Light*> spotLights;
 
-	for (auto& light : lights) {
+	for (auto& light : m_lights) {
 		if (!light->IsActive()) continue;
 
 		switch (light->GetType()) {
@@ -90,10 +126,16 @@ void LightManager::Draw() {
 
 	// シャドウキャスターのリストを更新
 	std::vector<Light*> shadowCasters;
-	for (auto& light : lights) {
+	for (auto& light : m_lights) {
 		if (light->IsActive() && light->IsShadowCaster()) {
 			shadowCasters.push_back(light);
 		}
+	}
+
+	// シャドウキャスターがいない場合は終了
+	if (shadowCasters.empty()) {
+		RENDERER.SetShadowLights(SHADOW_LIGHTS{});
+		return;
 	}
 
 	// シャドウキャスターの数を制限
@@ -128,4 +170,9 @@ void LightManager::Draw() {
 	shadowLightData.shadowLightCount = static_cast<UINT>(shadowCasters.size());
 
 	RENDERER.SetShadowLights(shadowLightData);
+
+	// シャドウマップのシェーダーをセット
+	m_vertexShader->Set();
+	m_pixelShader->Set();
+
 }

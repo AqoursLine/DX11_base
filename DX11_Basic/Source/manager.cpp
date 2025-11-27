@@ -74,10 +74,11 @@ void Manager::Draw() {
 
 	// deltaTime表示
 #ifdef _DEBUG
-	ImGui::SetNextWindowSize(ImVec2(240, 50));
+	ImGui::SetNextWindowSize(ImVec2(240, 60));
 	ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_Always);
 	ImGui::Begin("Debug Info");
 	ImGui::Text("Delta Time: %.6f seconds", SYSTEM.GetTimer()->GetDeltaTime());
+	ImGui::Text("FPS: %.2f", 1.0f / SYSTEM.GetTimer()->GetDeltaTime());
 	ImGui::End();
 #endif // _DEBUG
 
