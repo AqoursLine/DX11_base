@@ -116,7 +116,7 @@ void LightManager::Draw() {
 		lightData.lights[lightIndex].directionAndIntensity = XMFLOAT4(dir.x, dir.y, dir.z, light->GetIntensity());
 		Vector4 color = light->GetDiffuseColor();
 		lightData.lights[lightIndex].diffuseAndRange = XMFLOAT4(color.x, color.y, color.z, light->GetRange());
-		lightData.lights[lightIndex].spotParams = XMFLOAT4(light->GetInnerCone(), light->GetOuterCone(), light->GetFalloff(), light->IsEnabled() ? 1.0f : 0.0f);
+		lightData.lights[lightIndex].spotParams = XMFLOAT4(cosf(light->GetInnerCone() * 0.5f), cosf(light->GetOuterCone() * 0.5f), light->GetFalloff(), light->IsEnabled() ? 1.0f : 0.0f);
 		lightData.lights[lightIndex].attenuation = XMFLOAT4(light->GetAttenuationConstant(), light->GetAttenuationLinear(), light->GetAttenuationQuadratic(), 0.0f);
 		lightIndex++;
 	}
@@ -162,7 +162,9 @@ void LightManager::Draw() {
 		);
 		XMMATRIX lightMatrix = XMMatrixMultiply(viewMatrix, projMatrix);
 		lightMatrix = XMMatrixMultiply(lightMatrix, biasMatrix);
-		shadowLightData.shadowLights[i] = lightMatrix;
+		XMFLOAT4X4 transposedMatrix;
+		XMStoreFloat4x4(&transposedMatrix, XMMatrixTranspose(lightMatrix));
+		shadowLightData.shadowLights[i] = transposedMatrix;
 
 		// シャドウマップのインデックスをセット
 		light->SetShadowMapIndex(static_cast<int>(i));

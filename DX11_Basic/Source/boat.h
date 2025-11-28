@@ -125,6 +125,7 @@ private:
 
 	//水滴用タイマー
 	float m_splashTimer;
+	float m_splashEffectTimer;
 
 	//ボートの寸法
 	float m_length;	// ボートの長さ

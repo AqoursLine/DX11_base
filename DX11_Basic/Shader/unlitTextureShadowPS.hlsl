@@ -1,10 +1,12 @@
 #include "common.hlsl"
 #include "shadowMap.hlsl"
 
+SamplerState g_sampler : register(s0);
+
 void main(in PS_INPUT input, out float4 outDiffuse : SV_TARGET)
 {
-	int2 pixelCoord = int2(input.TexCoord.x * 1024.0f, input.TexCoord.y * 1024.0f);
-	float depth = g_shadowMapArray.Load(int4(pixelCoord, 0, 0)).r;
+	float4 depth = g_shadowMapArray.Sample(g_sampler, float3(input.TexCoord, 0));
 
-	outDiffuse = float4(depth, 0, 0, 1);
+	outDiffuse = depth;
+	outDiffuse.a = 1.0f;
 }

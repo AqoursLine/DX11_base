@@ -125,13 +125,13 @@ void Scene::ObjectDestroy() {
 }
 
 void Scene::ObjectDraw() {
-	//レンダーターゲット0に描画
-//	RENDERER.SetRenderTarget(0);
-
 	// ライトの描画
 	DrawLights();
 
 	RENDERER.SetDefaultRenderTarget();
+
+	//シャドウマップsrvセット
+	RENDERER.SetShadowMapSRV();
 
 	Camera* mainCamera = nullptr;
 

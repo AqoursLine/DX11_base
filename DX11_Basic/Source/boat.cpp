@@ -35,6 +35,7 @@ Boat::Boat()
 	, m_water(nullptr)
 	, m_splashEffect(nullptr)
 	, m_splashTimer(0.0f)
+	, m_splashEffectTimer(0.0f)
 
 	, m_length(2.9f)			//ボートの長さ(m)
 	, m_width(1.4f)				//ボートの幅(m)
@@ -401,6 +402,7 @@ void Boat::UpdateWaterInteraction(float deltaTime) {
 
 	if (GetSpeed() > 10.0f) {
 		m_splashTimer += deltaTime;
+		m_splashEffectTimer += deltaTime;
 
 		if (m_splashTimer >= 0.5f) {
 			m_water->AddRipple(m_position, 0.5f, 2.0f);
@@ -409,7 +411,7 @@ void Boat::UpdateWaterInteraction(float deltaTime) {
 		}
 
 		//水しぶきエフェクト生成
-		if (m_splashEffect) {
+		if (m_splashEffect && m_splashEffectTimer >= 0.05f) {
 			Vector3 forward = GetForwardQ();
 			Vector3 splashPos = m_position - forward * (m_length * 0.5f);
 			splashPos.y -= m_height* 0.3f;
@@ -417,6 +419,8 @@ void Boat::UpdateWaterInteraction(float deltaTime) {
 			splashPos.y = std::min(splashPos.y, m_water->GetWaterHeight(splashPos));
 
 			m_splashEffect->EmitOneShot(splashPos);
+
+			m_splashEffectTimer = 0.0f;
 		}
 	}
 }

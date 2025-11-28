@@ -3,6 +3,8 @@
 
 #include "input.h"
 
+#include "imguiSystem.h"
+
 bool GameDirectionalLight::Initialize() {
 	m_type = LIGHT_TYPE::DIRECTIONAL;
 
@@ -10,5 +12,4 @@ bool GameDirectionalLight::Initialize() {
 }
 
 void GameDirectionalLight::Update(double deltaTime) {
-
 }

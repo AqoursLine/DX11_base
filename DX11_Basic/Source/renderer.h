@@ -50,7 +50,7 @@ constexpr int SHADOW_MAP_SIZE = 1024; // シャドウマップサイズ
 struct SHADOW_LIGHTS {
 	UINT shadowLightCount; // シャドウキャストライトの数
 	UINT padding[3]; // パディング
-	XMMATRIX shadowLights[MAX_SHADOW_LIGHTS];
+	XMFLOAT4X4 shadowLights[MAX_SHADOW_LIGHTS];
 };
 
 //シェーダー用カメラ構造体
@@ -173,6 +173,8 @@ public:
 	//ターゲットをシャドウマップに設定
 	void SetShadowMapAsRenderTarget(int index);
 	void ClearShadowMap(int index);
+	//シャドウマップsrvセット
+	void SetShadowMapSRV();
 
 private:
 	ComPtr<IDXGISwapChain> m_swapChain;

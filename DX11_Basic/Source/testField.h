@@ -11,6 +11,7 @@ public:
 	void Finalize() override;
 	void Update(double deltaTime) override;
 	void Draw() override;
+	void DrawShadow() override;
 private:
 	class Field* m_field = nullptr;
 	//テクスチャ

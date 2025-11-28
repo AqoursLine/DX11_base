@@ -24,10 +24,10 @@ bool Field::Initialize() {
 	vertices[2].position = XMFLOAT4(-0.5f, 0.0f, -0.5f, 1.0f);
 	vertices[3].position = XMFLOAT4(0.5f, 0.0f, -0.5f, 1.0f);
 
-	vertices[0].normal = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
-	vertices[1].normal = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
-	vertices[2].normal = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
-	vertices[3].normal = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	vertices[0].normal = XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
+	vertices[1].normal = XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
+	vertices[2].normal = XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
+	vertices[3].normal = XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 
 	vertices[0].texcoord = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 	vertices[1].texcoord = XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f);

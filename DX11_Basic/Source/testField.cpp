@@ -19,9 +19,10 @@ bool TestField::Initialize() {
 	m_vertexShader = new VertexShader();
 	m_vertexShader->Load(L"Shader\\unlitTextureVS.cso");
 	m_pixelShader = new PixelShader();
-	m_pixelShader->Load(L"Shader\\lightShadowPS.cso");
+//	m_pixelShader->Load(L"Shader\\lightShadowPS.cso");
+	m_pixelShader->Load(L"Shader\\lightTestPS.cso");
 
-	m_scale = {10.0f, 1.0f, 10.0f};
+	m_scale = {50.0f, 1.0f, 50.0f};
 	m_position = { 0.0f, -1.0f, 0.0f };
 
 	return true;
@@ -60,4 +61,9 @@ void TestField::Draw() {
 	//フィールドの描画
 	m_field->Draw(m_position, m_rotation, m_scale);
 
+}
+
+void TestField::DrawShadow() {
+	//フィールドの描画
+	m_field->Draw(m_position, m_rotation, m_scale);
 }

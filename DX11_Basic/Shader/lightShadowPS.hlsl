@@ -12,7 +12,7 @@ void main(PS_INPUT input, out float4 outDiffuse : SV_TARGET)
 
 	float shadowAmount = 1.0;
 
-	for (int i = 0; i < ShadowLightCount; i++)
+	for (uint i = 0; i < ShadowLightCount; i++)
 	{
 		float shadow = CalculateHardShadowWithNormalBias(input.WorldPosition.xyz, normal.xyz, i, 0.005);
 

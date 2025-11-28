@@ -12,6 +12,8 @@
 
 #include "shaders.h"
 
+#include "imguiSystem.h"
+
 bool TestObject::Initialize() {
 	m_modelRenderer = new ModelRenderer();
 	if (!m_modelRenderer->Load("Asset\\Model\\torus3.fbx")) {
@@ -86,4 +88,24 @@ void TestObject::Draw() {
 	if (m_box) {
 		m_box->Draw(m_position + Vector3(3.0f, 0.0f, 0.0f), m_rotation, m_scale);
 	}
+
+#ifdef _DEBUG
+	// ImGuiウィンドウの表示
+	ImGui::Begin("Test Object");
+	ImGui::Text("Position");
+	ImGui::SliderFloat("X", &m_position.x, -10.0f, 10.0f);
+	ImGui::SliderFloat("Y", &m_position.y, -10.0f, 10.0f);
+	ImGui::SliderFloat("Z", &m_position.z, -10.0f, 10.0f);
+	ImGui::Text("Rotation");
+	ImGui::SliderFloat("Rot X", &m_rotation.x, -XM_PI, XM_PI);
+	ImGui::SliderFloat("Rot Y", &m_rotation.y, -XM_PI, XM_PI);
+	ImGui::SliderFloat("Rot Z", &m_rotation.z, -XM_PI, XM_PI);
+	ImGui::Text("Scale");
+	ImGui::SliderFloat("Scale X", &m_scale.x, 0.1f, 5.0f);
+	ImGui::SliderFloat("Scale Y", &m_scale.y, 0.1f, 5.0f);
+	ImGui::SliderFloat("Scale Z", &m_scale.z, 0.1f, 5.0f);
+	ImGui::End();
+
+#endif // _DEBUG
+
 }

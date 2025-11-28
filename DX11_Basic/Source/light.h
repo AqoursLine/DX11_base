@@ -44,7 +44,7 @@ public:
 	Light* SetFalloff(float falloff) { m_falloff = falloff; return this; }
 	Light* SetEnabled(bool enabled) { m_enabled = enabled ? 1.0f : 0.0f; return this; }
 	Light* SetAttenuation(float constant, float linear, float quadratic) { m_attenuationConstant = constant; m_attenuationLinear = linear; m_attenuationQuadratic = quadratic; return this; }
-	Light* SetShadowCaster(bool isCaster) { m_isShadowCaster = isCaster; SetVisible(isCaster); return this; }
+	Light* SetShadowCaster(bool isCaster) { m_isShadowCaster = isCaster; return this; }
 	Light* SetShadowMapIndex(int index) { m_shadowMapIndex = index; return this; }
 
 	// ライトビュー行列と射影行列の計算
@@ -71,10 +71,11 @@ protected:
 	float m_attenuationLinear = 0.09f; // 減衰線形項
 	float m_attenuationQuadratic = 0.032f; // 減衰二次項
 
-private:
 	// シャドウキャスト用
 	bool m_isShadowCaster = false; // シャドウキャスターかどうか
 	int m_shadowMapIndex = -1; // シャドウマップインデックス
 	XMMATRIX m_lightViewMatrix = XMMatrixIdentity(); // ライトビュー行列
 	XMMATRIX m_lightProjectionMatrix = XMMatrixIdentity(); // ライト射影行列
+
+private:
 };
