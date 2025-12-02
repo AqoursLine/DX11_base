@@ -1,0 +1,108 @@
+// パーティクル構造体
+struct Particle
+{
+	float3 position;
+	float3 velocity;
+	float4 color;
+	float size;
+	float life;
+	float maxLife;
+	float rotation;
+	float rotationSpeed;
+	uint active;
+};
+
+// 発生用パラメータ
+cbuffer EmitParams : register(b3)
+{
+	float3 emitPosition;
+	float emissionAngle;
+	float3 baseVelocity;
+	float emissionAngleVariation;
+	float3 positionVariation;
+	float lifeTime;
+	float3 velocityVariation;
+	float startSize;
+	float4 startColor;
+	float rotationSpeed;
+	float rotationSpeedMin;
+	float rotationSpeedMax;
+	uint maxParticles;
+	uint emitCount;
+	uint randomSeed;
+	float2 emitPadding;
+}
+
+// パーティクルバッファ
+RWStructuredBuffer<Particle> particles : register(u0);
+
+// 乱数生成関数
+float random(uint seed, uint index)
+{
+	uint n = seed + index * 747796405u + 2891336453u;
+	n = ((n >> ((n >> 28u) + 4u)) ^ n) * 277803737u;
+	return float((n >> 22u) ^ n) / 4294967295.0f;
+}
+
+float randomRange(uint seed, uint index, float minVal, float maxVal)
+{
+	return minVal + (maxVal - minVal) * random(seed, index);
+}
+
+[numthreads(256, 1, 1)]
+void main( uint3 DTid : SV_DispatchThreadID )
+{
+	uint threadIndex = DTid.x;
+	
+	// emit数を超えたら終了
+	if (threadIndex >= emitCount)
+		return;
+	
+	// 非アクティブなパーティクルを探す
+	for	(uint i = 0; i < maxParticles; i++)
+	{
+		uint index = (threadIndex + i) % maxParticles;
+		
+		// アトミック操作でパーティクルをアクティブにする
+		uint originalValue;
+		InterlockedCompareExchange(particles[index].active, 0, 1, originalValue);
+		
+		if (originalValue == 0)
+		{
+			// パーティクルの初期化
+			Particle p;
+			
+			uint baseSeed = randomSeed + threadIndex * 1234567u;
+			
+			// 位置にランダムなオフセットを加える
+			float3 offsetPos = float3(
+				randomRange(baseSeed, 0, -1.0f, 1.0f) * positionVariation.x,
+				randomRange(baseSeed, 1, -1.0f, 1.0f) * positionVariation.y,
+				randomRange(baseSeed, 2, -1.0f, 1.0f) * positionVariation.z
+			);
+			p.position = emitPosition + offsetPos;
+			
+			// 速度の計算
+			p.velocity = baseVelocity + float3(
+				randomRange(baseSeed, 3, -1.0f, 1.0f) * velocityVariation.x,
+				randomRange(baseSeed, 4, -1.0f, 1.0f) * velocityVariation.y,
+				randomRange(baseSeed, 5, -1.0f, 1.0f) * velocityVariation.z
+			);
+			
+			// ランダムな方向に速度を回転させる
+			p.rotation = emissionAngle + randomRange(baseSeed, 6, -emissionAngleVariation, emissionAngleVariation);
+			
+			// 回転速度のバラツキ
+			p.rotationSpeed = rotationSpeed + randomRange(baseSeed, 7, -rotationSpeedMin, rotationSpeedMax);
+
+			p.color = startColor;
+			p.size = startSize;
+			p.life = lifeTime;
+			p.maxLife = lifeTime;
+			p.active = 1;
+
+			particles[index] = p;
+			break;
+		}
+	}
+}

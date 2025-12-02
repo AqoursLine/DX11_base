@@ -139,9 +139,9 @@ void main(in PS_INPUT In, out float4 outDiffuse : SV_Target)
 
 	// シャドウマップの適用
 	float shadowAmount = 1.0f;
-	for (uint i = 0; i < ShadowLightCount; i++)
+	for (uint l = 0; l < ShadowLightCount; l++)
 	{
-		float shadow = CalculateHardShadowWithNormalBias(In.WorldPosition.xyz, normal.xyz, i, 0.005);
+		float shadow = CalculateHardShadowWithNormalBias(In.WorldPosition.xyz, normal.xyz, l, 0.005);
 		shadowAmount *= shadow;
 	}
 	
