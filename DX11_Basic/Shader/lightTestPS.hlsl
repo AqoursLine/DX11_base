@@ -16,7 +16,7 @@ void main(in PS_INPUT In, out float4 outDiffuse : SV_Target)
 	float4 normal = normalize(In.Normal);
 	float3 eyev = normalize(CameraPosition.xyz - In.WorldPosition.xyz);
 
-	float3 finalLight = Material.Ambient.rgb;
+	float3 finalLight = 0.0f;
 	float3 finalSpecular = 0.0f;
 	
 	// ディレクションライトのループ
@@ -133,9 +133,8 @@ void main(in PS_INPUT In, out float4 outDiffuse : SV_Target)
 	}
 
 	finalLight = saturate(finalLight);
-
-	outDiffuse.rgb = baseColor.rgb * finalLight;
-	outDiffuse.rgb += finalSpecular;
+	
+	finalLight = lerp(0.2f, 1.0f, finalLight);
 
 	// シャドウマップの適用
 	float shadowAmount = 1.0f;
@@ -144,8 +143,12 @@ void main(in PS_INPUT In, out float4 outDiffuse : SV_Target)
 		float shadow = CalculateHardShadowWithNormalBias(In.WorldPosition.xyz, normal.xyz, l, 0.005);
 		shadowAmount *= shadow;
 	}
-	
-	outDiffuse.rgb *= shadowAmount;
+
+	shadowAmount *= lerp(0.2f, 1.0f, shadowAmount);
+
+	// 最終色の計算
+	outDiffuse.rgb = baseColor.rgb * finalLight * shadowAmount;
+	outDiffuse.rgb += finalSpecular;
 
 	outDiffuse.a = 1.0f;
 }

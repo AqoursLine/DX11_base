@@ -1,10 +1,10 @@
 #pragma once
 
-#include "particleSystem.h"
+#include "gpuParticleSystem.h"
 
-class SplashParticle : public ParticleSystem {
+class SplashParticle : public GPUParticleSystem {
 public:
-	SplashParticle() = default;
+	SplashParticle() : GPUParticleSystem(ParticleDrawMode::CULL_DISTANCE) {}
 	~SplashParticle() = default;
 
 protected:

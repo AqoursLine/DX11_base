@@ -1,10 +1,10 @@
 #pragma once
 
-#include "particleSystem.h"
+#include "gpuParticleSystem.h"
 
-class TestParticle : public ParticleSystem {
+class TestParticle : public GPUParticleSystem {
 public:
-	TestParticle() = default;
+	TestParticle() : GPUParticleSystem(ParticleDrawMode::INDIRECT_DRAW) {}
 	~TestParticle() = default;
 
 protected:

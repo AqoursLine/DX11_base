@@ -20,16 +20,17 @@ bool TestParticle::Initialize() {
 	settings.startSize = 1.0f;
 	settings.endSize = 0.1f;
 	settings.lifeTime = 2.0f;
-	settings.position = { 1.0f, 0.0f, 1.0f };
+	settings.position = { 5.0f, 0.0f, 5.0f };
 	settings.velocity = { 0.0f, 5.0f, 0.0f };
 	settings.velocityVariation = { 2.0f, 1.0f, 2.0f };
 	settings.gravity = -3.0f;
 	settings.oneShot = true;
-	settings.maxParticles = 500;
+	settings.oneShotCount = 50;
+	settings.maxParticles = 10000;
 
 	SetEmitterSettings(settings);
 
-	ParticleSystem::Initialize();
+	GPUParticleSystem::Initialize();
 	return true;
 }
 
@@ -39,15 +40,22 @@ void TestParticle::Finalize() {
 		m_texture = nullptr;
 	}
 
-	ParticleSystem::Finalize();
+	GPUParticleSystem::Finalize();
 }
 
 void TestParticle::Update(double deltaTime) {
 	if (Input::GetKeyTrigger(KK_D0)) {
-		EmitOneShot(m_position);
 
-		EmitOneShot({ -5.0f, 0.0f, 0.0f });
+		EmitOneShot({ 5.0f, 0.0f, 5.0f });
 	}
 
-	ParticleSystem::Update(deltaTime);
+	if (Input::GetKeyPress(KK_D1)) {
+		EmitOneShot({ 0.0f, 0.0f, 0.0f });
+	}
+
+	if (Input::GetKeyPress(KK_D2)) {
+		EmitOneShot({ 5.0f, 0.0f, 5.0f });
+	}
+
+	GPUParticleSystem::Update(deltaTime);
 }

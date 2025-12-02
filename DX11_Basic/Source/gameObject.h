@@ -24,18 +24,19 @@ public:
 	{
 		if (!m_isInitialized) {
 			m_isInitialized = Initialize();
+			return;
 		}
 		if (m_isActive) {
 			Update(deltaTime);
 		}
 	}
 	void DrawShadowBase() {
-		if (m_isVisible && m_isActive) {
+		if (m_isVisible && m_isActive && m_isInitialized) {
 			DrawShadow();
 		}
 	}
 	void DrawBase() {
-		if (m_isVisible && m_isActive) {
+		if (m_isVisible && m_isActive && m_isInitialized) {
 			Draw();
 		}
 	}

@@ -31,7 +31,7 @@ bool SplashParticle::Initialize() {
 
 	SetEmitterSettings(settings);
 
-	ParticleSystem::Initialize();
+	GPUParticleSystem::Initialize();
 	return true;
 }
 
@@ -41,7 +41,7 @@ void SplashParticle::Finalize() {
 		m_texture = nullptr;
 	}
 
-	ParticleSystem::Finalize();
+	GPUParticleSystem::Finalize();
 }
 
 void SplashParticle::Update(double deltaTime) {
@@ -53,7 +53,7 @@ void SplashParticle::Update(double deltaTime) {
 #endif // _DEBUG
 
 
-	ParticleSystem::Update(deltaTime);
+	GPUParticleSystem::Update(deltaTime);
 }
 
 void SplashParticle::Draw() {
@@ -74,5 +74,5 @@ void SplashParticle::Draw() {
 //#endif // _DEBUG
 
 
-	ParticleSystem::Draw();
+	GPUParticleSystem::Draw();
 }

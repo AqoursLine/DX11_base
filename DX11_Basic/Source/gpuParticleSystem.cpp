@@ -19,12 +19,12 @@ void GPUParticleSystem::Emit(int count) {
 /// <param name="count">発生数</param>
 void GPUParticleSystem::EmitOneShot(const Vector3& position, int count) {
 	// エミッター位置を一時的に変更
-	Vector3 originalPosition = m_settings.position;
-	m_settings.position = position;
+	Vector3 originalPosition = m_position;
+	m_position = position;
 	// ワンショット発生
 	EmitGPU(count > 0 ? count : m_settings.oneShotCount);
 	// エミッター位置を元に戻す
-	m_settings.position = originalPosition;
+	m_position = originalPosition;
 }
 
 /// <summary>
@@ -456,15 +456,16 @@ bool GPUParticleSystem::CreateBuffers() {
 		bd.ByteWidth = sizeof(UINT) * 5;
 		bd.Usage = D3D11_USAGE_DEFAULT;
 		bd.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
-		bd.MiscFlags = D3D11_RESOURCE_MISC_DRAWINDIRECT_ARGS | D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-		bd.StructureByteStride = sizeof(UINT);
-		if (FAILED(device->CreateBuffer(&bd, nullptr, m_drawArgsBuffer.GetAddressOf()))) {
+		bd.MiscFlags = D3D11_RESOURCE_MISC_DRAWINDIRECT_ARGS;
+		HRESULT hr = device->CreateBuffer(&bd, nullptr, m_drawArgsBuffer.GetAddressOf());
+		if (FAILED(hr)) {
+			ErrorMessage(L"ドローアーギュメントバッファの作成に失敗しました。", hr);
 			return false;
 		}
 
 		// ドローアーギュメントUAV作成
 		uavDesc = {};
-		uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+		uavDesc.Format = DXGI_FORMAT_R32_UINT;
 		uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 		uavDesc.Buffer.FirstElement = 0;
 		uavDesc.Buffer.NumElements = 5;
@@ -494,26 +495,26 @@ bool GPUParticleSystem::LoadShaders() {
 	// 描画用シェーダー読み込み
 	m_vertexShader = new VertexShader();
 	if (m_drawMode == ParticleDrawMode::CULL_DISTANCE) {
-		m_vertexShader->Load(L"Shaders\\gpuParticleVS_CullDistance.csp");
+		m_vertexShader->Load(L"Shader\\gpuParticleVS_CullDistance.cso");
 	} else {
-		m_vertexShader->Load(L"Shaders\\gpuParticleVS_IndirectDraw.cso");
+		m_vertexShader->Load(L"Shader\\gpuParticleVS_IndirectDraw.cso");
 	}
 
 	m_pixelShader = new PixelShader();
-	m_pixelShader->Load(L"Shaders\\particlePS.cso");
+	m_pixelShader->Load(L"Shader\\particlePS.cso");
 
 	// 更新用コンピュートシェーダー読み込み
 	m_updateComputeShader = new ComputeShader();
-	m_updateComputeShader->Load(L"Shaders\\particleUpdateCS.cso");
+	m_updateComputeShader->Load(L"Shader\\particleUpdateCS.cso");
 
 	// 発生用コンピュートシェーダー読み込み
 	m_emitComputeShader = new ComputeShader();
-	m_emitComputeShader->Load(L"Shaders\\particleEmitCS.cso");
+	m_emitComputeShader->Load(L"Shader\\particleEmitCS.cso");
 
 	// コンパクト用コンピュートシェーダー読み込み(IndirectDrawモードのみ)
 	if (m_drawMode == ParticleDrawMode::INDIRECT_DRAW) {
 		m_compactComputeShader = new ComputeShader();
-		m_compactComputeShader->Load(L"Shaders\\particleCompactCS.cso");
+		m_compactComputeShader->Load(L"Shader\\particleCompactCS.cso");
 	}
 
 	return true;
