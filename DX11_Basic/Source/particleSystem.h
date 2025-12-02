@@ -11,6 +11,7 @@ struct Particle {
 	float life;
 	float maxLife;
 	float rotation;
+	float rotationSpeed;
 	bool active;
 };
 
@@ -20,7 +21,8 @@ struct ParticleInstance {
 	float size;
 	XMFLOAT4 color;
 	XMFLOAT2 texOffset;
-	float padding[2]; // アライメント調整用
+	float rotation;
+	float padding;
 };
 
 // ビルボード用要点データ
@@ -31,20 +33,25 @@ struct BillboardVertex {
 
 // エミッター設定
 struct EmitterSettings {
-	Vector3 position = Vector3::ZERO;
-	Vector3 velocity = Vector3::UP;
-	Vector3 velocityVariation = Vector3(0.5f, 0.5f, 0.5f);
-	Vector4 startColor = Vector4::ONE;
-	Vector4 endColor = Vector4::ONE;
-	float startSize = 1.0f;
-	float endSize = 0.0f;
-	float lifeTime = 2.0f;
-	float emitRate = 10.0f;
-	float gravity = -9.81f;
-	int maxParticles = 100;
-	bool loop = true;
-	bool oneShot = false;
-	int oneShotCount = 10;
+	Vector3 position = Vector3::ZERO;		// エミッター位置のばらつき
+	Vector3 velocity = Vector3::UP;			// 初速度
+	Vector3 velocityVariation = Vector3(0.5f, 0.5f, 0.5f);	// 初速度のばらつき
+	Vector4 startColor = Vector4::ONE;		// 開始色
+	Vector4 endColor = Vector4::ONE;		// 終了色
+	float startSize = 1.0f;					// 開始サイズ
+	float endSize = 0.0f;					// 終了サイズ
+	float lifeTime = 2.0f;					// 寿命
+	float emitRate = 10.0f;					// 発生レート（1秒あたりの発生数）
+	float gravity = -9.81f;					// 重力
+	float emissionAngle = 0.0f;				// 発生角度（rad）
+	float emissionAngleVariation = 0.0f;	// 発生角度のばらつき（rad）
+	float rotationSpeed = 0.0f;				// 回転速度
+	float rotationSpeedMin = 0.0f;			// 回転速度最小値
+	float rotationSpeedMax = 0.0f;			// 回転速度最大値
+	int maxParticles = 100;					// 最大パーティクル数
+	bool loop = true;						// ループ設定
+	bool oneShot = false;					// ワンショット設定
+	int oneShotCount = 10;					// ワンショット時の発生数
 };
 
 class ParticleSystem : public GameObject {
@@ -86,7 +93,8 @@ private:
 	// GPUリソース
 	ID3D11Buffer* m_vertexBuffer = nullptr;
 	ID3D11Buffer* m_indexBuffer = nullptr;
-	ID3D11Buffer* m_instanceBuffer = nullptr;
+	ID3D11Buffer* m_structuredBuffer = nullptr;
+	ID3D11ShaderResourceView* m_structuredBufferSRV = nullptr;
 	class VertexShader* m_vertexShader = nullptr;
 	class PixelShader* m_pixelShader = nullptr;
 	ID3D11ShaderResourceView* m_textureSRV = nullptr;
@@ -95,7 +103,7 @@ private:
 	ID3D11BlendState* m_blendState = nullptr;
 
 	// 発生タイマー
-	float m_enmitTimer = 0.0f;
+	float m_emitTimer = 0.0f;
 	bool m_isPlaying = true;
 	bool m_isPaused = false;
 

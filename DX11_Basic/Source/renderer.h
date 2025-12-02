@@ -21,6 +21,12 @@ struct MATERIAL {
 	float dummy[2];
 };
 
+// ビュー・ビルボード行列構造体
+struct VIEW_BILLBOARD_MATRIX {
+	XMFLOAT4X4 viewMatrix;
+	XMFLOAT4X4 billboardMatrix;
+};
+
 //ライト構造体
 struct LIGHT {
 	XMFLOAT4 positionAndType; // w成分にライトタイプ(0:平衡,1:点,2:スポット)
@@ -53,12 +59,6 @@ struct SHADOW_LIGHTS {
 	XMFLOAT4X4 shadowLights[MAX_SHADOW_LIGHTS];
 };
 
-//シェーダー用カメラ構造体
-struct CAMERA {
-	XMFLOAT4 position; // カメラ位置
-	XMFLOAT4 Right; // カメラの右方向ベクトル
-	XMFLOAT4 Up; // カメラの上方向ベクトル
-};
 
 ///シェーダープロパティ構造体
 struct SHADER_PROPERTIES {
@@ -142,7 +142,7 @@ public:
 	//ライト設定
 	void SetLights(const LIGHTS& light);
 	//カメラ設定
-	void SetCameraData(const CAMERA& camera);
+	void SetCameraData(const XMFLOAT4& camera);
 	//シェーダープロパティ設定
 	void SetShaderProperties(const SHADER_PROPERTIES& properties);
 	//シャドウキャスト用ライト設定
@@ -154,9 +154,11 @@ public:
 	ID3D11DeviceContext* GetDeviceContext() { return m_deviceContext.Get(); }
 
 	//頂点シェーダー作成
-	void CreateVertexShader(ID3D11VertexShader** vertexShader, ID3D11InputLayout** inputLayout, std::wstring fileName);
+	void CreateVertexShader(ID3D11VertexShader** vertexShader, ID3D11InputLayout** inputLayout, const std::wstring& fileName);
 	//ピクセルシェーダー作成
-	void CreatePixelShader(ID3D11PixelShader** pixelShader, std::wstring fileName);
+	void CreatePixelShader(ID3D11PixelShader** pixelShader, const std::wstring& fileName);
+	//コンピュートシェーダー作成
+	void CreateComputeShader(ID3D11ComputeShader** computeShader, const std::wstring& fileName);
 
 	//レンダーターゲット追加
 	int AddRenderTarget(UINT width, UINT height);

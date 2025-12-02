@@ -5,6 +5,7 @@
 //静的メンバ変数の実体
 std::unordered_map<std::wstring, VShader> VertexShader::m_loadedShaders;
 std::unordered_map<std::wstring, PShader> PixelShader::m_loadedShaders;
+std::unordered_map<std::wstring, CShader> ComputeShader::m_loadedShaders;
 
 //==============================================================================
 //バーテックスシェーダー
@@ -40,7 +41,7 @@ VertexShader::~VertexShader() {
 /// バーテックスシェーダーの読み込み
 /// </summary>
 /// <param name="path">シェーダーのパス</param>
-void VertexShader::Load(std::wstring path) {
+void VertexShader::Load(const std::wstring& path) {
 	ID3D11VertexShader* shader = nullptr;
 	ID3D11InputLayout* inputLayout = nullptr;
 
@@ -116,7 +117,7 @@ PixelShader::~PixelShader() {
 /// ピクセルシェーダーの読み込み
 /// </summary>
 /// <param name="path">シェーダーのパス</param>
-void PixelShader::Load(std::wstring path) {
+void PixelShader::Load(const std::wstring& path) {
 	ID3D11PixelShader* shader = nullptr;
 	//すでに読み込んでいるか確認
 	auto it = m_loadedShaders.find(path);
@@ -143,6 +144,72 @@ void PixelShader::Set() {
 /// ピクセルシェーダーの解放
 /// </summary>
 void PixelShader::ReleaseAll() {
+	for (auto& pair : m_loadedShaders) {
+		if (pair.second.shader) {
+			pair.second.shader->Release();
+			pair.second.shader = nullptr;
+		}
+	}
+	m_loadedShaders.clear();
+}
+
+//==============================================================================
+//コンピュートシェーダー
+//==============================================================================
+
+/// <summary>
+/// デストラクタ
+/// </summary>
+ComputeShader::~ComputeShader() {
+	//参照カウントをデクリメント
+	m_shader->refCount--;
+	//参照カウントが0なら解放
+	if (m_shader->refCount <= 0) {
+		if (m_shader->shader) {
+			m_shader->shader->Release();
+			m_shader->shader = nullptr;
+		}
+		//マップから削除
+		for (auto it = m_loadedShaders.begin(); it != m_loadedShaders.end(); ++it) {
+			if (it->second.shader == m_shader->shader) {
+				m_loadedShaders.erase(it);
+				break;
+			}
+		}
+	}
+}
+
+/// <summary>
+/// コンピュートシェーダーの読み込み
+/// </summary>
+/// <param name="path">シェーダーのパス</param>
+void ComputeShader::Load(const std::wstring& path) {
+	ID3D11ComputeShader* shader = nullptr;
+	//すでに読み込んでいるか確認
+	auto it = m_loadedShaders.find(path);
+	if (it != m_loadedShaders.end()) {
+		m_shader = &(it->second);
+		m_shader->refCount++;
+		return;
+	}
+	//シェーダーの読み込み
+	RENDERER.CreateComputeShader(&shader, path);
+	m_loadedShaders[path] = CShader { 1, shader };
+	m_shader = &m_loadedShaders[path];
+}
+
+/// <summary>
+/// コンピュートシェーダーの設定
+/// </summary>
+void ComputeShader::Set() {
+	auto context = RENDERER.GetDeviceContext();
+	context->CSSetShader(m_shader->shader, nullptr, 0);
+}
+
+/// <summary>
+/// コンピュートシェーダーの解放
+/// </summary>
+void ComputeShader::ReleaseAll() {
 	for (auto& pair : m_loadedShaders) {
 		if (pair.second.shader) {
 			pair.second.shader->Release();

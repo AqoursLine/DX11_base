@@ -1,34 +1,58 @@
 #include "common.hlsl"
 
+struct ParticleInstanceData
+{
+	float3 position;
+	float size;
+	float4 color;
+	float2 texOffset;
+	float rotation;
+	float padding; // パディング
+};
+
+StructuredBuffer<ParticleInstanceData> g_instanceDataBuffer : register(t0);
+
 struct VS_PARTICLE_INPUT
 {
-	float2 Offset : OFFSET;
-	float2 TexCoord : TEXCOORD;
-	
-	// インスタンスデータ
-	float3 InstancePosition : INSTANCE_POSITION;
-	float InstanceSize : INSTANCE_SIZE;
-	float4 InstanceColor : INSTANCE_COLOR;
-	float2 InstanceTexOffset : INSTANCE_TEXOFFSET;
+	float2 Offset : OFFSET; // 頂点オフセット
+	float2 TexCoord : TEXCOORD; // テクスチャ座標
 };
 
 struct PS_PARTICLE_INPUT
 {
 	float4 Position : SV_POSITION;
 	float2 TexCoord : TEXCOORD;
-	float4 Diffuse : COLOR;
+	float4 Color : COLOR;
 };
 
-void main(in VS_PARTICLE_INPUT input, out PS_PARTICLE_INPUT output)
+void main(in VS_PARTICLE_INPUT input, out PS_PARTICLE_INPUT output, uint instanceID : SV_InstanceID)
 {
-	// ビルボード用の頂点位置を計算
-	float3 worldPos = input.InstancePosition 
-					+ CameraRight.xyz * input.Offset.x * input.InstanceSize
-					+ CameraUp.xyz * input.Offset.y * input.InstanceSize;
+	ParticleInstanceData instance = g_instanceDataBuffer[instanceID];
+	
+	// 回転+スケーリング行列の計算
+	float cosR = cos(instance.rotation);
+	float sinR = sin(instance.rotation);
+	float size = instance.size;
+	
+	float3x3 localTransform = float3x3(
+		cosR * size, -sinR * size, 0.0,
+		sinR * size,  cosR * size, 0.0,
+		0.0,          0.0,         1.0
+	);
 
+	// ローカル変換を適用
+	float3 localPos = mul(float3(input.Offset, 0.0f), localTransform);
+	
+	// ビルボード変換
+	float3 billboardPos = mul(float4(localPos, 0.0f), BillboardMatrix).xyz;
+
+	// ワールド位置の計算
+	float3 worldPos = instance.position + billboardPos;
+	
+	// クリップ空間への変換
 	float4 viewPos = mul(float4(worldPos, 1.0f), ViewMatrix);
 	output.Position = mul(viewPos, ProjectionMatrix);
-	
-	output.TexCoord = input.TexCoord + input.InstanceTexOffset;
-	output.Diffuse = input.InstanceColor;
+
+	output.TexCoord = input.TexCoord + instance.texOffset;
+	output.Color = instance.color;
 }

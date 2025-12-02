@@ -411,7 +411,7 @@ void Boat::UpdateWaterInteraction(float deltaTime) {
 		}
 
 		//水しぶきエフェクト生成
-		if (m_splashEffect && m_splashEffectTimer >= 0.05f) {
+		if (m_splashEffect && m_splashEffectTimer >= 0.0f) {
 			Vector3 forward = GetForwardQ();
 			Vector3 splashPos = m_position - forward * (m_length * 0.5f);
 			splashPos.y -= m_height* 0.3f;

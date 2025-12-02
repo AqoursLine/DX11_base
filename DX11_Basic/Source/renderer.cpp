@@ -219,14 +219,15 @@ bool Renderer::Initialize(HWND hWnd) {
 		ErrorMessage(L"ワールドバッファの初期化に失敗しました。", hr);
 		return false;
 	}
-	hr = m_device->CreateBuffer(&bufferDesc, nullptr, m_viewBuffer.GetAddressOf());
-	if (FAILED(hr)) {
-		ErrorMessage(L"ビュー行列バッファの初期化に失敗しました。", hr);
-		return false;
-	}
 	hr = m_device->CreateBuffer(&bufferDesc, nullptr, m_projectionBuffer.GetAddressOf());
 	if (FAILED(hr)) {
 		ErrorMessage(L"プロジェクション行列バッファの初期化に失敗しました。", hr);
+		return false;
+	}
+	bufferDesc.ByteWidth = sizeof(VIEW_BILLBOARD_MATRIX);
+	hr = m_device->CreateBuffer(&bufferDesc, nullptr, m_viewBuffer.GetAddressOf());
+	if (FAILED(hr)) {
+		ErrorMessage(L"ビュー行列バッファの初期化に失敗しました。", hr);
 		return false;
 	}
 
@@ -253,7 +254,7 @@ bool Renderer::Initialize(HWND hWnd) {
 	m_deviceContext->VSSetConstantBuffers(4, 1, m_lightBuffer.GetAddressOf());
 
 	//カメラバッファの作成
-	bufferDesc.ByteWidth = sizeof(CAMERA);
+	bufferDesc.ByteWidth = sizeof(XMFLOAT4);
 	hr = m_device->CreateBuffer(&bufferDesc, nullptr, m_cameraBuffer.GetAddressOf());
 	if (FAILED(hr)) {
 		ErrorMessage(L"カメラバッファの初期化に失敗しました。", hr);
@@ -440,13 +441,21 @@ void Renderer::SetWorldMatrix(const XMMATRIX& worldMatrix) {
 }
 
 void Renderer::SetViewMatrix(const XMMATRIX& viewMatrix) {
-	XMFLOAT4X4 view;
-	XMStoreFloat4x4(&view, XMMatrixTranspose(viewMatrix));
+	VIEW_BILLBOARD_MATRIX viewBillboard;
+
+	XMStoreFloat4x4(&viewBillboard.viewMatrix, XMMatrixTranspose(viewMatrix));
+
+	XMVECTOR detach;
+	XMMATRIX inverseView = XMMatrixInverse(&detach, viewMatrix);
+
+	inverseView.r[3] = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+
+	XMStoreFloat4x4(&viewBillboard.billboardMatrix, XMMatrixTranspose(inverseView));
 
 	//mapで更新
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	m_deviceContext->Map(m_viewBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	memcpy(mappedResource.pData, &view, sizeof(view));
+	memcpy(mappedResource.pData, &viewBillboard, sizeof(viewBillboard));
 	m_deviceContext->Unmap(m_viewBuffer.Get(), 0);
 }
 
@@ -475,10 +484,10 @@ void Renderer::SetLights(const LIGHTS& light) {
 	m_deviceContext->Unmap(m_lightBuffer.Get(), 0);
 }
 
-void Renderer::SetCameraData(const CAMERA& camera) {
+void Renderer::SetCameraData(const XMFLOAT4& camera) {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	m_deviceContext->Map(m_cameraBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	memcpy(mappedResource.pData, &camera, sizeof(camera));
+	memcpy(mappedResource.pData, &camera, sizeof(XMFLOAT4));
 	m_deviceContext->Unmap(m_cameraBuffer.Get(), 0);
 }
 
@@ -496,7 +505,7 @@ void Renderer::SetShadowLights(const SHADOW_LIGHTS& shadowLights) {
 	m_deviceContext->Unmap(m_shadowLightBuffer.Get(), 0);
 }
 
-void Renderer::CreateVertexShader(ID3D11VertexShader** vertexShader, ID3D11InputLayout** inputLayout, std::wstring fileName) {
+void Renderer::CreateVertexShader(ID3D11VertexShader** vertexShader, ID3D11InputLayout** inputLayout, const std::wstring& fileName) {
 	HRESULT hr = S_OK;
 	ComPtr<ID3DBlob> shaderBlob;
 	ComPtr<ID3DBlob> errorBlob;
@@ -607,7 +616,7 @@ void Renderer::CreateVertexShader(ID3D11VertexShader** vertexShader, ID3D11Input
 	}
 }
 
-void Renderer::CreatePixelShader(ID3D11PixelShader** pixelShader, std::wstring fileName) {
+void Renderer::CreatePixelShader(ID3D11PixelShader** pixelShader, const std::wstring& fileName) {
 	HRESULT hr = S_OK;
 	ComPtr<ID3DBlob> shaderBlob;
 	ComPtr<ID3DBlob> errorBlob;
@@ -627,6 +636,26 @@ void Renderer::CreatePixelShader(ID3D11PixelShader** pixelShader, std::wstring f
 		return;
 	}
 
+	shaderBlob->Release();
+}
+
+void Renderer::CreateComputeShader(ID3D11ComputeShader** computeShader, const std::wstring& fileName) {
+	HRESULT hr = S_OK;
+	ComPtr<ID3DBlob> shaderBlob;
+	ComPtr<ID3DBlob> errorBlob;
+	//CSOファイルの読み込み
+	hr = D3DReadFileToBlob(fileName.c_str(), shaderBlob.GetAddressOf());
+	if (FAILED(hr)) {
+		ErrorMessage(L"CSOファイルの読み込みに失敗しました。", hr);
+		return;
+	}
+	//シェーダーの作成
+	hr = m_device->CreateComputeShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, computeShader);
+	if (FAILED(hr)) {
+		ErrorMessage(L"コンピュートシェーダーの作成に失敗しました。", hr);
+		shaderBlob->Release();
+		return;
+	}
 	shaderBlob->Release();
 }
 

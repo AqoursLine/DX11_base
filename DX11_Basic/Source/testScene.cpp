@@ -77,7 +77,7 @@ bool TestScene::Initialize() {
 		->SetPosition({ 0.0f, 5.0f, 0.0f });
 	AddGameObject(spotLight, TYPE_LIGHT);
 
-//	AddGameObject(new TestParticle, TYPE_TRANSPARENT);
+	AddGameObject(new TestParticle, TYPE_TRANSPARENT);
 
 //	AddGameObject(new SplashParticle(), TYPE_TRANSPARENT);
 

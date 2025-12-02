@@ -303,6 +303,7 @@
     <ClCompile Include="Source\gameDirectionalLight.cpp" />
     <ClCompile Include="Source\gameScene.cpp" />
     <ClCompile Include="Source\goalGate.cpp" />
+    <ClCompile Include="Source\gpuParticleSystem.cpp" />
     <ClCompile Include="Source\imguiSystem.cpp" />
     <ClCompile Include="Source\input.cpp" />
     <ClCompile Include="Source\lapDisplay.cpp" />
@@ -369,6 +370,7 @@
     <ClInclude Include="Source\gameObject.h" />
     <ClInclude Include="Source\gameScene.h" />
     <ClInclude Include="Source\goalGate.h" />
+    <ClInclude Include="Source\gpuParticleSystem.h" />
     <ClInclude Include="Source\imguiSystem.h" />
     <ClInclude Include="Source\input.h" />
     <ClInclude Include="Source\keybordEnum.h" />

@@ -1,4 +1,4 @@
-Texture2D g_particleTexture : register(t0);
+Texture2D g_particleTexture : register(t1);
 SamplerState g_particleSampler : register(s0);
 
 struct PS_PARTICLE_INPUT

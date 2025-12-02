@@ -12,6 +12,7 @@ void ParticleSystem::Emit(int count) {
 			if (particle.active) continue;
 
 			// パーティクル初期化
+			// 位置にランダムなオフセットを加える
 			Vector3 offsetPos = Vector3(
 				MyRandom::GetFloat(-1.0f, 1.0f) * m_settings.position.x,
 				MyRandom::GetFloat(-1.0f, 1.0f) * m_settings.position.y,
@@ -26,11 +27,16 @@ void ParticleSystem::Emit(int count) {
 				MyRandom::GetFloat(-1.0f, 1.0f) * m_settings.velocityVariation.z
 			);
 
+			// 発生角度のばらつきを適用
+			particle.rotation = m_settings.emissionAngle + MyRandom::GetFloat(-m_settings.emissionAngleVariation, m_settings.emissionAngleVariation);
+
+			// 回転速度のばらつきを適用
+			particle.rotationSpeed = m_settings.rotationSpeed + MyRandom::GetFloat(m_settings.rotationSpeedMin, m_settings.rotationSpeedMax);
+
 			particle.color = m_settings.startColor;
 			particle.size = m_settings.startSize;
 			particle.life = m_settings.lifeTime;
 			particle.maxLife = m_settings.lifeTime;
-			particle.rotation = 0.0f;
 			particle.active = true;
 
 			break;
@@ -69,7 +75,8 @@ void ParticleSystem::Finalize() {
 	// リソース解放
 	if (m_vertexBuffer) { m_vertexBuffer->Release(); m_vertexBuffer = nullptr; }
 	if (m_indexBuffer) { m_indexBuffer->Release(); m_indexBuffer = nullptr; }
-	if (m_instanceBuffer) { m_instanceBuffer->Release(); m_instanceBuffer = nullptr; }
+	if (m_structuredBuffer) { m_structuredBuffer->Release(); m_structuredBuffer = nullptr; }
+	if (m_structuredBufferSRV) { m_structuredBufferSRV->Release(); m_structuredBufferSRV = nullptr; }
 	if (m_vertexShader) { delete m_vertexShader; m_vertexShader = nullptr; }
 	if (m_pixelShader) { delete m_pixelShader; m_pixelShader = nullptr; }
 	if (m_blendState) { m_blendState->Release(); m_blendState = nullptr; }
@@ -82,12 +89,12 @@ void ParticleSystem::Update(double deltaTime) {
 
 	// パーティクル発生
 	if (m_isPlaying && !m_settings.oneShot) {
-		m_enmitTimer += dt;
+		m_emitTimer += dt;
 		float emitInterval = 1.0f / m_settings.emitRate;
 
-		while (m_enmitTimer >= emitInterval) {
+		while (m_emitTimer >= emitInterval) {
 			Emit(1);
-			m_enmitTimer -= emitInterval;
+			m_emitTimer -= emitInterval;
 		}
 	}
 
@@ -111,6 +118,7 @@ void ParticleSystem::Draw() {
 		instance.position = XMFLOAT3(particle.position.x, particle.position.y, particle.position.z);
 		instance.size = particle.size;
 		instance.color = XMFLOAT4(particle.color.x, particle.color.y, particle.color.z, particle.color.w);
+		instance.rotation = particle.rotation;
 		// テクスチャオフセット計算（例として単純に0に設定）
 		instance.texOffset = XMFLOAT2(0.0f, 0.0f);
 
@@ -121,34 +129,41 @@ void ParticleSystem::Draw() {
 
 	// インスタンスバッファ更新
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	context->Map(m_instanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	context->Map(m_structuredBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	memcpy(mappedResource.pData, instances.data(), sizeof(ParticleInstance) * instances.size());
-	context->Unmap(m_instanceBuffer, 0);
+	context->Unmap(m_structuredBuffer, 0);
 
 	// シェーダー設定
 	m_vertexShader->Set();
 	m_pixelShader->Set();
 
+	// StructuredBuffer設定
+	context->VSSetShaderResources(0, 1, &m_structuredBufferSRV);
+
 	// テクスチャ設定
-	context->PSSetShaderResources(0, 1, &m_textureSRV);
+	context->PSSetShaderResources(1, 1, &m_textureSRV);
 
 	// ブレンドステート設定
 	float blendFactor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	context->OMSetBlendState(m_blendState, blendFactor, 0xffffffff);
 
 	// 頂点バッファとインスタンスバッファ設定
-	UINT stride[2] = { sizeof(BillboardVertex), sizeof(ParticleInstance) };
-	UINT offset[2] = { 0, 0 };
-	ID3D11Buffer* buffers[2] = { m_vertexBuffer, m_instanceBuffer };
-
-	context->IASetVertexBuffers(0, 2, buffers, stride, offset);
+	UINT stride = sizeof(BillboardVertex);
+	UINT offset = 0;
+	context->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
 	context->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
 
 	// プリミティブトポロジー設定
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// インスタンス数分描画
 	context->DrawIndexedInstanced(6, static_cast<UINT>(instances.size()), 0, 0, 0);
+
+	// リソース解放
+	ID3D11ShaderResourceView* nullSRV[2] = { nullptr, nullptr };
+	context->VSSetShaderResources(0, 1, nullSRV);
+	context->PSSetShaderResources(1, 1, nullSRV);
 
 	// ステートリセット
 	RENDERER.SetATCEnable(false);
@@ -171,6 +186,16 @@ void ParticleSystem::UpdateParticles(float deltaTime) {
 
 		// 重力適用
 		particle.velocity.y += m_settings.gravity * deltaTime;
+
+		// 回転更新
+		particle.rotation += particle.rotationSpeed * deltaTime;
+
+		// 回転を0~2πに収める
+		if (particle.rotation > XM_2PI) {
+			particle.rotation -= XM_2PI;
+		} else if (particle.rotation < 0.0f) {
+			particle.rotation += XM_2PI;
+		}
 
 		// ライフタイム比率計算
 		float lifeRatio = particle.life / particle.maxLife;
@@ -226,19 +251,31 @@ bool ParticleSystem::CreateBuffers() {
 		return false;
 	}
 
-	// インスタンスバッファ作成
-	D3D11_BUFFER_DESC instDesc = {};
-	instDesc.ByteWidth = sizeof(ParticleInstance) * m_settings.maxParticles;
-	instDesc.Usage = D3D11_USAGE_DYNAMIC;
-	instDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	instDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	// パーティクルインスタンス用StructuredBuffer作成
+	D3D11_BUFFER_DESC sbDesc = {};
+	sbDesc.ByteWidth = sizeof(ParticleInstance) * m_settings.maxParticles;
+	sbDesc.Usage = D3D11_USAGE_DYNAMIC;
+	sbDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	sbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	sbDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	sbDesc.StructureByteStride = sizeof(ParticleInstance);
 
-	if (FAILED(device->CreateBuffer(&instDesc, nullptr, &m_instanceBuffer))) {
+	if (FAILED(device->CreateBuffer(&sbDesc, nullptr, &m_structuredBuffer))) {
+		return false;
+	}
+
+	// StructuredBuffer用SRV作成
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	srvDesc.Buffer.FirstElement = 0;
+	srvDesc.Buffer.NumElements = m_settings.maxParticles;
+
+	if (FAILED(device->CreateShaderResourceView(m_structuredBuffer, &srvDesc, &m_structuredBufferSRV))) {
 		return false;
 	}
 
 	return true;
-
 }
 
 bool ParticleSystem::CreateShaders() {

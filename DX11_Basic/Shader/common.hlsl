@@ -8,6 +8,7 @@ cbuffer WorldMatrixBuffer : register(b0)
 cbuffer ViewMatrixBuffer : register(b1)
 {
 	matrix ViewMatrix;
+	matrix BillboardMatrix;
 };
 
 //プロジェクション行列バッファ
@@ -61,8 +62,6 @@ cbuffer LightBuffer : register(b4)
 cbuffer CameraBuffer : register(b5)
 {
 	float4 CameraPosition; // カメラの位置
-	float4 CameraRight; // カメラの右方向ベクトル
-	float4 CameraUp; // カメラの上方向ベクトル
 };
 
 //シェーダーパラメータバッファ(汎用)
