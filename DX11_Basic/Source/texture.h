@@ -10,9 +10,9 @@ public:
 	Texture() = default;
 	~Texture();
 
-	bool Load(std::wstring fileName);
+	bool Load(const std::wstring& fileName);
 
-	void SetSRV(std::wstring name, ID3D11ShaderResourceView* srv);
+	void SetSRV(const std::wstring& name, ID3D11ShaderResourceView* srv);
 	ID3D11ShaderResourceView* GetSRV() { return m_texture->srv; }
 
 	static void ReleaseAll();

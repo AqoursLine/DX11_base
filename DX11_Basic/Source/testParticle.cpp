@@ -8,7 +8,7 @@ bool TestParticle::Initialize() {
 		return false;
 	}
 
-	if (!m_texture->Load(L"Asset\\Texture\\circle.png")) {
+	if (!m_texture->Load(L"Asset\\Texture\\particle.png")) {
 		return false;
 	}
 

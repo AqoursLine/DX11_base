@@ -1,6 +1,7 @@
 #include "main.h"
 #include "renderer.h"
 #include "texture.h"
+#include <filesystem>
 
 //スタティックメンバーの初期化
 std::unordered_map<std::wstring, TextureEntry*> Texture::m_textureCache;
@@ -33,7 +34,7 @@ Texture::~Texture() {
 /// </summary>
 /// <param name="fileName">ファイルパス</param>
 /// <returns>読み込み成功</returns>
-bool Texture::Load(std::wstring fileName) {
+bool Texture::Load(const std::wstring& fileName) {
 	// テクスチャのキャッシュを確認
 	if (m_textureCache.count(fileName)) {
 		m_texture = m_textureCache[fileName];
@@ -45,12 +46,26 @@ bool Texture::Load(std::wstring fileName) {
 
 	TexMetadata metadata;
 	ScratchImage scratchImg;
-	HRESULT hrTex = LoadFromWICFile(fileName.c_str(), WIC_FLAGS_NONE, &metadata, scratchImg);
+
+	// テクスチャの読み込み	
+	HRESULT hrTex;
+
+	// 拡張子チェック
+	std::filesystem::path path(fileName);
+
+	std::filesystem::path ext = path.extension();
+
+	if (ext == L".dds") {
+		hrTex = LoadFromDDSFile(fileName.c_str(), DDS_FLAGS_NONE, &metadata, scratchImg);
+	}
+	else {
+		hrTex = LoadFromWICFile(fileName.c_str(), WIC_FLAGS_NONE, &metadata, scratchImg);
+	}
 	if (FAILED(hrTex)) {
 		ErrorMessage(L"テクスチャの読み込みに失敗しました。", hrTex);
 		return false;
 	}
-	CreateShaderResourceView(RENDERER.GetInstance().GetDevice(), scratchImg.GetImages(), scratchImg.GetImageCount(), metadata, &m_texture->srv);
+	hrTex = CreateShaderResourceView(RENDERER.GetDevice(), scratchImg.GetImages(), scratchImg.GetImageCount(), metadata, &m_texture->srv);
 	if (FAILED(hrTex)) {
 		ErrorMessage(L"テクスチャのシェーダーリソースビューの作成に失敗しました。", hrTex);
 		return false;
@@ -67,7 +82,7 @@ bool Texture::Load(std::wstring fileName) {
 /// </summary>
 /// <param name="name">エントリ名</param>
 /// <param name="srv">シェーダーリソースビュー</param>
-void Texture::SetSRV(std::wstring name, ID3D11ShaderResourceView* srv) {
+void Texture::SetSRV(const std::wstring& name, ID3D11ShaderResourceView* srv) {
 	m_texture = new TextureEntry();
 	m_texture->srv = srv;
 	m_texture->refCount = 1;
