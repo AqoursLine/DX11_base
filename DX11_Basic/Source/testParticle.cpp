@@ -20,13 +20,13 @@ bool TestParticle::Initialize() {
 	settings.startSize = 1.0f;
 	settings.endSize = 0.1f;
 	settings.lifeTime = 2.0f;
-	settings.position = { 5.0f, 0.0f, 5.0f };
+	settings.position = { 0.0f, 0.0f, 0.0f };
 	settings.velocity = { 0.0f, 10.0f, 0.0f };
-	settings.velocityVariation = { 5.0f, 1.0f, 5.0f };
-	settings.gravity = -3.0f;
+	settings.velocityVariation = { 20.0f, 20.0f, 20.0f };
+	settings.gravity = -5.0f;
 	settings.oneShot = true;
-	settings.oneShotCount = 50;
-	settings.maxParticles = 10000;
+	settings.oneShotCount = 300;
+	settings.maxParticles = 40000;
 
 	SetEmitterSettings(settings);
 
@@ -46,7 +46,7 @@ void TestParticle::Finalize() {
 void TestParticle::Update(double deltaTime) {
 	if (Input::GetKeyTrigger(KK_D0)) {
 
-		EmitOneShot({ 5.0f, 0.0f, 5.0f });
+		EmitOneShot({ 0.0f, 0.0f, 0.0f });
 	}
 
 	if (Input::GetKeyPress(KK_D1)) {

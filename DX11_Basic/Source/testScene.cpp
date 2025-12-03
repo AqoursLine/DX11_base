@@ -32,14 +32,14 @@ bool TestScene::Initialize() {
 	AddGameObject(new SkyDome(), TYPE_OPAQUE);
 
 	//平行光源追加
-	auto light = new GameDirectionalLight();
-	Vector4 dir = { 0.0f, -1.0f, 0.01f, 0.0f };
-	light->SetDirection(dir)
-	->SetEnabled(true)
-	->SetShadowCaster(true)
-	->SetRange(200.0f)
-	->SetPosition({ 0.0f, 20.0f, 0.0f });
-	AddGameObject(light, TYPE_LIGHT);
+	//auto light = new GameDirectionalLight();
+	//Vector4 dir = { 0.0f, -1.0f, 0.01f, 0.0f };
+	//light->SetDirection(dir)
+	//->SetEnabled(true)
+	//->SetShadowCaster(true)
+	//->SetRange(200.0f)
+	//->SetPosition({ 0.0f, 20.0f, 0.0f });
+	//AddGameObject(light, TYPE_LIGHT);
 
 	//平行光源追加
 	//light = new GameDirectionalLight();
@@ -61,21 +61,21 @@ bool TestScene::Initialize() {
 	//	->SetPosition({ 0.0f, 1.0f, 2.0f });
 	//AddGameObject(pointLight, TYPE_LIGHT);
 
-	//// スポットライト追加
-	//auto spotLight = new Light();
-	//spotLight->SetType(LIGHT_TYPE::SPOT)
-	//	->SetRange(100.0f)
-	//	->SetIntensity(10.0f)
-	//	->SetDiffuseColor({ 0.6f, 0.8f, 1.0f, 1.0f })
-	//	->SetInnerCone(XMConvertToRadians(15.0f))
-	//	->SetOuterCone(XMConvertToRadians(30.0f))
-	//	->SetFalloff(5.0f)
-	//	->SetEnabled(true)
-	//	->SetDirection({ 0.0f, -1.0f, 0.01f, 0.0f })
-	//	->SetAttenuation(1.0f, 0.1f, 0.05f)
-	//	->SetShadowCaster(true)
-	//	->SetPosition({ 0.0f, 5.0f, 0.0f });
-	//AddGameObject(spotLight, TYPE_LIGHT);
+	// スポットライト追加
+	auto spotLight = new Light();
+	spotLight->SetType(LIGHT_TYPE::SPOT)
+		->SetRange(50.0f)
+		->SetIntensity(10.0f)
+		->SetDiffuseColor({ 0.6f, 0.8f, 1.0f, 1.0f })
+		->SetInnerCone(XMConvertToRadians(15.0f))
+		->SetOuterCone(XMConvertToRadians(30.0f))
+		->SetFalloff(5.0f)
+		->SetEnabled(true)
+		->SetDirection({ 0.0f, -1.0f, 0.01f, 0.0f })
+		->SetAttenuation(1.0f, 0.1f, 0.05f)
+		->SetShadowCaster(true)
+		->SetPosition({ 0.0f, 10.0f, 0.0f });
+	AddGameObject(spotLight, TYPE_LIGHT);
 
 	AddGameObject(new TestParticle, TYPE_TRANSPARENT);
 

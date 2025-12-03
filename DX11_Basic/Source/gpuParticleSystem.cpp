@@ -436,13 +436,6 @@ bool GPUParticleSystem::CreateBuffers() {
 		return false;
 	}
 
-	//// フリーインデックスUAV作成(追加用)
-	//uavDesc.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_APPEND;
-	//if (FAILED(device->CreateUnorderedAccessView(m_freeIndicesBuffer.Get(), &uavDesc, m_freeIndicesAppendUAV.GetAddressOf()))) {
-	//	return false;
-	//}
-
-
 	// 更新パラメータバッファ作成
 	bd = {};
 	bd.ByteWidth = sizeof(UpdateParams);
