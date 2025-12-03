@@ -36,6 +36,9 @@ cbuffer EmitParams : register(b3)
 // パーティクルバッファ
 RWStructuredBuffer<Particle> particles : register(u0);
 
+// フリーインデックスバッファ
+ConsumeStructuredBuffer<uint> freeIndices : register(u1);
+
 // 乱数生成関数
 float random(uint seed, uint index)
 {
@@ -49,6 +52,7 @@ float randomRange(uint seed, uint index, float minVal, float maxVal)
 	return minVal + (maxVal - minVal) * random(seed, index);
 }
 
+// パーティクル発生コンピュートシェーダ
 [numthreads(256, 1, 1)]
 void main( uint3 DTid : SV_DispatchThreadID )
 {
@@ -58,51 +62,40 @@ void main( uint3 DTid : SV_DispatchThreadID )
 	if (threadIndex >= emitCount)
 		return;
 	
-	// 非アクティブなパーティクルを探す
-	for	(uint i = 0; i < maxParticles; i++)
-	{
-		uint index = (threadIndex + i) % maxParticles;
-		
-		// アトミック操作でパーティクルをアクティブにする
-		uint originalValue;
-		InterlockedCompareExchange(particles[index].active, 0, 1, originalValue);
-		
-		if (originalValue == 0)
-		{
+	// フリーリストからインデックスを取得
+	uint index = freeIndices.Consume();
+	
 			// パーティクルの初期化
-			Particle p;
+	Particle p;
 			
-			uint baseSeed = randomSeed + threadIndex * 1234567u;
+	uint baseSeed = randomSeed + threadIndex * 1234567u;
 			
 			// 位置にランダムなオフセットを加える
-			float3 offsetPos = float3(
+	float3 offsetPos = float3(
 				randomRange(baseSeed, 0, -1.0f, 1.0f) * positionVariation.x,
 				randomRange(baseSeed, 1, -1.0f, 1.0f) * positionVariation.y,
 				randomRange(baseSeed, 2, -1.0f, 1.0f) * positionVariation.z
 			);
-			p.position = emitPosition + offsetPos;
+	p.position = emitPosition + offsetPos;
 			
 			// 速度の計算
-			p.velocity = baseVelocity + float3(
+	p.velocity = baseVelocity + float3(
 				randomRange(baseSeed, 3, -1.0f, 1.0f) * velocityVariation.x,
 				randomRange(baseSeed, 4, -1.0f, 1.0f) * velocityVariation.y,
 				randomRange(baseSeed, 5, -1.0f, 1.0f) * velocityVariation.z
 			);
 			
 			// ランダムな方向に速度を回転させる
-			p.rotation = emissionAngle + randomRange(baseSeed, 6, -emissionAngleVariation, emissionAngleVariation);
+	p.rotation = emissionAngle + randomRange(baseSeed, 6, -emissionAngleVariation, emissionAngleVariation);
 			
 			// 回転速度のバラツキ
-			p.rotationSpeed = rotationSpeed + randomRange(baseSeed, 7, -rotationSpeedMin, rotationSpeedMax);
+	p.rotationSpeed = rotationSpeed + randomRange(baseSeed, 7, rotationSpeedMin, rotationSpeedMax);
 
-			p.color = startColor;
-			p.size = startSize;
-			p.life = lifeTime;
-			p.maxLife = lifeTime;
-			p.active = 1;
+	p.color = startColor;
+	p.size = startSize;
+	p.life = lifeTime;
+	p.maxLife = lifeTime;
+	p.active = 1;
 
-			particles[index] = p;
-			break;
-		}
-	}
+	particles[index] = p;
 }

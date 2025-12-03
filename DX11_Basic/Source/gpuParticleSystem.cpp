@@ -198,15 +198,16 @@ void GPUParticleSystem::UpdateParticlesGPU(float deltaTime) {
 	context->CSSetConstantBuffers(3, 1, m_updateParamsBuffer.GetAddressOf());
 
 	// UAV設定
-	context->CSSetUnorderedAccessViews(0, 1, m_particleBufferUAV.GetAddressOf(), nullptr);
+	ID3D11UnorderedAccessView* uavs[2] = { m_particleBufferUAV.Get(), m_freeIndicesUAV.Get() };
+	context->CSSetUnorderedAccessViews(0, 2, uavs, nullptr);
 
 	// ディスパッチ
 	UINT threadGroupCount = (m_settings.maxParticles + 255) / 256;
 	context->Dispatch(threadGroupCount, 1, 1);
 
 	// リソース解除
-	ID3D11UnorderedAccessView* nullUAV = nullptr;
-	context->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
+	ID3D11UnorderedAccessView* nullUAV[2] = { nullptr, nullptr };
+	context->CSSetUnorderedAccessViews(0, 2, nullUAV, nullptr);
 	ID3D11Buffer* nullBuffer = nullptr;
 	context->CSSetConstantBuffers(3, 1, &nullBuffer);
 }
@@ -217,6 +218,14 @@ void GPUParticleSystem::UpdateParticlesGPU(float deltaTime) {
 /// <param name="count">発生数</param>
 void GPUParticleSystem::EmitGPU(UINT count) {
 	auto context = RENDERER.GetDeviceContext();
+
+	// フリーリスト初期化
+	if (!m_freeListInitialized) {
+		// フリーインデックスUAVのカウンタを最大パーティクル数に設定
+		UINT initialCount = static_cast<UINT>(m_settings.maxParticles);
+		context->CSSetUnorderedAccessViews(1, 1, m_freeIndicesUAV.GetAddressOf(), &initialCount);
+		m_freeListInitialized = true;
+	}
 
 	// 乱数シード更新
 	m_randomSeed = (m_randomSeed * 1103515245 + 12345) & 0x7fffffff;
@@ -253,15 +262,16 @@ void GPUParticleSystem::EmitGPU(UINT count) {
 	context->CSSetConstantBuffers(3, 1, m_emitParamsBuffer.GetAddressOf());
 
 	// UAV設定
-	context->CSSetUnorderedAccessViews(0, 1, m_particleBufferUAV.GetAddressOf(), nullptr);
+	ID3D11UnorderedAccessView* uavs[2] = { m_particleBufferUAV.Get(), m_freeIndicesUAV.Get() };
+	context->CSSetUnorderedAccessViews(0, 2, uavs, nullptr);
 
 	// ディスパッチ
 	UINT threadGroupCount = (count + 255) / 256;
 	context->Dispatch(threadGroupCount, 1, 1);
 
 	// リソース解除
-	ID3D11UnorderedAccessView* nullUAV = nullptr;
-	context->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
+	ID3D11UnorderedAccessView* nullUAVs[2] = { nullptr, nullptr };
+	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, nullptr);
 	ID3D11Buffer* nullBuffer = nullptr;
 	context->CSSetConstantBuffers(3, 1, &nullBuffer);
 }
@@ -366,10 +376,9 @@ bool GPUParticleSystem::CreateBuffers() {
 	bd.StructureByteStride = sizeof(GPUParticle);
 
 	// 初期データ(全て非アクティブ)
-	std::vector<GPUParticle> initialParticles(m_settings.maxParticles);
-	for (auto& particle : initialParticles) {
-		particle.active = 0;
-	}
+	GPUParticle inactiveParticle = {};
+	inactiveParticle.active = 0;
+	std::vector<GPUParticle> initialParticles(m_settings.maxParticles, inactiveParticle);
 
 	D3D11_SUBRESOURCE_DATA particleData = {};
 	particleData.pSysMem = initialParticles.data();
@@ -396,6 +405,43 @@ bool GPUParticleSystem::CreateBuffers() {
 	if (FAILED(device->CreateShaderResourceView(m_particleBuffer.Get(), &srvDesc, m_particleBufferSRV.GetAddressOf()))) {
 		return false;
 	}
+
+	// フリーインデックスバッファ作成
+	bd = {};
+	bd.ByteWidth = sizeof(UINT) * m_settings.maxParticles;
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+	bd.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	bd.StructureByteStride = sizeof(UINT);
+
+	// 初期データ(全インデックスをフリーリストに登録)
+	std::vector<UINT> freeIndices(m_settings.maxParticles);
+	for (UINT i = 0; i < m_settings.maxParticles; i++) {
+		freeIndices[i] = i;
+	}
+	D3D11_SUBRESOURCE_DATA freeIndexData = {};
+	freeIndexData.pSysMem = freeIndices.data();
+	if (FAILED(device->CreateBuffer(&bd, &freeIndexData, m_freeIndicesBuffer.GetAddressOf()))) {
+		return false;
+	}
+
+	// フリーインデックスUAV作成(消費用)
+	uavDesc = {};
+	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+	uavDesc.Buffer.FirstElement = 0;
+	uavDesc.Buffer.NumElements = m_settings.maxParticles;
+	uavDesc.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_COUNTER;
+	if (FAILED(device->CreateUnorderedAccessView(m_freeIndicesBuffer.Get(), &uavDesc, m_freeIndicesUAV.GetAddressOf()))) {
+		return false;
+	}
+
+	//// フリーインデックスUAV作成(追加用)
+	//uavDesc.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_APPEND;
+	//if (FAILED(device->CreateUnorderedAccessView(m_freeIndicesBuffer.Get(), &uavDesc, m_freeIndicesAppendUAV.GetAddressOf()))) {
+	//	return false;
+	//}
+
 
 	// 更新パラメータバッファ作成
 	bd = {};

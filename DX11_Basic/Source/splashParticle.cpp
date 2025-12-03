@@ -43,36 +43,3 @@ void SplashParticle::Finalize() {
 
 	GPUParticleSystem::Finalize();
 }
-
-void SplashParticle::Update(double deltaTime) {
-#ifdef _DEBUG
-	if (Input::GetKeyPress(KK_D1)) {
-		EmitOneShot(m_position);
-		EmitOneShot({ -5.0f, 0.0f, 0.0f });
-	}
-#endif // _DEBUG
-
-
-	GPUParticleSystem::Update(deltaTime);
-}
-
-void SplashParticle::Draw() {
-//#ifdef _DEBUG
-//	// ImGuiでエミッター設定を調整
-//	ImGui::Begin("Splash Particle Emitter Settings");
-//	EmitterSettings& settings = GetEmitterSettings();
-//	ImGui::ColorEdit4("Start Color", (float*)&settings.startColor, ImGuiColorEditFlags_Float);
-//	ImGui::ColorEdit4("End Color", (float*)&settings.endColor, ImGuiColorEditFlags_Float);
-//	ImGui::SliderFloat("Start Size", &settings.startSize, 0.1f, 5.0f, "%.1f");
-//	ImGui::SliderFloat("End Size", &settings.endSize, 0.0f, 5.0f, "%.1f");
-//	ImGui::SliderFloat("Life Time", &settings.lifeTime, 0.1f, 10.0f, "%.1f");
-//	ImGui::SliderFloat3("Velocity", (float*)&settings.velocity, -10.0f, 10.0f, "%.1f");
-//	ImGui::SliderFloat3("Velocity Variation", (float*)&settings.velocityVariation, 0.0f, 10.0f, "%.1f");
-//	ImGui::SliderFloat("Gravity", &settings.gravity, -20.0f, 0.0f, "%.1f");
-//	ImGui::End();
-//
-//#endif // _DEBUG
-
-
-	GPUParticleSystem::Draw();
-}

@@ -21,8 +21,8 @@ bool TestParticle::Initialize() {
 	settings.endSize = 0.1f;
 	settings.lifeTime = 2.0f;
 	settings.position = { 5.0f, 0.0f, 5.0f };
-	settings.velocity = { 0.0f, 5.0f, 0.0f };
-	settings.velocityVariation = { 2.0f, 1.0f, 2.0f };
+	settings.velocity = { 0.0f, 10.0f, 0.0f };
+	settings.velocityVariation = { 5.0f, 1.0f, 5.0f };
 	settings.gravity = -3.0f;
 	settings.oneShot = true;
 	settings.oneShotCount = 50;

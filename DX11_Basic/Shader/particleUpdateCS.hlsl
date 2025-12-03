@@ -26,6 +26,9 @@ cbuffer UpdateParams : register(b3)
 // パーティクルバッファ
 RWStructuredBuffer<Particle> particles : register(u0);
 
+// フリーインデックスバッファ
+AppendStructuredBuffer<uint> freeIndices : register(u1);
+
 // パーティクル更新コンピュートシェーダ
 [numthreads(256, 1, 1)]
 void main( uint3 DTid : SV_DispatchThreadID )
@@ -43,6 +46,9 @@ void main( uint3 DTid : SV_DispatchThreadID )
 	{
 		p.active = 0; // パーティクルを非アクティブにする
 		particles[index] = p;
+		
+		// フリーインデックスバッファにインデックスを追加
+		freeIndices.Append(index);
 		return;
 	}
 	

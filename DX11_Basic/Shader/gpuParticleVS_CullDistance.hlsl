@@ -31,7 +31,7 @@ struct PS_PARTICLE_INPUT
 	float4 position : SV_POSITION; // クリップ空間位置
 	float2 texCoord : TEXCOORD0; // テクスチャ座標
 	float4 color : COLOR0; // 頂点カラー
-	float cullDistance : SV_ClipDistance0; // カリング距離
+	float cullDistance : SV_CullDistance0; // カリング距離
 };
 
 void main(in VS_PARTICLE_INPUT input, out PS_PARTICLE_INPUT output)

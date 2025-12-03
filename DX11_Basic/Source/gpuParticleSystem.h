@@ -161,18 +161,23 @@ private:
 	ComPtr<ID3D11Buffer> m_indexBuffer = nullptr;						// ビルボードインデックスバッファ
 	ComPtr<ID3D11Buffer> m_particleBuffer = nullptr;					// パーティクルデータバッファ
 	ComPtr<ID3D11UnorderedAccessView> m_particleBufferUAV = nullptr;	// パーティクルデータUAV
-	ComPtr<ID3D11ShaderResourceView> m_particleBufferSRV = nullptr;	// パーティクルデータSRV
+	ComPtr<ID3D11ShaderResourceView> m_particleBufferSRV = nullptr;		// パーティクルデータSRV
 	ComPtr<ID3D11Buffer> m_updateParamsBuffer = nullptr;				// 更新用パラメータバッファ
 	ComPtr<ID3D11Buffer> m_emitParamsBuffer = nullptr;					// 発生用パラメータバッファ
 
+	// フリーインデックス管理
+	ComPtr<ID3D11Buffer> m_freeIndicesBuffer = nullptr;						// フリーインデックスバッファ
+	ComPtr<ID3D11UnorderedAccessView> m_freeIndicesUAV = nullptr;	// フリーインデックスUAV（消費用）
+
 	// IndirectDraw用リソース
 	ComPtr<ID3D11Buffer> m_activeIndicesBuffer = nullptr;				// アクティブインデックスバッファ
-	ComPtr<ID3D11UnorderedAccessView> m_activeIndicesUAV = nullptr;	// アクティブインデックスUAV
+	ComPtr<ID3D11UnorderedAccessView> m_activeIndicesUAV = nullptr;		// アクティブインデックスUAV
 	ComPtr<ID3D11ShaderResourceView> m_activeIndicesSRV = nullptr;		// アクティブインデックスSRV
 	ComPtr<ID3D11Buffer> m_drawArgsBuffer = nullptr;					// 間接描画引数バッファ
 	ComPtr<ID3D11UnorderedAccessView> m_drawArgsUAV = nullptr;			// 間接描画引数UAV
 	ComPtr<ID3D11Buffer> m_compactParamsBuffer = nullptr;				// Compact用パラメータバッファ
 
+	// シェーダー
 	class VertexShader* m_vertexShader = nullptr;				// 頂点シェーダ
 	class PixelShader* m_pixelShader = nullptr;					// ピクセルシェーダ
 	class ComputeShader* m_updateComputeShader = nullptr;		// 更新用コンピュートシェーダ
@@ -189,6 +194,9 @@ private:
 	bool m_isPlaying = true;
 	bool m_isPaused = false;
 	UINT m_randomSeed = 0;
+
+	// フリーリストカウンタ初期化フラグ
+	bool m_freeListInitialized = false;
 
 	// GPU側でのパーティクル更新
 	void UpdateParticlesGPU(float deltaTime);
