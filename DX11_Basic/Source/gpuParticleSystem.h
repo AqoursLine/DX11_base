@@ -38,33 +38,40 @@ struct BillboardVertex {
 };
 
 // 更新用パラメータ
-struct UpdateParams {
-	float deltaTime;
+struct StaticUpdateParams {
 	float gravity;
 	float startSize;
 	float endSize;
+	float padding; // パディング
 	XMFLOAT4 startColor;
 	XMFLOAT4 endColor;
 };
+struct DynamicUpdateParams {
+	float deltaTime;
+	float padding[3]; // パディング
+};
 
 // GPUEmit用パラメータ
-struct EmitParams {
-	XMFLOAT3 emitterPosition;
+struct StaticEmitParams {
 	float emissionAngle;
 	XMFLOAT3 baseVelocity;
 	float emissionAngleVariation;
 	XMFLOAT3 positionVariation;
 	float lifeTime;
 	XMFLOAT3 velocityVariation;
-	float startSize;
 	XMFLOAT4 startColor;
+	float startSize;
 	float rotationSpeed;
 	float rotationSpeedMin;
 	float rotationSpeedMax;
 	UINT maxParticles;
-	UINT emitCount;
+	XMFLOAT3 padding;
+};
+struct DynamicEmitParams {
+	XMFLOAT3 emitterPosition;
 	UINT randomSeed;
-	XMFLOAT2 padding;
+	UINT emitCount;
+	XMFLOAT3 padding;
 };
 
 // Compact用パラメータ
@@ -107,7 +114,11 @@ public:
 	/// エミッター設定
 	/// </summary>
 	/// <param name="settings">エミッター設定構造体</param>
-	void SetEmitterSettings(const EmitterSettings& settings) { m_settings = settings; }
+	void SetEmitterSettings(const EmitterSettings& settings) {
+		m_settings = settings; 
+		m_staticEmitParamsDirty = true;
+		m_staticUpdateParamsDirty = true;
+	}
 
 	/// <summary>
 	/// エミッター設定の取得
@@ -162,12 +173,16 @@ private:
 	ComPtr<ID3D11Buffer> m_particleBuffer = nullptr;					// パーティクルデータバッファ
 	ComPtr<ID3D11UnorderedAccessView> m_particleBufferUAV = nullptr;	// パーティクルデータUAV
 	ComPtr<ID3D11ShaderResourceView> m_particleBufferSRV = nullptr;		// パーティクルデータSRV
-	ComPtr<ID3D11Buffer> m_updateParamsBuffer = nullptr;				// 更新用パラメータバッファ
-	ComPtr<ID3D11Buffer> m_emitParamsBuffer = nullptr;					// 発生用パラメータバッファ
+
+	// 更新・発生用パラメータバッファ
+	ComPtr<ID3D11Buffer> m_dynamicUpdateParamsBuffer = nullptr;			// 動的更新パラメータバッファ
+	ComPtr<ID3D11Buffer> m_staticUpdateParamsBuffer = nullptr;			// 静的更新パラメータバッファ
+	ComPtr<ID3D11Buffer> m_dynamicEmitParamsBuffer = nullptr;			// 動的発生パラメータバッファ
+	ComPtr<ID3D11Buffer> m_staticEmitParamsBuffer = nullptr;			// 静的発生パラメータバッファ
 
 	// フリーインデックス管理
-	ComPtr<ID3D11Buffer> m_freeIndicesBuffer = nullptr;						// フリーインデックスバッファ
-	ComPtr<ID3D11UnorderedAccessView> m_freeIndicesUAV = nullptr;	// フリーインデックスUAV（消費用）
+	ComPtr<ID3D11Buffer> m_freeIndicesBuffer = nullptr;					// フリーインデックスバッファ
+	ComPtr<ID3D11UnorderedAccessView> m_freeIndicesUAV = nullptr;		// フリーインデックスUAV（消費用）
 
 	// IndirectDraw用リソース
 	ComPtr<ID3D11Buffer> m_activeIndicesBuffer = nullptr;				// アクティブインデックスバッファ
@@ -197,6 +212,10 @@ private:
 
 	// フリーリストカウンタ初期化フラグ
 	bool m_freeListInitialized = false;
+
+	// 静的パラメータ変更フラグ
+	bool m_staticUpdateParamsDirty = true;
+	bool m_staticEmitParamsDirty = true;
 
 	// GPU側でのパーティクル更新
 	void UpdateParticlesGPU(float deltaTime);

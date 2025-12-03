@@ -176,26 +176,43 @@ void GPUParticleSystem::Draw() {
 void GPUParticleSystem::UpdateParticlesGPU(float deltaTime) {
 	auto context = RENDERER.GetDeviceContext();
 
-	// 更新用パラメータ設定
-	UpdateParams params;
-	params.deltaTime = deltaTime;
-	params.gravity = m_settings.gravity;
-	params.startSize = m_settings.startSize;
-	params.endSize = m_settings.endSize;
-	params.startColor = XMFLOAT4(m_settings.startColor.x, m_settings.startColor.y, m_settings.startColor.z, m_settings.startColor.w);
-	params.endColor = XMFLOAT4(m_settings.endColor.x, m_settings.endColor.y, m_settings.endColor.z, m_settings.endColor.w);
+	// 静的パラメータが変更されていれば更新
+	if (m_staticUpdateParamsDirty) {
+		// 静的更新パラメータバッファに転送
+		StaticUpdateParams staticParams;
+		staticParams.gravity = m_settings.gravity;
+		staticParams.startSize = m_settings.startSize;
+		staticParams.endSize = m_settings.endSize;
+		staticParams.startColor = XMFLOAT4(m_settings.startColor.x, m_settings.startColor.y, m_settings.startColor.z, m_settings.startColor.w);
+		staticParams.endColor = XMFLOAT4(m_settings.endColor.x, m_settings.endColor.y, m_settings.endColor.z, m_settings.endColor.w);
+
+		D3D11_MAPPED_SUBRESOURCE mappedResource;
+		context->Map(m_staticUpdateParamsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+		memcpy(mappedResource.pData, &staticParams, sizeof(StaticUpdateParams));
+		context->Unmap(m_staticUpdateParamsBuffer.Get(), 0);
+
+		m_staticUpdateParamsDirty = false;
+	}
+
+	// 動的更新パラメータ設定
+	DynamicUpdateParams dynamicParams;
+	dynamicParams.deltaTime = deltaTime;
+	dynamicParams.padding[0] = 0.0f;
+	dynamicParams.padding[1] = 0.0f;
+	dynamicParams.padding[2] = 0.0f;
 
 	// パラメータバッファに転送
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	context->Map(m_updateParamsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	memcpy(mappedResource.pData, &params, sizeof(UpdateParams));
-	context->Unmap(m_updateParamsBuffer.Get(), 0);
+	context->Map(m_dynamicUpdateParamsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	memcpy(mappedResource.pData, &dynamicParams, sizeof(DynamicUpdateParams));
+	context->Unmap(m_dynamicUpdateParamsBuffer.Get(), 0);
 
 	// コンピュートシェーダー設定
 	m_updateComputeShader->Set();
 
 	// パラメータバッファ設定
-	context->CSSetConstantBuffers(3, 1, m_updateParamsBuffer.GetAddressOf());
+	ID3D11Buffer* constantBuffers[2] = { m_staticUpdateParamsBuffer.Get(), m_dynamicUpdateParamsBuffer.Get() };
+	context->CSSetConstantBuffers(3, 2, constantBuffers);
 
 	// UAV設定
 	ID3D11UnorderedAccessView* uavs[2] = { m_particleBufferUAV.Get(), m_freeIndicesUAV.Get() };
@@ -208,8 +225,8 @@ void GPUParticleSystem::UpdateParticlesGPU(float deltaTime) {
 	// リソース解除
 	ID3D11UnorderedAccessView* nullUAV[2] = { nullptr, nullptr };
 	context->CSSetUnorderedAccessViews(0, 2, nullUAV, nullptr);
-	ID3D11Buffer* nullBuffer = nullptr;
-	context->CSSetConstantBuffers(3, 1, &nullBuffer);
+	ID3D11Buffer* nullBuffer[2] = { nullptr, nullptr };
+	context->CSSetConstantBuffers(3, 2, nullBuffer);
 }
 
 /// <summary>
@@ -227,39 +244,55 @@ void GPUParticleSystem::EmitGPU(UINT count) {
 		m_freeListInitialized = true;
 	}
 
+	// 静的パラメータが変更されていれば更新
+	if (m_staticEmitParamsDirty) {
+		// 静的発生パラメータバッファに転送
+		StaticEmitParams staticParams;
+		staticParams.positionVariation = XMFLOAT3(m_settings.position.x, m_settings.position.y, m_settings.position.z);
+		staticParams.baseVelocity = XMFLOAT3(m_settings.velocity.x, m_settings.velocity.y, m_settings.velocity.z);
+		staticParams.velocityVariation = XMFLOAT3(m_settings.velocityVariation.x, m_settings.velocityVariation.y, m_settings.velocityVariation.z);
+		staticParams.emissionAngle = m_settings.emissionAngle;
+		staticParams.emissionAngleVariation = m_settings.emissionAngleVariation;
+		staticParams.rotationSpeedMin = m_settings.rotationSpeedMin;
+		staticParams.rotationSpeedMax = m_settings.rotationSpeedMax;
+		staticParams.lifeTime = m_settings.lifeTime;
+		staticParams.startColor = XMFLOAT4(m_settings.startColor.x, m_settings.startColor.y, m_settings.startColor.z, m_settings.startColor.w);
+		staticParams.startSize = m_settings.startSize;
+		staticParams.rotationSpeed = m_settings.rotationSpeed;
+		staticParams.maxParticles = static_cast<UINT>(m_settings.maxParticles);
+		staticParams.padding = XMFLOAT3(0.0f, 0.0f, 0.0f);
+
+		D3D11_MAPPED_SUBRESOURCE mappedResource;
+		context->Map(m_staticEmitParamsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+		memcpy(mappedResource.pData, &staticParams, sizeof(StaticEmitParams));
+		context->Unmap(m_staticEmitParamsBuffer.Get(), 0);
+
+		m_staticEmitParamsDirty = false;
+	}
+
+	// 動的発生パラメータ設定
 	// 乱数シード更新
 	m_randomSeed = (m_randomSeed * 1103515245 + 12345) & 0x7fffffff;
 
-	// Emitパラメータ設定
-	EmitParams params;
-	params.emitterPosition = XMFLOAT3(m_position.x, m_position.y, m_position.z);
-	params.emissionAngle = m_settings.emissionAngle;
-	params.baseVelocity = XMFLOAT3(m_settings.velocity.x, m_settings.velocity.y, m_settings.velocity.z);
-	params.emissionAngleVariation = m_settings.emissionAngleVariation;
-	params.positionVariation = XMFLOAT3(m_settings.position.x, m_settings.position.y, m_settings.position.z);
-	params.lifeTime = m_settings.lifeTime;
-	params.velocityVariation = XMFLOAT3(m_settings.velocityVariation.x, m_settings.velocityVariation.y, m_settings.velocityVariation.z);
-	params.startSize = m_settings.startSize;
-	params.startColor = XMFLOAT4(m_settings.startColor.x, m_settings.startColor.y, m_settings.startColor.z, m_settings.startColor.w);
-	params.rotationSpeed = m_settings.rotationSpeed;
-	params.rotationSpeedMin = m_settings.rotationSpeedMin;
-	params.rotationSpeedMax = m_settings.rotationSpeedMax;
-	params.maxParticles = static_cast<UINT>(m_settings.maxParticles);
-	params.emitCount = count;
-	params.randomSeed = m_randomSeed;
-	params.padding = XMFLOAT2(0.0f, 0.0f);
+	DynamicEmitParams dynamicParams;
+	dynamicParams.emitCount = count;
+	dynamicParams.emitterPosition = XMFLOAT3(m_position.x, m_position.y, m_position.z);
+	dynamicParams.randomSeed = m_randomSeed;
+	dynamicParams.padding = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 	// パラメータバッファに転送
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	context->Map(m_emitParamsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	memcpy(mappedResource.pData, &params, sizeof(EmitParams));
-	context->Unmap(m_emitParamsBuffer.Get(), 0);
+	context->Map(m_dynamicEmitParamsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	memcpy(mappedResource.pData, &dynamicParams, sizeof(DynamicEmitParams));
+	context->Unmap(m_dynamicEmitParamsBuffer.Get(), 0);
 
 	// コンピュートシェーダー設定
 	m_emitComputeShader->Set();
 
 	// パラメータバッファ設定
-	context->CSSetConstantBuffers(3, 1, m_emitParamsBuffer.GetAddressOf());
+	ID3D11Buffer* constantBuffers[2] = { m_staticEmitParamsBuffer.Get(), m_dynamicEmitParamsBuffer.Get() };
+	context->CSSetConstantBuffers(3, 2, constantBuffers);
+
 
 	// UAV設定
 	ID3D11UnorderedAccessView* uavs[2] = { m_particleBufferUAV.Get(), m_freeIndicesUAV.Get() };
@@ -272,8 +305,8 @@ void GPUParticleSystem::EmitGPU(UINT count) {
 	// リソース解除
 	ID3D11UnorderedAccessView* nullUAVs[2] = { nullptr, nullptr };
 	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, nullptr);
-	ID3D11Buffer* nullBuffer = nullptr;
-	context->CSSetConstantBuffers(3, 1, &nullBuffer);
+	ID3D11Buffer* nullBuffer[2] = { nullptr, nullptr };
+	context->CSSetConstantBuffers(3, 1, nullBuffer);
 }
 
 /// <summary>
@@ -310,6 +343,9 @@ void GPUParticleSystem::CompactParticlesGPU() {
 	// ディスパッチ
 	UINT threadGroupCount = (m_settings.maxParticles + 255) / 256;
 	context->Dispatch(threadGroupCount, 1, 1);
+
+	// 描画数をコピー
+	context->CopyStructureCount(m_drawArgsBuffer.Get(), sizeof(UINT), m_activeIndicesUAV.Get());
 
 	// リソース解除
 	ID3D11UnorderedAccessView* nullUAVs[2] = { nullptr, nullptr };
@@ -438,21 +474,29 @@ bool GPUParticleSystem::CreateBuffers() {
 
 	// 更新パラメータバッファ作成
 	bd = {};
-	bd.ByteWidth = sizeof(UpdateParams);
+	bd.ByteWidth = sizeof(DynamicUpdateParams);
 	bd.Usage = D3D11_USAGE_DYNAMIC;
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	if (FAILED(device->CreateBuffer(&bd, nullptr, m_updateParamsBuffer.GetAddressOf()))) {
+	if (FAILED(device->CreateBuffer(&bd, nullptr, m_dynamicUpdateParamsBuffer.GetAddressOf()))) {
+		return false;
+	}
+	bd.ByteWidth = sizeof(StaticUpdateParams);
+	if (FAILED(device->CreateBuffer(&bd, nullptr, m_staticUpdateParamsBuffer.GetAddressOf()))) {
 		return false;
 	}
 
 	// 発生パラメータバッファ作成
 	bd = {};
-	bd.ByteWidth = sizeof(EmitParams);
+	bd.ByteWidth = sizeof(DynamicEmitParams);
 	bd.Usage = D3D11_USAGE_DYNAMIC;
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	if (FAILED(device->CreateBuffer(&bd, nullptr, m_emitParamsBuffer.GetAddressOf()))) {
+	if (FAILED(device->CreateBuffer(&bd, nullptr, m_dynamicEmitParamsBuffer.GetAddressOf()))) {
+		return false;
+	}
+	bd.ByteWidth = sizeof(StaticEmitParams);
+	if (FAILED(device->CreateBuffer(&bd, nullptr, m_staticEmitParamsBuffer.GetAddressOf()))) {
 		return false;
 	}
 

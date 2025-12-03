@@ -8,7 +8,7 @@ bool TestParticle::Initialize() {
 		return false;
 	}
 
-	if (!m_texture->Load(L"Asset\\Texture\\particle.png")) {
+	if (!m_texture->Load(L"Asset\\Texture\\circle.png")) {
 		return false;
 	}
 
@@ -20,7 +20,7 @@ bool TestParticle::Initialize() {
 	settings.startSize = 1.0f;
 	settings.endSize = 0.1f;
 	settings.lifeTime = 2.0f;
-	settings.position = { 0.0f, 0.0f, 0.0f };
+	settings.position = { 5.0f, 0.0f, 5.0f };
 	settings.velocity = { 0.0f, 10.0f, 0.0f };
 	settings.velocityVariation = { 20.0f, 20.0f, 20.0f };
 	settings.gravity = -5.0f;
@@ -44,17 +44,13 @@ void TestParticle::Finalize() {
 }
 
 void TestParticle::Update(double deltaTime) {
-	if (Input::GetKeyTrigger(KK_D0)) {
+	if (Input::GetKeyTrigger(KK_D1)) {
 
-		EmitOneShot({ 0.0f, 0.0f, 0.0f });
-	}
-
-	if (Input::GetKeyPress(KK_D1)) {
 		EmitOneShot({ 0.0f, 0.0f, 0.0f });
 	}
 
 	if (Input::GetKeyPress(KK_D2)) {
-		EmitOneShot({ 5.0f, 0.0f, 5.0f });
+		EmitOneShot({ 0.0f, 0.0f, 0.0f });
 	}
 
 	GPUParticleSystem::Update(deltaTime);

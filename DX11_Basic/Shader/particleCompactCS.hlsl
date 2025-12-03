@@ -34,7 +34,7 @@ void main( uint3 DTid : SV_DispatchThreadID )
 	if (index == 0)
 	{
 		g_drawArgs[0] = 6; // インデックス数（四角形2つ分）
-		g_drawArgs[1] = 0; // インスタンス数（後で設定）
+		// インスタンス数は後で設定
 		g_drawArgs[2] = 0; // スタートインデックス
 		g_drawArgs[3] = 0; // ベース頂点
 		g_drawArgs[4] = 0; // スタートインスタンス
@@ -47,7 +47,6 @@ void main( uint3 DTid : SV_DispatchThreadID )
 	if (p.active != 0)
 	{
 		g_activeIndices.Append(index);
-		InterlockedAdd(g_drawArgs[1], 1); // インスタンス数をインクリメント
 	}
 
 }

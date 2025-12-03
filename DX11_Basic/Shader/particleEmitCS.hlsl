@@ -12,25 +12,31 @@ struct Particle
 	uint active;
 };
 
-// 発生用パラメータ
-cbuffer EmitParams : register(b3)
+// 静的発生用パラメータ
+cbuffer StaticEmitParams : register(b3)
 {
-	float3 emitPosition;
 	float emissionAngle;
 	float3 baseVelocity;
 	float emissionAngleVariation;
 	float3 positionVariation;
 	float lifeTime;
 	float3 velocityVariation;
-	float startSize;
 	float4 startColor;
+	float startSize;
 	float rotationSpeed;
 	float rotationSpeedMin;
 	float rotationSpeedMax;
 	uint maxParticles;
-	uint emitCount;
+	float3 emitPadding;
+}
+
+// 動的発生用パラメータ
+cbuffer DynamicEmitParams : register(b4)
+{
+	float3 emitPosition;
 	uint randomSeed;
-	float2 emitPadding;
+	uint emitCount;
+	uint3 dynamicEmitPadding;
 }
 
 // パーティクルバッファ

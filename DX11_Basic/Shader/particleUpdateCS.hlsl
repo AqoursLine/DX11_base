@@ -12,15 +12,22 @@ struct Particle
 	uint active;
 };
 
-// 更新用パラメータ
-cbuffer UpdateParams : register(b3)
+// 静的更新用パラメータ
+cbuffer StaticUpdateParams : register(b3)
 {
-	float deltaTime;
 	float gravity;
 	float startSize;
 	float endSize;
+	float padding;
 	float4 startColor;
 	float4 endColor;
+}
+
+// 動的更新用パラメータ
+cbuffer DynamicUpdateParams : register(b4)
+{
+	float deltaTime;
+	float3 dynamicUpdatePadding;
 }
 
 // パーティクルバッファ
