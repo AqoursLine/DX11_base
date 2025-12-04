@@ -127,25 +127,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//ウィンドウ更新
 	UpdateWindow(g_hWnd);
 
-#ifdef _DEBUG
-	// デバッグ用のコンソールを作成
-	AllocConsole();
-
-	//標準出力ストリームをコンソールにリダイレクト
-	freopen_s(reinterpret_cast<FILE**>(stdout), "CONOUT$", "w", stdout);
-	freopen_s(reinterpret_cast<FILE**>(stderr), "CONOUT$", "w", stderr);
-
-	//コンソールが閉じる時にメインウィンドウも閉じるように設定
-	SetConsoleCtrlHandler([](DWORD ctrlType) -> BOOL {
-		if (ctrlType == CTRL_CLOSE_EVENT || ctrlType == CTRL_C_EVENT) {
-			DestroyWindow(g_hWnd);
-			return TRUE;
-		}
-		return FALSE;
-		}, TRUE);
-
-#endif // _DEBUG
-
 	//システムクラス初期化
 	System::CreateInstance();
 	bool isSystemInitialized = SYSTEM.Initialize();
@@ -195,24 +176,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		//経過時間がフレームレートを超えたら
 		if (elapsedTime >= frameTime) {
-//			std::cout << "Frame Time: " << elapsedTime << " seconds" << std::endl;
-
 			//フレーム時間を引く
 			elapsedTime = 0;
 			if (SYSTEM.Excute()) {
 				isLoop = false;
 				break;
 			}
-
-#ifdef _DEBUG
-			frameCount++;
-			if (frameCount > 1) {
-				MoveConsoleCursorToTopLeft();
-//				ClearConsole();
-				frameCount = 0;
-			}
-#endif // _DEBUG
-
 		}
 	}
 

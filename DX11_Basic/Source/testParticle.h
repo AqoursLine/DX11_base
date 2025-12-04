@@ -15,4 +15,6 @@ protected:
 private:
 	class Texture* m_texture = nullptr;
 
+	float m_emitTimer = 0.0f;
+
 };

@@ -27,9 +27,9 @@ private:
 	class VertexShader* m_vertexShader = nullptr;
 
 	float m_inTimer = 0.0f;
-	float m_inDuration = 1.5f;
+	float m_inDuration = 0.5f;
 	float m_outTimer = 0.0f;
-	float m_outDuration = 1.5f;
+	float m_outDuration = 0.5f;
 
 	float m_alpha = 0.0f;
 

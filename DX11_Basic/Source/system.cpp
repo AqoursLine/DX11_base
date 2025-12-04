@@ -104,10 +104,5 @@ bool System::Excute() {
 		return true;
 	}
 
-	//deltaTime表示
-#ifdef _DEBUG
-	std::cout << "Delta Time: " << m_timer->GetDeltaTime() << " seconds" << std::endl;
-#endif // _DEBUG
-
 	return false;
 }
