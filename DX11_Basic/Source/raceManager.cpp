@@ -9,6 +9,7 @@
 #include "myRandom.h"
 
 #include "resultScene.h"
+#include "testTransition.h"
 
 //静的メンバ変数の初期化
 std::vector<BoatResultData> RaceManager::m_result;
@@ -63,6 +64,10 @@ void RaceManager::Finalize() {
 }
 
 void RaceManager::Update(double deltaTime) {
+	if (!m_isActivated) {
+		return;
+	}
+
 	//スタート前のカウントダウン
 	if (m_startDelay > 0.0f) {
 		m_startDelay -= static_cast<float>(deltaTime);
@@ -78,7 +83,7 @@ void RaceManager::Update(double deltaTime) {
 		if (m_raceTime >= 3.0f) {
 
 			//結果シーンへ移行
-			SYSTEM.GetManager()->SetScene(new ResultScene());
+			SYSTEM.GetManager()->SetScene(new ResultScene(), new TestTransition());
 
 			// 結果を送信
 			auto webClient = SYSTEM.GetWebClient();

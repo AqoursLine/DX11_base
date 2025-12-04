@@ -79,7 +79,7 @@ bool Renderer::Initialize(HWND hWnd) {
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
 	depthStencilViewDesc.Format = depthStencilDesc.Format;
-	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
 	depthStencilViewDesc.Flags = 0;
 	hr = m_device->CreateDepthStencilView(depthStencilBuffer.Get(), &depthStencilViewDesc, m_depthStencilView.GetAddressOf());
 	if (FAILED(hr)) {

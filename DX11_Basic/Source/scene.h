@@ -27,6 +27,7 @@ public:
 	virtual ~Scene() { if (m_future.valid()) m_future.wait(); }
 
 	bool InitializeBase();
+	void ActivateBase();
 	void FinalizeBase();
 	void UpdateBase(double deltaTime);
 	void DrawBase();
@@ -85,6 +86,7 @@ public:
 
 protected:
 	virtual bool Initialize() = 0;
+	virtual void Activate() = 0;
 	virtual void Finalize() = 0;
 	virtual void Update(double deltaTime) = 0;
 	virtual void Draw() = 0;
@@ -95,6 +97,7 @@ private:
 
 	//オブジェクト初期化関数
 	bool ObjectInitialize();
+	void ObjectActivate();
 	void ObjectFinalize();
 	void ObjectUpdate(double deltaTime);
 	void ObjectDestroy();

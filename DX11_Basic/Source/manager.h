@@ -1,6 +1,7 @@
 #pragma once
 
 class Scene;
+class Transition;
 
 class Manager {
 public:
@@ -18,13 +19,15 @@ public:
 
 	Scene* GetScene() const { return m_scene; }
 
-	void SetScene(Scene* scene);
+	void SetScene(Scene* scene, Transition* transition);
 private:
 	//終了したか
 	bool m_isFinished = false;
 
 	Scene* m_scene = nullptr;
 	Scene* m_nextScene = nullptr;
+
+	Transition* m_transition = nullptr;
 
 	class ImguiSystem* m_imguiSystem = nullptr;
 };

@@ -10,6 +10,7 @@
 #include "titleScene.h"
 #include "raceManager.h"
 
+#include "testTransition.h"
 
 bool ResultScene::Initialize() {
 	//タイトルテキスト初期化
@@ -30,6 +31,6 @@ bool ResultScene::Initialize() {
 void ResultScene::Update(double deltaTime) {
 	//Enterキーでシーン終了
 	if (Input::GetKeyTrigger(KK_ENTER)) {
-		SYSTEM.GetManager()->SetScene(new TitleScene());
+		SYSTEM.GetManager()->SetScene(new TitleScene(), new TestTransition);
 	}
 }

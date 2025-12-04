@@ -7,6 +7,7 @@
 #include "system.h"
 #include "timer.h"
 #include "imguiSystem.h"
+#include "transition.h"
 
 Manager::Manager() {
 	m_imguiSystem = new ImguiSystem();
@@ -57,6 +58,22 @@ void Manager::Update(double dt) {
 	//Inputの更新
 	Input::Update();
 
+	// トランジションの更新
+	if (m_transition != nullptr) {
+		m_transition->Update(dt);
+
+		// フェードインが完了したらシーンをアクティブ化してトランジションを削除
+		if (m_transition->IsInTransitionFinished()) {
+			// シーンのアクティブ化
+			m_scene->ActivateBase();
+
+			// トランジション削除
+			m_transition->Finalize();
+			delete m_transition;
+			m_transition = nullptr;
+		}
+	}
+
 	//ワールドの更新
 	m_scene->UpdateBase(dt);
 
@@ -71,6 +88,11 @@ void Manager::Draw() {
 
 	//ワールドの描画
 	m_scene->DrawBase();
+
+	// トランジションの描画
+	if (m_transition != nullptr) {
+		m_transition->Draw();
+	}
 
 	// deltaTime表示
 #ifdef _DEBUG
@@ -102,20 +124,25 @@ bool Manager::CleanUp() {
 	if (m_nextScene != nullptr) {
 		if (!m_nextScene->IsInitializedBase()) {
 			m_nextScene->InitializeBase();
-		} else if (m_nextScene->IsInitialized()) {
+		} else if (m_nextScene->IsInitialized() && m_transition->IsOutTransitionFinished()) {
 			m_scene->FinalizeBase();
 			delete m_scene;
 
 			m_scene = m_nextScene;
 			m_nextScene = nullptr;
+
+			m_transition->StartInTransition();
 		}
 	}
 
 	return false;
 }
 
-void Manager::SetScene(Scene* scene) {
+void Manager::SetScene(Scene* scene, Transition* transition) {
 	m_nextScene = scene;
+	m_transition = transition;
+	m_transition->Initialize();
+	m_transition->StartOutTransition();
 }
 
 

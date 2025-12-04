@@ -21,6 +21,8 @@
 #include "testField.h"
 #include "testSprite.h"
 
+#include "testTransition.h"
+
 bool TestScene::Initialize() {
 	//テストオブジェクト追加
 	AddGameObject(new TestObject(), TYPE_OPAQUE);
@@ -92,7 +94,7 @@ void TestScene::Finalize() {
 
 void TestScene::Update(double deltaTime) {
 	if (Input::GetKeyTrigger(KK_ENTER)) {
-		SYSTEM.GetManager()->SetScene(new TitleScene());
+		SYSTEM.GetManager()->SetScene(new TitleScene(), new TestTransition());
 	}
 }
 

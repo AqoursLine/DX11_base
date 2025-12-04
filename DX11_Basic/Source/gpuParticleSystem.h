@@ -97,7 +97,7 @@ struct EmitterSettings {
 	float rotationSpeed = 0.0f;				// 回転速度
 	float rotationSpeedMin = 0.0f;			// 回転速度最小値
 	float rotationSpeedMax = 0.0f;			// 回転速度最大値
-	int maxParticles = 100;					// 最大パーティクル数
+	UINT maxParticles = 100;					// 最大パーティクル数
 	bool loop = true;						// ループ設定
 	bool oneShot = false;					// ワンショット設定
 	int oneShotCount = 10;					// ワンショット時の発生数

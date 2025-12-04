@@ -19,6 +19,14 @@ public:
 		}
 		return m_isInitialized;
 	}
+
+	void ActivateBase() {
+		if (m_isInitialized) {
+			Activate();
+			m_isActivated = true;
+		}
+	}
+
 	virtual void Finalize() {}
 	void UpdateBase(double deltaTime)
 	{
@@ -135,6 +143,7 @@ public:
 
 protected:
 	virtual bool Initialize() { return true; }
+	virtual void Activate() {}
 	virtual void Update(double deltaTime) {}
 	virtual void DrawShadow() {}
 	virtual void Draw() {}
@@ -143,6 +152,8 @@ protected:
 	Vector3 m_rotation = Vector3(0.0f, 0.0f, 0.0f);
 	Vector4 m_quaternion = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
 	Vector3 m_scale = Vector3(1.0f, 1.0f, 1.0f);
+
+	bool m_isActivated = false;
 
 	Scene* m_scene = nullptr;
 private:

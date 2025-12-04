@@ -22,6 +22,17 @@ bool Scene::InitializeBase() {
 	return true;
 }
 
+void Scene::ActivateBase() {
+	if (!m_isInitialized.load(std::memory_order_acquire)) {
+		return;
+	}
+	// シーン固有のアクティブ化処理
+	Activate();
+
+	// GameObjectのアクティブ化処理
+	ObjectActivate();
+}
+
 void Scene::FinalizeBase() {
 	//非同期完了待ち
 	if (m_future.valid()) {
@@ -93,6 +104,15 @@ bool Scene::ObjectInitialize() {
 	m_isInitialized.store(true, std::memory_order_release);
 
 	return true;
+}
+
+void Scene::ObjectActivate() {
+	// GameObjectのアクティブ化処理
+	for (auto& objects : m_gameObjects) {
+		for (auto& gameObject : objects) {
+			gameObject->ActivateBase();
+		}
+	}
 }
 
 void Scene::ObjectFinalize() {
