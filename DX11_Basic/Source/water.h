@@ -6,12 +6,12 @@
 /// 波紋データ構造体
 /// </summary>
 struct Ripple {
-	Vector3 position;
-	float amplitude;
-	float frequency;
-	float speed;
-	float time;
-	bool active;
+	Vector3 position = Vector3::ZERO;
+	float amplitude = 0.0f;
+	float frequency = 0.0f;
+	float speed = 0.0f;
+	float time = 0.0f;
+	bool active = false;
 };
 
 /// <summary>
@@ -62,7 +62,7 @@ public:
 	void AddRipple(const Vector3& position, float amplitude = 2.0f, float frequency = 2.0f, float speed = 8.0f);
 	int GetActiveRippleCount() const { return m_activeRippleCount; }
 
-	// ==== 波高取得（CPU計算） ====
+	// ==== 波高取得（GPU計算結果をバイリニア補間） ====
 	float GetWaterHeight(const Vector3& position) const;
 	Vector3 GetWaterNormal(const Vector3& position) const;
 
@@ -91,13 +91,7 @@ private:
 		float baseWaveSpeed2;
 		float baseWaveSpeed3;
 		float waveSharpness;
-		float padding3; // パディング
-
-		// 環境マッピング用パラメータ
-		float reflectionStrength;
-		float refractionStrength;
-		float fresnelPower;
-		float waterClarityDepth;
+		int gridResolution; // パディング
 
 		// 波紋データ
 		struct {
@@ -106,25 +100,47 @@ private:
 		} ripples[MAX_RIPPLES];
 	};
 
+	/// <summary>
+	/// 高さと法線データ構造体
+	/// </summary>
+	struct HeightNormalData {
+		Vector3 normal;
+		float height;
+	};
+
 	// メッシュ生成
 	void CreateMesh();
 	void CreateNormalMap();
 	void CreateFoamTexture();
 
-	//定数バッファ更新
-	void UpdateConstantBuffer();
+	// ComputeShader関連
+	void CreateComputeResources();
+	void DispatchComputeShader();
+	void CopyHeightNormalData();
 
-	//CPU側波紋計算
-	float CalculateWaveHeight(const Vector3& position, float time) const;
+	// CPU側補間
+	float BilinearInterpolate(float p11, float p12, float p21, float p22, float tx, float ty) const;
+	Vector3 BilinearInterpolateVector3(const Vector3& p11, const Vector3& p12, const Vector3& p21, const Vector3& p22, float tx, float ty) const;
 
 	//バッファ
-	ID3D11Buffer* m_vertexBuffer = nullptr;
-	ID3D11Buffer* m_indexBuffer = nullptr;
-	ID3D11Buffer* m_constantBuffer = nullptr;
+	ComPtr<ID3D11Buffer> m_vertexBuffer = nullptr;
+	ComPtr<ID3D11Buffer> m_indexBuffer = nullptr;
+	ComPtr<ID3D11Buffer> m_constantBuffer = nullptr;
 
 	//シェーダー
 	class VertexShader* m_vertexShader = nullptr;
 	class PixelShader* m_pixelShader = nullptr;
+	class ComputeShader* m_computeShader = nullptr;
+
+	// ComputeShader用リソース
+	ComPtr<ID3D11Texture2D> m_heightNormalTexture = nullptr;
+	ComPtr<ID3D11UnorderedAccessView> m_heightNormalUAV = nullptr;
+	ComPtr<ID3D11ShaderResourceView> m_heightNormalSRV = nullptr;
+
+	// CPU読み取り用バッファ
+	ComPtr<ID3D11Texture2D> m_stagingTexture = nullptr;
+	std::vector<HeightNormalData> m_heightNormalData;
+	bool m_neadUpdateCPUData = false;
 
 	//テクスチャ
 	class Texture* m_normalMap = nullptr;
@@ -132,7 +148,7 @@ private:
 	ID3D11ShaderResourceView* m_environmentMapSRV = nullptr;
 
 	// サンプラーステート
-	ID3D11SamplerState* m_samplerState = nullptr;
+	ComPtr<ID3D11SamplerState> m_samplerState = nullptr;
 
 	// 水面パラメータ
 	float m_waterSize;

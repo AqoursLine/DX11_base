@@ -8,7 +8,7 @@ Water::Water()
 	: m_waterSize(500.0f)
 	, m_waveHeight(2.0f)
 	, m_time(0.0f)
-	, m_gridResolution(500)
+	, m_gridResolution(512)
 	, m_baseWaveFreqency1(0.02f)
 	, m_baseWaveFreqency2(0.015f)
 	, m_baseWaveFreqency3(0.01f)
@@ -24,6 +24,7 @@ Water::Water()
 	, m_indexCount(0)
 {
 	m_ripples.resize(MAX_RIPPLES);
+	m_heightNormalData.resize(m_gridResolution * m_gridResolution);
 }
 
 /// <summary>
@@ -34,27 +35,18 @@ Water::Water()
 /// <param name="frequency">波紋の周波数</param>
 /// <param name="speed">波紋の速度</param>
 void Water::AddRipple(const Vector3& position, float amplitude, float frequency, float speed) {
-	// 最大数チェック
-	if (m_activeRippleCount >= MAX_RIPPLES) {
-		// 最も古い波紋を削除
-		m_activeRippleCount = MAX_RIPPLES - 1;
+	// 非アクティブな波紋を検索して追加
+	for (auto& ripple : m_ripples) {
+		if (!ripple.active) {
+			ripple.position = position;
+			ripple.amplitude = amplitude;
+			ripple.frequency = frequency;
+			ripple.speed = speed;
+			ripple.time = 0.0f;
+			ripple.active = true;
+			break;
+		}
 	}
-
-	// 既存の波紋をシフト
-	for (int i = m_activeRippleCount; i > 0; i--) {
-		m_ripples[i] = m_ripples[i - 1];
-	}
-
-	// 新しい波紋を追加
-	Ripple& newRipple = m_ripples[0];
-	newRipple.position = position;
-	newRipple.amplitude = amplitude;
-	newRipple.frequency = frequency;
-	newRipple.speed = speed;
-	newRipple.time = 0.0f;
-	newRipple.active = true;
-
-	m_activeRippleCount++;
 }
 
 /// <summary>
@@ -63,7 +55,40 @@ void Water::AddRipple(const Vector3& position, float amplitude, float frequency,
 /// <param name="position">座標</param>
 /// <returns>波高</returns>
 float Water::GetWaterHeight(const Vector3& position) const {
-	return m_position.y + CalculateWaveHeight(position, m_time);
+	// ローカル座標に変換
+	float localX = position.x - m_position.x + (m_waterSize * 0.5f);
+	float localZ = position.z - m_position.z + (m_waterSize * 0.5f);
+
+	// グリッド座標に変換
+	float gridX = (localX / m_waterSize) * (m_gridResolution - 1);
+	float gridZ = (localZ / m_waterSize) * (m_gridResolution - 1);
+
+	// 範囲外チェック
+	if (gridX < 0.0f || gridX >= m_gridResolution - 1 ||
+		gridZ < 0.0f || gridZ >= m_gridResolution - 1) {
+		return m_position.y;
+	}
+
+	// 周囲4点のインデックス取得
+	int x0 = static_cast<int>(gridX);
+	int z0 = static_cast<int>(gridZ);
+	int x1 = x0 + 1;
+	int z1 = z0 + 1;
+
+	// 補間係数
+	float tx = gridX - x0;
+	float tz = gridZ - z0;
+
+	// 周囲4点の波高取得
+	float h00 = m_heightNormalData[z0 * m_gridResolution + x0].height;
+	float h10 = m_heightNormalData[z0 * m_gridResolution + x1].height;
+	float h01 = m_heightNormalData[z1 * m_gridResolution + x0].height;
+	float h11 = m_heightNormalData[z1 * m_gridResolution + x1].height;
+
+	// バイリニア補間
+	float height = BilinearInterpolate(h00, h10, h01, h11, tx, tz);
+
+	return m_position.y + height * m_waveHeight;
 }
 
 /// <summary>
@@ -72,17 +97,38 @@ float Water::GetWaterHeight(const Vector3& position) const {
 /// <param name="position">座標</param>
 /// <returns>法線</returns>
 Vector3 Water::GetWaterNormal(const Vector3& position) const {
-	float delta = 0.1f;
+	// ローカル座標に変換
+	float localX = position.x - m_position.x + (m_waterSize * 0.5f);
+	float localZ = position.z - m_position.z + (m_waterSize * 0.5f);
 
-	float heightL = CalculateWaveHeight(Vector3(position.x - delta, 0.0f, position.z), m_time);
-	float heightR = CalculateWaveHeight(Vector3(position.x + delta, 0.0f, position.z), m_time);
-	float heightD = CalculateWaveHeight(Vector3(position.x, 0.0f, position.z - delta), m_time);
-	float heightU = CalculateWaveHeight(Vector3(position.x, 0.0f, position.z + delta), m_time);
+	// グリッド座標に変換
+	float gridX = (localX / m_waterSize) * (m_gridResolution - 1);
+	float gridZ = (localZ / m_waterSize) * (m_gridResolution - 1);
 
-	Vector3 normal;
-	normal.x = (heightL - heightR) / (2.0f * delta);
-	normal.y = 1.0f;
-	normal.z = (heightD - heightU) / (2.0f * delta);
+	// 範囲外チェック
+	if (gridX < 0.0f || gridX >= m_gridResolution - 1 ||
+		gridZ < 0.0f || gridZ >= m_gridResolution - 1) {
+		return Vector3::UP;
+	}
+
+	// 周囲4点のインデックス取得
+	int x0 = static_cast<int>(gridX);
+	int z0 = static_cast<int>(gridZ);
+	int x1 = x0 + 1;
+	int z1 = z0 + 1;
+
+	// 補間係数
+	float tx = gridX - x0;
+	float tz = gridZ - z0;
+
+	// 周囲4点の法線取得
+	auto& n00 = m_heightNormalData[z0 * m_gridResolution + x0];
+	auto& n10 = m_heightNormalData[z0 * m_gridResolution + x1];
+	auto& n01 = m_heightNormalData[z1 * m_gridResolution + x0];
+	auto& n11 = m_heightNormalData[z1 * m_gridResolution + x1];
+
+	// バイリニア補間
+	Vector3 normal = BilinearInterpolateVector3(n00.normal, n10.normal, n01.normal, n11.normal, tx, tz);
 
 	normal.Normalize();
 	return normal;
@@ -93,29 +139,8 @@ Vector3 Water::GetWaterNormal(const Vector3& position) const {
 /// </summary>
 /// <returns>初期化成功</returns>
 bool Water::Initialize() {
-	auto device = RENDERER.GetDevice();
-
-	// シェーダー読み込み
-	m_vertexShader = new VertexShader();
-	m_vertexShader->Load(L"Shader\\waterVS.cso");
-	m_pixelShader = new PixelShader();
-	m_pixelShader->Load(L"Shader\\waterPS.cso");
-
 	// メッシュ生成
 	CreateMesh();
-
-	// 定数バッファ生成
-	D3D11_BUFFER_DESC cbDesc = {};
-	cbDesc.ByteWidth = sizeof(WaterConstantBuffer);
-	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
-	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-
-	HRESULT hr = device->CreateBuffer(&cbDesc, nullptr, &m_constantBuffer);
-	if (FAILED(hr)) {
-		ErrorMessage(L"水面の定数バッファの作成に失敗しました。", hr);
-		return false;
-	}
 
 	// 法線マップ生成
 	CreateNormalMap();
@@ -123,18 +148,38 @@ bool Water::Initialize() {
 	// フォームテクスチャ生成
 	CreateFoamTexture();
 
+	// シェーダー読み込み
+	m_vertexShader = new VertexShader();
+	m_vertexShader->Load(L"Shader\\waterVS.cso");
+	m_pixelShader = new PixelShader();
+	m_pixelShader->Load(L"Shader\\waterPS.cso");
+	m_computeShader = new ComputeShader();
+	m_computeShader->Load(L"Shader\\waterCS.cso");
+
+	// ComputeShader関連リソース生成
+	CreateComputeResources();
+
+	// 定数バッファ生成
+	D3D11_BUFFER_DESC cbDesc = {};
+	cbDesc.ByteWidth = sizeof(WaterConstantBuffer);
+	cbDesc.Usage = D3D11_USAGE_DEFAULT;
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbDesc.CPUAccessFlags = 0;
+
+	HRESULT hr = RENDERER.GetDevice()->CreateBuffer(&cbDesc, nullptr, &m_constantBuffer);
+	if (FAILED(hr)) {
+		ErrorMessage(L"水面の定数バッファの作成に失敗しました。", hr);
+		return false;
+	}
+
 	// サンプラーステート生成
 	D3D11_SAMPLER_DESC samplerDesc = {};
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.MinLOD = 0;
-	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	samplerDesc.MaxAnisotropy = 1;
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 
-	hr = device->CreateSamplerState(&samplerDesc, &m_samplerState);
+	hr = RENDERER.GetDevice()->CreateSamplerState(&samplerDesc, &m_samplerState);
 	if (FAILED(hr)) {
 		ErrorMessage(L"水面のサンプラーステートの作成に失敗しました。", hr);
 		return false;
@@ -147,11 +192,6 @@ bool Water::Initialize() {
 /// 終了
 /// </summary>
 void Water::Finalize() {
-	if (m_samplerState) {
-		m_samplerState->Release();
-		m_samplerState = nullptr;
-	}
-
 	if (m_normalMap) {
 		delete m_normalMap;
 		m_normalMap = nullptr;
@@ -160,18 +200,6 @@ void Water::Finalize() {
 		delete m_foamTexture;
 		m_foamTexture = nullptr;
 	}
-	if (m_constantBuffer) {
-		m_constantBuffer->Release();
-		m_constantBuffer = nullptr;
-	}
-	if (m_indexBuffer) {
-		m_indexBuffer->Release();
-		m_indexBuffer = nullptr;
-	}
-	if (m_vertexBuffer) {
-		m_vertexBuffer->Release();
-		m_vertexBuffer = nullptr;
-	}
 	if (m_pixelShader) {
 		delete m_pixelShader;
 		m_pixelShader = nullptr;
@@ -179,6 +207,10 @@ void Water::Finalize() {
 	if (m_vertexShader) {
 		delete m_vertexShader;
 		m_vertexShader = nullptr;
+	}
+	if (m_computeShader) {
+		delete m_computeShader;
+		m_computeShader = nullptr;
 	}
 }
 
@@ -191,29 +223,25 @@ void Water::Update(double deltaTime) {
 	m_time += dt;
 
 	// 波紋の更新
-	for (int i = 0; i < m_activeRippleCount; i++) {
-		Ripple& ripple = m_ripples[i];
-		ripple.time += dt;
+	m_activeRippleCount = 0;
+	for (auto& ripple : m_ripples) {
+		if (ripple.active) {
+			ripple.time += dt;
 
-		// 波紋の寿命チェック
-		if (ripple.time > 5.0f) {
-			// 波紋を無効化
-			ripple.active = false;
-		}
-	}
-
-	// 非アクティブな波紋をリストから削除
-	int writeIndex = 0;
-	for (int readIndex = 0; readIndex < m_activeRippleCount; readIndex++) {
-		if (m_ripples[readIndex].active) {
-			if (writeIndex != readIndex) {
-				m_ripples[writeIndex] = m_ripples[readIndex];
+			// 一定時間経過で非アクティブ化
+			if (ripple.time > 5.0f) {
+				ripple.active = false;
+			} else {
+				m_activeRippleCount++;
 			}
-			writeIndex++;
 		}
 	}
 
-	m_activeRippleCount = writeIndex;
+	// ComputeShader実行
+	DispatchComputeShader();
+
+	// 高さと法線データコピー
+	CopyHeightNormalData();
 }
 
 /// <summary>
@@ -226,20 +254,6 @@ void Water::Draw() {
 	m_vertexShader->Set();
 	m_pixelShader->Set();
 
-	// 定数バッファ更新
-	UpdateConstantBuffer();
-
-	// テクスチャ設定
-	m_normalMap->Set(0);
-	m_foamTexture->Set(1);
-
-	if (m_environmentMapSRV) {
-		context->PSSetShaderResources(2, 1, &m_environmentMapSRV);
-	}
-
-	// サンプラーステート設定
-	context->PSSetSamplers(0, 1, &m_samplerState);
-
 	// ワールド行列設定
 	XMMATRIX world = XMMatrixIdentity();
 	world *= XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
@@ -247,11 +261,43 @@ void Water::Draw() {
 	world *= XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
 	RENDERER.SetWorldMatrix(world);
 
+	// 水面パラメータを定数バッファに転送
+	SHADER_PROPERTIES props = {};
+	props.params1 = Vector4(m_waterSize, m_reflectionStrength, m_refractionStrength, m_fresnelPower);
+	props.params2 = Vector4(m_waterClarityDepth, 0.0f, 0.0f, 0.0f);
+	RENDERER.SetShaderProperties(props);
+
+	// 高さ・法線テクスチャ設定
+	context->VSSetShaderResources(3, 1, &m_heightNormalSRV);
+
+	// 法線マップ設定
+	if (m_normalMap) {
+		auto srv = m_normalMap->GetSRV();
+		context->PSSetShaderResources(0, 1, &srv);
+	}
+
+	// フォームテクスチャ設定
+	if (m_foamTexture) {
+		auto srv = m_foamTexture->GetSRV();
+		context->PSSetShaderResources(1, 1, &srv);
+	}
+
+	// 環境マップ設定
+	if (m_environmentMapSRV) {
+		context->PSSetShaderResources(2, 1, &m_environmentMapSRV);
+	}
+
+
+	// サンプラーステート設定
+	context->VSSetSamplers(0, 1, &m_samplerState);
+	context->PSSetSamplers(0, 1, &m_samplerState);
+
+
 	// 頂点バッファ設定
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
 	context->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
-	context->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	context->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
 	// プリミティブトポロジ設定
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -271,6 +317,7 @@ void Water::CreateMesh() {
 
 	int gridSize = m_gridResolution;
 	float cellSize = m_waterSize / gridSize;
+	float halfSize = m_waterSize * 0.5f;
 
 	// 頂点データ生成
 	std::vector<VERTEX_3D> vertices;
@@ -280,9 +327,9 @@ void Water::CreateMesh() {
 		for (int x = 0; x <= gridSize; x++) {
 			VERTEX_3D vertex = {};
 			vertex.position = XMFLOAT4(
-				(x - gridSize / 2.0f) * cellSize,
+				x * cellSize - halfSize,
 				0.0f,
-				(z - gridSize / 2.0f) * cellSize,
+				z * cellSize - halfSize,
 				1.0f);
 			vertex.normal = XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 			vertex.texcoord = XMFLOAT4(
@@ -462,107 +509,162 @@ void Water::CreateFoamTexture() {
 		texture->Release();
 	}
 }
+/// <summary>
+/// コンピュートシェーダー用リソースの生成
+/// </summary>
+void Water::CreateComputeResources() {
+	auto device = RENDERER.GetDevice();
+
+	// 高さと法線を格納するテクスチャ生成
+	D3D11_TEXTURE2D_DESC texDesc = {};
+	texDesc.Width = m_gridResolution;
+	texDesc.Height = m_gridResolution;
+	texDesc.MipLevels = 1;
+	texDesc.ArraySize = 1;
+	texDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; // xyz:法線、w:高さ
+	texDesc.SampleDesc.Count = 1;
+	texDesc.Usage = D3D11_USAGE_DEFAULT;
+	texDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+
+	device->CreateTexture2D(&texDesc, nullptr, &m_heightNormalTexture);
+
+	// UAV生成
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+	uavDesc.Format = texDesc.Format;
+	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
+	uavDesc.Texture2D.MipSlice = 0;
+	device->CreateUnorderedAccessView(m_heightNormalTexture.Get(), &uavDesc, &m_heightNormalUAV);
+
+	// SRV生成
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = texDesc.Format;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = 1;
+	device->CreateShaderResourceView(m_heightNormalTexture.Get(), &srvDesc, &m_heightNormalSRV);
+
+	// CPU読み取り用バッファ生成
+	texDesc.Usage = D3D11_USAGE_STAGING;
+	texDesc.BindFlags = 0;
+	texDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+
+	device->CreateTexture2D(&texDesc, nullptr, &m_stagingTexture);
+
+}
 
 /// <summary>
-/// 定数バッファ更新
+/// コンピュートシェーダーのディスパッチ
 /// </summary>
-void Water::UpdateConstantBuffer() {
+void Water::DispatchComputeShader() {
 	auto context = RENDERER.GetDeviceContext();
 
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	HRESULT hr = context->Map(m_constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	// 定数バッファ更新
+	WaterConstantBuffer cbData = {};
+	cbData.time = m_time;
+	cbData.waveHeight = m_waveHeight;
+	cbData.waterSize = m_waterSize;
+	cbData.activeRippleCount = m_activeRippleCount;
 
-	if (SUCCEEDED(hr)) {
-		WaterConstantBuffer* cb = reinterpret_cast<WaterConstantBuffer*>(mappedResource.pData);
+	// 基本波パラメータ
+	cbData.baseWaveFreq1 = m_baseWaveFreqency1;
+	cbData.baseWaveFreq2 = m_baseWaveFreqency2;
+	cbData.baseWaveFreq3 = m_baseWaveFreqency3;
+	cbData.baseWaveSpeed1 = m_baseWaveSpeed1;
+	cbData.baseWaveSpeed2 = m_baseWaveSpeed2;
+	cbData.baseWaveSpeed3 = m_baseWaveSpeed3;
+	cbData.waveSharpness = m_waveSharpness;
+	cbData.gridResolution = m_gridResolution;
 
-		cb->time = m_time;
-		cb->waveHeight = m_waveHeight;
-		cb->waterSize = m_waterSize;
-		cb->activeRippleCount = m_activeRippleCount;
-
-		cb->baseWaveFreq1 = m_baseWaveFreqency1;
-		cb->baseWaveFreq2 = m_baseWaveFreqency2;
-		cb->baseWaveFreq3 = m_baseWaveFreqency3;
-		cb->baseWaveSpeed1 = m_baseWaveSpeed1;
-		cb->baseWaveSpeed2 = m_baseWaveSpeed2;
-		cb->baseWaveSpeed3 = m_baseWaveSpeed3;
-		cb->waveSharpness = m_waveSharpness;
-
-		cb->padding3 = 0.0f;
-
-		cb->reflectionStrength = m_reflectionStrength;
-		cb->refractionStrength = m_refractionStrength;
-		cb->fresnelPower = m_fresnelPower;
-		cb->waterClarityDepth = m_waterClarityDepth;
-
-		// 波紋データ設定
-		// アクティブな波紋のみ設定
-		for (int i = 0; i < m_activeRippleCount; i++) {
-			const Ripple& ripple = m_ripples[i];
-			cb->ripples[i].positionAndTime = XMFLOAT4(ripple.position.x, ripple.position.y, ripple.position.z, ripple.time);
-			cb->ripples[i].params = XMFLOAT4(ripple.amplitude, ripple.frequency, ripple.speed, 1.0f);
+	// 波紋データ
+	int index = 0;
+	for (const auto& ripple : m_ripples) {
+		if (ripple.active && index < MAX_RIPPLES) {
+			cbData.ripples[index].positionAndTime = XMFLOAT4(ripple.position.x, ripple.position.z, 0.0f, ripple.time);
+			cbData.ripples[index].params = XMFLOAT4(ripple.amplitude, ripple.frequency, ripple.speed, 1.0f);
+			index++;
 		}
-
-		// 非アクティブな波紋はゼロクリア
-		for (int i = m_activeRippleCount; i < MAX_RIPPLES; i++) {
-			cb->ripples[i].positionAndTime = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
-			cb->ripples[i].params = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
-		}
-
-		context->Unmap(m_constantBuffer, 0);
 	}
 
-	// 定数バッファをb7にセット
-	context->VSSetConstantBuffers(7, 1, &m_constantBuffer);
-	context->PSSetConstantBuffers(7, 1, &m_constantBuffer);
+	context->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &cbData, 0, 0);
+
+	// シェーダー設定
+	m_computeShader->Set();
+	// 定数バッファ設定
+	context->CSSetConstantBuffers(7, 1, &m_constantBuffer);
+	// UAV設定
+	context->CSSetUnorderedAccessViews(0, 1, &m_heightNormalUAV, nullptr);
+
+	// ディスパッチ
+	UINT threadGroupX = (m_gridResolution + 15) / 16;
+	UINT threadGroupY = (m_gridResolution + 15) / 16;
+	context->Dispatch(threadGroupX, threadGroupY, 1);
+
+	// UAV解除
+	ID3D11UnorderedAccessView* nullUAV = nullptr;
+	context->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
+
 }
 
 /// <summary>
-/// 波高計算（CPU計算）
+/// 高さと法線データをコピー
 /// </summary>
-/// <param name="position">座標</param>
-/// <param name="time">時間</param>
-/// <returns>波高</returns>
-float Water::CalculateWaveHeight(const Vector3& position, float time) const {
-	float height = 0.0f;
-	float x = position.x;
-	float z = position.z;
+void Water::CopyHeightNormalData() {
+	auto context = RENDERER.GetDeviceContext();
 
-	// べき乗sin波で波頭を尖らせる
-	auto applySharpness = [this](float wave) -> float {
-		float wave01 = wave * 0.5f + 0.5f; // -1~1 -> 0~1
-		wave01 = std::pow(wave01, m_waveSharpness);
-		return wave01 * 2.0f - 1.0f; // 0~1 -> -1~1
-	};
+	// ステージングテクスチャにコピー
+	context->CopyResource(m_stagingTexture.Get(), m_heightNormalTexture.Get());
 
-	float wave1 = std::sin(x * m_baseWaveFreqency1 + time * m_baseWaveSpeed1);
-	float wave2 = std::sin(z * m_baseWaveFreqency2 + time * m_baseWaveSpeed2);
-	float wave3 = std::sin((x + z) * m_baseWaveFreqency3 + time * m_baseWaveSpeed3);
+	// マップ取得
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	HRESULT hr = context->Map(m_stagingTexture.Get(), 0, D3D11_MAP_READ, 0, &mappedResource);
+	if (SUCCEEDED(hr)) {
+		float* dataPtr = reinterpret_cast<float*>(mappedResource.pData);
 
-	wave1 = applySharpness(wave1);
-	wave2 = applySharpness(wave2);
-	wave3 = applySharpness(wave3);
+		for (int y = 0; y < m_gridResolution; y++) {
+			for (int x = 0; x < m_gridResolution; x++) {
+				int srcIndex = (y * mappedResource.RowPitch / sizeof(float)) + (x * 4);
+				int dstIndex = y * m_gridResolution + x;
 
-	height += wave1 * m_waveHeight * 0.3f;
-	height += wave2 * m_waveHeight * 0.2f;
-	height += wave3 * m_waveHeight * 0.5f;
-
-	// 波紋の影響
-	for (int i = 0; i < m_activeRippleCount; i++) {
-		const Ripple& ripple = m_ripples[i];
-		if (!ripple.active) continue;
-
-		float dx = x - ripple.position.x;
-		float dz = z - ripple.position.z;
-		float distance = std::sqrt(dx * dx + dz * dz);
-
-		if (distance < ripple.speed * ripple.time && ripple.time > 0.0f) {
-			float wavePhase = ripple.frequency * (distance - ripple.speed * ripple.time);
-			float attenuation = std::exp(-ripple.time * 0.5f); // 時間経過による減衰
-			float distanceAttenuation = 1.0f / (1.0f + distance * 0.01f); // 距離による減衰
-
-			height += std::sin(wavePhase) * ripple.amplitude * attenuation * distanceAttenuation;
+				m_heightNormalData[dstIndex].normal = Vector3(
+					dataPtr[srcIndex + 0],
+					dataPtr[srcIndex + 1],
+					dataPtr[srcIndex + 2]);
+				m_heightNormalData[dstIndex].height = dataPtr[srcIndex + 3];
+			}
 		}
+
+		context->Unmap(m_stagingTexture.Get(), 0);
 	}
-	return height;
 }
+
+/// <summary>
+/// バイリニア補間(スカラ―値)
+/// </summary>
+/// <param name="p11">左上</param>
+/// <param name="p12">右上</param>
+/// <param name="p21">左下</param>
+/// <param name="p22">右下</param>
+/// <param name="tx">X方向の補間係数</param>
+/// <param name="ty">Y方向の補間係数</param>
+/// <returns></returns>
+float Water::BilinearInterpolate(float p11, float p12, float p21, float p22, float tx, float ty) const {
+	float r1 = p11 * (1.0f - tx) + p12 * tx;
+	float r2 = p21 * (1.0f - tx) + p22 * tx;
+	return r1 * (1.0f - ty) + r2 * ty;
+}
+
+/// <summary>
+/// バイリニア補間(ベクトル値)
+/// </summary>
+/// <param name="p11">左上</param>
+/// <param name="p12">右上</param>
+/// <param name="p21">左下</param>
+/// <param name="p22">右下</param>
+/// <param name="tx">X方向の補間係数</param>
+/// <param name="ty">Y方向の補間係数</param>
+/// <returns></returns>
+Vector3 Water::BilinearInterpolateVector3(const Vector3& p11, const Vector3& p12, const Vector3& p21, const Vector3& p22, float tx, float ty) const {
+	Vector3 r1 = p11 * (1.0f - tx) + p12 * tx;
+	Vector3 r2 = p21 * (1.0f - tx) + p22 * tx;
+	return r1 * (1.0f - ty) + r2 * ty;
+}
+
