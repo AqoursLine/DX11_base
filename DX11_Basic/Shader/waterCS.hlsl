@@ -98,4 +98,26 @@ void main( uint3 DTid : SV_DispatchThreadID )
 	// uv座標からワールド座標に変換
 	float2 uv = float2(DTid.x, DTid.y) / (GridResolution - 1);
 	float2 worldPos = (uv - 0.5) * WaterSize;
+	
+	// 中心点の高さを計算
+	float height = CalculateHeight(worldPos);
+	
+	// 法線計算のための隣接点の高さを取得
+	float delta = WaterSize / (GridResolution - 1);
+	
+	float heightR = CalculateHeight(worldPos + float2(delta, 0.0));
+	float heightL = CalculateHeight(worldPos - float2(delta, 0.0));
+	float heightU = CalculateHeight(worldPos + float2(0.0, delta));
+	float heightD = CalculateHeight(worldPos - float2(0.0, delta));
+	
+	// 勾配から法線を計算
+	float3 tangentX = float3(delta * 2.0, (heightR - heightL) * WaveHeight, 0.0);
+	float3 tangentZ = float3(0.0, (heightU - heightD) * WaveHeight, delta * 2.0);
+
+	float3 normal = normalize(cross(tangentX, tangentZ));
+
+	// 出力テクスチャに高さと法線を格納
+	OutputHeightNormal[DTid.xy] = float4(normal, height);
+
+
 }
