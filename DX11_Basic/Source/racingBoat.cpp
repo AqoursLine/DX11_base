@@ -147,6 +147,12 @@ void RacingBoat::Update(double deltaTime) {
 		webClient->SendMessageClient(message);
 	}
 
+	// セクション判定
+	UpdateProgressSection();
+
+	// 進捗セクション更新
+	CalculateLapProgress();
+
 	Boat::Update(deltaTime);
 }
 
@@ -168,4 +174,132 @@ Vector2 RacingBoat::GetSceneBoundsMin() const {
 
 Vector2 RacingBoat::GetSceneBoundsMax() const {
 	return m_raceManager->GetBoundsMax();
+}
+
+void RacingBoat::UpdateProgressSection() {
+	Vector3 pos = m_position;
+	pos.y = 0.0f; // 水平成分のみ考慮
+
+	if (pos.x >= 0.0f && pos.x < 150.0f && pos.z <= 0.0f) {
+		// 南直線
+		// 0.0f <= x < 150.0f, z <= 0.0f
+		m_currentSection = FIRST_SOUTH_STRAIGHT;
+	} else if (pos.x >= 150.0f && pos.z < 0.0f) {
+		// 南東カーブ
+		// x >= 150.0f, z < 0.0f
+		m_currentSection = EAST_SOUTH_CURVE;
+	} else if (pos.x > 150.0f && pos.z >= 0.0f) {
+		// 北東カーブ
+		// x > 150.0f, z >= 0.0f
+		m_currentSection = EAST_NORTH_CURVE;
+	} else if (pos.x > 0.0f && pos.x <= 150.0f && pos.z > 0.0f) {
+		// 北直線
+		// 0.0f < x <= 150.0f, z > 0.0f
+		m_currentSection = FIRST_NORTH_STRAIGHT;
+	} else if (pos.x > -150.0f && pos.x <= 0.0f && pos.z > 0.0f) {
+		// 北直線
+		// -150.0f < x <= 0.0f, z > 0.0f
+		m_currentSection = SECOND_NORTH_STRAIGHT;
+	} else if (pos.x <= -150.0f && pos.z > 0.0f) {
+		// 北西カーブ
+		// x < -150.0f, z > 0.0f
+		m_currentSection = WEST_NORTH_CURVE;
+	} else if (pos.x < -150.0f && pos.z <= 0.0f) {
+		// 南西カーブ
+		// x < -150.0f, z <= 0.0f
+		m_currentSection = WEST_SOUTH_CURVE;
+	} else {
+		// 南直線
+		m_currentSection = SECOND_SOUTH_STRAIGHT;
+	}
+}
+
+void RacingBoat::CalculateLapProgress() {
+	float progress = 0.0f;
+	switch (m_currentSection) {
+		case RacingBoat::FIRST_SOUTH_STRAIGHT:
+			// 南直線
+			// x = 0 ~ 150, z = -35
+			progress = GetSectionProgress({ 150.0f, 0.0f, -35.0f }, { -1.0f, 0.0f, 0.0f });
+			progress *= 0.2f;
+			break;
+		case RacingBoat::EAST_SOUTH_CURVE:
+			// 南東カーブ
+			// x = 150 ~ 185, z = -35 ~ 0
+			progress = GetSectionProgress({ 150.0f, 0.0f, -35.0f }, { 1.0f, 0.0f, 0.0f }, { 185.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, -1.0f });
+			progress = 0.2f + progress * 0.05f;
+			break;
+		case RacingBoat::EAST_NORTH_CURVE:
+			// 北東カーブ
+			// x = 185 ~ 150, z = 0 ~ 35
+			progress = GetSectionProgress({ 185.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 150.0f, 0.0f, 35.0f }, { 1.0f, 0.0f, 0.0f });
+			progress = 0.25f + progress * 0.05f;
+			break;
+		case RacingBoat::FIRST_NORTH_STRAIGHT:
+			// 北直線
+			// x = 150 ~ 0, z = 35
+			progress = GetSectionProgress({ 0.0f, 0.0f, 35.0f }, { 1.0f, 0.0f, 0.0f });
+			progress = 0.3f + progress * 0.2f;
+			break;
+		case RacingBoat::SECOND_NORTH_STRAIGHT:
+			// 北直線
+			// x = 0 ~ -150, z = 35
+			progress = GetSectionProgress({ -150.0f, 0.0f, 35.0f }, { 1.0f, 0.0f, 0.0f });
+			progress = 0.5f + progress * 0.2f;
+			break;
+		case RacingBoat::WEST_NORTH_CURVE:
+			// 北西カーブ
+			// x = -150 ~ -185, z = 35 ~ 0
+			progress = GetSectionProgress({ -150.0f, 0.0f, 35.0f }, { -1.0f, 0.0f, 0.0f }, { -185.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f });
+			progress = 0.7f + progress * 0.05f;
+			break;
+		case RacingBoat::WEST_SOUTH_CURVE:
+			// 南西カーブ
+			// x = -185 ~ -150, z = 0 ~ -35
+			progress = GetSectionProgress({ -185.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }, { -150.0f, 0.0f, -35.0f }, { -1.0f, 0.0f, 0.0f });
+			progress = 0.75f + progress * 0.05f;
+			break;
+		case RacingBoat::SECOND_SOUTH_STRAIGHT:
+			progress = GetSectionProgress({ 0.0f, 0.0f, -35.0f }, { -1.0f, 0.0f, 0.0f });
+			progress = 0.8f + progress * 0.2f;
+			break;
+		default:
+			break;
+	}
+
+	m_lapProgress = progress;
+}
+
+/// <summary>
+/// セクション進捗度取得(直線)
+/// </summary>
+/// <param name="pos">ゲートの位置</param>
+/// <param name="dir">ゲートの正面方向</param>
+/// <returns>セクション内の進捗度(0.0 ~ 1.0)</returns>
+float RacingBoat::GetSectionProgress(const Vector3& pos, const Vector3& dir) {
+	Vector3 toBoat = m_position - pos;
+	toBoat.y = 0.0f; // 水平成分のみ考慮
+	float sectionLength = toBoat.Dot(dir);
+
+	return sectionLength / 150.0f;
+}
+
+/// <summary>
+/// セクション進捗度取得(カーブ)
+/// </summary>
+/// <param name="pos1">ゲートの位置1</param>
+/// <param name="dir1">ゲートの正面方向1</param>
+/// <param name="pos2">ゲートの位置2</param>
+/// <param name="dir2">ゲートの正面方向2</param>
+/// <returns>セクション内の進捗度(0.0 ~ 1.0)</returns>
+float RacingBoat::GetSectionProgress(const Vector3& pos1, const Vector3& dir1, const Vector3& pos2, const Vector3& dir2) {
+	Vector3 toBoat1 = m_position - pos1;
+	toBoat1.y = 0.0f; // 水平成分のみ考慮
+	float sectionLength1 = toBoat1.Dot(dir1);
+
+	Vector3 toBoat2 = m_position - pos2;
+	toBoat2.y = 0.0f; // 水平成分のみ考慮
+	float sectionLength2 = toBoat2.Dot(dir2);
+
+	return (sectionLength1 * sectionLength2) / (60.0f * 60.0f);
 }

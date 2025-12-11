@@ -39,29 +39,38 @@ void LapReadyGate::Update(double deltaTime) {
 			continue;
 		}
 
-
 		Vector3 boatPos = boat->GetPosition();
 
 		bool isCollided = false;
 
-		if (boatPos.z < m_position.z - m_scale.z * 0.5f && boatPos.z > m_position.z + m_scale.z * 0.5f) {
-			continue;
+		// Z軸範囲内かチェック
+		float gateHalfWidth = m_scale.x * 0.5f;
+
+		// ボートの中心がゲートの幅内にあるかチェック
+		if (boatPos.z > m_position.z - gateHalfWidth && boatPos.z < m_position.z + gateHalfWidth) {
+			// X軸範囲内かチェック
+			float collisionThickness = m_scale.z * 0.5f + boat->GetLength() * 0.5f;
+
+			// ボートの中心がゲートの厚み範囲内にあるかチェック
+			if (std::abs(boatPos.x - m_position.x) < collisionThickness) {
+				isCollided = true;
+			}
 		}
 
-		float boatHalfLength = boat->GetLength() * 0.5f;
-
-		if (boatPos.x + boatHalfLength > m_position.x - m_scale.x * 0.05f && boatPos.x + boatHalfLength < m_position.x + m_scale.x * 0.05f) {
-			isCollided = true;
-		}
-
-		Vector3 boatVel = boat->GetVelocity();
-		boatVel.y = 0.0f; //水平成分のみ
-
-		isCollided = isCollided && (boatVel.Dot(Vector4::FromAxisAngle(Vector3::UP, m_rotation.y).RotateVector(Vector3::FORWARD)) < 0.0f);
-
+		// 進行方向のチェック
 		if (isCollided) {
-			boat->SetLapUpdateReady(true);
+			Vector3 boatVelocity = boat->GetVelocity();
+			boatVelocity.y = 0.0f; // 水平成分のみ
+
+			// ゲートの正面方向ベクトル
+			Vector3 gateForward = GetForward();
+
+			// 内積を計算して、進行方向がゲートの正面方向と異なれば通過とみなす
+			if (boatVelocity.Dot(gateForward) < 0.0f) {
+				boat->SetLapUpdateReady(true);
+			}
 		}
+
 	}
 }
 

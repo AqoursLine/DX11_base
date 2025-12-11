@@ -71,7 +71,8 @@ struct DynamicEmitParams {
 	XMFLOAT3 emitterPosition;
 	UINT randomSeed;
 	UINT emitCount;
-	XMFLOAT3 padding;
+	UINT positionCount;
+	XMFLOAT2 padding;
 };
 
 // Compact用パラメータ
@@ -184,6 +185,13 @@ private:
 	ComPtr<ID3D11Buffer> m_freeIndicesBuffer = nullptr;					// フリーインデックスバッファ
 	ComPtr<ID3D11UnorderedAccessView> m_freeIndicesUAV = nullptr;		// フリーインデックスUAV（消費用）
 
+	// 発生位置管理
+	ComPtr<ID3D11Buffer> m_emitPositionsBuffer = nullptr;				// 発生位置バッファ
+	ComPtr<ID3D11ShaderResourceView> m_emitPositionsSRV = nullptr;		// 発生位置SRV
+	ComPtr<ID3D11Buffer> m_emitPositionIndicesBuffer = nullptr;			// 発生位置インデックスバッファ
+	ComPtr<ID3D11ShaderResourceView> m_emitPositionIndicesSRV = nullptr;	// 発生位置インデックスSRV
+
+
 	// IndirectDraw用リソース
 	ComPtr<ID3D11Buffer> m_activeIndicesBuffer = nullptr;				// アクティブインデックスバッファ
 	ComPtr<ID3D11UnorderedAccessView> m_activeIndicesUAV = nullptr;		// アクティブインデックスUAV
@@ -217,11 +225,21 @@ private:
 	bool m_staticUpdateParamsDirty = true;
 	bool m_staticEmitParamsDirty = true;
 
+	// バッチEmit用構造体
+	struct EmitRequest {
+		XMFLOAT3 position;
+		UINT Count;
+	};
+	std::vector<EmitRequest> m_pendingEmits;
+
 	// GPU側でのパーティクル更新
 	void UpdateParticlesGPU(float deltaTime);
 
 	// GPU側でのパーティクル発生
-	void EmitGPU(UINT count);
+	void EmitGPU(UINT count, const std::vector<XMFLOAT4>& positions);
+
+	// バッチEmitリクエストを処理
+	void FlushPendingEmits();
 
 	// GPU側でのアクティブパーティクル収集(IndirectDraw用)
 	void CompactParticlesGPU();

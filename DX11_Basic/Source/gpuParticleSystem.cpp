@@ -9,7 +9,8 @@
 /// </summary>
 /// <param name="count">発生数</param>
 void GPUParticleSystem::Emit(int count) {
-	EmitGPU(count);
+	std::vector<XMFLOAT4> singlePosition = { XMFLOAT4(m_position.x, m_position.y, m_position.z, static_cast<float>(count)) };
+	EmitGPU(static_cast<UINT>(count), singlePosition);
 }
 
 /// <summary>
@@ -18,13 +19,8 @@ void GPUParticleSystem::Emit(int count) {
 /// <param name="position">発生位置</param>
 /// <param name="count">発生数</param>
 void GPUParticleSystem::EmitOneShot(const Vector3& position, int count) {
-	// エミッター位置を一時的に変更
-	Vector3 originalPosition = m_position;
-	m_position = position;
-	// ワンショット発生
-	EmitGPU(count > 0 ? count : m_settings.oneShotCount);
-	// エミッター位置を元に戻す
-	m_position = originalPosition;
+	// バッチキューに追加
+	m_pendingEmits.push_back({ XMFLOAT3(position.x, position.y, position.z), static_cast<UINT>(count > 0 ? count : m_settings.oneShotCount) });
 }
 
 /// <summary>
@@ -92,13 +88,16 @@ void GPUParticleSystem::Update(double deltaTime) {
 		return;
 	}
 
+	// バッチ発生処理
+	FlushPendingEmits();
+
 	// パーティクル更新
 	if (m_isPlaying && !m_settings.oneShot) {
 		m_emitTimer += dt;
 		float emitInterval = 1.0f / m_settings.emitRate;
 
 		while (m_emitTimer >= emitInterval) {
-			EmitGPU(1);
+			Emit(1);
 			m_emitTimer -= emitInterval;
 		}
 	}
@@ -233,7 +232,7 @@ void GPUParticleSystem::UpdateParticlesGPU(float deltaTime) {
 /// パーティクル発生(GPU)
 /// </summary>
 /// <param name="count">発生数</param>
-void GPUParticleSystem::EmitGPU(UINT count) {
+void GPUParticleSystem::EmitGPU(UINT count, const std::vector<XMFLOAT4>& positions) {
 	auto context = RENDERER.GetDeviceContext();
 
 	// フリーリスト初期化
@@ -243,6 +242,27 @@ void GPUParticleSystem::EmitGPU(UINT count) {
 		context->CSSetUnorderedAccessViews(1, 1, m_freeIndicesUAV.GetAddressOf(), &initialCount);
 		m_freeListInitialized = true;
 	}
+
+	// 位置バッファに転送
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	context->Map(m_emitPositionsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	memcpy(mappedResource.pData, positions.data(), sizeof(XMFLOAT4) * positions.size());
+	context->Unmap(m_emitPositionsBuffer.Get(), 0);
+
+	// 位置インデックス配列を生成
+	std::vector<UINT> positionIndices(count);
+	UINT threadIndex = 0;
+	for (size_t posIdx = 0; posIdx < positions.size(); posIdx++) {
+		UINT emitCountForThisPos = static_cast<UINT>(count / positions[posIdx].w);
+		for (UINT i = 0; i < emitCountForThisPos; i++) {
+			positionIndices[threadIndex++] = static_cast<UINT>(posIdx);
+		}
+	}
+
+	// 位置インデックスバッファに転送
+	context->Map(m_emitPositionIndicesBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	memcpy(mappedResource.pData, positionIndices.data(), sizeof(UINT) * count);
+	context->Unmap(m_emitPositionIndicesBuffer.Get(), 0);
 
 	// 静的パラメータが変更されていれば更新
 	if (m_staticEmitParamsDirty) {
@@ -276,12 +296,12 @@ void GPUParticleSystem::EmitGPU(UINT count) {
 
 	DynamicEmitParams dynamicParams;
 	dynamicParams.emitCount = count;
-	dynamicParams.emitterPosition = XMFLOAT3(m_position.x, m_position.y, m_position.z);
+	dynamicParams.emitterPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	dynamicParams.randomSeed = m_randomSeed;
-	dynamicParams.padding = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	dynamicParams.positionCount = static_cast<UINT>(positions.size());
+	dynamicParams.padding = XMFLOAT2(0.0f, 0.0f);
 
 	// パラメータバッファに転送
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	context->Map(m_dynamicEmitParamsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	memcpy(mappedResource.pData, &dynamicParams, sizeof(DynamicEmitParams));
 	context->Unmap(m_dynamicEmitParamsBuffer.Get(), 0);
@@ -293,10 +313,13 @@ void GPUParticleSystem::EmitGPU(UINT count) {
 	ID3D11Buffer* constantBuffers[2] = { m_staticEmitParamsBuffer.Get(), m_dynamicEmitParamsBuffer.Get() };
 	context->CSSetConstantBuffers(3, 2, constantBuffers);
 
-
 	// UAV設定
 	ID3D11UnorderedAccessView* uavs[2] = { m_particleBufferUAV.Get(), m_freeIndicesUAV.Get() };
 	context->CSSetUnorderedAccessViews(0, 2, uavs, nullptr);
+
+	// SRV設定
+	ID3D11ShaderResourceView* srvs[2] = { m_emitPositionsSRV.Get(), m_emitPositionIndicesSRV.Get() };
+	context->CSSetShaderResources(2, 2, srvs);
 
 	// ディスパッチ
 	UINT threadGroupCount = (count + 255) / 256;
@@ -305,8 +328,34 @@ void GPUParticleSystem::EmitGPU(UINT count) {
 	// リソース解除
 	ID3D11UnorderedAccessView* nullUAVs[2] = { nullptr, nullptr };
 	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, nullptr);
+	ID3D11ShaderResourceView* nullSRVs[2] = { nullptr, nullptr };
+	context->CSSetShaderResources(2, 2, nullSRVs);
 	ID3D11Buffer* nullBuffer[2] = { nullptr, nullptr };
 	context->CSSetConstantBuffers(3, 1, nullBuffer);
+}
+
+/// <summary>
+/// 保留中の発生をフラッシュ
+/// </summary>
+void GPUParticleSystem::FlushPendingEmits() {
+	if (m_pendingEmits.empty()) {
+		return;
+	}
+
+	// 位置データの準備
+	std::vector<XMFLOAT4> positions;
+	UINT totalCount = 0;
+	
+	for (const auto& req : m_pendingEmits) {
+		positions.emplace_back(req.position.x, req.position.y, req.position.z, static_cast<float>(req.Count));
+		totalCount += req.Count;
+	}
+
+	// 発生
+	EmitGPU(totalCount, positions);
+
+	// 保留リストクリア
+	m_pendingEmits.clear();
 }
 
 /// <summary>
@@ -499,6 +548,47 @@ bool GPUParticleSystem::CreateBuffers() {
 	if (FAILED(device->CreateBuffer(&bd, nullptr, m_staticEmitParamsBuffer.GetAddressOf()))) {
 		return false;
 	}
+
+	// 発生位置バッファ作成
+	bd = {};
+	bd.ByteWidth = sizeof(XMFLOAT4) * 256; // 最大256個の発生位置
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	if (FAILED(device->CreateBuffer(&bd, nullptr, m_emitPositionsBuffer.GetAddressOf()))) {
+		return false;
+	}
+
+	// 発生位置SRV作成
+	srvDesc = {};
+	srvDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	srvDesc.Buffer.FirstElement = 0;
+	srvDesc.Buffer.NumElements = 256;
+	if (FAILED(device->CreateShaderResourceView(m_emitPositionsBuffer.Get(), &srvDesc, m_emitPositionsSRV.GetAddressOf()))) {
+		return false;
+	}
+
+	// 位置インデックス配列バッファ作成
+	bd = {};
+	bd.ByteWidth = sizeof(UINT) * m_settings.maxParticles;
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	if (FAILED(device->CreateBuffer(&bd, nullptr, m_emitPositionIndicesBuffer.GetAddressOf()))) {
+		return false;
+	}
+
+	// 位置インデックスSRV作成
+	srvDesc = {};
+	srvDesc.Format = DXGI_FORMAT_R32_UINT;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	srvDesc.Buffer.FirstElement = 0;
+	srvDesc.Buffer.NumElements = m_settings.maxParticles;
+	if (FAILED(device->CreateShaderResourceView(m_emitPositionIndicesBuffer.Get(), &srvDesc, m_emitPositionIndicesSRV.GetAddressOf()))) {
+		return false;
+	}
+
 
 	// IndirectDraw用リソース作成
 	if (m_drawMode == ParticleDrawMode::INDIRECT_DRAW) {

@@ -45,6 +45,12 @@ RWStructuredBuffer<Particle> particles : register(u0);
 // フリーインデックスバッファ
 ConsumeStructuredBuffer<uint> freeIndices : register(u1);
 
+// 発生位置バッファ
+Buffer<float4> emitPositions : register(t2);
+
+// 位置インデックスバッファ
+Buffer<uint> positionIndices : register(t3);
+
 // 乱数生成関数
 float random(uint seed, uint index)
 {
@@ -71,7 +77,11 @@ void main( uint3 DTid : SV_DispatchThreadID )
 	// フリーリストからインデックスを取得
 	uint index = freeIndices.Consume();
 	
-			// パーティクルの初期化
+	// 発生位置の取得
+	uint posIndex = positionIndices[threadIndex];
+	float4 emitPosData = emitPositions[posIndex];
+	
+	// パーティクルの初期化
 	Particle p;
 			
 	uint baseSeed = randomSeed + threadIndex * 1234567u;
@@ -82,7 +92,7 @@ void main( uint3 DTid : SV_DispatchThreadID )
 				randomRange(baseSeed, 1, -1.0f, 1.0f) * positionVariation.y,
 				randomRange(baseSeed, 2, -1.0f, 1.0f) * positionVariation.z
 			);
-	p.position = emitPosition + offsetPos;
+	p.position = emitPosData.xyz + offsetPos;
 			
 			// 速度の計算
 	p.velocity = baseVelocity + float3(

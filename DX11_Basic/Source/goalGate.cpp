@@ -93,33 +93,50 @@ void GoalGate::Update(double deltaTime) {
 
 		bool isCollided = false;
 
-		if (boatPos.z < m_position.z - m_scale.z * 0.5f && boatPos.z > m_position.z + m_scale.z * 0.5f) {
-			continue;
-		}
+		// Z軸範囲内かチェック
+		float gateHalfWidth = m_scale.x * 0.5f;
 
-		float boatHalfLength = boat->GetLength() * 0.5f;
+		// ボートの中心がゲートの幅内にあるかチェック
+		if (boatPos.z > m_position.z - gateHalfWidth && boatPos.z < m_position.z + gateHalfWidth) {
+			// X軸範囲内かチェック
+			float collisionThickness = m_scale.z * 0.5f + boat->GetLength() * 0.5f;
 
-		if (boatPos.x + boatHalfLength > m_position.x - m_scale.x * 0.05f && boatPos.x + boatHalfLength < m_position.x + m_scale.x * 0.05f) {
-			isCollided = true;
-		}
-
-		Vector3 boatVel = boat->GetVelocity();
-		boatVel.y = 0.0f; //水平成分のみ
-
-		isCollided = isCollided && (boatVel.Dot(Vector4::FromAxisAngle(Vector3::UP, m_rotation.y).RotateVector(Vector3::FORWARD)) < 0.0f);
-
-		if (isCollided) {
-			boat->SetLapCount(boat->GetLapCount() + 1);
-
-			boat->SetLapUpdateReady(false);
-
-			if (boat->GetLapCount() > m_topLapCount) {
-				m_topLapCount = boat->GetLapCount();
+			// ボートの中心がゲートの厚み範囲内にあるかチェック
+			if (std::abs(boatPos.x - m_position.x) < collisionThickness) {
+				isCollided = true;
 			}
+		}
 
-			if (boat->GetLapCount() > m_raceManager->GetLapCountToFinish()) {
-				boat->SetPassedGoalGate(true);
-				boat->FinishRace();
+		// ボートの進行方向のチェック
+		if (isCollided) {
+			Vector3 boatVel = boat->GetVelocity();
+			boatVel.y = 0.0f; // 水平成分のみ考慮
+
+			// ゲートの前方向ベクトル
+			Vector3 gateForward = GetForward();
+
+			// 内積の結果が負の場合、ボートはゲートに向かって進んでいる
+			if (boatVel.Dot(gateForward) >= 0.0f) {
+				isCollided = false;
+			}
+		}
+
+		//衝突していたら周回数を増やす
+		if (isCollided) {
+			// 周回数更新の準備ができている場合のみ更新
+			if (boat->IsLapUpdateReady()) {
+				boat->SetLapCount(boat->GetLapCount() + 1);
+
+				boat->SetLapUpdateReady(false);
+
+				if (boat->GetLapCount() > m_topLapCount) {
+					m_topLapCount = boat->GetLapCount();
+				}
+
+				if (boat->GetLapCount() > m_raceManager->GetLapCountToFinish()) {
+					boat->SetPassedGoalGate(true);
+					boat->FinishRace();
+				}
 			}
 		}
 
@@ -161,9 +178,6 @@ void GoalGate::Draw() {
 		//周回ゲート
 		//シェーダーの設定
 		m_lapGatePS->Set();
-
-		//m_vertexShader->Set();
-		//m_pixelShader->Set();
 
 		//テクスチャセット
 		m_lapGateTexture->Set(0);

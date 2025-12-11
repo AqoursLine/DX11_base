@@ -77,20 +77,32 @@ void StartGate::Update(double deltaTime) {
 
 			bool isCollided = false;
 
-			if (boatPos.z < m_position.z - m_scale.z * 0.5f && boatPos.z > m_position.z + m_scale.z * 0.5f) {
-				continue;
+			// z軸の幅
+			float gateHalfWidth = m_scale.x * 0.5f;
+
+			// ボートの中心がゲートの幅内にあるかチェック
+			if (boatPos.z > m_position.z - gateHalfWidth && boatPos.z < m_position.z + gateHalfWidth) {
+				// x軸の厚みチェック
+				float collisionThickness = m_scale.z * 0.5f + boat->GetLength() * 0.5f;
+
+				if (std::abs(boatPos.x - m_position.x) < collisionThickness) {
+					isCollided = true;
+				}
 			}
 
-			float boatHalfLength = boat->GetLength() * 0.5f;
+			// 進行方向のチェック
+			if (isCollided) {
+				Vector3 boatVel = boat->GetVelocity();
+				boatVel.y = 0.0f; // 水平成分のみを考慮
 
-			if (boatPos.x + boatHalfLength > m_position.x - m_scale.x * 0.05f && boatPos.x + boatHalfLength < m_position.x + m_scale.x * 0.05f) {
-				isCollided = true;
+				// ゲートの正面
+				Vector3 gateForward = GetForward();
+
+				// 内積が正の場合、逆方向に進んでいるので衝突判定を無効化
+				if (boatVel.Dot(gateForward) >= 0.0f) {
+					isCollided = false;
+				}
 			}
-
-			Vector3 boatVel = boat->GetVelocity();
-			boatVel.y = 0.0f; //水平成分のみ
-
-			isCollided = isCollided && (boatVel.Dot(Vector4::FromAxisAngle(Vector3::UP, m_rotation.y).RotateVector(Vector3::FORWARD)) < 0.0f);
 
 			if (isCollided && m_passCheckTime < 1.0f) {
 				boat->SetPassedStartGate(true);
