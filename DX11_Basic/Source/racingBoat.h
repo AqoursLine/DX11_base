@@ -37,6 +37,10 @@ public:
 	//周回進捗度
 	float GetLapProgress() const { return m_lapProgress; }
 
+	//順位設定
+	void SetRank(int rank) { m_rank = rank; }
+	int GetRank() const { return m_rank; }
+
 	//ゴール処理
 	void FinishRace();
 
@@ -68,14 +72,14 @@ private:
 
 	float m_lapProgress = 0.0f; //現在の周回進捗度(0.0f ~ 1.0f)
 
+	int m_rank = 0; //順位
+
 	enum ProgressSection {
 		FIRST_SOUTH_STRAIGHT = 0,
-		EAST_SOUTH_CURVE,
-		EAST_NORTH_CURVE,
+		EAST_CURVE,
 		FIRST_NORTH_STRAIGHT,
 		SECOND_NORTH_STRAIGHT,
-		WEST_NORTH_CURVE,
-		WEST_SOUTH_CURVE,
+		WEST_CURVE,
 		SECOND_SOUTH_STRAIGHT,
 	};
 	ProgressSection m_currentSection = FIRST_SOUTH_STRAIGHT;
@@ -99,10 +103,9 @@ private:
 	/// <summary>
 	/// セクション進捗度取得(カーブ)
 	/// </summary>
-	/// <param name="pos1">開始位置</param>
-	/// <param name="dir1">開始方向</param>
-	/// <param name="pos2">終了位置</param>
-	/// <param name="dir2">終了方向</param>
-	/// <returns>セクション内の進捗度(0.0f ~ 1.0f)</returns>
-	float GetSectionProgress(const Vector3& pos1, const Vector3& dir1, const Vector3& pos2, const Vector3& dir2);
+	/// <param name="center">カーブ中心位置</param>
+	/// <param name="offset">カーブの開始角度(rad)</param>
+	/// <param name="totalAngle">カーブ全体の角度</param>
+	/// <returns>カーブ内の進捗度(0.0f ~ 1.0f)</returns>
+	float GetSectionProgressCurve(const Vector3& center, float offset, float totalAngle = XM_PI);
 };

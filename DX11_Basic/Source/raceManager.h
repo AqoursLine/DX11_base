@@ -33,6 +33,8 @@ public:
 	//完走に必要な周回数取得
 	int GetLapCountToFinish() const { return m_lapCountToFinish; }
 
+	RacingBoat* GetRacingBoat(int laneIndex) const;
+
 	//レーンごとのタイム記録
 	void SetResultData(const BoatResultData& data);
 	static const std::vector<BoatResultData>& GetResultData() { return m_result; }
@@ -51,6 +53,7 @@ private:
 	bool m_raceFinished = false; //レース終了フラグ
 
 	std::vector<RacingBoat*> m_racingBoats; //レース参加ボート
+	std::vector<RacingBoat*> m_rankingBoats; //順位付け用ボートリスト
 
 	Vector2 m_boundsMin = { -215.0f, -60.0f };
 	Vector2 m_boundsMax = { 215.0f, 60.0f };

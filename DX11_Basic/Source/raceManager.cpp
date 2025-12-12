@@ -57,6 +57,9 @@ bool RaceManager::Initialize() {
 		laneIndex++;
 	}
 
+	//順位付け用リストにコピー
+	m_rankingBoats = m_racingBoats;
+
 	return true;
 }
 
@@ -111,6 +114,24 @@ void RaceManager::Update(double deltaTime) {
 	} else if (m_raceStarted) {
 		//レースタイム更新
 		m_raceTime += static_cast<float>(deltaTime);
+
+		//順位ソート
+		std::sort(m_rankingBoats.begin(), m_rankingBoats.end(),
+			[](RacingBoat* a, RacingBoat* b) {
+				//周回数が多い方が前
+				if (a->GetLapCount() != b->GetLapCount()) {
+					return a->GetLapCount() > b->GetLapCount();
+				}
+				//同じ周回数なら進捗度が大きい方が前
+				return a->GetLapProgress() > b->GetLapProgress();
+				  });
+
+		//各ボートに順位を設定
+		int rank = 1;
+		for (auto& boat : m_rankingBoats) {
+			boat->SetRank(rank);
+			rank++;
+		}
 	}
 }
 

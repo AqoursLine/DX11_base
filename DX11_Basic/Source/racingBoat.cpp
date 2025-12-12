@@ -12,6 +12,11 @@
 
 #include "modelRenderer.h"
 
+#ifdef _DEBUG
+#include "imguiSystem.h"
+#endif // _DEBUG
+
+
 
 void RacingBoat::SetThrottle(float throttle) {
 	float adjustedThrottle = throttle;
@@ -166,6 +171,19 @@ void RacingBoat::Draw() {
 
 	//モデル描画
 	m_model->Draw(m_position, m_quaternion, m_scale);
+
+#ifdef _DEBUG
+	//デバッグ情報表示
+	std::string title = "RacingBoat Debug Info (Lane " + std::to_string(m_laneIndex) + ")";
+	ImGui::Begin(title.c_str());
+	ImGui::Text("Lap Count: %d", m_lapCount);
+	ImGui::Text("Lap Progress: %.2f%%", m_lapProgress * 100.0f);
+	ImGui::Text("Current Section: %d", static_cast<int>(m_currentSection));
+	ImGui::Text("Rank: %d", m_rank);
+	ImGui::End();
+
+#endif // _DEBUG
+
 }
 
 Vector2 RacingBoat::GetSceneBoundsMin() const {
@@ -180,37 +198,24 @@ void RacingBoat::UpdateProgressSection() {
 	Vector3 pos = m_position;
 	pos.y = 0.0f; // 水平成分のみ考慮
 
-	if (pos.x >= 0.0f && pos.x < 150.0f && pos.z <= 0.0f) {
-		// 南直線
-		// 0.0f <= x < 150.0f, z <= 0.0f
+	if (pos.z < 0 && pos.x >= 0 && pos.x < 150.0f) {
+		// 最初の南直線
 		m_currentSection = FIRST_SOUTH_STRAIGHT;
-	} else if (pos.x >= 150.0f && pos.z < 0.0f) {
-		// 南東カーブ
-		// x >= 150.0f, z < 0.0f
-		m_currentSection = EAST_SOUTH_CURVE;
-	} else if (pos.x > 150.0f && pos.z >= 0.0f) {
-		// 北東カーブ
-		// x > 150.0f, z >= 0.0f
-		m_currentSection = EAST_NORTH_CURVE;
-	} else if (pos.x > 0.0f && pos.x <= 150.0f && pos.z > 0.0f) {
-		// 北直線
-		// 0.0f < x <= 150.0f, z > 0.0f
+	} else if (pos.z >= 0 && pos.x <= 150.0f && pos.x > 0) {
+		// 前半の北直線
 		m_currentSection = FIRST_NORTH_STRAIGHT;
-	} else if (pos.x > -150.0f && pos.x <= 0.0f && pos.z > 0.0f) {
-		// 北直線
-		// -150.0f < x <= 0.0f, z > 0.0f
+	} else if (pos.z >= 0 && pos.x <= 0 && pos.x > -150.0f) {
+		// 後半の北直線
 		m_currentSection = SECOND_NORTH_STRAIGHT;
-	} else if (pos.x <= -150.0f && pos.z > 0.0f) {
-		// 北西カーブ
-		// x < -150.0f, z > 0.0f
-		m_currentSection = WEST_NORTH_CURVE;
-	} else if (pos.x < -150.0f && pos.z <= 0.0f) {
-		// 南西カーブ
-		// x < -150.0f, z <= 0.0f
-		m_currentSection = WEST_SOUTH_CURVE;
-	} else {
-		// 南直線
+	} else if (pos.z < 0 && pos.x >= -150.0f && pos.x < 0) {
+		// 最後の南直線
 		m_currentSection = SECOND_SOUTH_STRAIGHT;
+	} else if (pos.x >= 150.0f) {
+		// 東カーブ
+		m_currentSection = EAST_CURVE;
+	} else if (pos.x <= -150.0f) {
+		// 西カーブ
+		m_currentSection = WEST_CURVE;
 	}
 }
 
@@ -223,17 +228,10 @@ void RacingBoat::CalculateLapProgress() {
 			progress = GetSectionProgress({ 150.0f, 0.0f, -35.0f }, { -1.0f, 0.0f, 0.0f });
 			progress *= 0.2f;
 			break;
-		case RacingBoat::EAST_SOUTH_CURVE:
-			// 南東カーブ
-			// x = 150 ~ 185, z = -35 ~ 0
-			progress = GetSectionProgress({ 150.0f, 0.0f, -35.0f }, { 1.0f, 0.0f, 0.0f }, { 185.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, -1.0f });
-			progress = 0.2f + progress * 0.05f;
-			break;
-		case RacingBoat::EAST_NORTH_CURVE:
-			// 北東カーブ
-			// x = 185 ~ 150, z = 0 ~ 35
-			progress = GetSectionProgress({ 185.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 150.0f, 0.0f, 35.0f }, { 1.0f, 0.0f, 0.0f });
-			progress = 0.25f + progress * 0.05f;
+		case RacingBoat::EAST_CURVE:
+			// 東カーブ
+			progress = GetSectionProgressCurve({ 150.0f, 0.0f, 0.0f }, -XM_PIDIV2);
+			progress = 0.2f + progress * 0.1f;
 			break;
 		case RacingBoat::FIRST_NORTH_STRAIGHT:
 			// 北直線
@@ -247,17 +245,11 @@ void RacingBoat::CalculateLapProgress() {
 			progress = GetSectionProgress({ -150.0f, 0.0f, 35.0f }, { 1.0f, 0.0f, 0.0f });
 			progress = 0.5f + progress * 0.2f;
 			break;
-		case RacingBoat::WEST_NORTH_CURVE:
-			// 北西カーブ
-			// x = -150 ~ -185, z = 35 ~ 0
-			progress = GetSectionProgress({ -150.0f, 0.0f, 35.0f }, { -1.0f, 0.0f, 0.0f }, { -185.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f });
-			progress = 0.7f + progress * 0.05f;
-			break;
-		case RacingBoat::WEST_SOUTH_CURVE:
-			// 南西カーブ
-			// x = -185 ~ -150, z = 0 ~ -35
-			progress = GetSectionProgress({ -185.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }, { -150.0f, 0.0f, -35.0f }, { -1.0f, 0.0f, 0.0f });
-			progress = 0.75f + progress * 0.05f;
+		case RacingBoat::WEST_CURVE:
+			// 西カーブ
+			// オフセットを-πにして、x <= -150より左側の範囲を0~πに収める
+			progress = GetSectionProgressCurve({ -150.0f, 0.0f, 0.0f }, XM_PIDIV2);
+			progress = 0.7f + progress * 0.1f;
 			break;
 		case RacingBoat::SECOND_SOUTH_STRAIGHT:
 			progress = GetSectionProgress({ 0.0f, 0.0f, -35.0f }, { -1.0f, 0.0f, 0.0f });
@@ -281,25 +273,38 @@ float RacingBoat::GetSectionProgress(const Vector3& pos, const Vector3& dir) {
 	toBoat.y = 0.0f; // 水平成分のみ考慮
 	float sectionLength = toBoat.Dot(dir);
 
-	return sectionLength / 150.0f;
+	return 1.0f - (sectionLength / 150.0f);
 }
 
 /// <summary>
 /// セクション進捗度取得(カーブ)
 /// </summary>
-/// <param name="pos1">ゲートの位置1</param>
-/// <param name="dir1">ゲートの正面方向1</param>
-/// <param name="pos2">ゲートの位置2</param>
-/// <param name="dir2">ゲートの正面方向2</param>
-/// <returns>セクション内の進捗度(0.0 ~ 1.0)</returns>
-float RacingBoat::GetSectionProgress(const Vector3& pos1, const Vector3& dir1, const Vector3& pos2, const Vector3& dir2) {
-	Vector3 toBoat1 = m_position - pos1;
-	toBoat1.y = 0.0f; // 水平成分のみ考慮
-	float sectionLength1 = toBoat1.Dot(dir1);
+/// <param name="center">カーブ中心位置</param>
+/// <param name="offset">カーブの開始角度</param>
+/// <param name="totalAngle">カーブ全体の角度</param>
+/// <returns>カーブ内の進捗度(0.0f ~ 1.0f)</returns>
+float RacingBoat::GetSectionProgressCurve(const Vector3& center, float offset, float totalAngle) {
+	Vector3 toBoat = m_position - center;
 
-	Vector3 toBoat2 = m_position - pos2;
-	toBoat2.y = 0.0f; // 水平成分のみ考慮
-	float sectionLength2 = toBoat2.Dot(dir2);
+	// ボートへのベクトルの角度を計算
+	float angle = std::atan2(toBoat.z, toBoat.x);
 
-	return (sectionLength1 * sectionLength2) / (60.0f * 60.0f);
+	// 角度を0~2πの範囲に正規化
+	if (angle < 0) {
+		angle += XM_2PI;
+	}
+	if (offset < 0) {
+		offset += XM_2PI;
+	}
+
+	// カーブ内の進捗度を計算
+	float angleDelta = angle - offset;
+
+	// 角度が負の場合、全体角度を加算
+	if (angleDelta < 0) {
+		angleDelta += XM_2PI;
+	}
+
+	return angleDelta / totalAngle;
 }
+
