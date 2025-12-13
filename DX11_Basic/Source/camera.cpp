@@ -125,10 +125,12 @@ void Camera::MoveSide(bool isRight, double deltaTime) {
 	Vector3 direction = Vector3(right.x, 0.0f, right.z);
 	direction.Normalize();
 
+	Vector3 deltaPos = direction * (isRight ? 1.0f : -1.0f) * m_moveSpeed * static_cast<float>(deltaTime);
+
 	//移動
-	m_position += direction * (isRight ? 1.0f : -1.0f) * m_moveSpeed * static_cast<float>(deltaTime);
+	m_position += deltaPos;
 	//ターゲット位置も同様に移動
-	m_targetPosition += direction * (isRight ? 1.0f : -1.0f) * m_moveSpeed * static_cast<float>(deltaTime);
+	m_targetPosition += deltaPos;
 }
 
 void Camera::MoveForward(bool isForward, double deltaTime) {
@@ -138,17 +140,21 @@ void Camera::MoveForward(bool isForward, double deltaTime) {
 	Vector3 direction = Vector3(forward.x, 0.0f, forward.z);
 	direction.Normalize();
 
+	Vector3 deltaPos = direction * (isForward ? 1.0f : -1.0f) * m_moveSpeed * static_cast<float>(deltaTime);
+
 	//移動
-	m_position += direction * (isForward ? 1.0f : -1.0f) * m_moveSpeed * static_cast<float>(deltaTime);
+	m_position += deltaPos;
 	//ターゲット位置も同様に移動
-	m_targetPosition += direction * (isForward ? 1.0f : -1.0f) * m_moveSpeed * static_cast<float>(deltaTime);
+	m_targetPosition += deltaPos;
 }
 
 void Camera::MoveUpDown(bool isUp, double deltaTime) {
+	float deltaHeight = (isUp ? 1.0f : -1.0f) * m_moveSpeed * static_cast<float>(deltaTime);
+	
 	//移動
-	m_position.y += (isUp ? 1.0f : -1.0f) * m_moveSpeed * static_cast<float>(deltaTime);
+	m_position.y += deltaHeight;
 	//ターゲット位置も同様に移動
-	m_targetPosition.y += (isUp ? 1.0f : -1.0f) * m_moveSpeed * static_cast<float>(deltaTime);
+	m_targetPosition.y += deltaHeight;
 }
 
 void Camera::RotateAroundTarget(double deltaTime) {
