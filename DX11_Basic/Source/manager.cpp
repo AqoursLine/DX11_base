@@ -132,6 +132,7 @@ bool Manager::CleanUp() {
 			m_nextScene = nullptr;
 
 			m_transition->StartInTransition();
+			m_isChangingScene = false;
 		}
 	}
 
@@ -139,10 +140,18 @@ bool Manager::CleanUp() {
 }
 
 void Manager::SetScene(Scene* scene, Transition* transition) {
+	if (m_isChangingScene) {
+		delete scene;
+		delete transition;
+		return;
+	}
+
 	m_nextScene = scene;
 	m_transition = transition;
 	m_transition->Initialize();
 	m_transition->StartOutTransition();
+
+	m_isChangingScene = true;
 }
 
 

@@ -361,6 +361,7 @@
     <ClCompile Include="Source\raceManager.cpp" />
     <ClCompile Include="Source\raceTimer.cpp" />
     <ClCompile Include="Source\racingBoat.cpp" />
+    <ClCompile Include="Source\rankDisplay.cpp" />
     <ClCompile Include="Source\renderer.cpp" />
     <ClCompile Include="Source\resultScene.cpp" />
     <ClCompile Include="Source\resultText.cpp" />
@@ -431,6 +432,7 @@
     <ClInclude Include="Source\raceManager.h" />
     <ClInclude Include="Source\raceTimer.h" />
     <ClInclude Include="Source\racingBoat.h" />
+    <ClInclude Include="Source\rankDisplay.h" />
     <ClInclude Include="Source\renderer.h" />
     <ClInclude Include="Source\resultScene.h" />
     <ClInclude Include="Source\resultText.h" />

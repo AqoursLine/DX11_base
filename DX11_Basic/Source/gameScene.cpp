@@ -22,8 +22,8 @@
 #include "test.h"
 #include "gameDirectionalLight.h"
 #include "splashParticle.h"
-
 #include "cpuBoat.h"
+#include "rankDisplay.h"
 
 bool GameScene::Initialize() {
 	//とりあえずの壁
@@ -87,6 +87,9 @@ bool GameScene::Initialize() {
 
 	//ラップ表示
 	AddGameObject(new LapDisplay(), TYPE_BEFORE_PROCESS_UI);
+
+	//順位表示
+	AddGameObject(new RankDisplay(), TYPE_BEFORE_PROCESS_UI);
 
 	//カメラの初期化
 	AddGameObject(new Camera(), TYPE_CAMERA);

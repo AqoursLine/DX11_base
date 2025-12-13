@@ -51,6 +51,10 @@ bool SpeedMeter::Initialize() {
 	m_rotation = { 0.0f, 0.0f, 0.0f };
 
 	m_player = m_scene->GetGameObject<Player>();
+
+	if (!m_player) {
+		SetActive(false);
+	}
 	return true;
 }
 

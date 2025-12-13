@@ -29,5 +29,7 @@ private:
 
 	Transition* m_transition = nullptr;
 
+	bool m_isChangingScene = false;
+
 	class ImguiSystem* m_imguiSystem = nullptr;
 };
