@@ -39,10 +39,10 @@ struct BillboardVertex {
 
 // 更新用パラメータ
 struct StaticUpdateParams {
-	float gravity;
+	XMFLOAT3 worldAcceleration; // ワールド加速度
 	float startSize;
+	XMFLOAT3 localAcceleration; // ローカル加速度
 	float endSize;
-	float padding; // パディング
 	XMFLOAT4 startColor;
 	XMFLOAT4 endColor;
 };
@@ -85,20 +85,21 @@ struct CompactParams {
 struct EmitterSettings {
 	Vector3 position = Vector3::ZERO;		// エミッター位置のばらつき
 	Vector3 velocity = Vector3::UP;			// 初速度
-	Vector3 velocityVariation = Vector3(0.5f, 0.5f, 0.5f);	// 初速度のばらつき
+	Vector3 velocityVariation = Vector3::ZERO;	// 初速度のばらつき
 	Vector4 startColor = Vector4::ONE;		// 開始色
 	Vector4 endColor = Vector4::ONE;		// 終了色
 	float startSize = 1.0f;					// 開始サイズ
 	float endSize = 0.0f;					// 終了サイズ
 	float lifeTime = 2.0f;					// 寿命
 	float emitRate = 10.0f;					// 発生レート（1秒あたりの発生数）
-	float gravity = -9.81f;					// 重力
+	Vector3 worldAcceleration = Vector3::ZERO;	// ワールド加速度
+	Vector3 localAcceleration = Vector3::ZERO;	// ローカル加速度
 	float emissionAngle = 0.0f;				// 発生角度（rad）
 	float emissionAngleVariation = 0.0f;	// 発生角度のばらつき（rad）
 	float rotationSpeed = 0.0f;				// 回転速度
 	float rotationSpeedMin = 0.0f;			// 回転速度最小値
 	float rotationSpeedMax = 0.0f;			// 回転速度最大値
-	UINT maxParticles = 100;					// 最大パーティクル数
+	UINT maxParticles = 100;				// 最大パーティクル数
 	bool loop = true;						// ループ設定
 	bool oneShot = false;					// ワンショット設定
 	int oneShotCount = 10;					// ワンショット時の発生数
