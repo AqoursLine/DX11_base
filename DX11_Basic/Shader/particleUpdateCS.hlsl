@@ -4,21 +4,23 @@ struct Particle
 	float3 position;
 	float3 velocity;
 	float4 color;
+	float3 upVector;
 	float size;
 	float life;
 	float maxLife;
 	float rotation;
 	float rotationSpeed;
 	uint active;
+	float particlePadding;
 };
 
 // 静的更新用パラメータ
 cbuffer StaticUpdateParams : register(b3)
 {
-	float gravity;
+	float3 worldAcceleration;
 	float startSize;
+	float3 localAcceleration;
 	float endSize;
-	float padding;
 	float4 startColor;
 	float4 endColor;
 }
@@ -35,6 +37,24 @@ RWStructuredBuffer<Particle> particles : register(u0);
 
 // フリーインデックスバッファ
 AppendStructuredBuffer<uint> freeIndices : register(u1);
+
+// ローカル座標加速度をワールド座標に変換
+float3 ApplyLocalAcceleration(float3 velocity, float3 localAccel, float3 upVector)
+{
+	//速度の大きさが0の場合、方向が定義できないため、ワールド加速度として返す
+	float speed = length(velocity);
+	if (speed < 0.001f)
+		return localAccel;
+	
+	// forwardベクトルを計算
+	float3 forward = velocity / speed;
+		
+	// rightベクトルを計算
+	float3 right = normalize(cross(upVector, forward));
+		
+	// ローカル加速度をワールド座標に変換
+	return localAccel.x * right + localAccel.y * upVector + localAccel.z * forward;
+}
 
 // パーティクル更新コンピュートシェーダ
 [numthreads(256, 1, 1)]
@@ -59,11 +79,15 @@ void main( uint3 DTid : SV_DispatchThreadID )
 		return;
 	}
 	
+	// 加速度計算
+	// ワールド加速度を適用
+	p.velocity += worldAcceleration * deltaTime;
+	
+	// ローカル加速度をワールド座標に変換して適用
+	p.velocity += ApplyLocalAcceleration(p.velocity, localAcceleration, p.upVector) * deltaTime;
+	
 	// 位置更新
 	p.position += p.velocity * deltaTime;
-	
-	// 重力の適用
-	p.velocity.y += gravity * deltaTime;
 	
 	// 回転更新
 	p.rotation += p.rotationSpeed * deltaTime;

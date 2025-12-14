@@ -179,7 +179,8 @@ void GPUParticleSystem::UpdateParticlesGPU(float deltaTime) {
 	if (m_staticUpdateParamsDirty) {
 		// 静的更新パラメータバッファに転送
 		StaticUpdateParams staticParams;
-		staticParams.gravity = m_settings.gravity;
+		staticParams.worldAcceleration = XMFLOAT3(m_settings.worldAcceleration.x, m_settings.worldAcceleration.y, m_settings.worldAcceleration.z);
+		staticParams.localAcceleration = XMFLOAT3(m_settings.localAcceleration.x, m_settings.localAcceleration.y, m_settings.localAcceleration.z);
 		staticParams.startSize = m_settings.startSize;
 		staticParams.endSize = m_settings.endSize;
 		staticParams.startColor = XMFLOAT4(m_settings.startColor.x, m_settings.startColor.y, m_settings.startColor.z, m_settings.startColor.w);
@@ -280,7 +281,7 @@ void GPUParticleSystem::EmitGPU(UINT count, const std::vector<XMFLOAT4>& positio
 		staticParams.startSize = m_settings.startSize;
 		staticParams.rotationSpeed = m_settings.rotationSpeed;
 		staticParams.maxParticles = static_cast<UINT>(m_settings.maxParticles);
-		staticParams.padding = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		staticParams.upVector = XMFLOAT3(m_settings.upVector.x, m_settings.upVector.y, m_settings.upVector.z);
 
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		context->Map(m_staticEmitParamsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);

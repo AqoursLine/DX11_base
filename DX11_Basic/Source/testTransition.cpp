@@ -6,7 +6,7 @@
 
 bool TestTransition::Initialize() {
 	m_logoTexture = new Texture();
-	m_logoTexture->Load(L"Asset\\Texture\\yukino.png");
+	m_logoTexture->Load(L"Asset\\Texture\\loading.png");
 	m_fadeTexture = new Texture();
 	m_fadeTexture->Load(L"Asset\\Texture\\white.jpg");
 
@@ -40,7 +40,7 @@ void TestTransition::Draw() {
 
 	// マテリアル
 	MATERIAL material = {};
-	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, m_alpha);
+	material.diffuse = XMFLOAT4(0.3f, 0.3f, 1.0f, m_alpha);
 	material.textureEnable = TRUE;
 	RENDERER.SetMaterial(material);
 
@@ -67,6 +67,8 @@ void TestTransition::UpdateInTransition(double deltaTime) {
 		m_alpha = 0.0f;
 		SetInTransitionFinished(true);
 	}
+
+	m_logoRotate += XMConvertToRadians(m_logoRotateSpeed) * static_cast<float>(deltaTime);
 }
 
 void TestTransition::UpdateTransition(double deltaTime) {
@@ -81,4 +83,6 @@ void TestTransition::UpdateOutTransition(double deltaTime) {
 		m_alpha = 1.0f;
 		SetOutTransitionFinished(true);
 	}
+
+	m_logoRotate += XMConvertToRadians(m_logoRotateSpeed) * static_cast<float>(deltaTime);
 }

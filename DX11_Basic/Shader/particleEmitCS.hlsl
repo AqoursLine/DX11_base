@@ -4,12 +4,14 @@ struct Particle
 	float3 position;
 	float3 velocity;
 	float4 color;
+	float3 upVector;
 	float size;
 	float life;
 	float maxLife;
 	float rotation;
 	float rotationSpeed;
 	uint active;
+	float particlePadding;
 };
 
 // 静的発生用パラメータ
@@ -27,7 +29,7 @@ cbuffer StaticEmitParams : register(b3)
 	float rotationSpeedMin;
 	float rotationSpeedMax;
 	uint maxParticles;
-	float3 emitPadding;
+	float3 upVector;
 }
 
 // 動的発生用パラメータ
@@ -108,6 +110,8 @@ void main( uint3 DTid : SV_DispatchThreadID )
 	p.rotationSpeed = rotationSpeed + randomRange(baseSeed, 7, rotationSpeedMin, rotationSpeedMax);
 
 	p.color = startColor;
+	p.particlePadding = 0.0f;
+	p.upVector = upVector;
 	p.size = startSize;
 	p.life = lifeTime;
 	p.maxLife = lifeTime;

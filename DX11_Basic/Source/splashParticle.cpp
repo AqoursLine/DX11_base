@@ -15,7 +15,7 @@ bool SplashParticle::Initialize() {
 
 	SetTexture(m_texture->GetSRV());
 
-	EmitterSettings settings;
+	EmitterSettings settings = {};
 	settings.startColor = { 0.0f, 0.5f, 1.0f, 1.0f };
 	settings.endColor = { 0.4f, 0.6f, 0.8f, 1.0f };
 	settings.startSize = 0.2f;
@@ -24,7 +24,7 @@ bool SplashParticle::Initialize() {
 	settings.position = { 0.5f, 0.0f, 0.5f };
 	settings.velocity = { 0.0f, 2.0f, 0.0f };
 	settings.velocityVariation = { 2.5f, 1.0f, 2.5f };
-	settings.gravity = -9.8f;
+	settings.worldAcceleration = { 0.0f, -9.8f, 0.0f };
 	settings.maxParticles = 5000;
 	settings.oneShot = true;
 	settings.oneShotCount = 10;
