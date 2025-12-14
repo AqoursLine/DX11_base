@@ -13,12 +13,14 @@ struct GPUParticle {
 	XMFLOAT3 position;		// 位置
 	XMFLOAT3 velocity;		// 速度
 	XMFLOAT4 color;			// 色
+	XMFLOAT3 upVector;		// ローカル上方向ベクトル
 	float size;				// 大きさ
 	float life;				// 寿命
 	float maxLife;			// 最大寿命
 	float rotation;			// 角度
 	float rotationSpeed;	// 回転速度
 	UINT active;			// アクティブフラグ
+	float padding;			// パディング
 };
 
 // パーティクルインスタンスデータ構造体
@@ -65,7 +67,7 @@ struct StaticEmitParams {
 	float rotationSpeedMin;
 	float rotationSpeedMax;
 	UINT maxParticles;
-	XMFLOAT3 padding;
+	XMFLOAT3 upVector;
 };
 struct DynamicEmitParams {
 	XMFLOAT3 emitterPosition;
@@ -99,6 +101,7 @@ struct EmitterSettings {
 	float rotationSpeed = 0.0f;				// 回転速度
 	float rotationSpeedMin = 0.0f;			// 回転速度最小値
 	float rotationSpeedMax = 0.0f;			// 回転速度最大値
+	Vector3 upVector = Vector3::UP;			// ローカル上方向ベクトル
 	UINT maxParticles = 100;				// 最大パーティクル数
 	bool loop = true;						// ループ設定
 	bool oneShot = false;					// ワンショット設定

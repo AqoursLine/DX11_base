@@ -4,12 +4,14 @@ struct Particle
 	float3 position;
 	float3 velocity;
 	float4 color;
+	float3 upVector;
 	float size;
 	float life;
 	float maxLife;
 	float rotation;
 	float rotationSpeed;
 	uint active;
+	float particlePadding;
 };
 
 // 静的更新用パラメータ
@@ -37,32 +39,21 @@ RWStructuredBuffer<Particle> particles : register(u0);
 AppendStructuredBuffer<uint> freeIndices : register(u1);
 
 // ローカル座標加速度をワールド座標に変換
-float3 ApplyLocalAcceleration(float3 velocity, float3 localAccel)
+float3 ApplyLocalAcceleration(float3 velocity, float3 localAccel, float3 upVector)
 {
 	//速度の大きさが0の場合、方向が定義できないため、ワールド加速度として返す
 	float speed = length(velocity);
 	if (speed < 0.001f)
-		return float3(0, 0, 0);
+		return localAccel;
 	
 	// forwardベクトルを計算
 	float3 forward = velocity / speed;
-	
-	// up方向をとりあえずY軸に設定
-	float3 up = float3(0.0f, 1.0f, 0.0f);
-	if (abs(dot(forward, up)) > 0.99f)
-	{
-		// forwardがY軸に近い場合はZ軸をupに使う
-		up = float3(0.0f, 0.0f, 1.0f);
-	}
-	
+		
 	// rightベクトルを計算
-	float3 right = normalize(cross(up, forward));
-	
-	// 再度upベクトルを計算
-	up = normalize(cross(forward, right));
-	
+	float3 right = normalize(cross(upVector, forward));
+		
 	// ローカル加速度をワールド座標に変換
-	return localAccel.x * right + localAccel.y * up + localAccel.z * forward;
+	return localAccel.x * right + localAccel.y * upVector + localAccel.z * forward;
 }
 
 // パーティクル更新コンピュートシェーダ
@@ -93,7 +84,7 @@ void main( uint3 DTid : SV_DispatchThreadID )
 	p.velocity += worldAcceleration * deltaTime;
 	
 	// ローカル加速度をワールド座標に変換して適用
-	p.velocity += ApplyLocalAcceleration(p.velocity, localAcceleration) * deltaTime;
+	p.velocity += ApplyLocalAcceleration(p.velocity, localAcceleration, p.upVector) * deltaTime;
 	
 	// 位置更新
 	p.position += p.velocity * deltaTime;

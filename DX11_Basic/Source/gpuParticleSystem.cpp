@@ -281,7 +281,7 @@ void GPUParticleSystem::EmitGPU(UINT count, const std::vector<XMFLOAT4>& positio
 		staticParams.startSize = m_settings.startSize;
 		staticParams.rotationSpeed = m_settings.rotationSpeed;
 		staticParams.maxParticles = static_cast<UINT>(m_settings.maxParticles);
-		staticParams.padding = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		staticParams.upVector = XMFLOAT3(m_settings.upVector.x, m_settings.upVector.y, m_settings.upVector.z);
 
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		context->Map(m_staticEmitParamsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);

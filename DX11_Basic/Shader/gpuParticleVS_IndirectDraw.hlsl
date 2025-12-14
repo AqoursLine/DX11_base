@@ -6,12 +6,14 @@ struct Particle
 	float3 position;
 	float3 velocity;
 	float4 color;
+	float3 upVector;
 	float size;
 	float life;
 	float maxLife;
 	float rotation;
 	float rotationSpeed;
 	uint active;
+	float particlePadding;
 };
 
 StructuredBuffer<Particle> g_particles : register(t0);

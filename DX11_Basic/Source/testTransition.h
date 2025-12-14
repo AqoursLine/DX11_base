@@ -34,5 +34,5 @@ private:
 	float m_alpha = 0.0f;
 
 	float m_logoRotate = 0.0f;
-	float m_logoRotateSpeed = 60.0f; // 1秒あたりの回転角度
+	float m_logoRotateSpeed = -120.0f; // 1秒あたりの回転角度
 };
