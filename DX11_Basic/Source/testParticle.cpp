@@ -82,20 +82,20 @@ void TestParticle::Draw() {
 	bool isChanged = false;
 	isChanged |= ImGui::ColorEdit4("Start Color", (float*)&settings.startColor, ImGuiColorEditFlags_AlphaBar);
 	isChanged |= ImGui::ColorEdit4("End Color", (float*)&settings.endColor, ImGuiColorEditFlags_AlphaBar);
-	isChanged |= ImGui::SliderFloat("Start Size", &settings.startSize, 0.0f, 1.0f);
-	isChanged |= ImGui::SliderFloat("End Size", &settings.endSize, 0.0f, 1.0f);
-	isChanged |= ImGui::SliderFloat("Life Time", &settings.lifeTime, 0.0f, 5.0f);
-	isChanged |= ImGui::SliderFloat3("Velocity", (float*)&settings.velocity, -10.0f, 10.0f);
-	isChanged |= ImGui::SliderFloat3("Velocity Variation", (float*)&settings.velocityVariation, 0.0f, 10.0f);
-	isChanged |= ImGui::SliderFloat3("World Acceleration", (float*)&settings.worldAcceleration, -50.0f, 50.0f);
-	isChanged |= ImGui::SliderFloat3("Local Acceleration", (float*)&settings.localAcceleration, -50.0f, 50.0f);
+	isChanged |= ImGui::DragFloat("Start Size", &settings.startSize, 0.0f, 1.0f);
+	isChanged |= ImGui::DragFloat("End Size", &settings.endSize, 0.0f, 1.0f);
+	isChanged |= ImGui::DragFloat("Life Time", &settings.lifeTime, 0.0f, 5.0f);
+	isChanged |= ImGui::DragFloat3("Velocity", (float*)&settings.velocity, -10.0f, 10.0f);
+	isChanged |= ImGui::DragFloat3("Velocity Variation", (float*)&settings.velocityVariation, 0.0f, 10.0f);
+	isChanged |= ImGui::DragFloat3("World Acceleration", (float*)&settings.worldAcceleration, -50.0f, 50.0f);
+	isChanged |= ImGui::DragFloat3("Local Acceleration", (float*)&settings.localAcceleration, -50.0f, 50.0f);
 	bool isChangedUpVector = false;
-	isChangedUpVector |= ImGui::SliderFloat3("Up Vector", (float*)&settings.upVector, -1.0f, 1.0f);
+	isChangedUpVector |= ImGui::DragFloat3("Up Vector", (float*)&settings.upVector, -1.0f, 1.0f);
 	if (isChangedUpVector) {
 		settings.upVector.Normalize();
 		isChanged = true;
 	}
-	isChanged |= ImGui::SliderInt("One Shot Count", &settings.oneShotCount, 1, 1000);
+	isChanged |= ImGui::DragInt("One Shot Count", &settings.oneShotCount, 1, 1000);
 	ImGui::End();
 
 	if (isChanged) {

@@ -341,6 +341,7 @@
     <ClCompile Include="Source\engine.cpp" />
     <ClCompile Include="Source\field.cpp" />
     <ClCompile Include="Source\fieldObject.cpp" />
+    <ClCompile Include="Source\firstFollowCamera.cpp" />
     <ClCompile Include="Source\fpsCamera.cpp" />
     <ClCompile Include="Source\gameDirectionalLight.cpp" />
     <ClCompile Include="Source\gameScene.cpp" />
@@ -410,6 +411,7 @@
     <ClInclude Include="Source\field.h" />
     <ClInclude Include="Source\fieldObject.h" />
     <ClInclude Include="Source\buoy.h" />
+    <ClInclude Include="Source\firstFollowCamera.h" />
     <ClInclude Include="Source\fpsCamera.h" />
     <ClInclude Include="Source\gameDirectionalLight.h" />
     <ClInclude Include="Source\gameObject.h" />

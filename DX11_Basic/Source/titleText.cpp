@@ -26,12 +26,6 @@ bool TitleText::Initialize() {
 	m_position = { SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f };
 	m_scale = { 800.0f, 200.0f, 1.0f };
 
-#ifdef _DEBUG
-	//テスト用にこのスレッドをしばらく待機
-	Sleep(5000);
-
-#endif // _DEBUG
-
 	return true;
 }
 

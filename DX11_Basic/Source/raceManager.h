@@ -33,7 +33,8 @@ public:
 	//完走に必要な周回数取得
 	int GetLapCountToFinish() const { return m_lapCountToFinish; }
 
-	RacingBoat* GetRacingBoat(int laneIndex) const;
+	RacingBoat* GetRacingBoat(unsigned int laneIndex) const;
+	RacingBoat* GetRacingBoatByRank(unsigned int rank) const;
 
 	//レーンごとのタイム記録
 	void SetResultData(const BoatResultData& data);

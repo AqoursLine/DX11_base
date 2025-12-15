@@ -14,6 +14,21 @@
 //静的メンバ変数の初期化
 std::vector<BoatResultData> RaceManager::m_result;
 
+RacingBoat* RaceManager::GetRacingBoat(unsigned int laneIndex) const {
+	if (laneIndex < 0 || laneIndex >= static_cast<int>(m_racingBoats.size())) {
+		return nullptr;
+	}
+	
+	return m_racingBoats[laneIndex];
+}
+
+RacingBoat* RaceManager::GetRacingBoatByRank(unsigned int rank) const {
+	if (rank < 1 || rank > static_cast<int>(m_rankingBoats.size())) {
+		return nullptr;
+	}
+	return m_rankingBoats[rank - 1];
+}
+
 void RaceManager::SetResultData(const BoatResultData& data) {
 	m_result.push_back(data);
 

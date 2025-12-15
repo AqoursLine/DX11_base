@@ -7,15 +7,17 @@ public:
 	Camera() = default;
 	~Camera() = default;
 
+	//メインカメラ
+	bool IsMainCamera() const { return m_isMainCamera; }
+	void SetMainCamera(bool isMain) { m_isMainCamera = isMain; }
+
+protected:
 	virtual bool Initialize() override;
 	virtual void Finalize() override;
 	virtual void Update(double deltaTime) override;
 	virtual void Draw() override;
 	virtual void CleanUp() override;
 
-	//メインカメラ
-	bool IsMainCamera() const { return m_isMainCamera; }
-protected:
 	//左右移動関数
 	void MoveSide(bool isRight, double deltaTime);
 
@@ -41,9 +43,8 @@ protected:
 	//レート
 	float m_rate = 0.0f;
 
-	//オフセット減衰スタートタイマー
-	float m_offsetDampingTimer = 0.0f;
-
 	bool m_isMainCamera = false; //メインカメラかどうか
 private:
+	//オフセット減衰スタートタイマー
+	float m_offsetDampingTimer = 0.0f;
 };

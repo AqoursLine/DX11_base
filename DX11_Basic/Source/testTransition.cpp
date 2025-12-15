@@ -11,6 +11,7 @@ bool TestTransition::Initialize() {
 	m_fadeTexture->Load(L"Asset\\Texture\\white.jpg");
 
 	m_spriteRenderer = new Sprite();
+	m_spriteRenderer->Initialize();
 
 	m_pixelShader = new PixelShader();
 	m_pixelShader->Load(L"Shader\\unlitTexturePS.cso");
