@@ -7,8 +7,12 @@
 #include "gameScene.h"
 
 #include "testTransition.h"
+#include "titleBackgroundMove.h"
 
 bool TitleScene::Initialize() {
+	//タイトル背景ムービー初期化
+	AddGameObject(new TitleBackgroundMove(), TYPE_BEFORE_PROCESS_UI);
+
 	//タイトルテキスト初期化
 	AddGameObject(new TitleText(), TYPE_BEFORE_PROCESS_UI);
 

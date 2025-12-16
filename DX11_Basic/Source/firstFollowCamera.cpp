@@ -9,7 +9,7 @@
 bool FirstFollowCamera::Initialize() {
 	m_raceManager = m_scene->GetGameObject<RaceManager>();
 
-	m_position = { 3.0f, 10.0f, -65.0f };
+	m_position = { -3.0f, 10.0f, -65.0f };
 	m_targetPosition = { 0.0f, 0.0f, -10.0f };
 
 	m_rate = 5.0f;
@@ -66,7 +66,8 @@ void FirstFollowCamera::UpdatePosition(RacingBoat* targetBoat, double deltaTime)
 	int lapCount = targetBoat->GetLapCount();
 	if (lapCount <= 0) {
 		// 最初の周回前は固定位置
-		m_position = Vector3 { 5.0f, 10.0f, -65.0f };
+		m_position = Vector3 { -5.0f, 10.0f, -65.0f };
+		return;
 	}
 
 	float lapProgress = targetBoat->GetLapProgress();
@@ -84,6 +85,6 @@ void FirstFollowCamera::UpdatePosition(RacingBoat* targetBoat, double deltaTime)
 		m_position = Vector3 { 0.0f, 10.0f, 0.0f };
 	} else {
 		// 南側の直線区間
-		m_position = Vector3 { 5.0f, 10.0f, -65.0f };
+		m_position = Vector3 { -5.0f, 10.0f, -65.0f };
 	}
 }

@@ -50,6 +50,12 @@ void Manager::Finalize() {
 	m_scene->FinalizeBase();
 	delete m_scene;
 
+	//nextSceneが存在する場合は削除
+	if (m_nextScene != nullptr) {
+		m_nextScene->FinalizeBase();
+		delete m_nextScene;
+	}
+
 	Input::Uninit();
 }
 

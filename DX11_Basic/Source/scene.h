@@ -107,6 +107,9 @@ private:
 	std::atomic<bool> m_isInitialized { false };
 	bool m_isInitializedBase = false;
 
+	//破棄フラグ
+	bool m_isFinalized = false;
+
 	//セーフティ
 	std::future<void> m_future;
 

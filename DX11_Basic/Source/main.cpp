@@ -5,6 +5,7 @@
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #include "imguiSystem.h"
+#include "video_texture.h"
 
 //
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -85,7 +86,7 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-//	_CrtSetBreakAlloc(65974);
+//	_CrtSetBreakAlloc(21622);
 
 	//ウィンドウクラス作成
 	WNDCLASSEX wc = {};
@@ -121,6 +122,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//DirectX11初期化
 	Renderer::CreateInstance();
 	RENDERER.Initialize(g_hWnd);
+
+	//media foundation初期化
+	VideoTexture::createAPI();
 
 	//ウィンドウ表示
 	ShowWindow(g_hWnd, nCmdShow);
@@ -161,12 +165,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//メインループ
 	while (isLoop) {
 		//メッセージ処理
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 			//終了メッセージ
 			if (msg.message == WM_QUIT) {
-				break;
+				isLoop = false;
 			}
 		}
 
@@ -189,6 +193,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	SYSTEM.Finalize();
 	//システムクラス破棄
 	System::DestroyInstance();
+
+	//media foundation終了
+	VideoTexture::destroyAPI();
 
 	//DirectX11終了
 	RENDERER.Finalize();

@@ -19,6 +19,9 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{3b19008b-bda2-424c-a8e2-e265c921e50a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="videoPlayer">
+      <UniqueIdentifier>{07d89299-0c50-4643-955d-abbf3a5d151a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\common.hlsl">
@@ -97,6 +100,9 @@
       <Filter>シェーダー</Filter>
     </FxCompile>
     <FxCompile Include="Shader\gpuParticleVS_IndirectDraw.hlsl">
+      <Filter>シェーダー</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\videoPS.hlsl">
       <Filter>シェーダー</Filter>
     </FxCompile>
   </ItemGroup>
@@ -297,6 +303,15 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\firstFollowCamera.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\videoplayer\video_texture.cpp">
+      <Filter>videoPlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\videoplayer\movieTexture.cpp">
+      <Filter>videoPlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\titleBackgroundMove.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -512,6 +527,18 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\firstFollowCamera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\videoplayer\video_texture.h">
+      <Filter>videoPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\videoplayer\movieTexture.h">
+      <Filter>videoPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\videoplayer\clock.h">
+      <Filter>videoPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\titleBackgroundMove.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
