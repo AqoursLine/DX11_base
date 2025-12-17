@@ -8,7 +8,7 @@
 bool TitleBackgroundMove::Initialize() {
 	m_videoTexture = new VideoTexture();
 	if (m_videoTexture) {
-		if (!m_videoTexture->create("Asset\\Movie\\demo.mp4")) {
+		if (!m_videoTexture->create("Asset\\Movie\\inGameMovie.mp4")) {
 			return false;
 		}
 	}
@@ -47,7 +47,7 @@ void TitleBackgroundMove::Finalize() {
 
 void TitleBackgroundMove::Update(double deltaTime) {
 	if (m_videoTexture) {
-		m_videoTexture->update(static_cast<float>(deltaTime));
+		m_videoTexture->update(static_cast<float>(deltaTime) * 2.0f);
 	}
 }
 

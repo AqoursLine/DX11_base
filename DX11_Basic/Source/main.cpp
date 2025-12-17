@@ -76,9 +76,20 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case WM_KEYDOWN:
 			if (wParam == VK_ESCAPE) {
+				if (MessageBox(hWnd, L"終了しますか？", L"確認", MB_OKCANCEL | MB_ICONQUESTION) == IDOK) {
+					DestroyWindow(hWnd);
+				}
+			}
+			break;
+		case WM_CLOSE:
+			if (MessageBox(hWnd, L"アプリケーションを終了しますか？", L"確認", MB_OKCANCEL | MB_ICONQUESTION) == IDOK) {
 				DestroyWindow(hWnd);
 			}
 			break;
+		case WM_SETCURSOR:
+			//カーソル非表示
+			SetCursor(NULL);
+			return TRUE;
 	}
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
@@ -97,7 +108,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	wc.cbWndExtra = 0;
 	wc.hInstance = hInstance;
 	wc.hIcon = nullptr;
-	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+//	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	wc.hCursor = nullptr;
 	wc.hbrBackground = nullptr;
 	wc.lpszMenuName = nullptr;
 	wc.lpszClassName = WNDOW_CLASS_NAME;
@@ -114,7 +126,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	int windowPosY = (screenHeight - SCREEN_HEIGHT) / 2;
 
 	//ウィンドウ作成
-	g_hWnd = CreateWindowEx(0, WNDOW_CLASS_NAME, L"とりあえず", WS_POPUP | WS_VISIBLE, windowPosX, windowPosY, SCREEN_WIDTH, SCREEN_HEIGHT, nullptr, nullptr, hInstance, nullptr);
+	g_hWnd = CreateWindowEx(0, WNDOW_CLASS_NAME, L"GW-Racing", WS_POPUP | WS_VISIBLE, windowPosX, windowPosY, SCREEN_WIDTH, SCREEN_HEIGHT, nullptr, nullptr, hInstance, nullptr);
 
 	//COMライブラリ初期化
 	CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);

@@ -30,7 +30,7 @@ bool TestParticle::Initialize() {
 	settings.velocityVariation = { 2.0f, 2.0f, 0.0f };
 	settings.worldAcceleration = { 0.0f, 0.0f, 10.0f};
 	settings.localAcceleration = { 40.0f, 0.0f, 10.0f };
-	settings.upVector = { 0.0f, 0.0f, 1.0f };
+	settings.upVector = { 0.0f, 0.0f, -1.0f };
 	settings.oneShot = true;
 	settings.oneShotCount = 200;
 	settings.maxParticles = 100000;

@@ -23,8 +23,8 @@ bool TitleText::Initialize() {
 	m_pixelShader = new PixelShader();
 	m_pixelShader->Load(L"Shader\\unlitTexturePS.cso");
 
-	m_position = { SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f };
 	m_scale = { 800.0f, 200.0f, 1.0f };
+	m_position = { SCREEN_WIDTH * 0.5f, 20.0f + m_scale.y * 0.5f, 0.0f };
 
 	return true;
 }

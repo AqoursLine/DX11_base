@@ -38,7 +38,7 @@ bool GameScene::Initialize() {
 	AddGameObject(new Wall(), TYPE_OPAQUE)->SetPosition({ 0.0f, 5.0f, -65.0f })->SetScale({ 400.0f, 20.0f, 10.0f })->SetRotation({ 0.0f, XM_PI, 0.0f });
 
 	//ゆきのん初期化
-	AddGameObject(new Temp2D(), TYPE_BEFORE_PROCESS_UI);
+//	AddGameObject(new Temp2D(), TYPE_BEFORE_PROCESS_UI);
 
 	//フィールドオブジェクト
 	AddGameObject(new FieldObject(), TYPE_OPAQUE);
@@ -47,7 +47,7 @@ bool GameScene::Initialize() {
 	AddGameObject(new Water(), TYPE_TRANSPARENT);
 
 	//プレイヤー
-//	AddGameObject(new Player(), TYPE_OPAQUE);
+	AddGameObject(new Player(), TYPE_OPAQUE);
 
 	//CPUボート
 	AddGameObject(new CPUBoat(), TYPE_OPAQUE)->SetPosition({ -160.0f, 0.0f, -10.0f});
@@ -55,7 +55,7 @@ bool GameScene::Initialize() {
 	AddGameObject(new CPUBoat(), TYPE_OPAQUE)->SetPosition({ -160.0f, 0.0f, -30.0f });
 	AddGameObject(new CPUBoat(), TYPE_OPAQUE)->SetPosition({ -160.0f, 0.0f, -40.0f });
 	AddGameObject(new CPUBoat(), TYPE_OPAQUE)->SetPosition({ -160.0f, 0.0f, -50.0f });
-	AddGameObject(new CPUBoat(), TYPE_OPAQUE)->SetPosition({ -160.0f, 0.0f, -60.0f });
+//	AddGameObject(new CPUBoat(), TYPE_OPAQUE)->SetPosition({ -160.0f, 0.0f, -60.0f });
 
 	//浮き
 	auto bob1 = AddGameObject(new Buoy(), TYPE_OPAQUE);
@@ -94,9 +94,9 @@ bool GameScene::Initialize() {
 	AddGameObject(new RankDisplay(), TYPE_BEFORE_PROCESS_UI);
 
 	//カメラの初期化
-	//AddGameObject(new Camera(), TYPE_CAMERA);
-	//	AddGameObject(new FpsCamera(), TYPE_CAMERA);
-	AddGameObject(new FirstFollowCamera(), TYPE_CAMERA);
+	AddGameObject(new Camera(), TYPE_CAMERA);
+//	AddGameObject(new FpsCamera(), TYPE_CAMERA);
+//	AddGameObject(new FirstFollowCamera(), TYPE_CAMERA);
 
 	//スカイドーム
 	AddGameObject(new SkyDome(), TYPE_OPAQUE);

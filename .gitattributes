@@ -1,3 +1,4 @@
 # Auto detect text files and perform LF normalization
 * text=auto
 DX11_Basic/Library/webrtc/lib/*.lib filter=lfs diff=lfs merge=lfs -text
+*.mp4 filter=lfs diff=lfs merge=lfs -text

@@ -314,6 +314,9 @@
     <ClCompile Include="Source\titleBackgroundMove.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Source\titleMenuBackground.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\camera.h">
@@ -539,6 +542,9 @@
       <Filter>videoPlayer</Filter>
     </ClInclude>
     <ClInclude Include="Source\titleBackgroundMove.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\titleMenuBackground.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

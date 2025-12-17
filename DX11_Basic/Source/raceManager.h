@@ -59,7 +59,7 @@ private:
 	Vector2 m_boundsMin = { -215.0f, -60.0f };
 	Vector2 m_boundsMax = { 215.0f, 60.0f };
 
-	int m_lapCountToFinish = 1; //完走に必要な周回数
+	int m_lapCountToFinish = 3; //完走に必要な周回数
 
 	static std::vector<BoatResultData> m_result;	//レース結果
 };

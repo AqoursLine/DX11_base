@@ -131,7 +131,7 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>Library\imgui\backends;Library\imgui;Library\cri\include;Library\webrtc\include;Source;Library\assimp\include;$(VcpkgRoot)installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Library\videoplayer;Library\imgui\backends;Library\imgui;Library\cri\include;Library\webrtc\include;Source;Library\assimp\include;$(VcpkgRoot)installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
@@ -393,6 +393,7 @@
     <ClCompile Include="Source\texture.cpp" />
     <ClCompile Include="Source\timer.cpp" />
     <ClCompile Include="Source\titleBackgroundMove.cpp" />
+    <ClCompile Include="Source\titleMenuBackground.cpp" />
     <ClCompile Include="Source\titleScene.cpp" />
     <ClCompile Include="Source\titleText.cpp" />
     <ClCompile Include="Source\tmp2D.cpp" />
@@ -469,6 +470,7 @@
     <ClInclude Include="Source\texture.h" />
     <ClInclude Include="Source\timer.h" />
     <ClInclude Include="Source\titleBackgroundMove.h" />
+    <ClInclude Include="Source\titleMenuBackground.h" />
     <ClInclude Include="Source\titleScene.h" />
     <ClInclude Include="Source\titleText.h" />
     <ClInclude Include="Source\tmp2D.h" />
