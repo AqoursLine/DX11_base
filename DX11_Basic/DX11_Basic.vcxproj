@@ -394,6 +394,10 @@
     <ClCompile Include="Source\timer.cpp" />
     <ClCompile Include="Source\titleBackgroundMove.cpp" />
     <ClCompile Include="Source\titleMenuBackground.cpp" />
+    <ClCompile Include="Source\titleMenuIcon.cpp" />
+    <ClCompile Include="Source\titleMenuIconQuit.cpp" />
+    <ClCompile Include="Source\titleMenuIconStart.cpp" />
+    <ClCompile Include="Source\titleMenuSelecter.cpp" />
     <ClCompile Include="Source\titleScene.cpp" />
     <ClCompile Include="Source\titleText.cpp" />
     <ClCompile Include="Source\tmp2D.cpp" />
@@ -471,6 +475,10 @@
     <ClInclude Include="Source\timer.h" />
     <ClInclude Include="Source\titleBackgroundMove.h" />
     <ClInclude Include="Source\titleMenuBackground.h" />
+    <ClInclude Include="Source\titleMenuIcon.h" />
+    <ClInclude Include="Source\titleMenuIconQuit.h" />
+    <ClInclude Include="Source\titleMenuIconStart.h" />
+    <ClInclude Include="Source\titleMenuSelecter.h" />
     <ClInclude Include="Source\titleScene.h" />
     <ClInclude Include="Source\titleText.h" />
     <ClInclude Include="Source\tmp2D.h" />

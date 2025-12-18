@@ -186,6 +186,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			}
 		}
 
+		//windprocで終了処理が行われたら抜ける
+		if (!isLoop) {
+			break;
+		}
+
+		//タイマークラス更新
 		timer.Tick();
 		//経過時間に加算
 		elapsedTime += timer.GetDeltaTime();

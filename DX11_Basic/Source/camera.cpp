@@ -34,9 +34,11 @@ void Camera::Update(double deltaTime) {
 		return;
 	}
 
-	//ターゲット位置をプレイヤーの位置に設定
-	m_targetPosition = player->GetPosition();
-	m_targetPosition.y += 1.5f; //少し上にオフセット
+	//ターゲット位置をプレイヤーの位置少しずつ近づける
+	Vector3 playerPos = player->GetPosition();
+	playerPos.y += 1.5f; //少し上を注視
+	m_targetPosition = m_targetPosition + (playerPos - m_targetPosition) * m_rate * 2.0f * static_cast<float>(deltaTime);
+
 
 	//ターゲットの回転を取得
 	Vector4 targetQuat = player->GetYawRotation();
