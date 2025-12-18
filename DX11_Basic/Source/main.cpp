@@ -64,28 +64,31 @@ HWND GetHwnd() {
 
 //プロシージャ
 LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+#ifdef _DEBUG
 	// imgui用のメッセージ処理
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam)) {
 		return true;
 	}
+#endif // _DEBUG
 
 	//メッセージ分岐
 	switch (msg) {
 		case WM_DESTROY:
 			PostQuitMessage(0);
-			break;
+			return 0;
 		case WM_KEYDOWN:
 			if (wParam == VK_ESCAPE) {
 				if (MessageBox(hWnd, L"終了しますか？", L"確認", MB_OKCANCEL | MB_ICONQUESTION) == IDOK) {
 					DestroyWindow(hWnd);
 				}
+				return 0;
 			}
 			break;
 		case WM_CLOSE:
 			if (MessageBox(hWnd, L"アプリケーションを終了しますか？", L"確認", MB_OKCANCEL | MB_ICONQUESTION) == IDOK) {
 				DestroyWindow(hWnd);
 			}
-			break;
+			return 0;
 		case WM_SETCURSOR:
 			//カーソル非表示
 			SetCursor(NULL);

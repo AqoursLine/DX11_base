@@ -3,6 +3,9 @@
 #include "renderer.h"
 #include "sprite.h"
 #include "shaders.h"
+#include "texture.h"
+
+#include "imguiSystem.h"
 
 bool TitleMenuIcon::Initialize() {
 	// スプライトの初期化
@@ -10,11 +13,17 @@ bool TitleMenuIcon::Initialize() {
 	if (!m_sprite->Initialize()) {
 		return false;
 	}
+	// テクスチャの読み込み
+	m_texture = new Texture();
+	if (!m_texture->Load(L"Asset\\Texture\\" + m_textureFilePath)) {
+		return false;
+	}
+
 	// シェーダーの初期化
 	m_vertexShader = new VertexShader();
-	m_vertexShader->Load(L"Shader\\unlitColorVS.cso");
+	m_vertexShader->Load(L"Shader\\unlitTextureVS.cso");
 	m_pixelShader = new PixelShader();
-	m_pixelShader->Load(L"Shader\\unlitColorPS.cso");
+	m_pixelShader->Load(L"Shader\\unlitTexturePS.cso");
 
 	// スケールベクトルの設定
 	m_baseScaleVector = Vector3(500.0f, 150.0f, 1.0f); // 基本スケールをアイコンのサイズに設定
@@ -37,6 +46,12 @@ void TitleMenuIcon::Finalize() {
 		delete m_sprite;
 		m_sprite = nullptr;
 	}
+	// テクスチャの解放
+	if (m_texture) {
+		delete m_texture;
+		m_texture = nullptr;
+	}
+
 	// シェーダーの解放
 	if (m_vertexShader) {
 		delete m_vertexShader;
@@ -73,10 +88,13 @@ void TitleMenuIcon::Draw() {
 	m_vertexShader->Set();
 	m_pixelShader->Set();
 
+	// テクスチャセット
+	m_texture->Set(0);
+
 	// マテリアル設定
 	MATERIAL material = {};
 	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	material.textureEnable = FALSE;
+	material.textureEnable = TRUE;
 	RENDERER.SetMaterial(material);
 
 	// スプライト描画

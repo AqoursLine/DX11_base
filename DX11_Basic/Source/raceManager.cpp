@@ -86,11 +86,17 @@ void RaceManager::Update(double deltaTime) {
 		return;
 	}
 
-	//スタート前のカウントダウン
 	if (m_startDelay > 0.0f) {
+		//スタート前の遅延時間
 		m_startDelay -= static_cast<float>(deltaTime);
+		return;
+	}
+	
+	if (m_countDown > 0.0f) {
+		//スタート前のカウントダウン
+		m_countDown -= static_cast<float>(deltaTime);
 
-		if (m_startDelay <= 0.0f) {
+		if (m_countDown <= 0.0f) {
 			for (auto& boat : m_racingBoats) {
 				boat->SetStarting(true);
 			}

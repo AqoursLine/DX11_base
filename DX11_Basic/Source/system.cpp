@@ -99,6 +99,13 @@ bool System::Excute() {
 
 	//マネージャークラス更新
 	m_manager->Update(m_timer->GetDeltaTime());
+
+	//終了判定
+	if (m_manager->GetScene() == nullptr || m_manager->IsFinished()) {
+		return true;
+	}
+
+	//描画
 	m_manager->Draw();
 	if (m_manager->CleanUp()) {
 		return true;

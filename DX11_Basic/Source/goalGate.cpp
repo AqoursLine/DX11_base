@@ -207,9 +207,14 @@ void GoalGate::Draw() {
 	properties.params3.z = 0.3f; //uv上の最大X位置
 	properties.params3.w = 0.78f; //uv上の最大Y位置
 
-
 	RENDERER.SetShaderProperties(properties);
+
+	// 両面描画設定
+	RENDERER.SetRasterizerState(RASTERIZER_MODE::NONE);
 
 	//スプライト描画
 	m_sprite->Draw(m_position, m_rotation, m_scale);
+
+	//裏面描画設定に戻す
+	RENDERER.SetRasterizerState(RASTERIZER_MODE::BACK);
 }

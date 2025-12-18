@@ -35,7 +35,6 @@ Boat::Boat()
 	, m_water(nullptr)
 	, m_splashEffect(nullptr)
 	, m_splashTimer(0.0f)
-	, m_splashEffectTimer(0.0f)
 
 	, m_length(2.9f)			//ボートの長さ(m)
 	, m_width(1.4f)				//ボートの幅(m)
@@ -400,27 +399,33 @@ Vector3 Boat::CalculateWallCollisionForce() {
 void Boat::UpdateWaterInteraction(float deltaTime) {
 	if (!m_water) return;
 
-	if (GetSpeed() > 10.0f) {
+	float speed = GetSpeed();
+
+	//水面にリップルを追加
+	if (speed > 10.0f) {
 		m_splashTimer += deltaTime;
-		m_splashEffectTimer += deltaTime;
 
 		if (m_splashTimer >= 0.5f) {
 			m_water->AddRipple(m_position, 0.5f, 2.0f);
 
 			m_splashTimer = 0.0f;
 		}
+	}
 
+	//水しぶきエフェクトの更新
+	if (speed > 5.0f) {
 		//水しぶきエフェクト生成
-		if (m_splashEffect && m_splashEffectTimer >= 0.0f) {
+		if (m_splashEffect) {
+			//ボートの後方中央にエフェクトを配置
 			Vector3 forward = GetForwardQ();
 			Vector3 splashPos = m_position - forward * (m_length * 0.5f);
-			splashPos.y -= m_height* 0.3f;
+			splashPos.y -= m_height * 0.3f;
 
+			//水面より下に配置
 			splashPos.y = std::min(splashPos.y, m_water->GetWaterHeight(splashPos));
 
+			//エフェクト発生
 			m_splashEffect->EmitOneShot(splashPos);
-
-			m_splashEffectTimer = 0.0f;
 		}
 	}
 }

@@ -4,6 +4,11 @@
 #include "texture.h"
 #include "shaders.h"
 
+#ifdef _DEBUG
+#include "imguiSystem.h"
+#endif // _DEBUG
+
+
 bool TitleText::Initialize() {
 	m_sprite = new Sprite();
 	if (!m_sprite->Initialize()) {
@@ -13,10 +18,11 @@ bool TitleText::Initialize() {
 
 	//テクスチャの読み込み
 	m_texture = new Texture();
-	if (!m_texture->Load(L"Asset\\Texture\\title.jpg")) {
+	if (!m_texture->Load(L"Asset\\Texture\\title.png")) {
 		ErrorMessage(L"タイトルテキストのテクスチャの読み込みに失敗しました。", E_FAIL);
 		return false;
 	}
+
 	//シェーダーの読み込み
 	m_vertexShader = new VertexShader();
 	m_vertexShader->Load(L"Shader\\unlitTextureVS.cso");
@@ -48,14 +54,15 @@ void TitleText::Draw() {
 	//シェーダーの設定
 	m_vertexShader->Set();
 	m_pixelShader->Set();
-	//テクスチャの設定
+
+	//テクスチャセット
 	m_texture->Set(0);
+
 	//マテリアルセット
 	MATERIAL material = {};
 	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	material.textureEnable = true;
+	material.textureEnable = TRUE;
 	RENDERER.SetMaterial(material);
-
 	//スプライトの描画
 	m_sprite->Draw(m_position, m_rotation, m_scale);
 }

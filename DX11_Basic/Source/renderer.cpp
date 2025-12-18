@@ -116,6 +116,12 @@ bool Renderer::Initialize(HWND hWnd) {
 		ErrorMessage(L"ラスタライザーステートの初期化に失敗しました。", hr);
 		return false;
 	}
+	rasterizerDesc.CullMode = D3D11_CULL_NONE;
+	hr = m_device->CreateRasterizerState(&rasterizerDesc, m_rasterizerNone.GetAddressOf());
+	if (FAILED(hr)) {
+		ErrorMessage(L"ラスタライザーステートの初期化に失敗しました。", hr);
+		return false;
+	}
 	rasterizerDesc.DepthBias = 100;
 	rasterizerDesc.SlopeScaledDepthBias = 0.5f;
 	rasterizerDesc.DepthBiasClamp = 0.0f;
@@ -411,6 +417,9 @@ void Renderer::SetRasterizerState(RASTERIZER_MODE mode) {
 			break;
 		case RASTERIZER_MODE::FRONT:
 			m_deviceContext->RSSetState(m_rasterizerFront.Get());
+			break;
+		case RASTERIZER_MODE::NONE:
+			m_deviceContext->RSSetState(m_rasterizerNone.Get());
 			break;
 		case RASTERIZER_MODE::SHADOW:
 			m_deviceContext->RSSetState(m_rasterizerShadow.Get());

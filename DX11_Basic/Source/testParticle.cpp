@@ -22,17 +22,17 @@ bool TestParticle::Initialize() {
 	EmitterSettings settings = {};
 	settings.startColor = { 1.0f, 0.2f, 0.2f, 1.0f };
 	settings.endColor = { 1.0f, 1.0f, 0.2f, 0.1f };
-	settings.startSize = 0.2f;
-	settings.endSize = 0.01f;
+	settings.startSize = 0.01f;
+	settings.endSize = 0.001f;
 	settings.lifeTime = 2.0f;
 	settings.position = { 0.0f, 0.0f, 0.0f };
 	settings.velocity = { 0.0f, 0.0f, 0.0f };
 	settings.velocityVariation = { 2.0f, 2.0f, 0.0f };
 	settings.worldAcceleration = { 0.0f, 0.0f, 10.0f};
-	settings.localAcceleration = { 40.0f, 0.0f, 10.0f };
+	settings.localAcceleration = { 100.0f, 0.0f, 10.0f };
 	settings.upVector = { 0.0f, 0.0f, -1.0f };
 	settings.oneShot = true;
-	settings.oneShotCount = 200;
+	settings.oneShotCount = 800;
 	settings.maxParticles = 100000;
 
 	SetEmitterSettings(settings);

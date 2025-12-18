@@ -4,7 +4,10 @@
 
 class TitleMenuIcon : public GameObject {
 public:
-	TitleMenuIcon() = default;
+	TitleMenuIcon() = delete;
+	TitleMenuIcon(const std::wstring& textureFilePath)
+		: m_textureFilePath(textureFilePath) {
+	};
 	~TitleMenuIcon() = default;
 
 	//選択状態設定
@@ -32,6 +35,9 @@ private:
 	bool m_isSelected = false;
 
 	class Sprite* m_sprite = nullptr;
+	class Texture* m_texture = nullptr;
 	class VertexShader* m_vertexShader = nullptr;
 	class PixelShader* m_pixelShader = nullptr;
+
+	std::wstring m_textureFilePath = L"";
 };

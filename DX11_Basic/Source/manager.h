@@ -16,6 +16,7 @@ public:
 	bool CleanUp();
 
 	void SetFinish(bool isFinish) { m_isFinished = isFinish; }
+	bool IsFinished() const { return m_isFinished; }
 
 	Scene* GetScene() const { return m_scene; }
 

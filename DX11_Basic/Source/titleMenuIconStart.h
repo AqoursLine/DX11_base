@@ -3,7 +3,7 @@
 #include "titleMenuIcon.h"
 class TitleMenuIconStart : public TitleMenuIcon {
 	public:
-	TitleMenuIconStart() = default;
+	TitleMenuIconStart() : TitleMenuIcon(L"start.png") {}
 	~TitleMenuIconStart() = default;
 	//決定処理
 	void OnDecide() override;

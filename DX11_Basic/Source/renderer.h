@@ -78,6 +78,7 @@ enum class DEPTH_MODE {
 enum class RASTERIZER_MODE {
 	BACK, // 裏面カリング
 	FRONT, // 表面カリング
+	NONE, // カリングなし
 	SHADOW // シャドウマップ用（表面カリング + デプスバイアス）
 };
 
@@ -190,6 +191,7 @@ private:
 	//ラスタライザステート
 	ComPtr<ID3D11RasterizerState> m_rasterizerBack;
 	ComPtr<ID3D11RasterizerState> m_rasterizerFront;
+	ComPtr<ID3D11RasterizerState> m_rasterizerNone;
 	ComPtr<ID3D11RasterizerState> m_rasterizerShadow;
 
 	//ブレンドステート
