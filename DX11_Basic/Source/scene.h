@@ -24,7 +24,7 @@ class Camera;
 
 class Scene {
 public:
-	virtual ~Scene() { if (m_future.valid()) m_future.wait(); }
+	virtual ~Scene() { if (m_future.valid()) m_future.wait(); FinalizeBase(); }
 
 	bool InitializeBase();
 	void ActivateBase();
