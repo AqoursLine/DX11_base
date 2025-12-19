@@ -56,6 +56,11 @@ void Manager::Finalize() {
 		delete m_nextScene;
 	}
 
+	if (m_transition != nullptr) {
+		m_transition->Finalize();
+		delete m_transition;
+	}
+
 	Input::Uninit();
 }
 

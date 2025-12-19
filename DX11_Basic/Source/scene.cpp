@@ -40,11 +40,9 @@ void Scene::FinalizeBase() {
 	}
 
 	if (!m_isInitialized.load(std::memory_order_acquire)) {
-		return;
+		// シーン固有の終了処理
+		Finalize();
 	}
-
-	// シーン固有の終了処理
-	Finalize();
 
 	// GameObjectの終了処理と解放
 	ObjectFinalize();

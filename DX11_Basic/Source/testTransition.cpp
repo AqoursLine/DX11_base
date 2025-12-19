@@ -26,6 +26,7 @@ void TestTransition::Finalize() {
 	delete m_logoTexture;
 	delete m_fadeTexture;
 
+	m_spriteRenderer->Finalize();
 	delete m_spriteRenderer;
 	delete m_pixelShader;
 	delete m_vertexShader;
