@@ -19,7 +19,9 @@ public:
 	//レースタイム取得
 	float GetRaceTime() const { return m_raceTime; }
 	//スタート前のカウントダウン時間取得
-	float GetStartDelay() const { return m_countDown; }
+	float GetCountDown() const { return m_countDown; }
+	//スタート前の遅延時間取得
+	float GetStartDelay() const { return m_startDelay; }
 
 	//レース開始フラグ取得
 	bool IsRaceStarted() const { return m_raceStarted; }

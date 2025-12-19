@@ -62,7 +62,7 @@ void RaceCountDownText::Update(double deltaTime) {
 	}
 
 	//raceManagerのスタート前カウントダウン時間を取得
-	float startDelay = m_raceManager->GetStartDelay();
+	float startDelay = m_raceManager->GetCountDown();
 
 	//表示時間を過ぎたら非表示にする
 	if (startDelay <= 0.0f) {
@@ -74,13 +74,17 @@ void RaceCountDownText::Update(double deltaTime) {
 	}
 
 	//表示時間内なら表示
-	m_time = startDelay + 0.5f;
+	m_time = startDelay + 0.9f;
 
 }
 
 void RaceCountDownText::Draw() {
 	//レースマネージャーがない場合は処理しない
 	if (!m_raceManager) {
+		return;
+	}
+
+	if (m_raceManager->GetStartDelay() > 0.0f) {
 		return;
 	}
 
