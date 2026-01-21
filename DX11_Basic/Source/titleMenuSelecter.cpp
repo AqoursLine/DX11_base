@@ -4,6 +4,12 @@
 
 #include "input.h"
 
+#include "renderer.h"
+#include "sprite.h"
+#include "texture.h"
+#include "shaders.h"
+
+
 bool TitleMenuSelecter::Initialize() {
 	m_menuIcons.clear();
 
@@ -18,7 +24,42 @@ bool TitleMenuSelecter::Initialize() {
 
 	// 最初のメニューアイコンを選択状態にする
 	m_menuIcons[m_currentIndex]->IsSelected(true);
+
+	// sprite関連初期化
+	m_sprite = new Sprite();
+	if (!m_sprite->Initialize()) {
+		return false;
+	}
+	m_texture = new Texture();
+	if (!m_texture->Load(L"Asset\\Texture\\start.png")) {
+		return false;
+	}
+	m_vertexShader = new VertexShader();
+	m_vertexShader->Load(L"Shader\\unlitTextureVS.cso");
+	m_pixelShader = new PixelShader();
+	m_pixelShader->Load(L"Shader\\selecterBackgroundPS.cso");
+
 	return true;
+}
+
+void TitleMenuSelecter::Finalize() {
+	if (m_sprite) {
+		m_sprite->Finalize();
+		delete m_sprite;
+		m_sprite = nullptr;
+	}
+	if (m_texture) {
+		delete m_texture;
+		m_texture = nullptr;
+	}
+	if (m_vertexShader) {
+		delete m_vertexShader;
+		m_vertexShader = nullptr;
+	}
+	if (m_pixelShader) {
+		delete m_pixelShader;
+		m_pixelShader = nullptr;
+	}
 }
 
 void TitleMenuSelecter::Update(double deltaTime) {
@@ -43,5 +84,32 @@ void TitleMenuSelecter::Update(double deltaTime) {
 	if (Input::GetKeyTrigger(KK_ENTER) || Input::GetKeyTrigger(KK_SPACE)) {
 		m_menuIcons[m_currentIndex]->OnDecide();
 	}
+
+}
+
+void TitleMenuSelecter::Draw() {
+	// 背景描画
+	// シェーダー設定
+	m_vertexShader->Set();
+	m_pixelShader->Set();
+
+	// テクスチャ設定
+	m_texture->Set(0);
+
+	// マテリアル
+	MATERIAL material = {};
+	material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.textureEnable = TRUE;
+	RENDERER.SetMaterial(material);
+
+	// アイコン位置・スケール取得
+	Vector3 iconPosition = m_menuIcons[m_currentIndex]->GetPosition();
+
+	float scaleFactor = 1.03f;
+
+	Vector3 iconScale = m_menuIcons[m_currentIndex]->GetScale() * scaleFactor;
+
+	// スプライト描画
+	m_sprite->Draw(iconPosition, Vector3::ZERO, iconScale);
 
 }

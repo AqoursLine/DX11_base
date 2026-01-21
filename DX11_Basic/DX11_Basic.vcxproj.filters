@@ -105,6 +105,9 @@
     <FxCompile Include="Shader\videoPS.hlsl">
       <Filter>シェーダー</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\selecterBackgroundPS.hlsl">
+      <Filter>シェーダー</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\camera.cpp">
