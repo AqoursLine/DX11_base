@@ -29,7 +29,7 @@ bool SkyDome::Initialize() {
 	auto water = m_scene->GetGameObject<Water>();
 
 	if (water) {
-		water->SetEnvironmentMap(m_model->GetTexture(0));
+		water->SetEnvironmentMapSRV(m_model->GetTexture(0));
 	}
 
 	return true;

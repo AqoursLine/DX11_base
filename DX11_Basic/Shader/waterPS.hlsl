@@ -22,8 +22,8 @@ cbuffer WaterConstantBuffer : register(b7)
 	float BaseWaveSpeed3;
 	float WaveSharpness; // 波頭の鋭さ（べき乗の指数）
 	float padding3;
-    
-    // 環境マッピングパラメータ
+
+	// 環境マッピングパラメータ
 	float ReflectionStrength; // 反射強度 (0.0-1.0)
 	float RefractionStrength; // 屈折強度 (0.0-1.0)
 	float FresnelPower; // フレネル効果の強さ
@@ -34,9 +34,9 @@ cbuffer WaterConstantBuffer : register(b7)
 }
 
 // テクスチャとサンプラー
-TextureCube EnvironmentMap : register(t0); // 環境マップ（キューブマップ）
-Texture2D NormalMapTexture : register(t1); // 法線マップ（オプション）
-Texture2D FoamTexture : register(t2); // 泡テクスチャ
+Texture2D NormalMapTexture : register(t0); // 法線マップ（オプション）
+Texture2D FoamTexture : register(t1); // 泡テクスチャ
+TextureCube EnvironmentMap : register(t2); // 環境マップ（キューブマップ）
 SamplerState LinearSampler : register(s0);
 
 void main(in PS_INPUT input, out float4 outDiffuse : SV_TARGET)
