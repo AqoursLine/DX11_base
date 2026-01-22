@@ -11,7 +11,7 @@ namespace WaterConstants {
 	constexpr int MAX_RIPPLES = 32;
 
 	// グリッド解像度
-	constexpr int GRID_RESOLUTION = 512;
+	constexpr int GRID_RESOLUTION = 511;
 	constexpr int CS_THREAD_GROUP_SIZE = 16;
 
 	// 水面サイズ
@@ -29,7 +29,7 @@ namespace WaterConstants {
 	constexpr int DISPATCH_GROUPS_Y = GRID_RESOLUTION / CS_THREAD_GROUP_SIZE;
 
 	// コンパイル検証
-	static_assert(GRID_RESOLUTION% CS_THREAD_GROUP_SIZE == 0, "GRID_RESOLUTION must be multiple of CS_THREAD_GROUP_SIZE");
+	static_assert((GRID_RESOLUTION + 1) % CS_THREAD_GROUP_SIZE == 0, "GRID_RESOLUTION must be multiple of CS_THREAD_GROUP_SIZE");
 }
 
 /// <summary>
