@@ -4,7 +4,7 @@
 //================================================================
 #define MAX_RIPPLES 32
 #define THREAD_GROUP_SIZE 16
-#define GRID_RESOLUTION 512 // グリッドの解像度（512x512）
+#define GRID_RESOLUTION 511 // グリッドの解像度（512x512）
 
 //================================================================
 // 構造体定義
@@ -15,9 +15,9 @@ struct Vertex
 {
 	float4 position; // xyz:位置 w:未使用
 	float4 normal; // xyz:法線 w:未使用
-	float4 diffuse; // rgba:色
 	float4 texcoord; // uv:テクスチャ座標
 	float4 tangent; // xyz:接線 w:未使用
+	float4 diffuse; // rgba:色
 };
 
 // 波紋データ構造体
