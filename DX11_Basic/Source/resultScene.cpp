@@ -14,7 +14,7 @@
 
 bool ResultScene::Initialize() {
 	//タイトルテキスト初期化
-	AddGameObject(new ResultText(), TYPE_BEFORE_PROCESS_UI);
+	AddGameObject<ResultText>(TYPE_BEFORE_PROCESS_UI);
 
 	auto resultData = RaceManager::GetResultData(); //結果データ取得
 
@@ -22,7 +22,7 @@ bool ResultScene::Initialize() {
 
 	//タイム表示初期化
 	for (int i = 0; i < resultCount; i++) {
-		AddGameObject(new ResultTime(resultCount, resultData[i], i), TYPE_BEFORE_PROCESS_UI);
+		AddGameObject<ResultTime>(TYPE_BEFORE_PROCESS_UI)->SetResultCount(resultCount)->SetResultData(resultData[i])->SetIndex(i);
 	}
 
 	return true;

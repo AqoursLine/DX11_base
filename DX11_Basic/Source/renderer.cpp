@@ -4,6 +4,7 @@
 #include <d3dcompiler.h>
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "dxgi.lib")
 
 Renderer* Renderer::s_instance = nullptr;
 
@@ -26,9 +27,33 @@ bool Renderer::Initialize(HWND hWnd) {
 	swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
 	swapChainDesc.SampleDesc.Quality = 0;
 	
+	// 外部GPU対応
+	IDXGIFactory1* dxgiFactory = nullptr;
+	CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**)&dxgiFactory);
+
+	IDXGIAdapter1* adapter = nullptr;
+	IDXGIAdapter1* bestAdapter = nullptr;
+	SIZE_T maxDedicatedVideoMemory = 0;
+
+	// 利用可能なアダプタを列挙して、専用ビデオメモリが最大のアダプタを選択
+	for (UINT adapterIndex = 0; dxgiFactory->EnumAdapters1(adapterIndex, &adapter) != DXGI_ERROR_NOT_FOUND; ++adapterIndex) {
+		DXGI_ADAPTER_DESC1 desc;
+		adapter->GetDesc1(&desc);
+		// 専用ビデオメモリが最大のアダプタを選択
+		if (desc.DedicatedVideoMemory > maxDedicatedVideoMemory) {
+			maxDedicatedVideoMemory = desc.DedicatedVideoMemory;
+			if (bestAdapter) {
+				bestAdapter->Release();
+			}
+			bestAdapter = adapter;
+		} else {
+			adapter->Release();
+		}
+	}
+
 	hr = D3D11CreateDeviceAndSwapChain(
-		nullptr,
-		D3D_DRIVER_TYPE_HARDWARE,
+		bestAdapter,
+		D3D_DRIVER_TYPE_UNKNOWN,
 		nullptr,
 		0,
 		NULL,

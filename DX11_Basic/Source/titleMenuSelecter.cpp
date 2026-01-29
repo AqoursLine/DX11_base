@@ -10,11 +10,18 @@
 #include "shaders.h"
 
 
-bool TitleMenuSelecter::Initialize() {
+void TitleMenuSelecter::ClearMenuIcons() {
+	for (auto& icon : m_menuIcons) {
+		icon->SetActive(false);
+		icon->IsSelected(false);
+	}
 	m_menuIcons.clear();
+	m_currentIndex = 0;
+	m_previousIndex = 0;
+	m_maxIndex = 0;
+}
 
-	m_menuIcons = m_scene->GetGameObjects<TitleMenuIcon>();
-
+bool TitleMenuSelecter::Initialize() {
 	m_maxIndex = static_cast<int>(m_menuIcons.size());
 
 	if (m_maxIndex == 0) {

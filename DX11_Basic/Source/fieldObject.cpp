@@ -21,7 +21,7 @@ bool FieldObject::Initialize() {
 	m_pixelShader = new PixelShader();
 	m_pixelShader->Load(L"Shader\\unlitTexturePS.cso");
 
-	m_scale = {1024.0, 1.0f, 640.0};
+	m_scale = {512.0, 1.0f, 512.0};
 	m_position = { 0.0f, -10.0f, 0.0f };
 
 	return true;

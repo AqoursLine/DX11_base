@@ -32,8 +32,8 @@ bool TestParticle::Initialize() {
 	settings.localAcceleration = { 100.0f, 0.0f, 10.0f };
 	settings.upVector = { 0.0f, 0.0f, -1.0f };
 	settings.oneShot = true;
-	settings.oneShotCount = 800;
-	settings.maxParticles = 100000;
+	settings.oneShotCount = 80000;
+	settings.maxParticles = 10000000;
 
 	SetEmitterSettings(settings);
 

@@ -36,7 +36,14 @@ public:
 	virtual Vector2 GetBoundsMin() const { return m_boundsMin; }
 	virtual Vector2 GetBoundsMax() const { return m_boundsMax; }
 
-	GameObject* AddGameObject(GameObject* gameObject, OBJECT_TYPE type);
+
+	template <typename T>
+	T* AddGameObject(OBJECT_TYPE type) {
+		T* gameObject = new T();
+		gameObject->SetScene(this);
+		m_gameObjects[type].push_back(gameObject);
+		return gameObject;
+	}
 
 	template <typename T>
 	T* GetGameObject() {

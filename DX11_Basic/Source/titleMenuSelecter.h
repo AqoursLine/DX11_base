@@ -9,6 +9,12 @@ public:
 	TitleMenuSelecter() = default;
 	~TitleMenuSelecter() = default;
 
+	void ClearMenuIcons();
+	void AddMenuIcon(TitleMenuIcon* icon) {
+		m_menuIcons.push_back(icon);
+		m_maxIndex = static_cast<int>(m_menuIcons.size());
+	}
+
 protected:
 	bool Initialize() override;
 	void Finalize() override;

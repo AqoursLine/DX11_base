@@ -7,12 +7,6 @@
 
 #include "raceManager.h"
 
-ResultTime::ResultTime(int resultCount, const BoatResultData& resultData, int index) 
-	: m_resultCount(resultCount)
-	, m_index(index)
-	, m_resultData(resultData)
-{
-}
 
 bool ResultTime::Initialize() {
 	m_sprite = new Sprite();

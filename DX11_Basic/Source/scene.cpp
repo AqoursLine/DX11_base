@@ -11,7 +11,7 @@ bool Scene::InitializeBase() {
 	m_isInitialized.store(false, std::memory_order_release);
 
 	// ライトマネージャーは必ずライトの先頭に追加する
-	AddGameObject(new LightManager(), TYPE_LIGHT);
+	AddGameObject<LightManager>(TYPE_LIGHT);
 
 	Initialize();
 
@@ -83,11 +83,6 @@ void Scene::CleanUpBase() {
 	CleanUp();
 }
 
-GameObject* Scene::AddGameObject(GameObject* gameObject, OBJECT_TYPE type) {
-	gameObject->SetScene(this);
-	m_gameObjects[type].push_back(gameObject);
-	return gameObject;
-}
 
 bool Scene::ObjectInitialize() {
 	// GameObjectの初期化

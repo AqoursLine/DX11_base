@@ -378,6 +378,9 @@
     <ClCompile Include="Source\minimap.cpp" />
     <ClCompile Include="Source\modelLoader.cpp" />
     <ClCompile Include="Source\modelRenderer.cpp" />
+    <ClCompile Include="Source\multiWaitGuestScene.cpp" />
+    <ClCompile Include="Source\multiWaitHostScene.cpp" />
+    <ClCompile Include="Source\multiWaitUser.cpp" />
     <ClCompile Include="Source\player.cpp" />
     <ClCompile Include="Source\raceManager.cpp" />
     <ClCompile Include="Source\raceTimer.cpp" />
@@ -407,7 +410,11 @@
     <ClCompile Include="Source\titleBackgroundMove.cpp" />
     <ClCompile Include="Source\titleMenuBackground.cpp" />
     <ClCompile Include="Source\titleMenuIcon.cpp" />
+    <ClCompile Include="Source\titleMenuIconGuest.cpp" />
+    <ClCompile Include="Source\titleMenuIconHost.cpp" />
+    <ClCompile Include="Source\titleMenuIconMulti.cpp" />
     <ClCompile Include="Source\titleMenuIconQuit.cpp" />
+    <ClCompile Include="Source\titleMenuIconSingle.cpp" />
     <ClCompile Include="Source\titleMenuIconStart.cpp" />
     <ClCompile Include="Source\titleMenuSelecter.cpp" />
     <ClCompile Include="Source\titleScene.cpp" />
@@ -458,6 +465,9 @@
     <ClInclude Include="Source\manager.h" />
     <ClInclude Include="Source\minimap.h" />
     <ClInclude Include="Source\modelRenderer.h" />
+    <ClInclude Include="Source\multiWaitGuestScene.h" />
+    <ClInclude Include="Source\multiWaitHostScene.h" />
+    <ClInclude Include="Source\multiWaitUser.h" />
     <ClInclude Include="Source\myRandom.h" />
     <ClInclude Include="Source\player.h" />
     <ClInclude Include="Source\raceManager.h" />
@@ -488,7 +498,11 @@
     <ClInclude Include="Source\titleBackgroundMove.h" />
     <ClInclude Include="Source\titleMenuBackground.h" />
     <ClInclude Include="Source\titleMenuIcon.h" />
+    <ClInclude Include="Source\titleMenuIconGuest.h" />
+    <ClInclude Include="Source\titleMenuIconHost.h" />
+    <ClInclude Include="Source\titleMenuIconMulti.h" />
     <ClInclude Include="Source\titleMenuIconQuit.h" />
+    <ClInclude Include="Source\titleMenuIconSingle.h" />
     <ClInclude Include="Source\titleMenuIconStart.h" />
     <ClInclude Include="Source\titleMenuSelecter.h" />
     <ClInclude Include="Source\titleScene.h" />

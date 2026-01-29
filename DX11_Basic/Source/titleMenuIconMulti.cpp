@@ -1,14 +1,12 @@
 #include "main.h"
-#include "titleMenuIconStart.h"
-
-#include "gameScene.h"
-
-#include "titleMenuSelecter.h"
-
-#include "titleMenuIconSingle.h"
 #include "titleMenuIconMulti.h"
 
-void TitleMenuIconStart::OnDecide() {
+#include "scene.h"
+#include "titleMenuSelecter.h"
+#include "titleMenuIconHost.h"
+#include "titleMenuIconGuest.h"
+
+void TitleMenuIconMulti::OnDecide() {
 	m_menuSelecter->ClearMenuIcons();
 	for (auto& icon : m_menuIcons) {
 		icon->SetActive(true);
@@ -17,7 +15,7 @@ void TitleMenuIconStart::OnDecide() {
 	m_menuIcons[0]->IsSelected(true);
 }
 
-bool TitleMenuIconStart::Initialize() {
+bool TitleMenuIconMulti::Initialize() {
 	// メニューセレクター取得
 	m_menuSelecter = m_scene->GetGameObject<TitleMenuSelecter>();
 	if (!m_menuSelecter) {
@@ -25,11 +23,11 @@ bool TitleMenuIconStart::Initialize() {
 	}
 
 	// シングルプレイアイコン追加
-	auto singleIcon = m_scene->GetGameObject<TitleMenuIconSingle>();
+	auto singleIcon = m_scene->GetGameObject<TitleMenuIconHost>();
 	m_menuIcons.push_back(singleIcon);
 
 	// マルチプレイアイコン追加
-	auto multiIcon = m_scene->GetGameObject<TitleMenuIconMulti>();
+	auto multiIcon = m_scene->GetGameObject<TitleMenuIconGuest>();
 	m_menuIcons.push_back(multiIcon);
 
 	return TitleMenuIcon::Initialize();

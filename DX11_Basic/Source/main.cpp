@@ -125,11 +125,38 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
-	int windowPosX = (screenWidth - SCREEN_WIDTH) / 2;
-	int windowPosY = (screenHeight - SCREEN_HEIGHT) / 2;
+	// ウィンドウサイズ設定
+	int windowWidth, windowHeight;
+	if (screenHeight < SCREEN_HEIGHT) {
+		// 画面高さが足りない場合は画面高さに合わせる
+		windowHeight = screenHeight;
+		windowWidth = static_cast<int>(SCREEN_WIDTH * (static_cast<float>(windowHeight) / static_cast<float>(SCREEN_HEIGHT)));
+	}
+	else {
+		// フルHDに合わせる
+		windowWidth = SCREEN_WIDTH;
+		windowHeight = SCREEN_HEIGHT;
+	}
+
+	//ウィンドウ表示位置計算
+	int windowPosX = (screenWidth - windowWidth) / 2;
+	int windowPosY = (screenHeight - windowHeight) / 2;
+
+	// ウィンドウスタイル
+	DWORD windowStyle = WS_POPUP | WS_VISIBLE;
+
+#ifdef _DEBUG
+	//デバッグビルド時はウィンドウモードで固定
+	windowHeight = 720;
+	windowWidth = 1280;
+	windowPosX = CW_USEDEFAULT;
+	windowPosY = CW_USEDEFAULT;
+	windowStyle = WS_OVERLAPPEDWINDOW;
+
+#endif // _DEBUG
 
 	//ウィンドウ作成
-	g_hWnd = CreateWindowEx(0, WNDOW_CLASS_NAME, L"GW-Racing", WS_POPUP | WS_VISIBLE, windowPosX, windowPosY, SCREEN_WIDTH, SCREEN_HEIGHT, nullptr, nullptr, hInstance, nullptr);
+	g_hWnd = CreateWindowEx(0, WNDOW_CLASS_NAME, L"GW-Racing", windowStyle, windowPosX, windowPosY, windowWidth, windowHeight, nullptr, nullptr, hInstance, nullptr);
 
 	//COMライブラリ初期化
 	CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);

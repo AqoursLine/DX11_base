@@ -5,8 +5,23 @@
 
 class ResultTime : public GameObject {
 public:
-	ResultTime(int resultCount, const BoatResultData& resultData, int index);
+	ResultTime() = default;
 	~ResultTime() = default;
+
+	ResultTime* SetResultCount(int count) {
+		m_resultCount = count;
+		return this;
+	}
+
+	ResultTime* SetResultData(const BoatResultData& data) {
+		m_resultData = data;
+		return this;
+	}
+
+	ResultTime* SetIndex(int index) {
+		m_index = index;
+		return this;
+	}
 
 protected:
 	bool Initialize() override;
