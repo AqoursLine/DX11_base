@@ -111,7 +111,7 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>Library\videoplayer;Library\imgui\backends;Library\imgui;Library\cri\include;Library\webrtc\include;Source;Library\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Library\directXTK\Inc;Library\videoplayer;Library\imgui\backends;Library\imgui;Library\cri\include;Library\webrtc\include;Source;Library\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
@@ -120,7 +120,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>Library\cri\libs\x64;Library\webrtc\lib;Library;Library/assimp/build/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>Library\directXTK\lib\Debug;Library\cri\libs\x64;Library\webrtc\lib;Library;Library/assimp/build/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <DelayLoadDLLs>assimp-vc143-mtd.dll</DelayLoadDLLs>
     </Link>
     <FxCompile>
@@ -137,7 +137,7 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>Library\videoplayer;Library\imgui\backends;Library\imgui;Library\cri\include;Library\webrtc\include;Source;Library\assimp\include;$(VcpkgRoot)installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Library\directXTK\Inc;Library\videoplayer;Library\imgui\backends;Library\imgui;Library\cri\include;Library\webrtc\include;Source;Library\assimp\include;$(VcpkgRoot)installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
@@ -148,7 +148,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(VcpkgRoot)installed\x64-windows\lib;Library\cri\libs\x64;Library\webrtc\lib;Library;Library/assimp/build/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>Library\directXTK\lib\Release;$(VcpkgRoot)installed\x64-windows\lib;Library\cri\libs\x64;Library\webrtc\lib;Library;Library/assimp/build/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <DelayLoadDLLs>assimp-vc143-mt.dll</DelayLoadDLLs>
     </Link>
     <FxCompile>
@@ -251,7 +251,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
-    <FxCompile Include="Shader\selecterBackgroundPS.hlsl">
+    <FxCompile Include="Shader\inversePS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
@@ -386,6 +386,7 @@
     <ClCompile Include="Source\raceTimer.cpp" />
     <ClCompile Include="Source\racingBoat.cpp" />
     <ClCompile Include="Source\rankDisplay.cpp" />
+    <ClCompile Include="Source\readyButton.cpp" />
     <ClCompile Include="Source\renderer.cpp" />
     <ClCompile Include="Source\resultScene.cpp" />
     <ClCompile Include="Source\resultText.cpp" />
@@ -474,6 +475,7 @@
     <ClInclude Include="Source\raceTimer.h" />
     <ClInclude Include="Source\racingBoat.h" />
     <ClInclude Include="Source\rankDisplay.h" />
+    <ClInclude Include="Source\readyButton.h" />
     <ClInclude Include="Source\renderer.h" />
     <ClInclude Include="Source\resultScene.h" />
     <ClInclude Include="Source\resultText.h" />

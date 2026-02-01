@@ -1,6 +1,7 @@
 #include "main.h"
 #include "multiWaitGuestScene.h"
 #include "system.h"
+#include "manager.h"
 
 #include "multiWaitUser.h"
 
@@ -78,10 +79,17 @@ void MultiWaitGuestScene::ReceiveMessages(const json& message) {
 
 		m_waitUsers[m_guestNumber]->SetIconVisible(true);
 
-	} else if (responseType == "newPlayerJoined") {
+	}
+	if (responseType == "newPlayerJoined") {
 		// 新しいプレイヤーが参加した場合の処理
 		std::string playerName = message["playerName"];
 		// プレイヤーリストに追加するなどの処理を行う
 		m_playerNames.push_back(playerName);
+	}
+
+	// ホストからの開始通知を受け取った場合
+	if (responseType == "hostStart") {
+		// ゲーム開始処理を実行
+		SYSTEM.GetManager()->SetScene();
 	}
 }

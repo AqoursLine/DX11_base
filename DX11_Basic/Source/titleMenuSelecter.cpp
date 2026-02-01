@@ -44,7 +44,7 @@ bool TitleMenuSelecter::Initialize() {
 	m_vertexShader = new VertexShader();
 	m_vertexShader->Load(L"Shader\\unlitTextureVS.cso");
 	m_pixelShader = new PixelShader();
-	m_pixelShader->Load(L"Shader\\selecterBackgroundPS.cso");
+	m_pixelShader->Load(L"Shader\\inversePS.cso");
 
 	return true;
 }

@@ -6,6 +6,9 @@
 
 #include "multiWaitUser.h"
 
+#include "readyButton.h"
+
+#include "input.h"
 
 bool MultiWaitHostScene::Initialize() {
 	// ウェブクライアント取得
@@ -39,6 +42,10 @@ bool MultiWaitHostScene::Initialize() {
 		m_waitUsers.push_back(user);
 	}
 
+	// スタートボタン追加
+	auto readyButton = AddGameObject<ReadyButton>(TYPE_BEFORE_PROCESS_UI);
+	readyButton->SetPosition({ 960.0f, 970.0f, 0.0f });
+
 	return true;
 }
 
@@ -53,6 +60,18 @@ void MultiWaitHostScene::Update(double deltaTime) {
 		}
 	}
 
+	auto readyButton = GetGameObject<ReadyButton>();
+	readyButton->SetReady(true);
+
+	// ゲーム開始
+	if (Input::GetKeyTrigger(KK_ENTER)) {
+		json message;
+		message["type"] = "hostStart";
+		m_webClient->SendMessageClient(message);
+
+		// ゲームシーンへ移行
+	}
+
 }
 
 void MultiWaitHostScene::ReceiveMessages(const json& message) {
@@ -63,18 +82,24 @@ void MultiWaitHostScene::ReceiveMessages(const json& message) {
 	}
 
 	std::string responseType = message["type"];
+
+	// 部屋が作成された場合の処理
 	if (responseType == "roomCreated") {
-		// 部屋が作成された場合の処理
 		m_roomId = message["roomId"];
 		m_roomCreated = true;
-	} else if (responseType == "guestJoined") {
-		// プレイヤーが参加した場合の処理
+	} 
+
+	// プレイヤーが参加した場合の処理
+	if (responseType == "guestJoined") {
 		std::string playerName = message["playerName"];
 		// プレイヤーリストに追加するなどの処理を行う
 		m_playerNames.push_back(playerName);
 		m_waitUsers[message["guestNumber"]]->SetIconVisible(true);
 		m_connectedPlayerCount++;
-	} else if (responseType == "guestReady") {
+	}
+
+	// プレイヤーが準備完了した場合の処理
+	if (responseType == "guestReady") {
 		m_waitUsers[message["guestNumber"]]->SetReady(true);
 	}
 
