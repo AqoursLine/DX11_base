@@ -1,0 +1,2 @@
+C:\Users\ths30712\source\nodejs\test\obj\Release\WebServer.esproj.CoreCompileInputs.cache
+D:\GitHub\DX11_base\WebServer\obj\Release\WebServer.esproj.CoreCompileInputs.cache
