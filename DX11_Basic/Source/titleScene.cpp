@@ -5,6 +5,7 @@
 #include "system.h"
 #include "manager.h"
 #include "gameScene.h"
+#include "testScene.h"
 
 #include "testTransition.h"
 #include "titleBackgroundMove.h"
@@ -65,4 +66,13 @@ bool TitleScene::Initialize() {
 }
 
 void TitleScene::Update(double deltaTime) {
+	if (Input::GetKeyTrigger(KK_G)) {
+		m_triggeredG++;
+	}
+
+	if (m_triggeredG == 5 && !m_isDebugMode) {
+		//ゲームシーンへ遷移
+		SYSTEM.GetManager()->SetScene(new TestScene(), new TestTransition());
+		m_isDebugMode = true;
+	}
 }

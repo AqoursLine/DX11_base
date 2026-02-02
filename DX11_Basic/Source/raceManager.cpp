@@ -54,7 +54,9 @@ bool RaceManager::Initialize() {
 	m_result.clear();
 
 	//ボートの順番をシャッフル
-	std::shuffle(m_racingBoats.begin(), m_racingBoats.end(), MyRandom::GetEngine());
+	if (m_isShuffleLanes) {
+		std::shuffle(m_racingBoats.begin(), m_racingBoats.end(), MyRandom::GetEngine());
+	}
 
 	//ボートに番号を割り当て
 	int laneIndex = 0;
@@ -78,11 +80,14 @@ bool RaceManager::Initialize() {
 	return true;
 }
 
+void RaceManager::Activate() {
+}
+
 void RaceManager::Finalize() {
 }
 
 void RaceManager::Update(double deltaTime) {
-	if (!m_isActivated) {
+	if (!m_isSceneStarted) {
 		return;
 	}
 

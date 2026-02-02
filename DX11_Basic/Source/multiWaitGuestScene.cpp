@@ -5,6 +5,9 @@
 
 #include "multiWaitUser.h"
 
+#include "multiGameGuestScene.h"
+#include "testTransition.h"
+
 #include "input.h"
 
 bool MultiWaitGuestScene::Initialize() {
@@ -45,6 +48,14 @@ bool MultiWaitGuestScene::Initialize() {
 }
 
 void MultiWaitGuestScene::Finalize() {
+	// 退出メッセージを送信
+	if (m_roomJoined && !m_receivedStartSignal) {
+		json message;
+		message["type"] = "guestLeave";
+		message["guestNumber"] = m_guestNumber;
+		m_webClient->SendMessageClient(message);
+	}
+
 	// メッセージ受信のコールバックをリセット
 	m_webClient->SetOnMessage([](const json& message) {
 		std::cout << "Received message: " << message.dump() << std::endl;
@@ -90,6 +101,17 @@ void MultiWaitGuestScene::ReceiveMessages(const json& message) {
 	// ホストからの開始通知を受け取った場合
 	if (responseType == "hostStart") {
 		// ゲーム開始処理を実行
-		SYSTEM.GetManager()->SetScene();
+		m_receivedStartSignal = true;
+
+		auto multiGameGuestScene = new MultiGameGuestScene();
+		int activeUserCount = 0;
+		for (auto user : m_waitUsers) {
+			if (user->IsIconVisible()) {
+				activeUserCount++;
+			}
+		}
+		multiGameGuestScene->SetPlayerCount(activeUserCount);
+		multiGameGuestScene->SetUserId(m_guestNumber);
+		SYSTEM.GetManager()->SetScene(multiGameGuestScene, new TestTransition());
 	}
 }

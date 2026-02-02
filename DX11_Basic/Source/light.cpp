@@ -3,11 +3,7 @@
 
 #include "renderer.h"
 
-#ifdef _DEBUG
 #include "imguiSystem.h"
-
-#endif // _DEBUG
-
 
 void Light::CalculateLightMatrices() {
 

@@ -14,5 +14,6 @@ protected:
 	void Draw() override {}
 	void CleanUp() override {}
 private:
-
+	int m_triggeredG = 0;
+	bool m_isDebugMode = false;
 };

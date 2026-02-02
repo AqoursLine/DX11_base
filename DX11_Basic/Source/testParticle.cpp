@@ -2,9 +2,7 @@
 #include "texture.h"
 #include "input.h"
 
-#ifdef _DEBUG
 #include "imguiSystem.h"
-#endif // _DEBUG
 
 
 bool TestParticle::Initialize() {
@@ -32,7 +30,7 @@ bool TestParticle::Initialize() {
 	settings.localAcceleration = { 100.0f, 0.0f, 10.0f };
 	settings.upVector = { 0.0f, 0.0f, -1.0f };
 	settings.oneShot = true;
-	settings.oneShotCount = 80000;
+	settings.oneShotCount = 10000;
 	settings.maxParticles = 10000000;
 
 	SetEmitterSettings(settings);
@@ -75,7 +73,6 @@ void TestParticle::Update(double deltaTime) {
 
 void TestParticle::Draw() {
 
-#ifdef _DEBUG
 	// ImGuiでパーティクル設定を変更
 	ImGui::Begin("Particle Settings");
 	EmitterSettings settings = GetEmitterSettings();
@@ -101,8 +98,6 @@ void TestParticle::Draw() {
 	if (isChanged) {
 		SetEmitterSettings(settings);
 	}
-
-#endif // _DEBUG
 
 
 	GPUParticleSystem::Draw();

@@ -6,11 +6,18 @@ SamplerState g_sampler : register(s0);
 
 void main(in PS_INPUT In, out float4 outDiffuse : SV_TARGET)
 {
-	float flag = step(0.5f, Material.TextureEnable);
-	float4 texColor = g_texture.Sample(g_sampler, In.TexCoord);
-	
-	outDiffuse = lerp(In.Diffuse, texColor * In.Diffuse, flag);
-	
+
+	if (Material.TextureEnable == 1)
+	{
+		//テクスチャカラー取得
+		outDiffuse = g_texture.Sample(g_sampler, In.TexCoord);
+	}
+	else
+	{
+		//テクスチャ無効時は白色
+		outDiffuse = float4(1, 1, 1, 1);
+	}
+
 	//マテリアルのベースカラーを乗算
-	outDiffuse *= Material.Diffuse;
+	outDiffuse *= Material.Diffuse * In.Diffuse;
 }

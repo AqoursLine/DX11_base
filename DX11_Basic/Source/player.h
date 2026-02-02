@@ -14,8 +14,8 @@ public:
 	~Player() = default;
 
 protected:
-	bool Initialize() override;
-	void Update(double deltaTime) override;
+	virtual bool Initialize() override;
+	virtual void Update(double deltaTime) override;
 
 private:
 	VehicleInput m_currentInput;

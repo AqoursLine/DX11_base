@@ -42,8 +42,15 @@ public:
 	void SetResultData(const BoatResultData& data);
 	static const std::vector<BoatResultData>& GetResultData() { return m_result; }
 
+	// レーンシャッフル設定
+	void SetShuffleLanes(bool shuffle) { m_isShuffleLanes = shuffle; }
+
+	// シーン開始フラグ設定
+	void SetSceneStarted(bool started) { m_isSceneStarted = started; }
+
 protected:
 	virtual bool Initialize() override;
+	virtual void Activate() override;
 	virtual void Finalize() override;
 	virtual void Update(double deltaTime) override;
 	virtual void Draw() override;
@@ -55,6 +62,8 @@ private:
 	float m_startDelay = 1.0f; //スタート前の遅延時間(秒)
 	bool m_raceStarted = false; //レース開始フラグ
 	bool m_raceFinished = false; //レース終了フラグ
+	bool m_isShuffleLanes = false; //レーンシャッフルフラグ
+	bool m_isSceneStarted = false; //シーン開始フラグ
 
 	std::vector<RacingBoat*> m_racingBoats; //レース参加ボート
 	std::vector<RacingBoat*> m_rankingBoats; //順位付け用ボートリスト

@@ -30,6 +30,7 @@ private:
 	std::string m_roomId = "";
 	bool m_roomJoined = false;
 	int m_guestNumber = 0;
+	bool m_receivedStartSignal = false;
 
 	int m_connectedPlayerCount = 0;
 

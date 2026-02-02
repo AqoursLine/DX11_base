@@ -23,7 +23,7 @@ protected:
 private:
 	void ReceiveMessages(const json& message);
 
-	class WebClient* m_webClient = nullptr;
+	WebClient* m_webClient = nullptr;
 
 	std::vector<std::string> m_playerNames;
 

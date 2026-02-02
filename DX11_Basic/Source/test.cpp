@@ -89,7 +89,6 @@ void TestObject::Draw() {
 		m_box->Draw(m_position + Vector3(3.0f, 0.0f, 0.0f), m_rotation, m_scale);
 	}
 
-#ifdef _DEBUG
 	// ImGuiウィンドウの表示
 	ImGui::Begin("Test Object");
 	ImGui::Text("Position");
@@ -106,6 +105,5 @@ void TestObject::Draw() {
 	ImGui::SliderFloat("Scale Z", &m_scale.z, 0.1f, 5.0f);
 	ImGui::End();
 
-#endif // _DEBUG
 
 }

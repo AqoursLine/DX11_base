@@ -42,8 +42,8 @@ SamplerState LinearSampler : register(s0);
 void main(in PS_INPUT input, out float4 outDiffuse : SV_TARGET)
 {
     // 水の基本色
-	float3 deepWaterColor = float3(0.05f, 0.2f, 0.4f); // 深い水の色（より濃く）
-	float3 shallowWaterColor = float3(0.2f, 0.6f, 0.8f); // 浅い水の色
+	float3 deepWaterColor = float3(0.1f, 0.4f, 0.6f); // 深い水の色（より濃く）
+	float3 shallowWaterColor = float3(0.2f, 0.6f, 0.9f); // 浅い水の色
     
     // 法線を正規化
 	float3 normal = normalize(input.Normal.xyz);

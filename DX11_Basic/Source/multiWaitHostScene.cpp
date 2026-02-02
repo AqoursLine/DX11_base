@@ -1,14 +1,17 @@
 #include "main.h"
 #include "multiWaitHostScene.h"
 #include "system.h"
+#include "manager.h"
+#include "multiGameHostScene.h"
+#include "testTransition.h"
 
 #include "player.h"
 
 #include "multiWaitUser.h"
-
 #include "readyButton.h"
 
 #include "input.h"
+
 
 bool MultiWaitHostScene::Initialize() {
 	// ウェブクライアント取得
@@ -55,7 +58,7 @@ void MultiWaitHostScene::Finalize() {
 void MultiWaitHostScene::Update(double deltaTime) {
 	// 全てが準備完了したら開始ボタンを有効化
 	for (auto& waitUser : m_waitUsers) {
-		if (!waitUser->IsReady()) {
+		if (!waitUser->IsReady() && waitUser->IsIconVisible()) {
 			return;
 		}
 	}
@@ -70,6 +73,10 @@ void MultiWaitHostScene::Update(double deltaTime) {
 		m_webClient->SendMessageClient(message);
 
 		// ゲームシーンへ移行
+		auto multiGameHostScene = new MultiGameHostScene();
+		multiGameHostScene->SetPlayerCount(m_connectedPlayerCount);
+		multiGameHostScene->SetUserId(0);
+		SYSTEM.GetManager()->SetScene(multiGameHostScene, new TestTransition());
 	}
 
 }

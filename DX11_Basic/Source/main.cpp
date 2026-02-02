@@ -64,12 +64,10 @@ HWND GetHwnd() {
 
 //プロシージャ
 LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-#ifdef _DEBUG
 	// imgui用のメッセージ処理
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam)) {
 		return true;
 	}
-#endif // _DEBUG
 
 	//メッセージ分岐
 	switch (msg) {

@@ -8,7 +8,7 @@ public:
 
 protected:
 	bool Initialize() override;
-	void Activate() override {}
+	void Activate() override;
 	void Finalize() override {}
 	void Update(double deltaTime) override {};
 	void Draw() override {}

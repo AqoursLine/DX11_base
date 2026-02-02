@@ -17,6 +17,11 @@ bool MultiWaitUser::Initialize() {
 		return false;
 	}
 
+	m_multiIconWaitingTexture = new Texture();
+	if (!m_multiIconWaitingTexture->Load(L"Asset\\Texture\\loading.png")) {
+		return false;
+	}
+
 
 	m_readyTexture = new Texture();
 	if (!m_readyTexture->Load(L"Asset\\Texture\\ready.png")) {
@@ -69,6 +74,14 @@ void MultiWaitUser::Finalize() {
 	}
 }
 
+void MultiWaitUser::Update(double deltaTime) {
+	// 待機アニメーション時間更新
+	m_waitAnimationTime += static_cast<float>(deltaTime);
+	if (m_waitAnimationTime > 1.0f) {
+		m_waitAnimationTime -= 1.0f;
+	}
+}
+
 void MultiWaitUser::Draw() {
 	// シェーダー設定
 	m_vertexShader->Set();
@@ -94,8 +107,18 @@ void MultiWaitUser::Draw() {
 	m_sprite->Draw(m_position, m_rotation, m_scale);
 
 	//====準備状態表示====
-	// アイコン非表示なら表示しない
 	if (!m_isIconVisible) {
+		// 待機アニメーション表示
+
+		// テクスチャ設定
+		m_multiIconWaitingTexture->Set(0);
+
+		Vector3 animationScale = { 100.0f, 100.0f, 1.0f };
+		Vector3 animationRotation = { 0.0f, 0.0f, m_waitAnimationTime * XM_2PI };
+
+		// スプライト描画
+		m_sprite->Draw(m_position, animationRotation, animationScale);
+
 		return;
 	}
 	// 座標設定

@@ -23,6 +23,8 @@
 
 #include "testTransition.h"
 
+#include "imguiSystem.h"
+
 bool TestScene::Initialize() {
 	//テストオブジェクト追加
 	AddGameObject<TestObject>(TYPE_OPAQUE);
@@ -87,12 +89,20 @@ void TestScene::Finalize() {
 }
 
 void TestScene::Update(double deltaTime) {
+	m_deltaTime = static_cast<float>(deltaTime);
 	if (Input::GetKeyTrigger(KK_ENTER)) {
 		SYSTEM.GetManager()->SetScene(new TitleScene(), new TestTransition());
 	}
+
 }
 
 void TestScene::Draw() {
 	RENDERER.ClearShadowMap(0);
 	RENDERER.SetShadowMapAsRenderTarget(0);
+
+	// fps表示
+	ImGui::Begin("FPS");
+	ImGui::Text("DeltaTime: %.4f", m_deltaTime);
+	ImGui::Text("FPS: %.2f", 1.0f /m_deltaTime);
+	ImGui::End();
 }

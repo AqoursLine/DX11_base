@@ -378,6 +378,10 @@
     <ClCompile Include="Source\minimap.cpp" />
     <ClCompile Include="Source\modelLoader.cpp" />
     <ClCompile Include="Source\modelRenderer.cpp" />
+    <ClCompile Include="Source\multiGameGuestScene.cpp" />
+    <ClCompile Include="Source\multiOtherPlayer.cpp" />
+    <ClCompile Include="Source\multiGameHostScene.cpp" />
+    <ClCompile Include="Source\multiPlayer.cpp" />
     <ClCompile Include="Source\multiWaitGuestScene.cpp" />
     <ClCompile Include="Source\multiWaitHostScene.cpp" />
     <ClCompile Include="Source\multiWaitUser.cpp" />
@@ -466,6 +470,10 @@
     <ClInclude Include="Source\manager.h" />
     <ClInclude Include="Source\minimap.h" />
     <ClInclude Include="Source\modelRenderer.h" />
+    <ClInclude Include="Source\multiGameGuestScene.h" />
+    <ClInclude Include="Source\multiOtherPlayer.h" />
+    <ClInclude Include="Source\multiGameHostScene.h" />
+    <ClInclude Include="Source\multiPlayer.h" />
     <ClInclude Include="Source\multiWaitGuestScene.h" />
     <ClInclude Include="Source\multiWaitHostScene.h" />
     <ClInclude Include="Source\multiWaitUser.h" />

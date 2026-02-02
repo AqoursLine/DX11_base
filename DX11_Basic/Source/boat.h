@@ -67,6 +67,12 @@ protected:
 	virtual Vector2 GetSceneBoundsMin() const;
 	virtual Vector2 GetSceneBoundsMax() const;
 
+	//水との相互作用更新
+	void UpdateWaterInteraction(float deltaTime);
+
+	//速度設定（通信同期用）
+	void SetVelocity(const Vector3& velocity) { m_velocity = velocity; }
+
 private:
 	//物理計算
 	void UpdatePhysics(float deltaTime, float speed, float horizontalSpeed);
@@ -78,7 +84,6 @@ private:
 	Vector3 CalculateBuoyancyForce(float deltaTime);
 	Vector3 CalculateWaveForce();
 	Vector3 CalculateWallCollisionForce();
-	void UpdateWaterInteraction(float deltaTime);
 	void ApplyForces(float deltaTime);
 
 	//姿勢制御
