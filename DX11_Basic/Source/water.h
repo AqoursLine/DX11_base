@@ -72,7 +72,7 @@ protected:
 	virtual void Update(double deltaTime) override;
 	virtual void Draw() override;
 private:
-	constexpr static int MAX_RIPPLES = 32; // 最大波紋数
+	constexpr static int MAX_RIPPLES = 64; // 最大波紋数
 
 	/// <summary>
 	/// 定数バッファ構造体

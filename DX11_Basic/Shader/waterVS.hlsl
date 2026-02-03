@@ -31,7 +31,7 @@ cbuffer WaterConstantBuffer : register(b7)
 	float WaterClarityDepth;
 
 	//波紋データ（先頭から詰まっている）
-	RippleData Ripples[32];
+	RippleData Ripples[64];
 }
 
 

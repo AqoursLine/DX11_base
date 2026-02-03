@@ -230,11 +230,11 @@ void Water::Draw() {
 	UpdateConstantBuffer();
 
 	// テクスチャ設定
-	m_normalMap->Set(0);
-	m_foamTexture->Set(1);
+	m_normalMap->Set(1);
+	m_foamTexture->Set(2);
 
 	if (m_environmentMapSRV) {
-		context->PSSetShaderResources(2, 1, &m_environmentMapSRV);
+		context->PSSetShaderResources(0, 1, &m_environmentMapSRV);
 	}
 
 	// サンプラーステート設定

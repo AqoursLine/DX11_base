@@ -30,7 +30,7 @@ cbuffer WaterConstantBuffer : register(b7)
 	float WaterClarityDepth; // 水の透明度（深さ）
 
     // 波紋データ（先頭から詰まっている）
-	RippleData Ripples[32];
+	RippleData Ripples[64];
 }
 
 // テクスチャとサンプラー
@@ -184,6 +184,9 @@ void main(in PS_INPUT input, out float4 outDiffuse : SV_TARGET)
     
     // 入力カラーを考慮
 	finalColor *= input.Diffuse.rgb;
+	
+	// デバッグ用
+//	finalColor = envColor;
     
     // 透明度設定（フレネル効果で調整）
 	float alpha = input.Diffuse.a * (0.6f + fresnel * 0.4f);
