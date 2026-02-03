@@ -24,6 +24,7 @@
     <ProjectGuid>{58374749-0ef8-4092-9c4a-2e67502d7194}</ProjectGuid>
     <RootNamespace>DX11Basic</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>GW-Racing</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

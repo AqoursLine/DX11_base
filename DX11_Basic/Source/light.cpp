@@ -54,35 +54,35 @@ void Light::Update(double deltaTime) {
 
 void Light::Draw() {
 
-#ifdef _DEBUG
-	std::string title = "Light Debug Settings##" + std::to_string(reinterpret_cast<uintptr_t>(this));
-	ImGui::Begin(title.c_str());
-	ImGui::Text("Light Type: %d", static_cast<int>(m_type));
+	// ImGuiによるデバッグUI表示
+	if (IsActivatedImGui()) {
+		std::string title = "Light Debug Settings##" + std::to_string(reinterpret_cast<uintptr_t>(this));
+		ImGui::Begin(title.c_str());
+		ImGui::Text("Light Type: %d", static_cast<int>(m_type));
 
-	ImGui::SliderFloat3("Position", (float*)&m_position, -100.0f, 100.0f);
-	float direction[3] = { m_direction.x,  m_direction.y,  m_direction.z };
+		ImGui::SliderFloat3("Position", (float*)&m_position, -100.0f, 100.0f);
+		float direction[3] = { m_direction.x,  m_direction.y,  m_direction.z };
 
-	if (ImGui::SliderFloat3("Direction", direction, -1.0f, 1.0f)) {
-		SetDirection(Vector4(direction[0], direction[1], direction[2], 0.0f)); // 正規化も兼ねる
+		if (ImGui::SliderFloat3("Direction", direction, -1.0f, 1.0f)) {
+			SetDirection(Vector4(direction[0], direction[1], direction[2], 0.0f)); // 正規化も兼ねる
+		}
+
+		ImGui::SliderFloat("Intensity", &m_intensity, 0.0f, 10.0f);
+		ImGui::SliderFloat("Range", &m_range, 0.1f, 100.0f);
+		ImGui::ColorEdit4("Diffuse Color", (float*)&m_diffuseColor);
+		float degree = m_innerCone * (180.0f / XM_PI);
+		if (ImGui::SliderFloat("Inner Cone", &degree, 0.0f, 180.0f)) {
+			m_innerCone = degree * (XM_PI / 180.0f);
+		}
+		degree = m_outerCone * (180.0f / XM_PI);
+		if (ImGui::SliderFloat("Outer Cone", &degree, 0.001f, 180.0f)) {
+			m_outerCone = degree * (XM_PI / 180.0f);
+		}
+		ImGui::SliderFloat("Falloff", &m_falloff, 0.0f, 5.0f);
+		ImGui::SliderFloat3("Attenuation", (float*)&m_attenuationConstant, 0.0f, 5.0f);
+
+		ImGui::End();
 	}
-
-	ImGui::SliderFloat("Intensity", &m_intensity, 0.0f, 10.0f);
-	ImGui::SliderFloat("Range", &m_range, 0.1f, 100.0f);
-	ImGui::ColorEdit4("Diffuse Color", (float*)&m_diffuseColor);
-	float degree = m_innerCone * (180.0f / XM_PI);
-	if(ImGui::SliderFloat("Inner Cone", &degree, 0.0f, 180.0f)){
-		m_innerCone = degree * (XM_PI / 180.0f);
-	}
-	degree = m_outerCone * (180.0f / XM_PI);
-	if(ImGui::SliderFloat("Outer Cone", &degree, 0.001f, 180.0f)){
-		m_outerCone = degree * (XM_PI / 180.0f);
-	}
-	ImGui::SliderFloat("Falloff", &m_falloff, 0.0f, 5.0f);
-	ImGui::SliderFloat3("Attenuation", (float*)&m_attenuationConstant, 0.0f, 5.0f);
-
-	ImGui::End();
-
-#endif // _DEBUG
 
 	if (m_isShadowCaster) {
 		// レンダーターゲットのクリア

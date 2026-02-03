@@ -28,6 +28,9 @@ using namespace DirectX;
 
 void ErrorMessage(const std::wstring& msg, HRESULT hr);
 
+void SetActivatedImGui(bool isActive);
+bool IsActivatedImGui();
+
 HWND GetHwnd();
 
 constexpr int SCREEN_WIDTH = 1920;

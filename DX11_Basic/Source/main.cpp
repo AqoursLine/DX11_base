@@ -12,6 +12,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 //グローバル変数
 HWND g_hWnd = nullptr;
+bool g_isActivatedImGui = false;
 
 #define WNDOW_CLASS_NAME L"DirectX11Window"
 
@@ -58,6 +59,14 @@ void ErrorMessage(const std::wstring& msg, HRESULT hr) {
 
 }
 
+void SetActivatedImGui(bool isActive) {
+	g_isActivatedImGui = isActive;
+}
+
+bool IsActivatedImGui() {
+	return g_isActivatedImGui;
+}
+
 HWND GetHwnd() {
 	return g_hWnd;
 }
@@ -65,8 +74,10 @@ HWND GetHwnd() {
 //プロシージャ
 LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	// imgui用のメッセージ処理
-	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam)) {
-		return true;
+	if (g_isActivatedImGui) {
+		if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam)) {
+			return true;
+		}
 	}
 
 	//メッセージ分岐

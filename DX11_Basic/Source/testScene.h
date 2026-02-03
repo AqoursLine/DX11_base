@@ -17,4 +17,6 @@ protected:
 private:
 	float m_testTimer = 0.0f;
 	float m_deltaTime = 0.0;
+
+	int m_triggeredG = 0;
 };

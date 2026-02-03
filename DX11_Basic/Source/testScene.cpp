@@ -82,16 +82,23 @@ bool TestScene::Initialize() {
 
 	AddGameObject<TestField>(TYPE_OPAQUE);
 
+	SetActivatedImGui(true);
+
 	return true;
 }
 
 void TestScene::Finalize() {
+	SetActivatedImGui(false);
 }
 
 void TestScene::Update(double deltaTime) {
 	m_deltaTime = static_cast<float>(deltaTime);
-	if (Input::GetKeyTrigger(KK_ENTER)) {
-		SYSTEM.GetManager()->SetScene(new TitleScene(), new TestTransition());
+	if (Input::GetKeyTrigger(KK_G)) {
+		m_triggeredG++;
+		if (m_triggeredG == 5) {
+			// マネージャーにタイトルシーンをセット
+			System::GetInstance().GetManager()->SetScene(new TitleScene(), new TestTransition());
+		}
 	}
 
 }
