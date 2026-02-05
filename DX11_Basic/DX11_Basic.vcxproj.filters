@@ -108,6 +108,9 @@
     <FxCompile Include="Shader\inversePS.hlsl">
       <Filter>シェーダー</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\roundedRectPS.hlsl">
+      <Filter>シェーダー</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\camera.cpp">

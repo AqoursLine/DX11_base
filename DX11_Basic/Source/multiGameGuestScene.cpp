@@ -55,9 +55,12 @@ bool MultiGameGuestScene::Initialize() {
 
 	for (int i = 0; i < m_playerCount; i++) {
 		if (i == m_userId) {
-			AddGameObject<MultiPlayer>(TYPE_OPAQUE)->SetPlayerId(m_userId);
+			auto player = AddGameObject<MultiPlayer>(TYPE_OPAQUE);
+			player->SetSplashParticle(AddGameObject<SplashParticle>(TYPE_TRANSPARENT));
+			player->SetPlayerId(i);
 		} else {
 			m_otherPlayers[i] = AddGameObject<MultiOtherPlayer>(TYPE_OPAQUE);
+			m_otherPlayers[i]->SetSplashParticle(AddGameObject<SplashParticle>(TYPE_TRANSPARENT));
 		}
 	}
 
@@ -102,9 +105,6 @@ bool MultiGameGuestScene::Initialize() {
 
 	//平行光源
 	AddGameObject<GameDirectionalLight>(TYPE_LIGHT)->SetDirection({ -1.0f, -1.0f, -1.0f, 0.0f })->SetEnabled(true);
-
-	//スプラッシュエフェクト
-	AddGameObject<SplashParticle>(TYPE_TRANSPARENT);
 
 	return true;
 }

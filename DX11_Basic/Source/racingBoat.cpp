@@ -81,6 +81,7 @@ void RacingBoat::FinishRace() {
 	BoatResultData result = {};
 	result.laneIndex = m_laneIndex;
 	result.boatColor = m_boatColor;
+	result.playerName = m_racerName;
 
 	m_raceManager->SetResultData(result);
 }

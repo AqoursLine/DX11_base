@@ -44,6 +44,8 @@ public:
 	//ゴール処理
 	void FinishRace();
 
+	RacingBoat* SetRacerName(const std::string& name) { m_racerName = name; return this; }
+
 protected:
 	bool Initialize() override;
 	void Finalize() override;
@@ -85,6 +87,8 @@ private:
 	ProgressSection m_currentSection = FIRST_SOUTH_STRAIGHT;
 
 	float m_finishTime = 0.0f; //ゴールタイム
+
+	std::string m_racerName = "Player"; //レーサー名
 
 	// セクション判定
 	void UpdateProgressSection();

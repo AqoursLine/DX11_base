@@ -49,6 +49,9 @@
       <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\inversePS.cso</FullPath>
     </ContentFile>
     <ContentFile>
+      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\roundedRectPS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
       <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\shadowMapPS.cso</FullPath>
     </ContentFile>
     <ContentFile>

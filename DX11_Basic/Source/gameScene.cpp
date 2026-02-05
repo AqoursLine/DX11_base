@@ -44,15 +44,15 @@ bool GameScene::Initialize() {
 	AddGameObject<Water>(TYPE_TRANSPARENT);
 
 	//プレイヤー
-	AddGameObject<Player>(TYPE_OPAQUE);
-
+	AddGameObject<Player>(TYPE_OPAQUE)->SetRacerName("Player")->SetSplashParticle(AddGameObject<SplashParticle>(TYPE_TRANSPARENT));
+	
 	//CPUボート
-	AddGameObject<CPUBoat>(TYPE_OPAQUE)->SetPosition({ -160.0f, 0.0f, -10.0f});
-	AddGameObject<CPUBoat>(TYPE_OPAQUE)->SetPosition({ -160.0f, 0.0f, -20.0f });
-	AddGameObject<CPUBoat>(TYPE_OPAQUE)->SetPosition({ -160.0f, 0.0f, -30.0f });
-	AddGameObject<CPUBoat>(TYPE_OPAQUE)->SetPosition({ -160.0f, 0.0f, -40.0f });
-	AddGameObject<CPUBoat>(TYPE_OPAQUE)->SetPosition({ -160.0f, 0.0f, -50.0f });
-//	AddGameObject<CPUBoat>(TYPE_OPAQUE)->SetPosition({ -160.0f, 0.0f, -60.0f });
+	AddGameObject<CPUBoat>(TYPE_OPAQUE)->SetRacerName("CP1")->SetSplashParticle(AddGameObject<SplashParticle>(TYPE_TRANSPARENT))->SetPosition({-160.0f, 0.0f, -10.0f});
+	AddGameObject<CPUBoat>(TYPE_OPAQUE)->SetRacerName("CP2")->SetSplashParticle(AddGameObject<SplashParticle>(TYPE_TRANSPARENT))->SetPosition({ -160.0f, 0.0f, -20.0f });
+	AddGameObject<CPUBoat>(TYPE_OPAQUE)->SetRacerName("CP3")->SetSplashParticle(AddGameObject<SplashParticle>(TYPE_TRANSPARENT))->SetPosition({ -160.0f, 0.0f, -30.0f });
+	AddGameObject<CPUBoat>(TYPE_OPAQUE)->SetRacerName("CP4")->SetSplashParticle(AddGameObject<SplashParticle>(TYPE_TRANSPARENT))->SetPosition({ -160.0f, 0.0f, -40.0f });
+	AddGameObject<CPUBoat>(TYPE_OPAQUE)->SetRacerName("CP5")->SetSplashParticle(AddGameObject<SplashParticle>(TYPE_TRANSPARENT))->SetPosition({ -160.0f, 0.0f, -50.0f });
+//	AddGameObject<CPUBoat>(TYPE_OPAQUE)->SetSplashParticle(AddGameObject<SplashParticle>(TYPE_OPAQUE))->SetPosition({ -160.0f, 0.0f, -60.0f });
 
 	//浮き
 	AddGameObject<Buoy>(TYPE_OPAQUE)->SetPosition({ 150.0f, 0.0f, 0.0f });
@@ -98,8 +98,6 @@ bool GameScene::Initialize() {
 	//平行光源
 	AddGameObject<GameDirectionalLight>(TYPE_LIGHT)->SetDirection({ -1.0f, -1.0f, -1.0f, 0.0f })->SetEnabled(true);
 
-	//スプラッシュエフェクト
-	AddGameObject<SplashParticle>(TYPE_TRANSPARENT);
 	return true;
 }
 

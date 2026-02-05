@@ -4,6 +4,7 @@
 #include "engine.h"
 
 class Water;
+class SplashParticle;
 
 class Boat : public GameObject {
 public:
@@ -40,6 +41,8 @@ public:
 
 	//水面設定
 	void SetWater(Water* water) { m_water = water; }
+	// 水しぶきエフェクト設定
+	Boat* SetSplashParticle(SplashParticle* splashEffect) { m_splashEffect = splashEffect; return this; }
 
 	//ボートの寸法設定
 	void SetDimensions(float length, float width, float height) {
@@ -126,7 +129,7 @@ private:
 	//水面への参照
 	Water* m_water;
 	//水しぶきエフェクト
-	class SplashParticle* m_splashEffect;
+	SplashParticle* m_splashEffect;
 
 	//水滴用タイマー
 	float m_splashTimer;

@@ -13,7 +13,7 @@
 #include "fpsCamera.h"
 #include "skyDome.h"
 #include "testParticle.h"
-//#include "splashParticle.h"
+#include "splashParticle.h"
 
 #include "gameDirectionalLight.h"
 
@@ -77,7 +77,7 @@ bool TestScene::Initialize() {
 
 	AddGameObject<TestParticle>(TYPE_TRANSPARENT)->SetPosition({ 0.0f, 2.0f, 0.0f });
 
-//	AddGameObject(new SplashParticle(), TYPE_TRANSPARENT);
+	AddGameObject<SplashParticle>(TYPE_TRANSPARENT)->SetPosition({ 2.0f, 2.0f, 0.0f });
 
 
 	AddGameObject<TestField>(TYPE_OPAQUE);

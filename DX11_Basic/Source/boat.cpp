@@ -99,9 +99,6 @@ bool Boat::Initialize() {
 	m_position.y = m_restingWaterLevel - 0.2f;
 	m_prevPosition = m_position;
 
-	// 水しぶきパーティクル取得
-	m_splashEffect = m_scene->GetGameObject<SplashParticle>();
-
 	return true;
 }
 
@@ -425,7 +422,7 @@ void Boat::UpdateWaterInteraction(float deltaTime) {
 			splashPos.y = std::min(splashPos.y, m_water->GetWaterHeight(splashPos));
 
 			//エフェクト発生
-			m_splashEffect->EmitOneShot(splashPos);
+			m_splashEffect->EmitOneShot(splashPos, static_cast<int>(speed) * 2);
 		}
 	}
 }
