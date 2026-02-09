@@ -19,4 +19,5 @@ private:
 	// Shader
 	class VertexShader* m_vertexShader = nullptr;
 	class PixelShader* m_pixelShader = nullptr;
+	class PixelShader* m_backPixelShader = nullptr;
 };

@@ -2,6 +2,8 @@
 #include "resultScene.h"
 #include "resultText.h"
 #include "resultTime.h"
+#include "resultRankText.h"
+#include "resultRankBackground.h"
 
 #include "input.h"
 #include "system.h"
@@ -23,6 +25,11 @@ bool ResultScene::Initialize() {
 	//タイム表示初期化
 	for (int i = 0; i < resultCount; i++) {
 		AddGameObject<ResultTime>(TYPE_BEFORE_PROCESS_UI)->SetResultCount(resultCount)->SetResultData(resultData[i])->SetIndex(i);
+	}
+
+	//ランキングテキスト初期化
+	for (int i = 0; i < resultCount; i++) {
+		AddGameObject<ResultRankText>(TYPE_BEFORE_PROCESS_UI)->SetRankIndex(i);
 	}
 
 	return true;

@@ -31,7 +31,6 @@ protected:
 
 private:
 	class Sprite* m_sprite = nullptr;
-	class Texture* m_texture = nullptr;
 	class Texture* m_numberTexture = nullptr;
 	class VertexShader* m_vertexShader = nullptr;
 	class PixelShader* m_pixelShader = nullptr;

@@ -9,6 +9,7 @@ struct BoatResultData {
 	float finishTime;	// ゴールタイム
 	Vector4 boatColor;	// ボートカラー
 	std::string playerName; // プレイヤー名
+	bool isMainPlayer; // メインプレイヤーフラグ
 };
 
 class RaceManager : public GameObject {
@@ -71,7 +72,7 @@ private:
 	Vector2 m_boundsMin = { -215.0f, -60.0f };
 	Vector2 m_boundsMax = { 215.0f, 60.0f };
 
-	int m_lapCountToFinish = 3; //完走に必要な周回数
+	int m_lapCountToFinish = 1; //完走に必要な周回数
 
 	static std::vector<BoatResultData> m_result;	//レース結果
 };

@@ -57,6 +57,8 @@ protected:
 
 	Vector4 m_boatColor = Vector4::ONE; //ボートカラー
 
+	void SetIsMainPlayer(bool isMain) { m_isMainPlayer = isMain; }
+
 private:
 	class RaceManager* m_raceManager = nullptr;
 
@@ -89,6 +91,7 @@ private:
 	float m_finishTime = 0.0f; //ゴールタイム
 
 	std::string m_racerName = "Player"; //レーサー名
+	bool m_isMainPlayer = false; //メインプレイヤーフラグ
 
 	// セクション判定
 	void UpdateProgressSection();

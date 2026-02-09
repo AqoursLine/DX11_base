@@ -95,6 +95,7 @@ void RankDisplay::Draw() {
 	backMaterial.textureEnable = false;
 	RENDERER.SetMaterial(backMaterial);
 
+	// 角丸矩形のプロパティ設定
 	SHADER_PROPERTIES properties = {};
 	properties.params1.x = 0.2f;	// 角丸半径
 	properties.params1.y = 0.005f;	// 境界線のスムーズさ

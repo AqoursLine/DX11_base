@@ -16,11 +16,6 @@ bool ResultTime::Initialize() {
 	}
 
 	//テクスチャの読み込み
-	m_texture = new Texture();
-	if (!m_texture->Load(L"Asset\\Texture\\time.png")) {
-		ErrorMessage(L"リザルトタイムのテクスチャの読み込みに失敗しました。", E_FAIL);
-		return false;
-	}
 	m_numberTexture = new Texture();
 	if (!m_numberTexture->Load(L"Asset\\Texture\\dotNum.png")) {
 		ErrorMessage(L"リザルトタイムの数字テクスチャの読み込みに失敗しました。", E_FAIL);
@@ -34,9 +29,9 @@ bool ResultTime::Initialize() {
 	m_pixelShader->Load(L"Shader\\spriteAnimationPS.cso");
 
 	//位置、回転、拡大縮小の設定
-	m_scale = { 250.0f, 100.0f, 1.0f };
+	m_scale = { 60.0f, 112.0f, 1.0f };
 	float posY = SCREEN_HEIGHT * 0.4f + m_index * (m_scale.y + 20.0f);
-	m_position = { m_scale.x * 0.5f + 20.0f, posY, 0.0f };
+	m_position = { SCREEN_WIDTH * 0.5f + m_scale.x * 3.5f, posY, 0.0f };
 	m_rotation = { 0.0f, 0.0f, 0.0f };
 
 	return true;
@@ -47,7 +42,6 @@ void ResultTime::Finalize() {
 	m_sprite->Finalize();
 	delete m_sprite;
 	//テクスチャの解放
-	delete m_texture;
 	delete m_numberTexture;
 	//シェーダーの解放
 	delete m_vertexShader;
@@ -61,36 +55,25 @@ void ResultTime::Draw() {
 	//シェーダーの設定
 	m_vertexShader->Set();
 	m_pixelShader->Set();
-	//テクスチャの設定
-	m_texture->Set(0);
 	//マテリアルセット
 	MATERIAL material = {};
+	XMFLOAT4 diffuse = {};
+	if (m_resultData.isMainPlayer) {
+		diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f); // メインプレイヤーは黒
+	} else {
+		diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f); // その他は灰色
+	}
+
 	material.diffuse = XMFLOAT4(m_resultData.boatColor.x, m_resultData.boatColor.y, m_resultData.boatColor.z, 1.0f);
 	material.textureEnable = true;
 	RENDERER.SetMaterial(material);
 
-	//シェーダープロパティ設定
-	SHADER_PROPERTIES properties = {};
-	properties.params1.z = 1.0f; // 幅
-	properties.params1.w = 1.0f; // 高さ
-	RENDERER.SetShaderProperties(properties);
-
-	//スプライトの描画
-	m_sprite->Draw(m_position, m_rotation, m_scale);
-
-	//数字の描画
-	// スケール
-	Vector3 numberScale = { 60.0f, 112.0f, 1.0f };
-	 
-	//ポジション
-	Vector3 pos = { SCREEN_WIDTH * 0.5f, m_position.y, 0.0f };
-	pos.x += numberScale.x * 3.5f; //右端の位置調整
-
+ 
 	//テクスチャの設定
 	m_numberTexture->Set(0);
 
 	//アニメーション用プロパティ
-	properties = {};
+	SHADER_PROPERTIES properties = {};
 	properties.params1.z = 1.0f / 10.0f; //1フレームの幅(10フレーム)
 	properties.params1.w = 1.0f / 2.0f; //1フレームの高さ(2行)
 
@@ -107,6 +90,8 @@ void ResultTime::Draw() {
 	digits[5] = 11; // コロン
 	digits[6] = (timeInt / 6000); // 分1の位
 
+	//描画開始位置
+	Vector3 pos = m_position;
 
 	//右から表示(1:00.00(分秒ミリ秒)形式)
 	for (int i = 0; i < 7; i++) {
@@ -119,10 +104,10 @@ void ResultTime::Draw() {
 		RENDERER.SetShaderProperties(properties);
 
 		//スプライト描画
-		m_sprite->Draw(pos, Vector3::ZERO, numberScale);
+		m_sprite->Draw(pos, Vector3::ZERO, m_scale);
 
 		//位置調整
-		pos.x -= numberScale.x;
+		pos.x -= m_scale.x;
 	}
 
 }

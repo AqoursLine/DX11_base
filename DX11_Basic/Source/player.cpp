@@ -9,6 +9,8 @@ bool Player::Initialize() {
 
 	m_position = { -160.0f, 0.0f, -50.0f };
 
+	SetIsMainPlayer(true);
+
 	return true;
 }
 
