@@ -24,5 +24,7 @@ bool MultiOtherPlayer::Initialize() {
 }
 
 void MultiOtherPlayer::Update(double deltaTime) {
+	RacingBoat::UpdateProgressSection();
+	RacingBoat::CalculateLapProgress();
 	Boat::UpdateWaterInteraction(static_cast<float>(deltaTime));
 }

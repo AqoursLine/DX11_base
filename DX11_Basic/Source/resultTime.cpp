@@ -30,7 +30,7 @@ bool ResultTime::Initialize() {
 
 	//位置、回転、拡大縮小の設定
 	m_scale = { 60.0f, 112.0f, 1.0f };
-	float posY = SCREEN_HEIGHT * 0.4f + m_index * (m_scale.y + 20.0f);
+	float posY = 400.0f + m_index * (m_scale.y + 8.0f);
 	m_position = { SCREEN_WIDTH * 0.5f + m_scale.x * 3.5f, posY, 0.0f };
 	m_rotation = { 0.0f, 0.0f, 0.0f };
 

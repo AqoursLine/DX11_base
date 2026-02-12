@@ -82,20 +82,30 @@ void MultiWaitGuestScene::ReceiveMessages(const json& message) {
 		return;
 	}
 	std::string responseType = message["type"];
+
+	// 部屋に参加した場合の処理
 	if (responseType == "roomJoined") {
-		// 部屋に参加した場合の処理
 		m_roomId = message["roomId"];
 		m_roomJoined = true;
 		m_guestNumber = message["guestNumber"];
 
-		m_waitUsers[m_guestNumber]->SetIconVisible(true);
-
+		for (int i = 0; i < m_guestNumber + 1; i++) {
+			m_waitUsers[i]->SetIconVisible(true);
+		}
 	}
-	if (responseType == "newPlayerJoined") {
-		// 新しいプレイヤーが参加した場合の処理
+
+	// 新しいゲストが参加した場合の処理
+	if (responseType == "newGuestJoined") {
 		std::string playerName = message["playerName"];
-		// プレイヤーリストに追加するなどの処理を行う
 		m_playerNames.push_back(playerName);
+
+		m_waitUsers[message["guestNumber"]]->SetIconVisible(true);
+	}
+
+	// 他の参加者の準備状態が更新された場合の処理
+	if (responseType == "guestReady") {
+		int guestNumber = message["guestNumber"];
+		m_waitUsers[guestNumber]->SetReady(true);
 	}
 
 	// ホストからの開始通知を受け取った場合

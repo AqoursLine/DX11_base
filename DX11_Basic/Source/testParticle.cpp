@@ -92,7 +92,8 @@ void TestParticle::Draw() {
 		settings.upVector.Normalize();
 		isChanged = true;
 	}
-	isChanged |= ImGui::DragInt("One Shot Count", &settings.oneShotCount, 1, 1000);
+	isChanged |= ImGui::DragInt("One Shot Count", &settings.oneShotCount, 1, 10000);
+	isChanged |= ImGui::DragInt("Max Particles", (int*)&settings.maxParticles, 500, 10000000);
 	ImGui::End();
 
 	if (isChanged) {

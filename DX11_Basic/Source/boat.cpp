@@ -373,6 +373,36 @@ Vector3 Boat::CalculateWallCollisionForce() {
 		}
 	}
 
+	// 中央島との衝突を判定
+	Vector2 centerMin = { -150.0f, -1.0f };
+	Vector2 centerMax = { 150.0f, 1.0f };
+
+	for (int i = 0; i < 4; i++) {
+		// 4隅のいずれかが中央島内にあるかチェック
+		if (m_corners[i].x > centerMin.x && m_corners[i].x < centerMax.x &&
+			m_corners[i].z > centerMin.y && m_corners[i].z < centerMax.y) {
+			// 中央島内にある場合、最も近い境界までの距離を計算
+			float distLeft = m_corners[i].x - centerMin.x;
+			float distRight = centerMax.x - m_corners[i].x;
+			float distBottom = m_corners[i].z - centerMin.y;
+			float distTop = centerMax.y - m_corners[i].z;
+
+			// 最小の距離を見つけて、その方向にめり込み深さを設定
+			float minDist = std::min({ distLeft, distRight, distBottom, distTop });
+			if (minDist == distLeft) {
+				m_wallPenetrationDepth.x += -distLeft;
+			} else if (minDist == distRight) {
+				m_wallPenetrationDepth.x += distRight;
+			} else if (minDist == distBottom) {
+				m_wallPenetrationDepth.y += -distBottom;
+			} else if (minDist == distTop) {
+				m_wallPenetrationDepth.y += distTop;
+			}
+			break; // 一度めり込んだら他の隅は無視
+		}
+	}
+
+
 	//衝突力を計算
 	if (std::abs(m_wallPenetrationDepth.x) > 0.01f) {
 		collisionForce.x = m_wallPenetrationDepth.x * m_mass * 10.0f; //めり込み深さに比例した力
@@ -390,6 +420,7 @@ Vector3 Boat::CalculateWallCollisionForce() {
 			collisionForce += frictionForce;
 		}
 	}
+
 	return collisionForce;
 }
 

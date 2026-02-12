@@ -59,7 +59,7 @@ bool GameScene::Initialize() {
 	AddGameObject<Buoy>(TYPE_OPAQUE)->SetPosition({ -150.0f, 0.0f, 0.0f });
 
 	//レースマネージャー
-	AddGameObject<RaceManager>(TYPE_CUTOUT)->SetShuffleLanes(true);
+	AddGameObject<RaceManager>(TYPE_CUTOUT)->SetShuffleLanes(false);
 	//カウントダウン
 	AddGameObject<RaceCountDownText>(TYPE_BEFORE_PROCESS_UI);
 

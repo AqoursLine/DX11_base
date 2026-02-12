@@ -58,6 +58,18 @@ wss.on('connection', function (ws) {
 						};
 						room.host.send(JSON.stringify(joinMessage));
 					}
+
+					// 他の参加者にも新しい参加者がいることを通知
+					room.guests.forEach(guest => {
+						if (guest !== ws && guest.readyState === WebSocket.OPEN) {
+							const joinMessage = {
+								type: 'newGuestJoined',
+								playerName: messageData.playerName,
+								guestNumber: guestNumber
+							};
+							guest.send(JSON.stringify(joinMessage));
+						}
+					});
 				} else {
 					// 利用可能なルームがない場合の処理
 					ws.send(JSON.stringify({ type: 'error', message: 'No available rooms to join.' }));
@@ -67,8 +79,18 @@ wss.on('connection', function (ws) {
 			// 参加者準備完了通知の処理
 			if (messageData.type === 'guestReady') {
 				const room = activeRooms.get(ws.roomId);
+				// ホストに参加者の準備完了を通知
 				room.host.send(JSON.stringify({ type: 'guestReady', guestNumber: messageData.guestNumber }));
+
+				// 他の参加者にも通知
+				room.guests.forEach(guest => {
+					if (guest !== ws && guest.readyState === WebSocket.OPEN) {
+						guest.send(JSON.stringify({ type: 'guestReady', guestNumber: messageData.guestNumber }));
+					}
+				});
+
 				console.log(`Guest ${messageData.guestNumber} is ready in room ${ws.roomId}.`);
+
 			}
 
 			// ホスト開始通知の処理

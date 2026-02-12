@@ -59,6 +59,12 @@ protected:
 
 	void SetIsMainPlayer(bool isMain) { m_isMainPlayer = isMain; }
 
+	// セクション判定
+	void UpdateProgressSection();
+
+	// 周回進捗度計算
+	void CalculateLapProgress();
+
 private:
 	class RaceManager* m_raceManager = nullptr;
 
@@ -92,12 +98,6 @@ private:
 
 	std::string m_racerName = "Player"; //レーサー名
 	bool m_isMainPlayer = false; //メインプレイヤーフラグ
-
-	// セクション判定
-	void UpdateProgressSection();
-
-	// 周回進捗度計算
-	void CalculateLapProgress();
 
 	/// <summary>
 	/// セクション進捗度取得(直線)
