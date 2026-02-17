@@ -11,6 +11,12 @@ public:
 	bool IsMainCamera() const { return m_isMainCamera; }
 	void SetMainCamera(bool isMain) { m_isMainCamera = isMain; }
 
+	void SetTargetPosition(const Vector3& targetPosition) { m_targetPosition = targetPosition; }
+	const Vector3& GetTargetPosition() const { return m_targetPosition; }
+
+	void SetOffset(const Vector3& offset) { m_offset = offset; }
+	const Vector3& GetOffset() const { return m_offset; }
+
 protected:
 	virtual bool Initialize() override;
 	virtual void Finalize() override;
@@ -37,7 +43,7 @@ protected:
 	float m_rotateSpeed = 0.0f;
 
 	Vector3 m_targetPosition { 0.0f, 0.0f, 0.0f };
-	Vector3 m_offset { 0.0f, 0.0f, 0.0f }; // カメラのオフセット位置
+	Vector3 m_offset { 0.0f, 1.0f, -7.0f }; // カメラのオフセット位置
 	Vector4 m_rotationOffset { 0.0f, 0.0f, 0.0f, 1.0f };
 
 	//レート

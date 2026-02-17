@@ -9,6 +9,7 @@
 
 #include "multiWaitUser.h"
 #include "readyButton.h"
+#include "startRaceText.h"
 
 #include "input.h"
 
@@ -37,6 +38,7 @@ bool MultiWaitHostScene::Initialize() {
 	Vector3 userScale = { 400.0f, 150.0f, 1.0f };
 	Vector3 userRotation = { 0.0f, 0.0f, 0.0f };
 
+	// 6人分のユーザー表示オブジェクトを配置
 	for (int i = 0; i < 6; i++) {
 		Vector3 deltaPos = { (i % 2) * 520.0f, (i / 2) * 200.0f, 0.0f };
 
@@ -49,21 +51,55 @@ bool MultiWaitHostScene::Initialize() {
 	auto readyButton = AddGameObject<ReadyButton>(TYPE_BEFORE_PROCESS_UI);
 	readyButton->SetPosition({ 960.0f, 970.0f, 0.0f });
 
+	// スタートレーステキスト追加
+	AddGameObject<StartRaceText>(TYPE_BEFORE_PROCESS_UI);
+
 	return true;
 }
 
 void MultiWaitHostScene::Finalize() {
+	// 退出メッセージを送信
+	if (m_roomCreated && !m_isStartSignalSent) {
+		json message;
+		message["type"] = "closeRoom";
+		m_webClient->SendMessageClient(message);
+	}
+
 }
 
 void MultiWaitHostScene::Update(double deltaTime) {
+	auto readyButton = GetGameObject<ReadyButton>();
+	auto startRaceText = GetGameObject<StartRaceText>();
+	// 開始通知の表示更新	
+	startRaceText->SetReady(m_isStartSignalSent);
+
 	// 全てが準備完了したら開始ボタンを有効化
 	for (auto& waitUser : m_waitUsers) {
 		if (!waitUser->IsReady() && waitUser->IsIconVisible()) {
+			readyButton->SetReady(false);
 			return;
 		}
 	}
 
-	auto readyButton = GetGameObject<ReadyButton>();
+	// プレイヤーが1人だけの場合は開始できないようにする
+	if (m_connectedPlayerCount == 1) {
+		readyButton->SetReady(false);
+		return;
+	}
+
+	if (m_isStartSignalSent) {
+		m_changeSceneTimer += static_cast<float>(deltaTime);
+		if (m_changeSceneTimer >= 1.0f) {
+			// ゲームシーンへ移行
+			auto multiGameHostScene = new MultiGameHostScene();
+			multiGameHostScene->SetPlayerCount(m_connectedPlayerCount);
+			multiGameHostScene->SetUserId(0);
+			SYSTEM.GetManager()->SetScene(multiGameHostScene, new TestTransition());
+		}
+
+		return;
+	}
+
 	readyButton->SetReady(true);
 
 	// ゲーム開始
@@ -72,11 +108,7 @@ void MultiWaitHostScene::Update(double deltaTime) {
 		message["type"] = "hostStart";
 		m_webClient->SendMessageClient(message);
 
-		// ゲームシーンへ移行
-		auto multiGameHostScene = new MultiGameHostScene();
-		multiGameHostScene->SetPlayerCount(m_connectedPlayerCount);
-		multiGameHostScene->SetUserId(0);
-		SYSTEM.GetManager()->SetScene(multiGameHostScene, new TestTransition());
+		m_isStartSignalSent = true;
 	}
 
 }
@@ -94,7 +126,7 @@ void MultiWaitHostScene::ReceiveMessages(const json& message) {
 	if (responseType == "roomCreated") {
 		m_roomId = message["roomId"];
 		m_roomCreated = true;
-	} 
+	}
 
 	// プレイヤーが参加した場合の処理
 	if (responseType == "guestJoined") {
@@ -110,4 +142,11 @@ void MultiWaitHostScene::ReceiveMessages(const json& message) {
 		m_waitUsers[message["guestNumber"]]->SetReady(true);
 	}
 
+	// プレイヤーが退出した場合の処理
+	if (responseType == "guestLeft") {
+		int guestNumber = message["guestNumber"];
+		m_waitUsers[guestNumber]->SetIconVisible(false);
+		m_waitUsers[guestNumber]->SetReady(false);
+		m_connectedPlayerCount--;
+	}
 }

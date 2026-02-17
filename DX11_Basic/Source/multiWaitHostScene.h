@@ -32,5 +32,9 @@ private:
 
 	int m_connectedPlayerCount = 0;
 
+	bool m_isStartSignalSent = false;
+
+	float m_changeSceneTimer = 0.0f;
+
 	std::vector<MultiWaitUser*> m_waitUsers;
 };

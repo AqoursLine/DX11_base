@@ -2,22 +2,10 @@
 
 #include "gameObject.h"
 
-#include "raceManager.h"
-
 class ResultRankBackground : public GameObject {
 public:
 	ResultRankBackground() = default;
 	~ResultRankBackground() = default;
-
-	ResultRankBackground* SetResultCount(int count) {
-		m_resultCount = count;
-		return this;
-	}
-
-	ResultRankBackground* SetResultData(const BoatResultData& data) {
-		m_resultData = data;
-		return this;
-	}
 
 protected:
 	bool Initialize() override;
@@ -31,7 +19,9 @@ private:
 	class VertexShader* m_vertexShader = nullptr;
 	class PixelShader* m_pixelShader = nullptr;
 
-	int m_resultCount = 0;
-	BoatResultData m_resultData;
+	int m_mainPlayerIndex = -1; // メインプレイヤーのインデックス
+	int m_playerCount = 0; // プレイヤーの総数
+
+	Vector4 m_color = { 1.0f, 1.0f, 1.0f, 1.0f };
 };
 

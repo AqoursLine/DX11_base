@@ -71,8 +71,11 @@ private:
 
 	Vector2 m_boundsMin = { -215.0f, -60.0f };
 	Vector2 m_boundsMax = { 215.0f, 60.0f };
-
+#ifdef _DEBUG
+	int m_lapCountToFinish = 2; //デバッグ用に完走に必要な周回数を1に設定
+#else
 	int m_lapCountToFinish = 3; //完走に必要な周回数
+#endif // _DEBUG
 
 	static std::vector<BoatResultData> m_result;	//レース結果
 };

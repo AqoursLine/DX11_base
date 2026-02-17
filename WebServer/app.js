@@ -39,14 +39,34 @@ wss.on('connection', function (ws) {
 				if (availableRoomId) {
 					const room = activeRooms.get(availableRoomId);
 
+					// 現在使用中の番号を取得
+					const usedNumbers = room.guests.map(guest => guest.guestNumber);
+					// 1から順に確認して最小の数字を探す
+					let guestNumber = 1;
+					while (usedNumbers.includes(guestNumber)) {
+						guestNumber++;
+					}
+
 					ws.roomId = availableRoomId; // クライアントにルームIDを保存
 					ws.isHost = false; // クライアントをホストではないとしてマーク
+					ws.isReady = false; // クライアントの準備状態を初期化
+					ws.guestNumber = guestNumber; // クライアントに参加者番号を保存
 
-					// 参加順に番号を割り当て
-					const guestNumber = room.guests.length + 1;
 					room.guests.push(ws);
 
-					ws.send(JSON.stringify({ type: 'roomJoined', roomId: availableRoomId, guestNumber: guestNumber }));
+					var isReadyMember = 0x1
+						;
+					var loopCount = 0;
+					// 参加者の準備状態をビットフラグで管理
+					room.guests.forEach(guest => {
+						// ホストは常に準備完了とみなす
+						loopCount++;
+						if (guest.isReady) {
+							isReadyMember |= (1 << loopCount); // 準備完了の参加者のビットを立てる
+						}
+					});
+
+					ws.send(JSON.stringify({ type: 'roomJoined', roomId: availableRoomId, guestNumber: guestNumber, readyMember: isReadyMember }));
 					console.log(`Client joined room ${availableRoomId}.`);
 
 					// ホストに参加者がいることを通知
@@ -78,6 +98,8 @@ wss.on('connection', function (ws) {
 
 			// 参加者準備完了通知の処理
 			if (messageData.type === 'guestReady') {
+				ws.isReady = true; // クライアントを準備完了としてマーク
+
 				const room = activeRooms.get(ws.roomId);
 				// ホストに参加者の準備完了を通知
 				room.host.send(JSON.stringify({ type: 'guestReady', guestNumber: messageData.guestNumber }));
@@ -96,6 +118,7 @@ wss.on('connection', function (ws) {
 			// ホスト開始通知の処理
 			if (messageData.type === 'hostStart') {
 				const room = activeRooms.get(ws.roomId);
+				room.host.send(message);
 				room.guests.forEach(guest => {
 					if (guest.readyState === WebSocket.OPEN) {
 						guest.send(JSON.stringify({ type: 'hostStart' }));
@@ -133,6 +156,47 @@ wss.on('connection', function (ws) {
 				});
 			}
 
+			// ゲスト退出
+			if (messageData.type === 'guestLeave') {
+				const room = activeRooms.get(ws.roomId);
+				if (room && !ws.isHost) {
+					// 参加者をルームから削除
+					room.guests = room.guests.filter(guest => guest !== ws);
+
+					// ホストに参加者が退出したことを通知
+					if (room.host.readyState === WebSocket.OPEN) {
+						room.host.send(JSON.stringify({ type: 'guestLeft', guestNumber: messageData.guestNumber }));
+					}
+				}
+
+				// 他の参加者にも通知
+				room.guests.forEach(guest => {
+					if (guest !== ws && guest.readyState === WebSocket.OPEN) {
+						guest.send(JSON.stringify({ type: 'guestLeft', guestNumber: messageData.guestNumber }));
+					}
+				});
+
+				console.log(`Guest ${messageData.guestNumber} left room ${ws.roomId}.`);
+				ws.roomId = null; // クライアントのルームIDをクリア
+				ws.guestNumber = null; // クライアントの参加者番号をクリア
+			}
+
+			// ホスト退出
+			if (messageData.type === 'closeRoom') {
+				// ルームをアクティブなルームから削除
+				activeRooms.delete(ws.roomId);
+				console.log(`Room ${ws.roomId} closed by host.`);
+
+				// 参加者にルームが閉じられたことを通知
+				wss.clients.forEach(client => {
+					// 参加者が同じルームにいる場合
+					if (client.roomId === ws.roomId && client.readyState === WebSocket.OPEN) {
+						// ルーム閉鎖メッセージを送信
+						client.send(JSON.stringify({ type: 'roomClosed' }));
+					}
+				});
+			}
+
 		} catch (e) {
 			console.error('Error parsing message:', e);
 		}
@@ -150,9 +214,28 @@ wss.on('connection', function (ws) {
 				// 参加者が同じルームにいる場合
 				if (client.roomId === ws.roomId && client.readyState === WebSocket.OPEN) {
 					// ルーム閉鎖メッセージを送信
-					client.send(JSON.stringify({ type: 'room_closed', message: 'The host has disconnected. The room is closed.' }));
+					client.send(JSON.stringify({ type: 'roomClosed' }));
 				}
 			});
+		} else if (ws.roomId) {
+			// 参加者が切断した場合、ホストに通知
+			const room = activeRooms.get(ws.roomId);
+			if (room) {
+				room.guests = room.guests.filter(guest => guest !== ws); // 参加者をルームから削除
+
+				// ホストに参加者が切断したことを通知
+				if (room.host.readyState === WebSocket.OPEN) {
+					room.host.send(JSON.stringify({ type: 'guestLeft', guestNumber: ws.guestNumber }));
+				}
+				// 他の参加者にも通知
+				room.guests.forEach(guest => {
+					if (guest !== ws && guest.readyState === WebSocket.OPEN) {
+						guest.send(JSON.stringify({ type: 'guestLeft', guestNumber: ws.guestNumber }));
+					}
+				});
+
+			}
+
 		}
 
 	});

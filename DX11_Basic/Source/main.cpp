@@ -155,12 +155,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	DWORD windowStyle = WS_POPUP | WS_VISIBLE;
 
 #ifdef _DEBUG
-	//デバッグビルド時はウィンドウモードで固定
-	windowHeight = 720;
-	windowWidth = 1280;
-	windowPosX = CW_USEDEFAULT;
-	windowPosY = CW_USEDEFAULT;
-	windowStyle = WS_OVERLAPPEDWINDOW;
+	////デバッグビルド時はウィンドウモードで固定
+	//windowHeight = 720;
+	//windowWidth = 1280;
+	//windowPosX = CW_USEDEFAULT;
+	//windowPosY = CW_USEDEFAULT;
+	//windowStyle = WS_OVERLAPPEDWINDOW;
 
 #endif // _DEBUG
 

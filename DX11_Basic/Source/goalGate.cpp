@@ -99,10 +99,7 @@ void GoalGate::Update(double deltaTime) {
 		// ボートの中心がゲートの幅内にあるかチェック
 		if (boatPos.z > m_position.z - gateHalfWidth && boatPos.z < m_position.z + gateHalfWidth) {
 			// X軸範囲内かチェック
-			float collisionThickness = m_scale.z * 0.5f + boat->GetLength() * 0.5f;
-
-			// ボートの中心がゲートの厚み範囲内にあるかチェック
-			if (std::abs(boatPos.x - m_position.x) < collisionThickness) {
+			if (boatPos.x > 0) {
 				isCollided = true;
 			}
 		}

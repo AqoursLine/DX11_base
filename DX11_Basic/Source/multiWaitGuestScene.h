@@ -31,8 +31,11 @@ private:
 	bool m_roomJoined = false;
 	int m_guestNumber = 0;
 	bool m_receivedStartSignal = false;
+	bool m_roomClosed = false;
 
 	int m_connectedPlayerCount = 0;
+
+	float m_changeSceneTimer = 0.0f;
 
 	std::vector<MultiWaitUser*> m_waitUsers;
 };

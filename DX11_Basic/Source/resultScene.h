@@ -12,7 +12,7 @@ protected:
 	void Activate() override {}
 	void Finalize() override {}
 	void Update(double deltaTime) override;
-	void Draw() override {}
+	void Draw() override;
 	void CleanUp() override {}
 
 private:

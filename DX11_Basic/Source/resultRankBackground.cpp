@@ -5,6 +5,13 @@
 #include "texture.h"
 #include "shaders.h"
 
+#include "raceManager.h"
+
+#ifdef _DEBUG
+#include "imguiSystem.h"
+#endif // _DEBUG
+
+
 bool ResultRankBackground::Initialize() {
 	m_sprite = new Sprite();
 	if (!m_sprite->Initialize()) {
@@ -27,6 +34,17 @@ bool ResultRankBackground::Initialize() {
 
 	m_scale = { 1100.0f, 100.0f, 1.0f };
 	m_position = { SCREEN_WIDTH * 0.5f, 400.0f, 0.0f };
+
+	// メインプレイヤーのインデックスを取得
+	auto resultData = RaceManager::GetResultData();
+	for (size_t i = 0; i < resultData.size(); i++) {
+		if (resultData[i].isMainPlayer) {
+			m_mainPlayerIndex = static_cast<int>(i);
+			break;
+		}
+	}
+
+	m_playerCount = static_cast<int>(resultData.size());
 
 	return true;
 }
@@ -57,20 +75,21 @@ void ResultRankBackground::Draw() {
 	MATERIAL material = {};
 	material.textureEnable = true;
 
-	// ポジション
-	Vector3 pos = m_position;
-
-	// 複数表示
-	for (int i = 0; i < m_resultCount; i++) {
-		// マテリアルセット
+	for (int i = 0; i < m_playerCount; i++) {
 		// メインプレイヤー
-		if (m_resultData.isMainPlayer) {
-			material.diffuse = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+		if (i == m_mainPlayerIndex) {
+			material.diffuse = XMFLOAT4(0.0f, 1.0f, 0.8f, 1.0f);
 		} else {
-			material.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+			material.diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 		}
 		RENDERER.SetMaterial(material);
 
+		Vector3 pos = m_position;
+		pos.y += i * (m_scale.y + 20.0f); // プレイヤーごとにY位置をずらす
+
+		// 描画
+		m_sprite->Draw(pos, m_rotation, m_scale);
 	}
+
 
 }

@@ -34,18 +34,24 @@ void Scene::ActivateBase() {
 }
 
 void Scene::FinalizeBase() {
+	if (m_isFinalized) {
+		return;
+	}
+
 	//非同期完了待ち
 	if (m_future.valid()) {
 		m_future.wait();
 	}
 
-	if (!m_isInitialized.load(std::memory_order_acquire)) {
+	if (m_isInitialized.load(std::memory_order_acquire)) {
 		// シーン固有の終了処理
 		Finalize();
 	}
 
 	// GameObjectの終了処理と解放
 	ObjectFinalize();
+
+	m_isFinalized = true;
 }
 
 void Scene::UpdateBase(double deltaTime) {

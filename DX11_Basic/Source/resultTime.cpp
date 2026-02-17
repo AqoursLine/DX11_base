@@ -30,9 +30,21 @@ bool ResultTime::Initialize() {
 
 	//位置、回転、拡大縮小の設定
 	m_scale = { 60.0f, 112.0f, 1.0f };
-	float posY = 400.0f + m_index * (m_scale.y + 8.0f);
-	m_position = { SCREEN_WIDTH * 0.5f + m_scale.x * 3.5f, posY, 0.0f };
+	m_position = { SCREEN_WIDTH * 0.5f + m_scale.x * 3.5f, 400.0f, 0.0f };
 	m_rotation = { 0.0f, 0.0f, 0.0f };
+
+	auto resultData = RaceManager::GetResultData(); //結果データ取得
+	for (auto data : resultData) {
+		m_times.push_back(data.finishTime);
+	}
+
+	// メインプレイヤーのインデックスを取得
+	for (size_t i = 0; i < resultData.size(); i++) {
+		if (resultData[i].isMainPlayer) {
+			m_mainPlayerIndex = static_cast<int>(i);
+			break;
+		}
+	}
 
 	return true;
 }
@@ -57,17 +69,7 @@ void ResultTime::Draw() {
 	m_pixelShader->Set();
 	//マテリアルセット
 	MATERIAL material = {};
-	XMFLOAT4 diffuse = {};
-	if (m_resultData.isMainPlayer) {
-		diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f); // メインプレイヤーは黒
-	} else {
-		diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f); // その他は灰色
-	}
-
-	material.diffuse = XMFLOAT4(m_resultData.boatColor.x, m_resultData.boatColor.y, m_resultData.boatColor.z, 1.0f);
 	material.textureEnable = true;
-	RENDERER.SetMaterial(material);
-
  
 	//テクスチャの設定
 	m_numberTexture->Set(0);
@@ -77,37 +79,49 @@ void ResultTime::Draw() {
 	properties.params1.z = 1.0f / 10.0f; //1フレームの幅(10フレーム)
 	properties.params1.w = 1.0f / 2.0f; //1フレームの高さ(2行)
 
-	//ミリ秒を整数に変換して表示
-	int timeInt = static_cast<int>(m_resultData.finishTime * 100); // 小数第2位まで表示
+	for (int i = 0; i < m_times.size(); i++) {
+		// メインプレイヤーの色を変更
+		if (i == m_mainPlayerIndex) {
+			material.diffuse = { 0.0f, 0.0f, 0.0f, 1.0f };
+		} else {
+			material.diffuse = { 0.8f, 0.8f, 0.8f, 1.0f };
+		}
+		RENDERER.SetMaterial(material);
 
-	//各桁の数字を取得
-	int digits[7];
-	digits[0] = (timeInt) % 10; // ミリ秒1の位
-	digits[1] = (timeInt / 10) % 10; // ミリ秒10の位
-	digits[2] = 10; // ドット
-	digits[3] = (timeInt / 100) % 10; // 秒1の位
-	digits[4] = (timeInt / 1000) % 6; // 秒10の位
-	digits[5] = 11; // コロン
-	digits[6] = (timeInt / 6000); // 分1の位
+		//ミリ秒を整数に変換して表示
+		int timeInt = static_cast<int>(m_times[i] * 100); // 小数第2位まで表示
 
-	//描画開始位置
-	Vector3 pos = m_position;
+		//各桁の数字を取得
+		int digits[7];
+		digits[0] = (timeInt) % 10; // ミリ秒1の位
+		digits[1] = (timeInt / 10) % 10; // ミリ秒10の位
+		digits[2] = 10; // ドット
+		digits[3] = (timeInt / 100) % 10; // 秒1の位
+		digits[4] = (timeInt / 1000) % 6; // 秒10の位
+		digits[5] = 11; // コロン
+		digits[6] = (timeInt / 6000); // 分1の位
 
-	//右から表示(1:00.00(分秒ミリ秒)形式)
-	for (int i = 0; i < 7; i++) {
-		//アニメーションプロパティ設定
-		//左上のUV座標
-		properties.params1.x = (digits[i] % 10) * properties.params1.z; //フレーム番号から左上のU座標を計算
-		properties.params1.y = (digits[i] / 10) * properties.params1.w; //フレーム番号から左上のV座標を計算
+		//描画開始位置
+		Vector3 pos = m_position;
+		pos.y += i * 120.0f; //レーンごとに縦に配置
 
-		//シェーダープロパティ設定
-		RENDERER.SetShaderProperties(properties);
+		//右から表示(1:00.00(分秒ミリ秒)形式)
+		for (int digit = 0; digit < 7; digit++) {
+			//アニメーションプロパティ設定
+			//左上のUV座標
+			properties.params1.x = (digits[digit] % 10) * properties.params1.z; //フレーム番号から左上のU座標を計算
+			properties.params1.y = (digits[digit] / 10) * properties.params1.w; //フレーム番号から左上のV座標を計算
 
-		//スプライト描画
-		m_sprite->Draw(pos, Vector3::ZERO, m_scale);
+			//シェーダープロパティ設定
+			RENDERER.SetShaderProperties(properties);
 
-		//位置調整
-		pos.x -= m_scale.x;
+			//スプライト描画
+			m_sprite->Draw(pos, Vector3::ZERO, m_scale);
+
+			//位置調整
+			pos.x -= m_scale.x;
+		}
+
 	}
 
 }

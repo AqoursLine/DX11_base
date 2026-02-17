@@ -48,6 +48,7 @@ D:\GitHub\DX11_base\DX11_Basic\Source\rankDisplay.cpp;D:\GitHub\DX11_base\DX11_B
 D:\GitHub\DX11_base\DX11_Basic\Source\readyButton.cpp;D:\GitHub\DX11_base\DX11_Basic\GW-Racing\x64\Release\readyButton.obj
 D:\GitHub\DX11_base\DX11_Basic\Source\renderer.cpp;D:\GitHub\DX11_base\DX11_Basic\GW-Racing\x64\Release\renderer.obj
 D:\GitHub\DX11_base\DX11_Basic\Source\resultRankBackground.cpp;D:\GitHub\DX11_base\DX11_Basic\GW-Racing\x64\Release\resultRankBackground.obj
+D:\GitHub\DX11_base\DX11_Basic\Source\resultRankIcon.cpp;D:\GitHub\DX11_base\DX11_Basic\GW-Racing\x64\Release\resultRankIcon.obj
 D:\GitHub\DX11_base\DX11_Basic\Source\resultRankText.cpp;D:\GitHub\DX11_base\DX11_Basic\GW-Racing\x64\Release\resultRankText.obj
 D:\GitHub\DX11_base\DX11_Basic\Source\resultScene.cpp;D:\GitHub\DX11_base\DX11_Basic\GW-Racing\x64\Release\resultScene.obj
 D:\GitHub\DX11_base\DX11_Basic\Source\resultText.cpp;D:\GitHub\DX11_base\DX11_Basic\GW-Racing\x64\Release\resultText.obj
@@ -60,6 +61,7 @@ D:\GitHub\DX11_base\DX11_Basic\Source\particleSystem.cpp;D:\GitHub\DX11_base\DX1
 D:\GitHub\DX11_base\DX11_Basic\Source\splashParticle.cpp;D:\GitHub\DX11_base\DX11_Basic\GW-Racing\x64\Release\splashParticle.obj
 D:\GitHub\DX11_base\DX11_Basic\Source\sprite.cpp;D:\GitHub\DX11_base\DX11_Basic\GW-Racing\x64\Release\sprite.obj
 D:\GitHub\DX11_base\DX11_Basic\Source\startGate.cpp;D:\GitHub\DX11_base\DX11_Basic\GW-Racing\x64\Release\startGate.obj
+D:\GitHub\DX11_base\DX11_Basic\Source\startRaceText.cpp;D:\GitHub\DX11_base\DX11_Basic\GW-Racing\x64\Release\startRaceText.obj
 D:\GitHub\DX11_base\DX11_Basic\Source\system.cpp;D:\GitHub\DX11_base\DX11_Basic\GW-Racing\x64\Release\system.obj
 D:\GitHub\DX11_base\DX11_Basic\Source\test.cpp;D:\GitHub\DX11_base\DX11_Basic\GW-Racing\x64\Release\test.obj
 D:\GitHub\DX11_base\DX11_Basic\Source\testField.cpp;D:\GitHub\DX11_base\DX11_Basic\GW-Racing\x64\Release\testField.obj

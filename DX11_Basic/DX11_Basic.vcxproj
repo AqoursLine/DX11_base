@@ -400,6 +400,7 @@
     <ClCompile Include="Source\readyButton.cpp" />
     <ClCompile Include="Source\renderer.cpp" />
     <ClCompile Include="Source\resultRankBackground.cpp" />
+    <ClCompile Include="Source\resultRankIcon.cpp" />
     <ClCompile Include="Source\resultRankText.cpp" />
     <ClCompile Include="Source\resultScene.cpp" />
     <ClCompile Include="Source\resultText.cpp" />
@@ -412,6 +413,7 @@
     <ClCompile Include="Source\splashParticle.cpp" />
     <ClCompile Include="Source\sprite.cpp" />
     <ClCompile Include="Source\startGate.cpp" />
+    <ClCompile Include="Source\startRaceText.cpp" />
     <ClCompile Include="Source\system.cpp" />
     <ClCompile Include="Source\test.cpp" />
     <ClCompile Include="Source\testField.cpp" />
@@ -495,6 +497,7 @@
     <ClInclude Include="Source\readyButton.h" />
     <ClInclude Include="Source\renderer.h" />
     <ClInclude Include="Source\resultRankBackground.h" />
+    <ClInclude Include="Source\resultRankIcon.h" />
     <ClInclude Include="Source\resultRankText.h" />
     <ClInclude Include="Source\resultScene.h" />
     <ClInclude Include="Source\resultText.h" />
@@ -507,6 +510,7 @@
     <ClInclude Include="Source\splashParticle.h" />
     <ClInclude Include="Source\sprite.h" />
     <ClInclude Include="Source\startGate.h" />
+    <ClInclude Include="Source\startRaceText.h" />
     <ClInclude Include="Source\system.h" />
     <ClInclude Include="Source\test.h" />
     <ClInclude Include="Source\testField.h" />

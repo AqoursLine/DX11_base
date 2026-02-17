@@ -9,7 +9,6 @@
 
 //カメラクラス初期化
 bool Camera::Initialize() {
-	m_offset = { 0.0f, 1.0f, -7.0f }; // カメラのオフセット位置
 	m_position = m_offset; // 初期位置をオフセット位置に設定
 
 	m_moveSpeed = 10.0f; // カメラの移動速度
