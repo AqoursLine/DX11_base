@@ -22,6 +22,7 @@ private:
 	class Texture* m_textTexture = nullptr;
 	class VertexShader* m_vertexShader = nullptr;
 	class PixelShader* m_pixelShader = nullptr;
+	class PixelShader* m_backgroundPS = nullptr;
 
 	Vector3 m_textPosition = {0.0f, 0.0f, 0.0f};
 	Vector3 m_textScale = { 1.0f, 1.0f, 1.0f };
@@ -37,6 +38,9 @@ private:
 
 	float m_moveDuration = 0.3f; // テキストと背景が移動する時間
 	float m_moveElapsed = 0.0f; // 移動の経過時間
+
+	float m_moveProgress = 0.0f; // 移動の進行度（0.0fから1.0f）
+	float m_dissolveProgress = 0.0f; // ディゾルブの進行度（0.0fから1.0f）
 
 	bool m_isReady = false; // レース開始の準備ができているか
 };

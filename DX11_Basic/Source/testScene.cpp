@@ -21,6 +21,8 @@
 #include "testField.h"
 #include "testSprite.h"
 
+#include "startRaceText.h"
+
 #include "testTransition.h"
 
 #include "imguiSystem.h"
@@ -83,6 +85,8 @@ bool TestScene::Initialize() {
 	AddGameObject<TestField>(TYPE_OPAQUE);
 
 	SetActivatedImGui(true);
+
+	AddGameObject<StartRaceText>(TYPE_BEFORE_PROCESS_UI);
 
 	return true;
 }

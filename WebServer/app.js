@@ -54,19 +54,16 @@ wss.on('connection', function (ws) {
 
 					room.guests.push(ws);
 
-					var isReadyMember = 0x1
-						;
-					var loopCount = 0;
+					var isReadyMember = 0x1;
 					// 参加者の準備状態をビットフラグで管理
 					room.guests.forEach(guest => {
 						// ホストは常に準備完了とみなす
-						loopCount++;
 						if (guest.isReady) {
-							isReadyMember |= (1 << loopCount); // 準備完了の参加者のビットを立てる
+							isReadyMember |= (1 << guest.guestNumber); // 準備完了の参加者のビットを立てる
 						}
 					});
 
-					ws.send(JSON.stringify({ type: 'roomJoined', roomId: availableRoomId, guestNumber: guestNumber, readyMember: isReadyMember }));
+					ws.send(JSON.stringify({ type: 'roomJoined', roomId: availableRoomId, guestNumber: guestNumber, memberCount: room.guests.length + 1, readyMember: isReadyMember }));
 					console.log(`Client joined room ${availableRoomId}.`);
 
 					// ホストに参加者がいることを通知
@@ -74,6 +71,7 @@ wss.on('connection', function (ws) {
 						const joinMessage = {
 							type: 'guestJoined',
 							playerName: messageData.playerName,
+
 							guestNumber: guestNumber
 						};
 						room.host.send(JSON.stringify(joinMessage));
@@ -98,21 +96,20 @@ wss.on('connection', function (ws) {
 
 			// 参加者準備完了通知の処理
 			if (messageData.type === 'guestReady') {
-				ws.isReady = true; // クライアントを準備完了としてマーク
+                ws.isReady = messageData.ready; // クライアントの準備状態を更新
 
 				const room = activeRooms.get(ws.roomId);
 				// ホストに参加者の準備完了を通知
-				room.host.send(JSON.stringify({ type: 'guestReady', guestNumber: messageData.guestNumber }));
+				room.host.send(JSON.stringify({ type: 'guestReady', ready: ws.isReady, guestNumber: ws.guestNumber }));
 
-				// 他の参加者にも通知
+				// 自信を含め他の参加者にも通知
 				room.guests.forEach(guest => {
-					if (guest !== ws && guest.readyState === WebSocket.OPEN) {
-						guest.send(JSON.stringify({ type: 'guestReady', guestNumber: messageData.guestNumber }));
+					if (guest.readyState === WebSocket.OPEN) {
+						guest.send(JSON.stringify({ type: 'guestReady', ready: ws.isReady, guestNumber: ws.guestNumber }));
 					}
 				});
 
-				console.log(`Guest ${messageData.guestNumber} is ready in room ${ws.roomId}.`);
-
+				console.log(`Guest ${ws.guestNumber} is ready in room ${ws.roomId}.`);
 			}
 
 			// ホスト開始通知の処理
@@ -183,6 +180,12 @@ wss.on('connection', function (ws) {
 
 			// ホスト退出
 			if (messageData.type === 'closeRoom') {
+				// このクライアントがホストであることを確認
+				if (!ws.isHost) {
+					ws.send(JSON.stringify({ type: 'error', message: 'Only the host can close the room.' }));
+					return;
+                }
+
 				// ルームをアクティブなルームから削除
 				activeRooms.delete(ws.roomId);
 				console.log(`Room ${ws.roomId} closed by host.`);
@@ -191,11 +194,20 @@ wss.on('connection', function (ws) {
 				wss.clients.forEach(client => {
 					// 参加者が同じルームにいる場合
 					if (client.roomId === ws.roomId && client.readyState === WebSocket.OPEN) {
+						// クライアントのルームIDをクリア
+						client.roomId = null;
+
 						// ルーム閉鎖メッセージを送信
 						client.send(JSON.stringify({ type: 'roomClosed' }));
 					}
 				});
+
+				ws.roomId = null; // クライアントのルームIDをクリア
+				ws.isHost = false; // クライアントのホストフラグをクリア
+				ws.guestNumber = null; // クライアントの参加者番号をクリア
+
 			}
+
 
 		} catch (e) {
 			console.error('Error parsing message:', e);

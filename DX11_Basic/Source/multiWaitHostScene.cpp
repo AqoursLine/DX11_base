@@ -8,8 +8,11 @@
 #include "player.h"
 
 #include "multiWaitUser.h"
-#include "readyButton.h"
+#include "multiButtonStart.h"
+#include "multiButtonQuit.h"
+#include "multiSelector.h"
 #include "startRaceText.h"
+#include "multiLobbyText.h"
 
 #include "input.h"
 
@@ -43,13 +46,26 @@ bool MultiWaitHostScene::Initialize() {
 		Vector3 deltaPos = { (i % 2) * 520.0f, (i / 2) * 200.0f, 0.0f };
 
 		auto user = AddGameObject<MultiWaitUser>(TYPE_BEFORE_PROCESS_UI)->SetIconVisible(i == 0)->SetReady(i == 0);
+		user->SetIsMyself(i == 0); // 最初のユーザーオブジェクトを自分のものとして設定
 		user->SetPosition(userPosition + deltaPos)->SetScale(userScale)->SetRotation(userRotation);
 		m_waitUsers.push_back(user);
 	}
 
 	// スタートボタン追加
-	auto readyButton = AddGameObject<ReadyButton>(TYPE_BEFORE_PROCESS_UI);
-	readyButton->SetPosition({ 960.0f, 970.0f, 0.0f });
+	auto startButton = AddGameObject<MultiButtonStart>(TYPE_BEFORE_PROCESS_UI);
+	startButton->SetPosition({ 1220.0f, 970.0f, 0.0f });
+
+	// 退出ボタン追加
+	auto multiButtonQuit = AddGameObject<MultiButtonQuit>(TYPE_BEFORE_PROCESS_UI);
+	multiButtonQuit->SetPosition({ 700.0f, 970.0f, 0.0f });
+
+	// ボタンセレクター追加
+	auto multiSelector = AddGameObject<MultiSelector>(TYPE_BEFORE_PROCESS_UI);
+	multiSelector->AddButton(startButton);
+	multiSelector->AddButton(multiButtonQuit);
+
+	// ロビー説明テキスト追加
+	AddGameObject<MultiLobbyText>(TYPE_BEFORE_PROCESS_UI);
 
 	// スタートレーステキスト追加
 	AddGameObject<StartRaceText>(TYPE_BEFORE_PROCESS_UI);
@@ -68,7 +84,7 @@ void MultiWaitHostScene::Finalize() {
 }
 
 void MultiWaitHostScene::Update(double deltaTime) {
-	auto readyButton = GetGameObject<ReadyButton>();
+	auto startButton = GetGameObject<MultiButtonStart>();
 	auto startRaceText = GetGameObject<StartRaceText>();
 	// 開始通知の表示更新	
 	startRaceText->SetReady(m_isStartSignalSent);
@@ -76,14 +92,14 @@ void MultiWaitHostScene::Update(double deltaTime) {
 	// 全てが準備完了したら開始ボタンを有効化
 	for (auto& waitUser : m_waitUsers) {
 		if (!waitUser->IsReady() && waitUser->IsIconVisible()) {
-			readyButton->SetReady(false);
+			startButton->SetReady(false);
 			return;
 		}
 	}
 
 	// プレイヤーが1人だけの場合は開始できないようにする
 	if (m_connectedPlayerCount == 1) {
-		readyButton->SetReady(false);
+		startButton->SetReady(false);
 		return;
 	}
 
@@ -100,16 +116,7 @@ void MultiWaitHostScene::Update(double deltaTime) {
 		return;
 	}
 
-	readyButton->SetReady(true);
-
-	// ゲーム開始
-	if (Input::GetKeyTrigger(KK_ENTER)) {
-		json message;
-		message["type"] = "hostStart";
-		m_webClient->SendMessageClient(message);
-
-		m_isStartSignalSent = true;
-	}
+	startButton->SetReady(true);
 
 }
 
@@ -139,7 +146,11 @@ void MultiWaitHostScene::ReceiveMessages(const json& message) {
 
 	// プレイヤーが準備完了した場合の処理
 	if (responseType == "guestReady") {
-		m_waitUsers[message["guestNumber"]]->SetReady(true);
+		m_waitUsers[message["guestNumber"]]->SetReady(message["ready"]);
+	}
+
+	if (responseType == "hostStart") {
+		m_isStartSignalSent = true;
 	}
 
 	// プレイヤーが退出した場合の処理

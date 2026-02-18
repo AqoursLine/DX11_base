@@ -2,90 +2,93 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\x64\Release\GW-Racing.exe</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\x64\Release\GW-Racing.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\addvancedSpriteAnimationPS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\addvancedSpriteAnimationPS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\gpuParticleVS_CullDistance.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\blockDissolvePS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\gpuParticleVS_IndirectDraw.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\gpuParticleVS_CullDistance.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\gridPS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\gpuParticleVS_IndirectDraw.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\lightShadowPS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\gridPS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\lightTestPS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\lightShadowPS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\particleCompactCS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\lightTestPS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\particleEmitCS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\particleCompactCS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\particleUpdateCS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\particleEmitCS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\pixelLightingPS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\particleUpdateCS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\pixelLightingVS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\pixelLightingPS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\particlePS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\pixelLightingVS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\particleVS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\particlePS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\inversePS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\particleVS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\roundedRectPS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\inversePS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\shadowMapPS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\roundedRectPS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\shadowMapVS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\shadowMapPS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\spriteAnimationPS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\shadowMapVS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\spriteAnimationVS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\spriteAnimationPS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\unlitColorPS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\spriteAnimationVS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\unlitColorVS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\unlitColorPS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\unlitTexturePS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\unlitColorVS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\unlitTextureShadowPS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\unlitTexturePS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\unlitTextureVS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\unlitTextureShadowPS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\videoPS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\unlitTextureVS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\waterPS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\videoPS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\GitHub\DX11_base\DX11_Basic\Shader\waterVS.cso</FullPath>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\waterPS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\georg\Documents\GitHub\DX11_base\DX11_Basic\Shader\waterVS.cso</FullPath>
     </ContentFile>
   </ContentFiles>
   <SatelliteDlls />

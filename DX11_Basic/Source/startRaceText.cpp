@@ -28,7 +28,10 @@ bool StartRaceText::Initialize() {
 	m_vertexShader->Load(L"Shader/unlitTextureVS.cso");
 
 	m_pixelShader = new PixelShader();
-	m_pixelShader->Load(L"Shader/unlitTexturePS.cso");
+	m_pixelShader->Load(L"Shader/blockDissolvePS.cso");
+
+	m_backgroundPS = new PixelShader();
+	m_backgroundPS->Load(L"Shader/unlitColorPS.cso");
 
 	// テキストと背景のスケール
 	m_textScale = { 900.0f, 200.0f, 1.0f };
@@ -78,27 +81,53 @@ void StartRaceText::Update(double deltaTime) {
 		m_textPosition = m_textStartPos;
 		m_backgroundPosition = m_backgroundStartPos;
 
+		m_moveProgress = 0.0f;
+		m_dissolveProgress = 0.0f;
+		m_moveElapsed = 0.0f;
+
 		return;
 	}
+
+	// 進行度更新(移動の後にディゾルブ)
+
+	//　移動の進行度を更新
+	m_moveProgress = static_cast<float>(m_moveElapsed / m_moveDuration);
 
 	// 移動の経過時間を更新
 	m_moveElapsed += static_cast<float>(deltaTime);
 
-	// 移動の進行度を計算
-	float progress = m_moveElapsed / m_moveDuration;
+	// ディゾルブの進行度を更新
+	m_dissolveProgress = static_cast<float>(m_moveElapsed / m_moveDuration);
 
 	// 進行度を0.0fから1.0fの範囲にクランプ
-	if (progress > 1.0f) {
-		progress = 1.0f;
+	if (m_moveProgress > 1.0f) {
+		m_moveProgress = 1.0f;
 	}
 
 	// テキストと背景の位置を線形補間で更新
-	m_textPosition = m_textStartPos + (m_textEndPos - m_textStartPos) * progress;
-	m_backgroundPosition = m_backgroundStartPos + (m_backgroundEndPos - m_backgroundStartPos) * progress;
+	m_textPosition = m_textStartPos + (m_textEndPos - m_textStartPos) * m_moveProgress;
+	m_backgroundPosition = m_backgroundStartPos + (m_backgroundEndPos - m_backgroundStartPos) * m_moveProgress;
 
 }
 
 void StartRaceText::Draw() {
+	// レース開始の準備ができていない場合は描画しない
+	if (!m_isReady) {
+		return;
+	}
+
+	// 画面全体を暗くする背景
+	m_vertexShader->Set();
+	m_backgroundPS->Set();
+
+	MATERIAL bgMaterial = {};
+	bgMaterial.diffuse = { 0.0f, 0.0f, 0.0f, 0.5f }; // 半透明の黒
+	bgMaterial.textureEnable = FALSE;
+	RENDERER.SetMaterial(bgMaterial);
+
+	// 描画
+	m_sprite->Draw({ SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f }, m_rotation, { SCREEN_WIDTH, SCREEN_HEIGHT, 1.0f });
+
 	// シェーダーの設定
 	m_vertexShader->Set();
 	m_pixelShader->Set();
@@ -108,6 +137,15 @@ void StartRaceText::Draw() {
 	material.diffuse = { 1.0f, 1.0f, 1.0f, 1.0f };
 	material.textureEnable = TRUE;
 	RENDERER.SetMaterial(material);
+
+	// シェーダープロパティの設定
+	SHADER_PROPERTIES properties = {};
+	properties.params1.x = 100.0f;
+	properties.params1.y = 30.0f;
+	properties.params1.z = m_moveElapsed / m_moveDuration;
+	properties.params1.w = 1.0f;
+
+	RENDERER.SetShaderProperties(properties);
 
 	// 背景の描画
 	m_background->Set();

@@ -57,7 +57,7 @@ bool System::Initialize() {
 	//=======================
 
 	//サーバーに接続
-	if (!m_webClient->Connect("ws://George-Windows-Note:9002")) {
+	if (!m_webClient->Connect("ws://localhost:9002")) {
 	}
 
 

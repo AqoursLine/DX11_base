@@ -91,10 +91,13 @@ void MultiWaitUser::Draw() {
 	m_multiIconBackgroundTexture->Set(0);
 
 	// カラー設定
-	XMFLOAT4 color = XMFLOAT4(m_color.x, m_color.y, m_color.z, m_color.w);
+	XMFLOAT4 color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	// アイコン非表示なら暗くする
 	if (!m_isIconVisible) {
 		color = XMFLOAT4(0.2f, 0.2f, 0.2f, 0.9f);
+	}else if (m_isMyself) {
+		// 自分のユーザーなら色を変える
+		color = XMFLOAT4(1.0f, 1.0f, 0.5f, 1.0f);
 	}
 
 	// マテリアル設定

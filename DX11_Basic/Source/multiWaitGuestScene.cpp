@@ -9,6 +9,12 @@
 #include "multiGameGuestScene.h"
 #include "testTransition.h"
 
+#include "multiButtonQuit.h"
+#include "multiButtonReady.h"
+#include "multiSelector.h"
+
+#include "multiLobbyText.h"
+
 #include "input.h"
 
 bool MultiWaitGuestScene::Initialize() {
@@ -44,6 +50,18 @@ bool MultiWaitGuestScene::Initialize() {
 		m_waitUsers.push_back(user);
 	}
 
+	// 退出ボタンと準備完了ボタンを追加
+	auto multiButtonQuit = AddGameObject<MultiButtonQuit>(TYPE_BEFORE_PROCESS_UI);
+	multiButtonQuit->SetPosition({ 700.0f, 970.0f, 0.0f });
+	auto multiButtonReady = AddGameObject<MultiButtonReady>(TYPE_BEFORE_PROCESS_UI);
+	multiButtonReady->SetPosition({ 1220.0f, 970.0f, 0.0f });
+	auto multiSelector = AddGameObject<MultiSelector>(TYPE_BEFORE_PROCESS_UI);
+	multiSelector->AddButton(multiButtonReady);
+	multiSelector->AddButton(multiButtonQuit);
+
+	// ロビー説明テキスト追加
+	AddGameObject<MultiLobbyText>(TYPE_BEFORE_PROCESS_UI);
+
 	// スタートレーステキスト追加
 	AddGameObject<StartRaceText>(TYPE_BEFORE_PROCESS_UI);
 	return true;
@@ -60,16 +78,6 @@ void MultiWaitGuestScene::Finalize() {
 }
 
 void MultiWaitGuestScene::Update(double deltaTime) {
-	// 準備完了
-	if (Input::GetKeyTrigger(KK_ENTER)) {
-		json message;
-		message["type"] = "guestReady";
-		message["guestNumber"] = m_guestNumber;
-		m_webClient->SendMessageClient(message);
-
-		m_waitUsers[m_guestNumber]->SetReady(true);
-	}
-
 	// 開始通知の表示更新
 	auto startRaceText = GetGameObject<StartRaceText>();
 	startRaceText->SetReady(m_receivedStartSignal);
@@ -102,15 +110,21 @@ void MultiWaitGuestScene::ReceiveMessages(const json& message) {
 		m_roomId = message["roomId"];
 		m_roomJoined = true;
 		m_guestNumber = message["guestNumber"];
+		// 参加しているプレイヤー数
+		int memberCount = message["memberCount"];
+
 		// 準備完了しているビットフラグを取得
 		int isReadyMembers = message["readyMember"];
 
-		for (int i = 0; i < m_guestNumber + 1; i++) {
+		for (int i = 0; i < memberCount; i++) {
 			m_waitUsers[i]->SetIconVisible(true);
 			if (isReadyMembers & (1 << i)) {
 				m_waitUsers[i]->SetReady(true);
-
 			}
+			if (i == m_guestNumber) {
+				m_waitUsers[i]->SetIsMyself(true);
+			}
+
 			m_connectedPlayerCount++;
 		}
 	}
@@ -128,7 +142,7 @@ void MultiWaitGuestScene::ReceiveMessages(const json& message) {
 	// 他の参加者の準備状態が更新された場合の処理
 	if (responseType == "guestReady") {
 		int guestNumber = message["guestNumber"];
-		m_waitUsers[guestNumber]->SetReady(true);
+		m_waitUsers[guestNumber]->SetReady(message["ready"]);
 	}
 
 	// ホストからの開始通知を受け取った場合

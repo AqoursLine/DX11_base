@@ -14,6 +14,7 @@
 #include "input.h"
 #include "system.h"
 #include "manager.h"
+#include "webClient.h"
 
 #include "titleScene.h"
 #include "raceManager.h"
@@ -59,6 +60,16 @@ bool ResultScene::Initialize() {
 	AddGameObject<ResultRankIcon>(TYPE_BEFORE_PROCESS_UI);
 
 	return true;
+}
+
+void ResultScene::Finalize() {
+	// ルームのクリーンアップ
+	auto webClient = SYSTEM.GetWebClient();
+	if (webClient->IsConnected()) {
+		json message;
+		message["type"] = "closeRoom";
+		webClient->SendMessageClient(message);
+	}
 }
 
 void ResultScene::Update(double deltaTime) {

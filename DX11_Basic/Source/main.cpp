@@ -75,6 +75,7 @@ HWND GetHwnd() {
 LRESULT CALLBACK WinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	// imgui用のメッセージ処理
 	if (g_isActivatedImGui) {
+		extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 		if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam)) {
 			return true;
 		}

@@ -9,13 +9,14 @@ public:
 	MultiWaitUser() = default;
 	~MultiWaitUser() = default;
 
-	void SetColor(const Vector4& color) { m_color = color; }
-
 	MultiWaitUser* SetIconVisible(bool visible) { m_isIconVisible = visible; return this; }
 	bool IsIconVisible() const { return m_isIconVisible; }
 
 	MultiWaitUser* SetReady(bool isReady) { m_isReady = isReady; return this; }
 	bool IsReady() const { return m_isReady; }
+
+	void SetIsMyself(bool isMyself) { m_isMyself = isMyself; }
+	bool IsMyself() const { return m_isMyself; }
 protected:
 	bool Initialize() override;
 	void Finalize() override;
@@ -31,11 +32,11 @@ private:
 	class VertexShader* m_vertexShader = nullptr;
 	class PixelShader* m_pixelShader = nullptr;
 
-	Vector4 m_color = { 1.0f, 1.0f, 1.0f, 1.0f };
-
 	bool m_isIconVisible = true;
 
 	bool m_isReady = false;
 
 	float m_waitAnimationTime = 0.0f;
+
+	bool m_isMyself = false; // 自分のユーザーかどうか
 };

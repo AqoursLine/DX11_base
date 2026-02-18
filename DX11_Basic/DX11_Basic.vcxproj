@@ -164,6 +164,12 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
+    <FxCompile Include="Shader\blockDissolvePS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="Shader\common.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -385,10 +391,14 @@
     <ClCompile Include="Source\minimap.cpp" />
     <ClCompile Include="Source\modelLoader.cpp" />
     <ClCompile Include="Source\modelRenderer.cpp" />
+    <ClCompile Include="Source\multiButtonQuit.cpp" />
+    <ClCompile Include="Source\multiButtonStart.cpp" />
     <ClCompile Include="Source\multiGameGuestScene.cpp" />
+    <ClCompile Include="Source\multiLobbyText.cpp" />
     <ClCompile Include="Source\multiOtherPlayer.cpp" />
     <ClCompile Include="Source\multiGameHostScene.cpp" />
     <ClCompile Include="Source\multiPlayer.cpp" />
+    <ClCompile Include="Source\multiSelector.cpp" />
     <ClCompile Include="Source\multiWaitGuestScene.cpp" />
     <ClCompile Include="Source\multiWaitHostScene.cpp" />
     <ClCompile Include="Source\multiWaitUser.cpp" />
@@ -397,7 +407,7 @@
     <ClCompile Include="Source\raceTimer.cpp" />
     <ClCompile Include="Source\racingBoat.cpp" />
     <ClCompile Include="Source\rankDisplay.cpp" />
-    <ClCompile Include="Source\readyButton.cpp" />
+    <ClCompile Include="Source\multiButtonReady.cpp" />
     <ClCompile Include="Source\renderer.cpp" />
     <ClCompile Include="Source\resultRankBackground.cpp" />
     <ClCompile Include="Source\resultRankIcon.cpp" />
@@ -477,14 +487,19 @@
     <ClInclude Include="Source\lapReadyGate.h" />
     <ClInclude Include="Source\light.h" />
     <ClInclude Include="Source\lightManager.h" />
+    <ClInclude Include="Source\multiLobbyText.h" />
     <ClInclude Include="Source\main.h" />
     <ClInclude Include="Source\manager.h" />
     <ClInclude Include="Source\minimap.h" />
     <ClInclude Include="Source\modelRenderer.h" />
+    <ClInclude Include="Source\multiButton.h" />
+    <ClInclude Include="Source\multiButtonQuit.h" />
+    <ClInclude Include="Source\multiButtonStart.h" />
     <ClInclude Include="Source\multiGameGuestScene.h" />
     <ClInclude Include="Source\multiOtherPlayer.h" />
     <ClInclude Include="Source\multiGameHostScene.h" />
     <ClInclude Include="Source\multiPlayer.h" />
+    <ClInclude Include="Source\multiSelector.h" />
     <ClInclude Include="Source\multiWaitGuestScene.h" />
     <ClInclude Include="Source\multiWaitHostScene.h" />
     <ClInclude Include="Source\multiWaitUser.h" />
@@ -494,7 +509,7 @@
     <ClInclude Include="Source\raceTimer.h" />
     <ClInclude Include="Source\racingBoat.h" />
     <ClInclude Include="Source\rankDisplay.h" />
-    <ClInclude Include="Source\readyButton.h" />
+    <ClInclude Include="Source\multiButtonReady.h" />
     <ClInclude Include="Source\renderer.h" />
     <ClInclude Include="Source\resultRankBackground.h" />
     <ClInclude Include="Source\resultRankIcon.h" />
