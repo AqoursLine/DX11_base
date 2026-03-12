@@ -156,4 +156,17 @@ void MultiGameGuestScene::ReceiveMessages(const json& message) {
 		auto raceManager = GetGameObject<RaceManager>();
 		raceManager->SetSceneStarted(true);
 	}
+
+	// タイマー同期
+	if (responseType == "timerSync") {
+		if (!message.contains("startDelay") || !message.contains("countDown") || !message.contains("raceTime")) {
+			return;
+		}
+		auto raceManager = GetGameObject<RaceManager>();
+		if (raceManager) {
+			raceManager->SetStartDelay(message["startDelay"]);
+			raceManager->SetCountDown(message["countDown"]);
+			raceManager->SetRaceTime(message["raceTime"]);
+		}
+	}
 }
