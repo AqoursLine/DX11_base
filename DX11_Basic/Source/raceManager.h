@@ -19,10 +19,16 @@ public:
 
 	//レースタイム取得
 	float GetRaceTime() const { return m_raceTime; }
+	//レースタイム設定
+	void SetRaceTime(float value) { m_raceTime = value; }
 	//スタート前のカウントダウン時間取得
 	float GetCountDown() const { return m_countDown; }
+	//スタート前のカウントダウン時間設定
+	void SetCountDown(float value) { m_countDown = value; }
 	//スタート前の遅延時間取得
 	float GetStartDelay() const { return m_startDelay; }
+	//スタート前の遅延時間設定
+	void SetStartDelay(float value) { m_startDelay = value; }
 
 	//レース開始フラグ取得
 	bool IsRaceStarted() const { return m_raceStarted; }

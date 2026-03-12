@@ -130,6 +130,23 @@ void MultiGameHostScene::Update(double deltaTime) {
 
 		m_raceStarted = true;
 	}
+
+	// タイマー同期(定期的にホストのタイマー状態を全クライアントに送信)
+	if (m_raceStarted) {
+		m_timerSyncElapsed += static_cast<float>(deltaTime);
+		if (m_timerSyncElapsed >= m_timerSyncInterval) {
+			m_timerSyncElapsed = 0.0f;
+			auto raceManager = GetGameObject<RaceManager>();
+			if (raceManager) {
+				json syncMessage;
+				syncMessage["type"] = "timerSync";
+				syncMessage["startDelay"] = raceManager->GetStartDelay();
+				syncMessage["countDown"] = raceManager->GetCountDown();
+				syncMessage["raceTime"] = raceManager->GetRaceTime();
+				m_webClient->SendMessageClient(syncMessage);
+			}
+		}
+	}
 }
 
 void MultiGameHostScene::Draw() {

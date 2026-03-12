@@ -43,7 +43,11 @@ private:
 
 	// レース開始フラグ
 	bool m_raceStarted = false;
-	
+
+	// タイマー同期間隔(秒)
+	float m_timerSyncInterval = 0.5f;
+	// タイマー同期経過時間(秒)
+	float m_timerSyncElapsed = 0.0f;
 
 
 };
